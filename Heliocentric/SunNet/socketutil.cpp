@@ -88,4 +88,12 @@ namespace Sunnet {
 		return select(socket, read_descriptors, write_descriptors, except_descriptors, timeout);
 	}
 
+	int socket_poll(POLL_DESCRIPTOR* descriptors, NUM_POLL_DESCRIPTORS count, int timeout) {
+#ifdef _WIN32
+		return WSAPoll(descriptors, count, timeout);
+#else
+		return poll(descriptors, count, timeout);
+#endif
+	}
+
 }

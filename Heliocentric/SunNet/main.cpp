@@ -1,4 +1,5 @@
 #include "tcp_socket_connection.hpp"
+#include "pollservice.h"
 
 #include <memory>
 #include <iostream>
@@ -6,7 +7,16 @@
 
 using namespace Sunnet;
 using TCPSocketConnection_p = std::shared_ptr<TCPSocketConnection>;
-using SocketConnection_p = std::shared_ptr<SocketConnection>;
+
+void operate(SocketCollection_p sockets) {
+	for (Socket_iter it = sockets->begin(); it != sockets->end(); ++it) {
+		SocketConnection_p socket = *it;
+		char data[4];
+		socket->receive(data, 3);
+		data[3] = '\0';
+		std::cout << "RECEIVED: " << data << std::endl;
+	}
+}
 
 int main(int argc, char* argv[]) {
 	TCPSocketConnection_p server = std::make_shared<TCPSocketConnection>();
@@ -35,6 +45,24 @@ int main(int argc, char* argv[]) {
 
 	server_client->receive(data, message.size());
 	std::cout << data << std::endl;
+
+	std::vector<SocketConnection_p> vec;
+	vec.push_back(server_client);
+
+	SocketCollection_p clients = std::make_shared<SocketCollection>(vec.begin(), vec.end());
+	PollService poll_service(clients, 1000 * 2);
+
+	/* Should timeout */
+	std::cout << "Polling.. should probably block" << std::endl;
+	SocketCollection_p ready_socks = poll_service.poll();
+	operate(ready_socks);
+
+	std::cout << "Polling.. should not block" << std::endl;
+	client->send("abc", 3);
+
+	/* Should not timeout */
+	ready_socks = poll_service.poll();
+	operate(ready_socks);
 
 	std::string dummy;
 	std::cin >> dummy;

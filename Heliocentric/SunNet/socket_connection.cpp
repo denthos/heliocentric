@@ -133,7 +133,7 @@ namespace Sunnet {
 		}
 	}
 
-	std::shared_ptr<SocketConnection> SocketConnection::accept() const {
+	SocketConnection_p SocketConnection::accept() const {
 		struct sockaddr connection_info;
 		SOCKET_LEN info_size = sizeof(connection_info);
 

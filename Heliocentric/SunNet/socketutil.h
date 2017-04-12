@@ -15,12 +15,15 @@ Windows/Linux in utilizing sockets and WinSock APIs
 typedef int SOCKET_LEN;
 typedef char NETWORK_BYTE;
 typedef int NETWORK_BYTE_SIZE;
+typedef WSAPOLLFD POLL_DESCRIPTOR;
+typedef ULONG NUM_POLL_DESCRIPTORS;
 
 #else
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <poll.h>
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
@@ -28,6 +31,8 @@ typedef int SOCKET;
 typedef socklen_t SOCKET_LEN;
 typedef unsigned char NETWORK_BYTE;
 typedef size_t NETWORK_BYTE_SIZE;
+typedef struct pollfd POLL_DESCRIPTOR;
+typedef nfds_t NUM_POLL_DESCRIPTORS;
 #endif
 
 namespace Sunnet {
@@ -148,6 +153,17 @@ namespace Sunnet {
 	*/
 	int socket_select(SOCKET socket, fd_set* read_descriptors, fd_set* write_descriptors,
 		fd_set* except_descriptors, struct timeval* timeout);
+
+	/**
+	Polls for the status of one or more sockets (blocking if necessary) to perform
+	synchronous IO
+
+	@param descriptors The set of descriptors to poll
+	@param count The number of descriptors to poll
+	@param timeout The poll timeout
+	@return The number of sockets in which events occurred; SOCKET_ERROR if error
+	*/
+	int socket_poll(POLL_DESCRIPTOR* descriptors, NUM_POLL_DESCRIPTORS count, int timeout);
 
 	/**
 	Returns the error code of the most recent error. This is to be used

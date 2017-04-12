@@ -12,6 +12,7 @@
 
 namespace Sunnet {
 
+
 	/**
 	A struct used to hold pointers to struct addrinfo types. 
 	Any dynamically allocated addrinfo structs should be wrapped
