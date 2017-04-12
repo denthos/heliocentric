@@ -111,6 +111,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="socketutil.cpp" />
+    <ClCompile Include="socket_connection.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="socketutil.h" />
+    <ClInclude Include="socket_connection.hpp" />
+    <ClInclude Include="tcp_socket_connection.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
