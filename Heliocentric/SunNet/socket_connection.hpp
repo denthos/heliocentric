@@ -41,6 +41,9 @@ namespace Sunnet {
 	 class are synchronous. 
 	 */
 	class SocketConnection {
+
+	friend class SocketCollection;
+
 	private:
 		SOCKET socket_descriptor; /** < The underlying OS socket descriptor */
 		std::unique_ptr<struct addrinfo_data, addrinfo_delete> address_info; 
@@ -164,4 +167,6 @@ namespace Sunnet {
 	public:
 		ConnectException(std::string msg) : SocketException(msg) {};
 	};
+
+	typedef std::shared_ptr<SocketConnection> SocketConnection_p;
 }

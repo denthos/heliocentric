@@ -113,10 +113,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="socketutil.cpp" />
+    <ClCompile Include="socket_collection.cpp" />
     <ClCompile Include="socket_connection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="socketutil.h" />
+    <ClInclude Include="socket_collection.h" />
     <ClInclude Include="socket_connection.hpp" />
     <ClInclude Include="tcp_socket_connection.hpp" />
   </ItemGroup>
