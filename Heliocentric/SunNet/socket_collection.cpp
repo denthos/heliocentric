@@ -5,7 +5,7 @@ namespace Sunnet {
 		try {
 			return this->descriptor_map.at(socket);
 		}
-		catch (const std::out_of_range& e) {
+		catch (const std::out_of_range&) {
 			return nullptr;
 		}
 	}

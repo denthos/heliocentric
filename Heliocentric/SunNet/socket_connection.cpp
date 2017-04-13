@@ -30,7 +30,7 @@ namespace Sunnet {
 		this->socket_descriptor = socket_response;
 	}
 
-	SocketConnection::SocketConnection(int socket_fd, int domain, int type, int protocol) :
+	SocketConnection::SocketConnection(SOCKET socket_fd, int domain, int type, int protocol) :
 		socket_descriptor(socket_fd) {
 
 		if (SocketConnection::open_connection_count++ == 0) {

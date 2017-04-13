@@ -20,7 +20,7 @@ namespace Sunnet {
 
 	SocketCollection_p PollService::poll() {
 		this->results->clear();
-		int poll_return = socket_poll(this->descriptors.data(), this->descriptors.size(), this->timeout);
+		int poll_return = socket_poll(this->descriptors.data(), (NUM_POLL_DESCRIPTORS) this->descriptors.size(), this->timeout);
 
 		if (poll_return == SOCKET_ERROR) {
 			throw PollException(std::to_string(get_previous_error_code()));
