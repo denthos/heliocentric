@@ -39,3 +39,6 @@ x64/
 Heliocentric/x64
 Debug/
 Release/
+
+# Documentation
+docs/
