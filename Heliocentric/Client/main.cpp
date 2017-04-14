@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-#include "Client.h"
+#include "client.h"
 
 int main() {
 

@@ -119,22 +119,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="client.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ShaderUtils.cpp" />
-    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="shader_utils.cpp" />
+    <ClCompile Include="sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Client.h" />
-    <ClInclude Include="ShaderUtils.h" />
-    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="client.h" />
+    <ClInclude Include="shader_utils.h" />
+    <ClInclude Include="sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
-    <None Include="Shaders\simpleTexture.frag" />
-    <None Include="Shaders\simpleTexture.vert" />
+    <None Include="Shaders\simple_texture.frag" />
+    <None Include="Shaders\simple_texture.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

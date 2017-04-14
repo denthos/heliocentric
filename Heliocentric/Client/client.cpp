@@ -1,11 +1,11 @@
-#include "Client.h"
+#include "client.h"
 
 #include <glm\gtc\matrix_transform.hpp>
 #include <stdio.h>
 #include <soil.h>
 
-#include "ShaderUtils.h"
-#include "Sphere.h"
+#include "shader_utils.h"
+#include "sphere.h"
 
 int Client::width, Client::height;
 float Client::fov = 45.0f, Client::nearPlane = 0.5f, Client::farPlane = 10000.0f;

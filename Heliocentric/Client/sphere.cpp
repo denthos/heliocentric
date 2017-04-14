@@ -1,6 +1,6 @@
-#include "Sphere.h"
+#include "sphere.h"
 
-#include "Client.h"
+#include "client.h"
 
 #include <glm\trigonometric.hpp>
 #include <glm\gtc\constants.hpp>
