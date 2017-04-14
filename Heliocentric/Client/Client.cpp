@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <soil.h>
 
-#include "ShaderUtils.h"
+#include "shader_utils.h"
 #include "Sphere.h"
 
 int Client::width, Client::height;
