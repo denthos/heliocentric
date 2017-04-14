@@ -75,7 +75,7 @@ namespace Sunnet {
 		 @param type The type of the already existing socket
 		 @param protocol The protocol of the socket
 		 */
-		SocketConnection(int socket_fd, int domain, int type, int protocol);
+		SocketConnection(SOCKET socket_fd, int domain, int type, int protocol);
 
 		/**
 		 Destruct the socket connection, closing its socket.

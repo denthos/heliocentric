@@ -141,20 +141,6 @@ namespace Sunnet {
 	int socket_receive(SOCKET socket, NETWORK_BYTE* buffer, NETWORK_BYTE_SIZE len, int flags);
 
 	/**
-	Determines the status of one or more sockets (blocking if necessary) to perform
-	synchronous IO
-
-	@param socket The socket to monitor I/O from
-	@param read_descriptors The set of sockets to be checked for readability
-	@param write_descriptors The set of sockets to be checked for writability
-	@param except_descriptors The set of sockets to be checked for errs
-	@param timeout The maximum timeout for select to wait
-	@return The number of sockets which need attention; 0 if timeout; SOCKET_ERROR if error.
-	*/
-	int socket_select(SOCKET socket, fd_set* read_descriptors, fd_set* write_descriptors,
-		fd_set* except_descriptors, struct timeval* timeout);
-
-	/**
 	Polls for the status of one or more sockets (blocking if necessary) to perform
 	synchronous IO
 

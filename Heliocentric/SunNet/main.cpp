@@ -31,19 +31,19 @@ int main(int argc, char* argv[]) {
 
 	SocketConnection_p server_client = server->accept();
 	std::string message = "Hello, world! (From server)";
-	server_client->send(message.c_str(), message.size());
+	server_client->send(message.c_str(), (NETWORK_BYTE_SIZE) message.size());
 
 	char data[512];
 	std::memset(data, 0, 512);
 
-	client->receive(data, message.size());
+	client->receive(data, (NETWORK_BYTE_SIZE) message.size());
 	std::cout << data << std::endl;
 
 	std::memset(data, 0, 512);
 	message = "Hello, world! (From client)";
-	client->send(message.c_str(), message.size());
+	client->send(message.c_str(), (NETWORK_BYTE_SIZE) message.size());
 
-	server_client->receive(data, message.size());
+	server_client->receive(data, (NETWORK_BYTE_SIZE) message.size());
 	std::cout << data << std::endl;
 
 	std::vector<SocketConnection_p> vec;
