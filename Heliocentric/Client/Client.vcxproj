@@ -119,26 +119,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ApplyTexture.cpp" />
     <ClCompile Include="Client.cpp" />
-    <ClCompile Include="Drawable.cpp" />
-    <ClCompile Include="Group.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Orbit.cpp" />
     <ClCompile Include="ShaderUtils.cpp" />
     <ClCompile Include="Sphere.cpp" />
-    <ClCompile Include="Transformation.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ApplyTexture.h" />
     <ClInclude Include="Client.h" />
-    <ClInclude Include="Drawable.h" />
-    <ClInclude Include="Group.h" />
-    <ClInclude Include="Node.h" />
-    <ClInclude Include="Orbit.h" />
     <ClInclude Include="ShaderUtils.h" />
     <ClInclude Include="Sphere.h" />
-    <ClInclude Include="Transformation.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

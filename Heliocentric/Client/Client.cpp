@@ -5,11 +5,7 @@
 #include <soil.h>
 
 #include "ShaderUtils.h"
-#include "Group.h"
 #include "Sphere.h"
-#include "Transformation.h"
-#include "Orbit.h"
-#include "ApplyTexture.h"
 
 int Client::width, Client::height;
 float Client::fov = 45.0f, Client::nearPlane = 0.5f, Client::farPlane = 10000.0f;
@@ -19,7 +15,6 @@ std::string Client::windowTitle("Heliocentric");
 
 
 GLuint defaultShader;
-Group * root;
 
 std::pair<double, double> lastMousePos;
 bool leftMouseDown = false;
@@ -110,20 +105,6 @@ void Client::initialize() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	// free sun texture resources
 	SOIL_free_image_data(sunTextureImage);
-
-	root = new Group();
-	Orbit * orbit = new Orbit(25.0f, 0.1f);
-	Orbit * planetSpin = new Orbit(0.0f, -0.5f);
-	orbit->addChild(planetSpin);
-	ApplyTexture * applyEarthTexture = new ApplyTexture(earthTexture);
-	applyEarthTexture->addChild(new Sphere());
-	planetSpin->addChild(applyEarthTexture);
-	root->addChild(orbit);
-	Transformation * scale = new Transformation(glm::scale(glm::mat4(1.0f), glm::vec3(10.0f)));
-	ApplyTexture * applySunTexture = new ApplyTexture(sunTexture);
-	applySunTexture->addChild(new Sphere());
-	scale->addChild(applySunTexture);
-	root->addChild(scale);
 }
 
 void Client::display(GLFWwindow * window) {
@@ -134,16 +115,13 @@ void Client::display(GLFWwindow * window) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	root->draw(defaultShader, glm::mat4(1.0f));
-
-
 	glfwSwapBuffers(window);
 
 	glfwPollEvents();
 }
 
 void Client::update() {
-	root->update();
+
 }
 
 void Client::errorCallback(int error, const char * description) {

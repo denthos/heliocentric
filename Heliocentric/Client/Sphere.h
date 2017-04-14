@@ -1,18 +1,17 @@
-#ifndef SPHERE_H_
-#define SPHERE_H_
+#pragma once
 
-#include "Drawable.h"
+#include <GL\glew.h>
+#include <glm/mat4x4.hpp>
 
-class Sphere : public Drawable {
+class Sphere {
 public:
 	static bool init;
 	static GLuint VBO, VAO, EBO, VN, TO;
 	static unsigned int numIndices;
 
+	void draw(GLuint shader, glm::mat4 C);
+
 	Sphere();
 private:
-	virtual void render();
+	void render();
 };
-
-
-#endif
