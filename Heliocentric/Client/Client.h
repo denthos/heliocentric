@@ -1,5 +1,4 @@
-#ifndef CLIENT_H_
-#define CLIENT_H_
+#pragma once
 
 #include <GL\glew.h>
 #include <GLFW/glfw3.h>
@@ -25,9 +24,3 @@ public:
 	static void mouseCursorCallback(GLFWwindow *, double x, double y);
 	static void mouseWheelCallback(GLFWwindow *, double x, double y);
 };
-
-
-
-
-
-#endif
