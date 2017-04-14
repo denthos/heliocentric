@@ -33,7 +33,14 @@ namespace Sunnet {
 		@param sockets The sockets to monitor
 		@param timeout how long to wait before declaring no socket can be read (in ms)
 		*/
-		PollService(SocketCollection_p sockets, int timeout = 10);
+		PollService(const SocketCollection_p sockets, int timeout = 10);
+
+		/**
+		Adds a collection of sockets to the poll's collection of sockets.
+
+		@param sockets The sockets to add
+		*/
+		void add_sockets(const SocketCollection_p sockets);
 
 		/**
 		Poll all sockets, returning those ready to be read
@@ -78,3 +85,4 @@ namespace Sunnet {
 		}
 	};
 }
+
