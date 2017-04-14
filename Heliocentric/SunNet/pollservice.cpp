@@ -4,24 +4,30 @@
 
 
 namespace Sunnet {
-	PollService::PollService(const SocketCollection_p sockets, int timeout) : timeout(timeout) {
-		this->sockets = std::make_shared<SocketCollection>();
+
+	PollService::PollService(int timeout) : timeout(timeout) {
 		this->results = std::make_shared<SocketCollection>();
-		this->add_sockets(sockets);
 	}
 
-	void PollService::add_sockets(const SocketCollection_p sockets) {
-		for (auto it = sockets->descriptor_map.begin(); it != sockets->descriptor_map.end(); ++it) {
-			SOCKET sock_descriptor = it->first;
-			SocketConnection_p sock_connection = it->second;
+	PollService::PollService(const SocketConnection_p socket, int timeout) : PollService(timeout) {
+		this->add_socket(socket);
+	}
 
-			POLL_DESCRIPTOR poll_descriptor;
-			poll_descriptor.events = POLLIN;
-			poll_descriptor.fd = sock_descriptor;
+	void PollService::add_socket(const SocketConnection_p socket) {
+		POLL_DESCRIPTOR poll_descriptor;
+		poll_descriptor.events = POLLIN;
+		poll_descriptor.fd = socket->socket_descriptor;
 
-			this->descriptors.push_back(poll_descriptor);
-			this->sockets->add(sock_connection);
-		}
+		this->descriptors.push_back(poll_descriptor);
+		this->poll_descriptor_map[socket->socket_descriptor] = std::make_pair(this->descriptors.size() - 1, socket);
+	}
+
+	void PollService::remove_socket(const SocketConnection_p socket) {
+		std::pair<int, SocketConnection_p> info = this->poll_descriptor_map.at(socket->socket_descriptor);
+		int index = info.first;
+
+		this->descriptors.erase(this->descriptors.begin() + index);
+		this->poll_descriptor_map.erase(socket->socket_descriptor);
 	}
 
 	SocketCollection_p PollService::poll() {
@@ -34,17 +40,18 @@ namespace Sunnet {
 		else if (poll_return > 0) {
 			for (auto poll_iter = this->descriptors.begin(); poll_iter != this->descriptors.end(); ++poll_iter) {
 				if (poll_iter->revents & (POLLIN | POLLERR | POLLNVAL | POLLHUP)) {
-					SocketConnection_p ready_socket = this->sockets->get_by_descriptor(poll_iter->fd);
+					std::pair<int, SocketConnection_p> socket_info = this->poll_descriptor_map.at(poll_iter->fd);
+					SocketConnection_p ready_socket = socket_info.second;
 
 					if (!ready_socket) {
 						throw InvalidSocketConnectionException("Invalid socket descriptor", poll_iter->fd);
 					}
 
 					if (poll_iter->revents & (POLLERR | POLLNVAL | POLLHUP)) {
-						throw PollReturnEventException(std::to_string(poll_iter->revents), ready_socket);
+						ready_socket->set_error();
 					}
 
-					this->results->add(ready_socket);
+					this->results->insert(ready_socket);
 				}
 			}
 		}

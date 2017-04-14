@@ -4,10 +4,11 @@
 
 namespace Sunnet {
 	std::atomic_uint SocketConnection::open_connection_count = 0;
+	std::atomic_uint SocketConnection::initializations = 0;
 
-	SocketConnection::SocketConnection(int domain, int type, int protocol) {
+	SocketConnection::SocketConnection(int domain, int type, int protocol) : in_error_state(false) {
 		if (SocketConnection::open_connection_count++ == 0) {
-			initialize_socket_api();
+			this->initialize_api();
 		}
 
 		this->address_info = std::unique_ptr<struct addrinfo_data, addrinfo_delete>(new addrinfo_data);
@@ -24,17 +25,28 @@ namespace Sunnet {
 		SOCKET socket_response = open_socket(domain, type, protocol);
 
 		if (socket_response == INVALID_SOCKET) {
-			throw CreateException(std::to_string(get_previous_error_code()));
+			int socket_err = get_previous_error_code();
+
+			if (socket_err == SOCKET_API_NOT_INITIALIZED) {
+				this->initialize_api();
+				socket_response = open_socket(domain, type, protocol);
+				if (socket_response == INVALID_SOCKET) {
+					throw CreateException(std::to_string(get_previous_error_code()));
+				}
+			}
+			else {
+				throw CreateException(std::to_string(get_previous_error_code()));
+			}
 		}
 
 		this->socket_descriptor = socket_response;
 	}
 
 	SocketConnection::SocketConnection(SOCKET socket_fd, int domain, int type, int protocol) :
-		socket_descriptor(socket_fd) {
+		socket_descriptor(socket_fd), in_error_state(false) {
 
 		if (SocketConnection::open_connection_count++ == 0) {
-			initialize_socket_api();
+			this->initialize_api();
 		}
 
 		this->address_info = std::unique_ptr<struct addrinfo_data, addrinfo_delete>(new addrinfo_data);
@@ -53,8 +65,19 @@ namespace Sunnet {
 		close_socket(this->socket_descriptor);
 
 		if (--SocketConnection::open_connection_count == 0) {
-			quit_socket_api();
+			while (SocketConnection::initializations-- > 0) {
+				quit_socket_api();
+			}
 		}
+	}
+
+	void SocketConnection::initialize_api() {
+		int initialize_result = initialize_socket_api();
+		if (initialize_result != 0) {
+			throw ApiInitializationException(std::to_string(initialize_result));
+		}
+
+		SocketConnection::initializations++;
 	}
 
 	void SocketConnection::send(const NETWORK_BYTE* bytes, NETWORK_BYTE_SIZE num_bytes) const {

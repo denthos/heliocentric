@@ -12,6 +12,8 @@ Windows/Linux in utilizing sockets and WinSock APIs
 
 #pragma comment(lib, "Ws2_32.lib")
 
+#define SOCKET_API_NOT_INITIALIZED 10093
+
 typedef int SOCKET_LEN;
 typedef char NETWORK_BYTE;
 typedef int NETWORK_BYTE_SIZE;
@@ -24,6 +26,8 @@ typedef ULONG NUM_POLL_DESCRIPTORS;
 #include <netinet/in.h>
 #include <errno.h>
 #include <poll.h>
+
+#define SOCKET_API_NOT_INITIALIZED -1
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1

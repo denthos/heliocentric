@@ -1,69 +1,85 @@
 #include "tcp_socket_connection.hpp"
-#include "pollservice.h"
+#include "client.h"
+#include "server.h"
 
 #include <memory>
 #include <iostream>
 #include <string>
 
 using namespace Sunnet;
-using TCPSocketConnection_p = std::shared_ptr<TCPSocketConnection>;
 
-void operate(SocketCollection_p sockets) {
-	for (Socket_iter it = sockets->begin(); it != sockets->end(); ++it) {
-		SocketConnection_p socket = *it;
-		char data[4];
-		socket->receive(data, 3);
-		data[3] = '\0';
-		std::cout << "RECEIVED: " << data << std::endl;
+class TestServer : public Server<TCPSocketConnection> {
+public:
+	TestServer(std::string address, std::string port, int queue_size) :
+		Server<TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
+
+	void handle_client_connect(SocketConnection_p client) {
+		std::cout << "Client connected!" << std::endl;
 	}
-}
+
+	void handle_ready_to_read(SocketConnection_p client) {
+		std::cout << "Client sent data!" << std::endl;
+
+		char data[512];
+		std::memset(data, 0, 512);
+		std::string message = "Hello, world!";
+
+		bool open = client->receive(data, message.size());
+		std::cout << data << std::endl;
+
+		client->send(data, message.size());
+
+		if (!open) {
+			std::cout << "Client disconnect" << std::endl;
+			this->remove_socket(client);
+		}
+	}
+
+	void handle_poll_timeout() {
+		std::cout << "Poll timeout!" << std::endl;
+	}
+};
+
+class TestClient : public Client<TCPSocketConnection> {
+public:
+	TestClient(int poll_timeout) : Client<TCPSocketConnection>(poll_timeout) {}
+
+	void handle_client_ready_to_read() {
+		std::cout << "Client ready to read!" << std::endl;
+		char data[512];
+		std::memset(data, 0, 512);
+		std::string message = "Hello, world!";
+
+		this->read(data, message.size());
+		std::cout << data << std::endl;
+	}
+
+	void handle_poll_timeout() {
+		std::cout << "Client poll timeout" << std::endl;
+	}
+
+	void handle_connection_disconnect() {
+		std::cout << "Client connection disconnect" << std::endl;
+	}
+
+	void handle_client_error() {
+		std::cout << "CLIENT ERROR!" << std::endl;
+	}
+};
 
 int main(int argc, char* argv[]) {
-	TCPSocketConnection_p server = std::make_shared<TCPSocketConnection>();
-	TCPSocketConnection_p client = std::make_shared<TCPSocketConnection>();
 
-	server->bind("9876");
-	server->listen(5);
+	TestServer server("0.0.0.0", "9876", 5);
+	server.open();
+	server.serve(1000 * 2);
 
-	std::cout << "hosting on localhost, port " << 9876 << std::endl;
+	TestClient client(1000 * 2);
+	client.connect("127.0.0.1", "9876");
 
-	client->connect("127.0.0.1", "9876");
-
-	SocketConnection_p server_client = server->accept();
-	std::string message = "Hello, world! (From server)";
-	server_client->send(message.c_str(), (NETWORK_BYTE_SIZE) message.size());
-
-	char data[512];
-	std::memset(data, 0, 512);
-
-	client->receive(data, (NETWORK_BYTE_SIZE) message.size());
-	std::cout << data << std::endl;
-
-	std::memset(data, 0, 512);
-	message = "Hello, world! (From client)";
-	client->send(message.c_str(), (NETWORK_BYTE_SIZE) message.size());
-
-	server_client->receive(data, (NETWORK_BYTE_SIZE) message.size());
-	std::cout << data << std::endl;
-
-	std::vector<SocketConnection_p> vec;
-	vec.push_back(server_client);
-
-	SocketCollection_p clients = std::make_shared<SocketCollection>(vec.begin(), vec.end());
-	PollService poll_service(clients, 1000 * 2);
-
-	/* Should timeout */
-	std::cout << "Polling.. should probably block" << std::endl;
-	SocketCollection_p ready_socks = poll_service.poll();
-	operate(ready_socks);
-
-	std::cout << "Polling.. should not block" << std::endl;
-	client->send("abc", 3);
-
-	/* Should not timeout */
-	ready_socks = poll_service.poll();
-	operate(ready_socks);
+	std::string message = "Hello, world!";
+	client.send(message.c_str(), message.size());
+	client.send(message.c_str(), message.size());
 
 	std::string dummy;
-	std::cin >> dummy;
+	std::getline(std::cin, dummy);
 }

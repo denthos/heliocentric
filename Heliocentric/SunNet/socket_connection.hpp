@@ -43,17 +43,21 @@ namespace Sunnet {
 	 */
 	class SocketConnection {
 
-	friend class SocketCollection;
+	friend struct SocketConnection_p_hash;
+	friend class PollService;
 
 	private:
+		bool in_error_state;
 		SOCKET socket_descriptor; /** < The underlying OS socket descriptor */
 		std::unique_ptr<struct addrinfo_data, addrinfo_delete> address_info; 
 
 		/** Keep track of the amount of open connections to automatically call initialize_socket_api
 		and quit_socket_api */
 		static std::atomic_uint open_connection_count;
+		static std::atomic_uint initializations;
 
 		void set_socket_info(std::string, std::string address, int flag);
+		void initialize_api();
 
 	public:
 		/**
@@ -80,7 +84,7 @@ namespace Sunnet {
 		/**
 		 Destruct the socket connection, closing its socket.
 		 */
-		~SocketConnection();
+		virtual ~SocketConnection();
 
 		/**
 		 Sends the requested number of bytes from the provided buffer onto the
@@ -130,8 +134,15 @@ namespace Sunnet {
 		@throws AcceptException if there is an error accepting
 		*/
 		std::shared_ptr<SocketConnection> accept() const;
+
+		bool has_error() { return this->in_error_state;  }
+		void set_error() { this->in_error_state = true; }
 	};
 
+	class ApiInitializationException : public std::runtime_error {
+	public:
+		ApiInitializationException(std::string msg) : std::runtime_error(msg) {};
+	};
 	class SocketException : public std::runtime_error {
 	public:
 		SocketException(std::string msg) : std::runtime_error(msg) {};

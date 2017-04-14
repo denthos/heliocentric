@@ -44,6 +44,12 @@
     <ClInclude Include="pollservice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="socket_collection.h">
       <Filter>Header Files</Filter>
     </ClInclude>

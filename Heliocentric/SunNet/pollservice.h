@@ -7,8 +7,8 @@ sockets and allows action on ones which are ready to read
 
 #include "socket_connection.hpp"
 #include "socket_collection.h"
-#include <functional>
 #include <vector>
+#include <unordered_map>
 
 namespace Sunnet {
 
@@ -21,26 +21,42 @@ namespace Sunnet {
 	class PollService {
 	private:
 		int timeout; /** < How long to wait before declaring no socket can be read */
-		SocketCollection_p sockets; /** < The collection of sockets to watch */
 		std::vector<POLL_DESCRIPTOR> descriptors; /** < The corresponding poll() descriptors */
+		std::unordered_map<SOCKET, std::pair<int, SocketConnection_p>> poll_descriptor_map; /** < Points to elements in descriptors for fast updating */
 
-		SocketCollection_p results;
-
+		std::shared_ptr<SocketCollection> results;
 	public:
+
+		PollService(int timeout = 10);
+
+		PollService(const SocketConnection_p socket, int timeout = 10);
+
 		/**
 		Create a PollService object from a collection of sockets.
 
 		@param sockets The sockets to monitor
 		@param timeout how long to wait before declaring no socket can be read (in ms)
 		*/
-		PollService(const SocketCollection_p sockets, int timeout = 10);
+		template <class Iter>
+		PollService(Iter& begin, Iter& end, int timeout = 10) : PollService(timeout) {
+			this->add_sockets(begin, end);
+		}
+
+		void add_socket(const SocketConnection_p socket);
 
 		/**
 		Adds a collection of sockets to the poll's collection of sockets.
 
 		@param sockets The sockets to add
 		*/
-		void add_sockets(const SocketCollection_p sockets);
+		template <class Iter>
+		void add_sockets(Iter& begin, Iter& end) {
+			for (auto it = begin, it != end; ++it) {
+				this->add_socket(*it);
+			}
+		}
+
+		void remove_socket(const SocketConnection_p socket);
 
 		/**
 		Poll all sockets, returning those ready to be read
