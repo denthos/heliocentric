@@ -111,6 +111,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="channels.cpp" />
+    <ClCompile Include="channel_subscribable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pollservice.cpp" />
     <ClCompile Include="socketutil.cpp" />
@@ -118,6 +120,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="client.h" />
+    <ClInclude Include="channel_subscribable.h" />
+    <ClInclude Include="channels.h" />
     <ClInclude Include="pollservice.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="socketutil.h" />

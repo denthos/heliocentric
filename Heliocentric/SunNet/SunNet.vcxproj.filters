@@ -30,6 +30,12 @@
     <ClCompile Include="socket_collection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="channels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="channel_subscribable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="socket_connection.hpp">
@@ -51,6 +57,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="socket_collection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="channels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="channel_subscribable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
