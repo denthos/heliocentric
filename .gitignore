@@ -27,3 +27,18 @@
 *.exe
 *.out
 *.app
+
+# NuGet packages
+packages/
+
+# VS Settings
+.vs/
+
+# Builds
+x64/
+Heliocentric/x64
+Debug/
+Release/
+
+# Documentation
+docs/
