@@ -1,6 +1,6 @@
 #include "channel_subscribable.h"
 
-namespace Sunnet {
+namespace SunNet {
 	void ChannelSubscribable::handleIncomingMessage(ChanneledSocketConnection_p socket) {
 		try {
 			CHANNEL_ID channel_id = socket->channeled_read_id();

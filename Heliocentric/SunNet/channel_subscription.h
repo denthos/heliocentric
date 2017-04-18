@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory>
 
-namespace Sunnet {
+namespace SunNet {
 	typedef unsigned int SUBSCRIPTION_ID;
 
 	class ChannelSubscriptionInterface {

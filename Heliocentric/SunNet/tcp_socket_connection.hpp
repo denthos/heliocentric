@@ -6,7 +6,7 @@
 
 #include "socket_connection.hpp"
 
-namespace Sunnet {
+namespace SunNet {
 
 	class TCPSocketConnection : public SocketConnection {
 

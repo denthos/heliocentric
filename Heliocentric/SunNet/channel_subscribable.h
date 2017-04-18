@@ -9,7 +9,7 @@
 #include "channeled_socket_connection.h"
 
 
-namespace Sunnet {
+namespace SunNet {
 	class ChannelSubscribable {
 	private:
 		std::unordered_map < CHANNEL_ID, std::shared_ptr<ChannelSubscriptionInterface>> subscriptions;
@@ -21,10 +21,11 @@ namespace Sunnet {
 			CHANNEL_ID channel_id = Channels::getChannelId<TSubscriptionType>();
 			std::shared_ptr<ChannelSubscriptionInterface> subscription;
 
-			try {
-				subscription = this->subscriptions.at(channel_id);
+			auto subscription_iter = this->subscriptions.find(channel_id);
+			if (subscription_iter != this->subscriptions.end()) {
+				subscription = subscription_iter->second;
 			}
-			catch (std::out_of_range&) {
+			else {
 				subscription = std::make_shared<ChannelSubscription<TSubscriptionType>>();
 				this->subscriptions[channel_id] = subscription;
 			}

@@ -6,7 +6,7 @@
 #include <memory>
 #include <atomic>
 
-namespace Sunnet {
+namespace SunNet {
 	typedef NETWORK_BYTE CHANNEL_ID;
 
 	class ChannelInterface {

@@ -4,7 +4,7 @@
 #include <vector>
 #include <thread>
 
-namespace Sunnet {
+namespace SunNet {
 	enum ClientState {
 		CLIENT_INIT,
 		CLIENT_CONNECTED

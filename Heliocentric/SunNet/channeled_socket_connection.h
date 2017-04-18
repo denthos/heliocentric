@@ -2,7 +2,7 @@
 #include "socket_connection.hpp"
 #include "channels.h"
 
-namespace Sunnet {
+namespace SunNet {
 	class ChanneledSocketConnection : public SocketConnection {
 	public:
 		ChanneledSocketConnection(int domain, int type, int protocol) :

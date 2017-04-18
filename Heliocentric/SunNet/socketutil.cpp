@@ -1,6 +1,6 @@
 #include "socketutil.h"
 
-namespace Sunnet {
+namespace SunNet {
 
 	int initialize_socket_api() {
 #ifdef _WIN32

@@ -6,14 +6,12 @@
 #include <iostream>
 #include <string>
 
-using namespace Sunnet;
-
-class TestServer : public ChanneledServer<TCPSocketConnection> {
+class TestServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 public:
 	TestServer(std::string address, std::string port, int queue_size) :
-		ChanneledServer<TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
+		ChanneledServer<SunNet::TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
 
-	void handle_client_connect(SocketConnection_p client) {
+	void handle_client_connect(SunNet::SocketConnection_p client) {
 		std::cout << "Client connected!" << std::endl;
 	}
 
@@ -22,9 +20,9 @@ public:
 	}
 };
 
-class TestClient : public ChanneledClient<TCPSocketConnection> {
+class TestClient : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
-	TestClient(int poll_timeout) : ChanneledClient<TCPSocketConnection>(poll_timeout) {}
+	TestClient(int poll_timeout) : ChanneledClient<SunNet::TCPSocketConnection>(poll_timeout) {}
 
 	void handle_poll_timeout() {
 		std::cout << "Client poll timeout" << std::endl;
@@ -43,7 +41,7 @@ struct GeneralMessage {
 	int msg;
 };
 
-void server_callback(ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
+void server_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
 	std::cout << "Server received: " << ptr->msg << std::endl;
 
 	GeneralMessage response;
@@ -51,7 +49,7 @@ void server_callback(ChanneledSocketConnection_p sender, std::shared_ptr<General
 	sender->channeled_send<GeneralMessage>(&response);
 }
 
-void client_callback(ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
+void client_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
 	std::cout << "Client received: " << ptr->msg << std::endl;
 
 	GeneralMessage response{ 1337 };
@@ -60,7 +58,7 @@ void client_callback(ChanneledSocketConnection_p sender, std::shared_ptr<General
 
 int main(int argc, char* argv[]) {
 
-	Channels::addNewChannel<GeneralMessage>();
+	SunNet::Channels::addNewChannel<GeneralMessage>();
 
 	TestServer server("0.0.0.0", "9876", 5);
 	server.open();

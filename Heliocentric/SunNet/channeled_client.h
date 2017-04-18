@@ -4,7 +4,7 @@
 #include "channel_subscribable.h"
 #include "channeled_socket_connection.h"
 
-namespace Sunnet {
+namespace SunNet {
 
 	template <typename TSocketConnection>
 	class ChanneledClient : public Client<TSocketConnection>, public ChannelSubscribable {

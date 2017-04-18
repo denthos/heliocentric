@@ -3,7 +3,7 @@
 #include <string>
 
 
-namespace Sunnet {
+namespace SunNet {
 
 	PollService::PollService(int timeout) : timeout(timeout) {
 		this->results = std::make_shared<SocketCollection>();

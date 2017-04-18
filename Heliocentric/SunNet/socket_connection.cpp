@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Sunnet {
+namespace SunNet {
 	std::atomic_uint SocketConnection::open_connection_count = 0;
 	std::atomic_uint SocketConnection::initializations = 0;
 

@@ -10,7 +10,7 @@ sockets and allows action on ones which are ready to read
 #include <vector>
 #include <unordered_map>
 
-namespace Sunnet {
+namespace SunNet {
 
 	/**
 	A C++ wrapper class around WinSock/Sockets poll().

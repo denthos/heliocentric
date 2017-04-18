@@ -5,7 +5,7 @@
 #include <thread>
 #include <mutex>
 
-namespace Sunnet {
+namespace SunNet {
 	enum ServerState {
 		INIT,
 		OPEN,
