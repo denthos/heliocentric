@@ -21,11 +21,11 @@ public:
 	Returns the player who owns this game object.
 	@return The owner of this game object.
 	*/
-	virtual Player* get_player();
+	Player* get_player();
 
 	/**
 	Returns the current position of this game object.
 	@return The current position of this game object.
 	*/
-	virtual glm::vec3 get_position();
+	glm::vec3 get_position();
 };

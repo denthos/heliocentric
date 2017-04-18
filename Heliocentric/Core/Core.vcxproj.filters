@@ -102,8 +102,8 @@
     <ClCompile Include="INIParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test_iniparser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

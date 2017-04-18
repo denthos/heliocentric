@@ -22,7 +22,6 @@
   <ItemGroup>
     <ClCompile Include="ConfigParser.cpp" />
     <ClCompile Include="INIParser.cpp" />
-    <ClCompile Include="test_iniparser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConfigParser.h" />

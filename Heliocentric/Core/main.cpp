@@ -2,8 +2,8 @@
 #include "city.h"
 #include "slot.h"
 #include "planet.h"
-//#include "unit.h"
 #include "glm/ext.hpp"
+#include "INIParser.h"
 #include <glm\vec3.hpp>
 #include <iostream>
 
@@ -16,7 +16,19 @@ void city_test_1(Player* player) {
 	maya.print();
 }
 
+void config_test() {
+	/* Load config file */
+	INIParser config("ConfigTemplate.ini");
+
+	/* Retrieve an int from the config file. */ 
+	int value = 600;  // Set 600 as the default.
+	bool exists = config.get_value("ScreenWidth", value);
+	assert(exists && value==800);
+}
+
 int main() {
+	config_test();
+
 	Player sylvia("Sylvia", 1);
 	sylvia.print();
 
