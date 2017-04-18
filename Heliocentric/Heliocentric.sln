@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.0
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Client\Client.vcxproj", "{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}"
 EndProject
@@ -20,27 +20,21 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Debug|x64.ActiveCfg = Debug|x64
-		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Debug|x64.Build.0 = Debug|x64
 		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Debug|x86.ActiveCfg = Debug|Win32
 		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Debug|x86.Build.0 = Debug|Win32
 		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Release|x64.ActiveCfg = Release|x64
-		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Release|x64.Build.0 = Release|x64
 		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Release|x86.ActiveCfg = Release|Win32
 		{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}.Release|x86.Build.0 = Release|Win32
 		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Debug|x64.ActiveCfg = Debug|x64
-		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Debug|x64.Build.0 = Debug|x64
 		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Debug|x86.ActiveCfg = Debug|Win32
 		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Debug|x86.Build.0 = Debug|Win32
 		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Release|x64.ActiveCfg = Release|x64
-		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Release|x64.Build.0 = Release|x64
 		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Release|x86.ActiveCfg = Release|Win32
 		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}.Release|x86.Build.0 = Release|Win32
 		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Debug|x64.ActiveCfg = Debug|x64
-		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Debug|x64.Build.0 = Debug|x64
 		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Debug|x86.ActiveCfg = Debug|Win32
 		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Debug|x86.Build.0 = Debug|Win32
 		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Release|x64.ActiveCfg = Release|x64
-		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Release|x64.Build.0 = Release|x64
 		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Release|x86.ActiveCfg = Release|Win32
 		{2BDE4C67-9DDE-4DCD-AB2B-A20E75409809}.Release|x86.Build.0 = Release|Win32
 		{8FBFFC03-4B81-4E40-8B7C-A5B1B5A07EEE}.Debug|x64.ActiveCfg = Debug|x64
