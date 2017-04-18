@@ -30,7 +30,7 @@ void Player::acquire_object(GameObject* object) {
 
 void Player::print() {
 	std::cout << "Player " << get_player_ID() << "(" << get_name() << ")" << std::endl;
-};
+}
 
 std::ostream& Player::operator<< (std::ostream & out) {
 	out << "Player " << get_player_ID() << "(" << get_name() << ")" << std::endl;

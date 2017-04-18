@@ -1,9 +1,13 @@
 #pragma once
+
 #include "attackable.h"
 #include "game_object.h"
 
+struct UnitUpdate;
+
 class Unit : public GameObject, public Attackable {
 public:
+	friend UnitUpdate;
 	void update();
 	glm::vec3 get_destination();
 	glm::vec3 set_destination(glm::vec3 destination);

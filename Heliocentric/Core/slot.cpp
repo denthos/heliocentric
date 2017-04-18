@@ -1,6 +1,6 @@
 #include "slot.h"
 
-Slot::Slot(int slot_ID, bool occupied, glm::vec3 pos) : ID(slot_ID), occupied(false) {
+Slot::Slot(int slot_ID, bool occupied, glm::vec3 pos) : ID(slot_ID) {
 	position = pos;
 }
 
@@ -13,6 +13,5 @@ bool Slot::is_occupied() {
 }
 
 void Slot::assign_player(Player* owner) {
-	occupied = true;
 	player = owner;
 }

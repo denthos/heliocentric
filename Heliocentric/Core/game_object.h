@@ -3,6 +3,8 @@
 @brief An abstract class that defines basic game object.
 */
 #pragma once
+#include "drawable.h"
+#include "identifiable.h"
 #include "lib.h"
 #include "player.h"
 #include <glm\vec3.hpp>
@@ -10,7 +12,7 @@
 /**
 An abstract class that defines base game object.
 */
-class GameObject {
+class GameObject : public Drawable, public Identifiable {
 protected:
 	Player* player;
 	glm::vec3 position;

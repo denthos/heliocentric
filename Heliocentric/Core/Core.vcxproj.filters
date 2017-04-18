@@ -36,6 +36,27 @@
     <ClInclude Include="attackable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="drawable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="identifiable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player_update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="planet_update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="city_update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slot_update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="lib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -47,6 +68,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <ClCompile Include="city.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -72,8 +94,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lib.cpp">
-	  <Filter>Source Files</Filter>
-	</ClCompile>
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ConfigParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

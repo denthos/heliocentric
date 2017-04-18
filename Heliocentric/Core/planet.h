@@ -7,8 +7,11 @@
 #include <string>
 #include <iostream>
 
+struct PlanetUpdate;
+
 class Planet : public GameObject {
 public:
+	friend PlanetUpdate;
 	Planet(std::string planet_name, std::vector<Slot*>);
 	bool check_occupancy();
 	void print();

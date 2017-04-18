@@ -13,6 +13,13 @@ glm::mat4 Client::perspectiveMatrix, Client::viewMatrix;
 glm::vec3 Client::camPos(0.0f, 0.f, 20.0f), Client::camLookAt(0.0f, 0.0f, 0.0f), Client::camUp(0.0f, 1.0f, 0.0f);
 std::string Client::windowTitle("Heliocentric");
 
+std::unordered_map<UID, Player *> Client::playerMap;
+std::unordered_map<UID, Planet *> Client::planetMap;
+std::unordered_map<UID, Unit *> Client::unitMap;
+std::unordered_map<UID, City *> Client::cityMap;
+std::unordered_map<UID, Slot *> Client::slotMap;
+//Octree<GameObject *> Client::octree;
+
 
 GLuint defaultShader;
 
@@ -78,33 +85,8 @@ void Client::initialize() {
 
 	viewMatrix = glm::lookAt(camPos, camLookAt, camUp);
 
-	compileShaders("Shaders/shader.vert", "Shaders/shader.frag", &defaultShader);
-
-	// load earth texture
-	int earthTextureWidth, earthTextureHeight;
-	unsigned char * earthTextureImage = SOIL_load_image("Textures/earth.jpg", &earthTextureWidth, &earthTextureHeight, 0, SOIL_LOAD_RGB);
-	GLuint earthTexture;
-	glGenTextures(1, &earthTexture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, earthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, earthTextureWidth, earthTextureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, earthTextureImage);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// free earth texture resources
-	SOIL_free_image_data(earthTextureImage);
-
-	// load sun texture
-	int sunTextureWidth, sunTextureHeight;
-	unsigned char * sunTextureImage = SOIL_load_image("Textures/sun.jpg", &sunTextureWidth, &sunTextureHeight, 0, SOIL_LOAD_RGB);
-	GLuint sunTexture;
-	glGenTextures(1, &sunTexture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sunTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, sunTextureWidth, sunTextureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, sunTextureImage);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// free sun texture resources
-	SOIL_free_image_data(sunTextureImage);
+	// Set up SunNet client and channel callbacks
+	// TODO
 }
 
 void Client::display(GLFWwindow * window) {
@@ -152,7 +134,10 @@ void Client::keyCallback(GLFWwindow * window, int key, int scancode, int action,
 	}
 	else if (action == GLFW_RELEASE) {
 		switch (key) {
-
+		case(GLFW_KEY_ESCAPE):
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -221,4 +206,28 @@ void Client::mouseCursorCallback(GLFWwindow * window, double x, double y) {
 
 void Client::mouseWheelCallback(GLFWwindow * window, double x, double y) {
 	camPos = glm::vec3(glm::translate(glm::mat4(1.0f), camPos * (float)y * -0.05f) * glm::vec4(camPos, 1.0f));
+}
+
+void Client::playerUpdateHandler(PlayerUpdate * update) {
+	update->apply(*playerMap[update->id]);
+}
+
+void Client::unitUpdateHandler(UnitUpdate * update) {
+	update->apply(*unitMap[update->id]);
+	// update octree
+}
+
+void Client::cityUpdateHandler(CityUpdate * update) {
+	update->apply(*cityMap[update->id]);
+	// update octree
+}
+
+void Client::planetUpdateHandler(PlanetUpdate * update) {
+	update->apply(*planetMap[update->id]);
+	// update octree
+}
+
+void Client::slotUpdateHandler(SlotUpdate * update) {
+	update->apply(*slotMap[update->id]);
+	// update octree
 }
