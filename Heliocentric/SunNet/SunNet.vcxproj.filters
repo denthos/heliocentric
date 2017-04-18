@@ -27,9 +27,6 @@
     <ClCompile Include="pollservice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="socket_collection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="channels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="channel_subscribable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="channel_subscription.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

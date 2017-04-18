@@ -119,6 +119,7 @@
     <ClCompile Include="socket_connection.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="channel_subscription.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="channel_subscribable.h" />
     <ClInclude Include="channels.h" />
