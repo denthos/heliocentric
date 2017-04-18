@@ -13,9 +13,9 @@ namespace Sunnet {
 	template <class TSocketConnection>
 	class Client {
 	private:
-		std::shared_ptr<SocketConnection> connection;
 		std::thread poll_thread;
 		PollService poll_service;
+
 		ClientState state;
 
 		void state_transition(ClientState from, ClientState to) {
@@ -25,6 +25,9 @@ namespace Sunnet {
 
 			this->state = to;
 		}
+
+	protected:
+		std::shared_ptr<SocketConnection> connection;
 
 	public:
 		template <class ... ArgTypes>
@@ -88,7 +91,6 @@ namespace Sunnet {
 		virtual void handle_client_error() {}
 		virtual void handle_client_ready_to_read() {}
 		virtual void handle_poll_timeout() {}
-		virtual void handle_connection_disconnect() {}
 
 		class ClientException : public std::exception {};
 		class InvalidStateTransitionException : public ClientException {};

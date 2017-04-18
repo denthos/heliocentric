@@ -65,5 +65,14 @@
     <ClInclude Include="channel_subscription.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="channeled_server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="channeled_client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="channeled_socket_connection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

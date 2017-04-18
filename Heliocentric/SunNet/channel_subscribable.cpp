@@ -1,16 +1,19 @@
 #include "channel_subscribable.h"
 
 namespace Sunnet {
-	void ChannelSubscribable::handleIncomingMessage(SocketConnection_p socket) {
-			CHANNEL_ID channel_id;
-			socket->receive(&channel_id, sizeof(CHANNEL_ID));
-			std::shared_ptr<ChannelInterface> channel = Channels::getChannel(channel_id);
+	void ChannelSubscribable::handleIncomingMessage(ChanneledSocketConnection_p socket) {
+		try {
+			CHANNEL_ID channel_id = socket->channeled_read_id();
 
-			std::shared_ptr<NETWORK_BYTE> data(new NETWORK_BYTE[channel->getMessageSize()], std::default_delete<NETWORK_BYTE[]>());
-			socket->receive(data.get(), channel->getMessageSize());
+			std::unique_ptr<NETWORK_BYTE[]> data = socket->channeled_read(channel_id);
 
-			for (auto subscription : subscriptions) {
-				subscription.second->propagate_to_handlers(data);
+			auto channel_subs = subscriptions.find(channel_id);
+			if (channel_subs != this->subscriptions.end()) {
+				channel_subs->second->propagate_to_handlers(socket, std::move(data));
 			}
+		}
+		catch (ChanneledSocketConnection::ConnectionClosedException&) {
+			this->handleSocketDisconnect(socket);
+		}
 	}
 }

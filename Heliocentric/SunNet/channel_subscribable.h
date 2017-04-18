@@ -6,6 +6,7 @@
 #include "channels.h"
 #include "socket_connection.hpp"
 #include "channel_subscription.h"
+#include "channeled_socket_connection.h"
 
 
 namespace Sunnet {
@@ -13,10 +14,10 @@ namespace Sunnet {
 	private:
 		std::unordered_map < CHANNEL_ID, std::shared_ptr<ChannelSubscriptionInterface>> subscriptions;
 	public:
-		void handleIncomingMessage(SocketConnection_p socket);
+		void handleIncomingMessage(ChanneledSocketConnection_p socket);
 
 		template <class TSubscriptionType>
-		SUBSCRIPTION_ID subscribe(std::function<void(std::shared_ptr<TSubscriptionType>)> callback) {
+		SUBSCRIPTION_ID subscribe(std::function<void(ChanneledSocketConnection_p, std::shared_ptr<TSubscriptionType>)> callback) {
 			CHANNEL_ID channel_id = Channels::getChannelId<TSubscriptionType>();
 			std::shared_ptr<ChannelSubscriptionInterface> subscription;
 
@@ -44,8 +45,11 @@ namespace Sunnet {
 				std::static_pointer_cast<ChannelSubscription<TSubscriptionType>>(subscription);
 			);
 
-			typed_subscription->unsubscribe(id);
+			if (typed_subscription->unsubscribe(id)) {
+				this->subscriptions.erase(channel_id);
+			}
 		}
 
+		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) {}
 	};
 }

@@ -3,6 +3,7 @@
 #include "pollservice.h"
 
 #include <thread>
+#include <mutex>
 
 namespace Sunnet {
 	enum ServerState {
@@ -15,8 +16,10 @@ namespace Sunnet {
 	class Server {
 	private:
 		SocketConnection_p server_connection;
+
 		PollService poll_service;
 		std::thread poll_thread;
+		std::mutex poll_service_mutex;
 
 		std::string address;
 		std::string port;
@@ -29,6 +32,17 @@ namespace Sunnet {
 				throw InvalidStateTransitionException();
 			}
 			this->state = to;
+		}
+
+	protected:
+		void addToPollService(SocketConnection_p socket) {
+			std::lock_guard<std::mutex> lock(this->poll_service_mutex);
+			this->poll_service.add_socket(socket);
+		}
+
+		void removeFromPollService(SocketConnection_p socket) {
+			std::lock_guard<std::mutex> lock(this->poll_service_mutex);
+			this->poll_service.remove_socket(socket);
 		}
 
 	public:
@@ -61,6 +75,8 @@ namespace Sunnet {
 
 		void poll() {
 			while (this->state == SERVE) {
+				std::lock_guard<std::mutex> lock(this->poll_service_mutex);
+
 				SocketCollection_p ready_sockets = poll_service.poll();
 
 				if (ready_sockets->size() == 0) {
