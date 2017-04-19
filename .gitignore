@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.obj
+!Heliocentric/models/*/*.obj
 
 # Precompiled Headers
 *.gch
@@ -35,7 +36,7 @@ packages/
 .vs/
 
 # Builds
-x64/
+x64/i
 Heliocentric/x64
 Debug/
 Release/
