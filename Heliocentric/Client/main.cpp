@@ -36,5 +36,7 @@ int main() {
 	}
 
 	glfwTerminate();
+
+	Client::clean();
 	return 0;
 }
