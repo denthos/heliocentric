@@ -13,6 +13,7 @@ int main() {
 		return 1;
 	}
 
+
 	fprintf(stdout, "Supported OpenGL version: %s\n", glGetString(GL_VERSION));
 #ifdef GL_SHADING_LANGUAGE_VERSION
 	fprintf(stdout, "Supported GLSL version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));

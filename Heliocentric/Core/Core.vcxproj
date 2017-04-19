@@ -21,10 +21,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConfigParser.cpp" />
+    <ClCompile Include="game_channels.cpp" />
     <ClCompile Include="INIParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConfigParser.h" />
+    <ClInclude Include="game_channels.h" />
     <ClInclude Include="INIParser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -91,6 +93,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)/SunNet;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link />
   </ItemDefinitionGroup>
