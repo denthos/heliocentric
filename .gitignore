@@ -36,7 +36,7 @@ packages/
 .vs/
 
 # Builds
-x64/i
+x64/
 Heliocentric/x64
 Debug/
 Release/
