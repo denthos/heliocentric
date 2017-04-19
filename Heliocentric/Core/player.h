@@ -23,6 +23,7 @@ public:
 
 private:
 	std::unordered_map<std::type_index, std::vector<GameObject*>*> owned_objects;
+	std::unordered_map<std::type_index, std::string> type_names;
 	std::string name;
 	int ID;
 	//list<Resource> recourses;
