@@ -1,19 +1,69 @@
-#include "shader_utils.h"
 
-#include <fstream>
-#include <sstream>
-#include <vector>
 
-bool compileShaders(const char * vertexFile, const char * fragmentFile, GLuint * programOut) {
-	std::ifstream in(vertexFile);
-	std::stringstream vertexSource, fragmentSource;
-	vertexSource << in.rdbuf();
-	in = std::ifstream(fragmentFile);
-	fragmentSource << in.rdbuf();
-	return compileShadersWithSource(vertexSource.str(), fragmentSource.str(), programOut);
+#include <iostream>
+
+#include "shader.h"
+
+GLuint Shader::currentlyBoundShaderID = 0x0;
+
+Shader::Shader(const char *vert, const char *frag)
+{
+	
+    //Read in the vertex and fragment shaders
+    //We must delete these after we are finished compiling the shaders
+	std::string vv = read(vert);
+	std::string vf = read(frag);
+        
+    //Setup the shader
+	setup(vv, vf);
+
+
 }
 
-bool compileShadersWithSource(std::string vertexSource, std::string fragmentSource, GLuint * programOut) {
+Shader::~Shader()
+{
+
+	glDeleteProgram(pid);
+}
+
+void Shader::bind()
+{
+    if(currentlyBoundShaderID != pid)
+    {
+        currentlyBoundShaderID = pid;
+        glUseProgram(pid);
+    }
+}
+
+void Shader::unbind()
+{
+    if(currentlyBoundShaderID != (0x0))
+    {
+        currentlyBoundShaderID = (0x0);
+        glUseProgram(0);
+    }
+}
+
+GLhandleARB Shader::getPid()
+{
+	return pid;
+}
+
+
+
+std::string Shader::read(const char *filename)
+{
+	std::ifstream in(filename);
+	std::stringstream shaderSource;
+	shaderSource << in.rdbuf();
+	
+	
+    
+	return shaderSource.str();
+}
+
+bool Shader::setup(std::string vertSource, std::string fragSource)
+{
 	/* Based on https://www.khronos.org/opengl/wiki/Example/GLSL_Full_Compile_Linking */
 
 
@@ -22,7 +72,7 @@ bool compileShadersWithSource(std::string vertexSource, std::string fragmentSour
 
 	//Send the vertex shader source code to GL
 	//Note that std::string's .c_str is NULL character terminated.
-	const GLchar *source = (const GLchar *)vertexSource.c_str();
+	const GLchar *source = (const GLchar *)vertSource.c_str();
 	glShaderSource(vertexShader, 1, &source, 0);
 
 	//Compile the vertex shader
@@ -55,7 +105,7 @@ bool compileShadersWithSource(std::string vertexSource, std::string fragmentSour
 
 	//Send the fragment shader source code to GL
 	//Note that std::string's .c_str is NULL character terminated.
-	source = (const GLchar *)fragmentSource.c_str();
+	source = (const GLchar *)fragSource.c_str();
 	glShaderSource(fragmentShader, 1, &source, 0);
 
 	//Compile the fragment shader
@@ -87,29 +137,29 @@ bool compileShadersWithSource(std::string vertexSource, std::string fragmentSour
 	//Vertex and fragment shaders are successfully compiled.
 	//Now time to link them together into a program.
 	//Get a program object.
-	GLuint program = glCreateProgram();
+	pid = glCreateProgram();
 
 	//Attach our shaders to our program
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
+	glAttachShader(pid, vertexShader);
+	glAttachShader(pid, fragmentShader);
 
 	//Link our program
-	glLinkProgram(program);
+	glLinkProgram(pid);
 
 	//Note the different functions here: glGetProgram* instead of glGetShader*.
 	GLint isLinked = 0;
-	glGetProgramiv(program, GL_LINK_STATUS, (int *)&isLinked);
+	glGetProgramiv(pid, GL_LINK_STATUS, (int *)&isLinked);
 	if (isLinked == GL_FALSE)
 	{
 		GLint maxLength = 0;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+		glGetProgramiv(pid, GL_INFO_LOG_LENGTH, &maxLength);
 
 		//The maxLength includes the NULL character
 		std::vector<GLchar> infoLog(maxLength);
-		glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+		glGetProgramInfoLog(pid, maxLength, &maxLength, &infoLog[0]);
 
 		//We don't need the program anymore.
-		glDeleteProgram(program);
+		glDeleteProgram(pid);
 		//Don't leak shaders either.
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
@@ -123,10 +173,12 @@ bool compileShadersWithSource(std::string vertexSource, std::string fragmentSour
 	}
 
 	//Always detach shaders after a successful link.
-	glDetachShader(program, vertexShader);
-	glDetachShader(program, fragmentShader);
+	glDetachShader(pid, vertexShader);
+	glDetachShader(pid, fragmentShader);
 
-	*programOut = program;
 
 	return true;
 }
+
+
+

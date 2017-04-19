@@ -42,9 +42,12 @@ public:
 	static void mouseCursorCallback(GLFWwindow *, double x, double y);
 	static void mouseWheelCallback(GLFWwindow *, double x, double y);
 
+	static void clean(); //free all memory here
+	
 	static void playerUpdateHandler(PlayerUpdate *);
 	static void unitUpdateHandler(UnitUpdate *);
 	static void cityUpdateHandler(CityUpdate *);
 	static void planetUpdateHandler(PlanetUpdate *);
 	static void slotUpdateHandler(SlotUpdate *);
 };
+
