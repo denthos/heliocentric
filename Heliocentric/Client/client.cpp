@@ -1,17 +1,45 @@
 #include "client.h"
 
-#include <glm\gtc\matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <stdio.h>
 #include <soil.h>
 
-#include "shader_utils.h"
-#include "sphere.h"
+
+#include "Planet.h"
+#include "sphere_mesh.h"
+#include "transformation.h"
+#include "orbit.h"
+
+#include "model.h"
+
+
+#define WINDOW_TITLE "Heliocentric"
+#define VERT_SHADER "Shaders/shader.vert"
+#define FRAG_SHADER "Shaders/shader.frag"
+
+#define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
+#define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
+
+#define EARTH_TEXTURE "Textures/earth.jpg"
+#define SUN_TEXTURE "Textures/sun.jpg"
+
+#define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+
+Model rocket;
+PlanetModel * earth;
+PlanetModel  * sun;
+
+Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
+Shader* textureShader;
+//don't forget to clean up afterwards
 
 int Client::width, Client::height;
 float Client::fov = 45.0f, Client::nearPlane = 0.5f, Client::farPlane = 10000.0f;
 glm::mat4 Client::perspectiveMatrix, Client::viewMatrix;
 glm::vec3 Client::camPos(0.0f, 0.f, 20.0f), Client::camLookAt(0.0f, 0.0f, 0.0f), Client::camUp(0.0f, 1.0f, 0.0f);
-std::string Client::windowTitle("Heliocentric");
+std::string Client::windowTitle(WINDOW_TITLE);
 
 std::unordered_map<UID, Player *> Client::playerMap;
 std::unordered_map<UID, Planet *> Client::planetMap;
@@ -22,6 +50,7 @@ std::unordered_map<UID, Slot *> Client::slotMap;
 
 
 GLuint defaultShader;
+
 
 std::pair<double, double> lastMousePos;
 bool leftMouseDown = false;
@@ -83,8 +112,25 @@ void Client::initialize() {
 	glEnable(GL_CULL_FACE);
 	glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
 
+	glShadeModel(GL_SMOOTH);
+
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_TEXTURE_2D);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
 	viewMatrix = glm::lookAt(camPos, camLookAt, camUp);
 
+
+
+	shader = new Shader(VERT_SHADER, FRAG_SHADER);
+	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
+	
+	rocket = Model(ROCKET_MODEL);
+	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
+	earth = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(50.0f, 0.06f));
+	sun = new PlanetModel(Texture(SUN_TEXTURE), 15.0f, Orbit(0.0f, 0.0f));
+	
 	// Set up SunNet client and channel callbacks
 	// TODO
 }
@@ -97,13 +143,24 @@ void Client::display(GLFWwindow * window) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+
+	
+	
+
+	
+	earth->Draw(*textureShader);
+	rocket.Draw(*textureShader);
+	sun->Draw(*textureShader);
+
 	glfwSwapBuffers(window);
 
 	glfwPollEvents();
 }
 
 void Client::update() {
-
+	sun->Update(glm::mat4(1.0f));
+	earth->Update(glm::mat4(1.0f));
+	rocket.Update(glm::mat4(1.0f));
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -208,6 +265,16 @@ void Client::mouseWheelCallback(GLFWwindow * window, double x, double y) {
 	camPos = glm::vec3(glm::translate(glm::mat4(1.0f), camPos * (float)y * -0.05f) * glm::vec4(camPos, 1.0f));
 }
 
+
+void Client::clean()
+{
+	delete shader;
+	delete textureShader;
+
+	delete earth;
+	delete sun;
+}
+
 void Client::playerUpdateHandler(PlayerUpdate * update) {
 	update->apply(*playerMap[update->id]);
 }
@@ -231,3 +298,4 @@ void Client::slotUpdateHandler(SlotUpdate * update) {
 	update->apply(*slotMap[update->id]);
 	// update octree
 }
+
