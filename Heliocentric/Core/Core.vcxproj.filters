@@ -16,6 +16,9 @@
     <Filter Include="Networking">
       <UniqueIdentifier>{08d61a7f-8759-4529-8105-e71670604348}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility Library">
+      <UniqueIdentifier>{8356a21f-d01a-4ed3-9a52-78603aa51687}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="city.h">
@@ -60,17 +63,17 @@
     <ClInclude Include="slot_update.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConfigParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="INIParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_channels.h">
       <Filter>Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="config_parser.h">
+      <Filter>Utility Library</Filter>
+    </ClInclude>
+    <ClInclude Include="ini_parser.h">
+      <Filter>Utility Library</Filter>
+    </ClInclude>
+    <ClInclude Include="lib.h">
+      <Filter>Utility Library</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -99,13 +102,7 @@
     <ClCompile Include="game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lib.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConfigParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="INIParser.cpp">
+    <ClCompile Include="unit_sample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,5 +113,17 @@
     <ClCompile Include="game_channels.cpp">
       <Filter>Networking</Filter>
     </ClCompile>
+    <ClCompile Include="ini_parser.cpp">
+      <Filter>Utility Library</Filter>
+    </ClCompile>
+    <ClCompile Include="config_parser.cpp">
+      <Filter>Utility Library</Filter>
+    </ClCompile>
+    <ClCompile Include="lib.cpp">
+      <Filter>Utility Library</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
