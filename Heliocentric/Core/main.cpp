@@ -19,7 +19,7 @@ void city_test_1(Player* player) {
 
 void config_test() {
 	/* Load config file */
-	Lib::INIParser config("ConfigTemplate.ini");
+	Lib::INIParser config = Lib::INIParser::getInstance("ConfigTemplate.ini");
 
 	/* Retrieve an int from the config file. */
 	int value = 600;  // Set 600 as the default.

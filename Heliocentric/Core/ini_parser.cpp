@@ -1,6 +1,12 @@
 #include "ini_parser.h"
 
 namespace Lib {
+
+	INIParser& INIParser::getInstance(std::string fname) {
+		static INIParser parser(fname);
+		return parser;
+	}
+
 	bool INIParser::reload() {
 		std::ifstream myfile;
 		myfile.open(file_name.c_str());
