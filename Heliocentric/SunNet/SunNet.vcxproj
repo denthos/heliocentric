@@ -111,7 +111,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="channels.cpp" />
     <ClCompile Include="channel_subscribable.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pollservice.cpp" />

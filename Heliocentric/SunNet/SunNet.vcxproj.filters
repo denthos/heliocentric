@@ -27,9 +27,6 @@
     <ClCompile Include="pollservice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="channels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="channel_subscribable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
