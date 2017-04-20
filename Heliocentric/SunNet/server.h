@@ -57,15 +57,23 @@ namespace SunNet {
 		}
 
 		virtual ~Server() {
+			/* Only formally close if we are serving. */
 			if (this->state == SERVE) {
 				this->close();
+			}
+
+			/* Otherwise, just reset the socket */
+			else {
+				this->server_connection.reset();
 			}
 		}
 
 		void open() {
-			this->state_transition(INIT, OPEN);
+			/* Attempt to bind and listen. Change state if both succeed */
 			this->server_connection->bind(this->port, this->address);
 			this->server_connection->listen(this->listen_queue_size);
+
+			this->state_transition(INIT, OPEN);
 		}
 
 		void serve(int timeout_in_ms) {

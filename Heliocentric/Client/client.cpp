@@ -35,6 +35,8 @@ Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
 //don't forget to clean up afterwards
 
+#include "game_channels.h"
+
 int Client::width, Client::height;
 float Client::fov = 45.0f, Client::nearPlane = 0.5f, Client::farPlane = 10000.0f;
 glm::mat4 Client::perspectiveMatrix, Client::viewMatrix;
@@ -132,6 +134,8 @@ void Client::initialize() {
 	sun = new PlanetModel(Texture(SUN_TEXTURE), 15.0f, Orbit(0.0f, 0.0f));
 	
 	// Set up SunNet client and channel callbacks
+	initializeChannels();
+
 	// TODO
 }
 

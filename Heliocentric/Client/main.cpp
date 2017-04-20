@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "client.h"
+#include "logging.h"
 
 int main() {
 
@@ -13,12 +14,13 @@ int main() {
 		return 1;
 	}
 
-	fprintf(stdout, "Supported OpenGL version: %s\n", glGetString(GL_VERSION));
+
+	Lib::LOG_DEBUG("Supported OpenGL version: ", glGetString(GL_VERSION));
 #ifdef GL_SHADING_LANGUAGE_VERSION
-	fprintf(stdout, "Supported GLSL version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	Lib::LOG_DEBUG("Supported GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
-	fprintf(stdout, "Glew version: %s\n", glewGetString(GLEW_VERSION));
-	fprintf(stdout, "Renderer: %s\n", glGetString(GL_RENDERER));
+	Lib::LOG_DEBUG("Glew version: ", glewGetString(GLEW_VERSION));
+	Lib::LOG_DEBUG("Renderer: ", glGetString(GL_RENDERER));
 
 	// Set up callback functions
 	glfwSetErrorCallback(Client::errorCallback);

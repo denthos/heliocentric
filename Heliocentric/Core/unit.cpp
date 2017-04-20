@@ -1,5 +1,4 @@
 #include "unit.h"
-#include "lib.h"
 
 void Unit::update() {
 	switch (currentCommand) {
@@ -37,7 +36,7 @@ int Unit::set_movmennt_speed_max(int movementSpeedMax) {
 
 Unit* Unit::do_attack(Unit* target) {
 	Lib::assertTrue(target != this, "Unit attacking itself.");
-	if (Lib::distance_vec3(this->position, target->get_position()) > (float) this->combatRange) {
+	if (glm::distance(this->position, target->get_position()) > (float) this->combatRange) {
 		do_move();
 	}
 	else {
