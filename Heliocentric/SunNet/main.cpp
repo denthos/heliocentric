@@ -39,20 +39,22 @@ public:
 
 struct GeneralMessage {
 	int msg;
+	int msg2;
 };
 
 void server_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
-	std::cout << "Server received: " << ptr->msg << std::endl;
+	std::cout << "Server received: " << ptr->msg << " and " << ptr->msg2 << std::endl;
 
 	GeneralMessage response;
 	response.msg = 12345678;
+	response.msg2 = 98765;
 	sender->channeled_send<GeneralMessage>(&response);
 }
 
 void client_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
-	std::cout << "Client received: " << ptr->msg << std::endl;
+	std::cout << "Client received: " << ptr->msg << " and " << ptr->msg2 << std::endl;
 
-	GeneralMessage response{ 1337 };
+	GeneralMessage response{ 1337, 7331 };
 	sender->channeled_send(&response);
 }
 
@@ -72,6 +74,7 @@ int main(int argc, char* argv[]) {
 
 	struct GeneralMessage msg;
 	msg.msg = 1337;
+	msg.msg2 = 8888;
 
 	client.channeled_send<GeneralMessage>(&msg);
 
