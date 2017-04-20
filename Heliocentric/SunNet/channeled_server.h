@@ -16,15 +16,20 @@ namespace SunNet {
 		virtual void handle_ready_to_read(SocketConnection_p client) {
 			ChanneledSocketConnection_p channeled_socket = (
 				std::static_pointer_cast<ChanneledSocketConnection>(client)
-				);
+			);
 			this->handleIncomingMessage(channeled_socket);
 		}
 
 		virtual void handleSocketDisconnect(SocketConnection_p socket) {
 			this->removeFromPollService(socket);
-			this->handleClientDisconnect(socket);
+
+
+			ChanneledSocketConnection_p channeled_socket = (
+				std::static_pointer_cast<ChanneledSocketConnection>(socket)
+			);
+			this->handleClientDisconnect(channeled_socket);
 		}
 
-		virtual void handleClientDisconnect(SocketConnection_p client) {}
+		virtual void handleClientDisconnect(ChanneledSocketConnection_p client) {}
 	};
 }
