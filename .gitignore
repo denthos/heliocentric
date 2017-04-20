@@ -43,3 +43,6 @@ Release/
 
 # Documentation
 docs/
+
+# User project files
+*.vcxproj.user
