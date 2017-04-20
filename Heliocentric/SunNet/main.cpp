@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <string>
+#include <cassert>
 
 class TestServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 public:
@@ -37,14 +38,21 @@ public:
 	}
 };
 
-struct GeneralMessage {
+class GeneralParent {
+public:
 	int msg;
+	int msg2;
+};
+
+class GeneralMessage : public GeneralParent {
+public:
 	int msg2;
 };
 
 void server_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
 	std::cout << "Server received: " << ptr->msg << " and " << ptr->msg2 << std::endl;
 
+	assert(ptr->msg == 1337 && ptr->msg2 == 8888);
 	GeneralMessage response;
 	response.msg = 12345678;
 	response.msg2 = 98765;
@@ -54,7 +62,10 @@ void server_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr
 void client_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
 	std::cout << "Client received: " << ptr->msg << " and " << ptr->msg2 << std::endl;
 
-	GeneralMessage response{ 1337, 7331 };
+	assert(ptr->msg == 12345678 && ptr->msg2 == 98765);
+	GeneralMessage response;
+	response.msg = 1337;
+	response.msg2 = 8888;
 	sender->channeled_send(&response);
 }
 
@@ -72,7 +83,7 @@ int main(int argc, char* argv[]) {
 	client.connect("127.0.0.1", "9876");
 	client.subscribe<GeneralMessage>(client_callback);
 
-	struct GeneralMessage msg;
+	GeneralMessage msg;
 	msg.msg = 1337;
 	msg.msg2 = 8888;
 
