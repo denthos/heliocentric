@@ -62,7 +62,10 @@ namespace SunNet {
 	}
 
 	SocketConnection::~SocketConnection() {
-		close_socket(this->socket_descriptor);
+		try {
+			close_socket(this->socket_descriptor);
+		}
+		catch (...) {}
 
 		if (--SocketConnection::open_connection_count == 0) {
 			while (SocketConnection::initializations-- > 0) {
