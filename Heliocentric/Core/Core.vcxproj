@@ -20,12 +20,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConfigParser.cpp" />
-    <ClCompile Include="INIParser.cpp" />
+    <ClCompile Include="config_parser.cpp" />
+    <ClCompile Include="game_channels.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ConfigParser.h" />
-    <ClInclude Include="INIParser.h" />
+    <ClInclude Include="config_parser.h" />
+    <ClInclude Include="game_channels.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -84,6 +84,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)/SunNet;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -91,6 +93,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)/SunNet;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link />
   </ItemDefinitionGroup>
@@ -101,6 +105,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)/SunNet;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -114,6 +120,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)/SunNet;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -127,6 +135,7 @@
     <ClInclude Include="drawable.h" />
     <ClInclude Include="game_object.h" />
     <ClInclude Include="identifiable.h" />
+    <ClInclude Include="ini_parser.h" />
     <ClInclude Include="planet.h" />
     <ClInclude Include="planet_update.h" />
     <ClInclude Include="player_update.h" />
@@ -140,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="city.cpp" />
     <ClCompile Include="game_object.cpp" />
+    <ClCompile Include="ini_parser.cpp" />
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="planet.cpp" />
@@ -147,6 +157,7 @@
     <ClCompile Include="slot.cpp" />
     <ClCompile Include="attackable.cpp" />
     <ClCompile Include="unit.cpp" />
+    <ClCompile Include="unit_sample.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -3,7 +3,7 @@
 @brief An abstract class that defines a base unit.
 */
 #pragma once
-
+#include "lib.h"
 #include "attackable.h"
 #include "game_object.h"
 

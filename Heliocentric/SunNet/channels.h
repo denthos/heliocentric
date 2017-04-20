@@ -14,7 +14,7 @@ namespace SunNet {
 		NETWORK_BYTE_SIZE message_size;
 		CHANNEL_ID channel_id;
 	public:
-		ChannelInterface(NETWORK_BYTE_SIZE size, CHANNEL_ID id);
+		ChannelInterface(NETWORK_BYTE_SIZE size, CHANNEL_ID id) : message_size(size), channel_id(id) {}
 		NETWORK_BYTE_SIZE getMessageSize() { return this->message_size; }
 		CHANNEL_ID getId() { return this->channel_id; }
 	};
@@ -31,7 +31,9 @@ namespace SunNet {
 			return types_to_ids.at(typeid(TChannelType));
 		}
 
-		static std::shared_ptr<ChannelInterface> getChannel(CHANNEL_ID id);
+		static std::shared_ptr<ChannelInterface> getChannel(CHANNEL_ID id) {
+			return ids_to_channels.at(id);
+		}
 
 		static CHANNEL_ID getNextId() { return channel_counter++; }
 
@@ -49,4 +51,9 @@ namespace SunNet {
 	public:
 		Channel() : ChannelInterface(sizeof(TData), Channels::getNextId()) {}
 	};
+
+
+	std::map<CHANNEL_ID, std::shared_ptr<ChannelInterface>> Channels::ids_to_channels;
+	std::map<std::type_index, CHANNEL_ID> Channels::types_to_ids;
+	std::atomic<CHANNEL_ID> Channels::channel_counter = 0;
 }

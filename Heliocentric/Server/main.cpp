@@ -2,6 +2,7 @@
 #include <string>
 #include "player.h"
 #include "unit.h"
+//#include "game_channels.h"
 
 void claim_a_unit_test() {
 	std::cout << "Claim a single unit test." << std::endl;
@@ -51,6 +52,8 @@ void destroy_multiple_units_test() {
 void claim_a_slot_test() {}
 
 int main() {
+	//initializeChannels();
+
 	claim_a_unit_test();
 	destroy_a_unit_test();
 	destroy_multiple_units_test();

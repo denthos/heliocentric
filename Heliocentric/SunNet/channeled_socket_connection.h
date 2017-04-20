@@ -38,7 +38,7 @@ namespace SunNet {
 			std::shared_ptr<ChannelInterface> channel = Channels::getChannel(id);
 			std::unique_ptr<NETWORK_BYTE[]> data = std::make_unique<NETWORK_BYTE[]>(channel->getMessageSize());
 
-			if (!this->receive(data.get(), sizeof(channel->getMessageSize()))) {
+			if (!this->receive(data.get(), channel->getMessageSize())) {
 				throw ConnectionClosedException();
 			}
 
