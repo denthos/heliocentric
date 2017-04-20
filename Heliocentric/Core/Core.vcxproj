@@ -135,6 +135,7 @@
     <ClInclude Include="drawable.h" />
     <ClInclude Include="game_object.h" />
     <ClInclude Include="identifiable.h" />
+    <ClInclude Include="logging.h" />
     <ClInclude Include="ini_parser.h" />
     <ClInclude Include="planet.h" />
     <ClInclude Include="planet_update.h" />
@@ -160,6 +161,8 @@
     <ClCompile Include="unit_sample.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\config.ini" />
+    <None Include="ConfigTemplate.ini" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
