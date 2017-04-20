@@ -30,16 +30,39 @@ int Player::get_player_ID() {
 
 void Player::acquire_object(GameObject* object) {
 	owned_objects[std::type_index(typeid(*object))]->push_back(object);
+	// update object members
+	object->set_player(this);
+	object->set_vector_pos(owned_objects[std::type_index(typeid(*object))]->size()-1);
 }
 
 void Player::print() {
 	std::cout << "Player " << get_player_ID() << "(" << get_name() << ")" << std::endl;
 	for (auto it : owned_objects) {
 		std::cout << type_names[it.first] << ": " << (it.second)->size() << std::endl;
+		for (GameObject* object : (*owned_objects[it.first])) {
+			std::cout << "  " << object->get_vector_pos() << std::endl;
+		}
 	}
 }
 
-std::ostream& Player::operator<< (std::ostream & out) {
-	out << "Player " << get_player_ID() << "(" << get_name() << ")" << std::endl;
-	return out;
+void Player::swap_data(GameObject* object) {
+	std::vector<GameObject*>* vec = owned_objects[std::type_index(typeid(*object))];
+	vec->back()->set_vector_pos(object->get_vector_pos());
+	vec->at(object->get_vector_pos()) = vec->back();
+	vec->back() = object;
+}
+
+void Player::add_to_destory(GameObject* object) {
+	objects_to_destroy.push_back(object);
+}
+
+void Player::pop() {
+	// loop through all objects for each type
+	for (GameObject* object : objects_to_destroy) {
+		swap_data(object);
+		owned_objects[std::type_index(typeid(*object))]->pop_back();
+	}
+
+	// clear out
+	objects_to_destroy.clear();
 }

@@ -19,12 +19,16 @@ public:
 	int get_player_ID();
 	void acquire_object(GameObject* object);
 	void print();
-	std::ostream& operator<<(std::ostream&);
+	void swap_data(GameObject*);              // swap an object in any vector under owned_objects with its last element
+	void add_to_destory(GameObject*);         // Add a game object to destroy
+	void pop();                               // Pop all objects queued for destroy
 
 private:
 	std::unordered_map<std::type_index, std::vector<GameObject*>*> owned_objects;
 	std::unordered_map<std::type_index, std::string> type_names;
 	std::string name;
+	std::vector<GameObject*> objects_to_destroy;
+
 	int ID;
 	//list<Resource> recourses;
 };

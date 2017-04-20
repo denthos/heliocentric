@@ -16,6 +16,8 @@ class GameObject : public Drawable, public Identifiable {
 protected:
 	Player* player;
 	glm::vec3 position;
+	int vector_pos;  //access position in player's owned objects
+
 public:
 	/**
 	Returns the player who owns this game object.
@@ -23,9 +25,20 @@ public:
 	*/
 	Player* get_player();
 
+	/* *
+	Assign player while no constructor is doing so.
+	*/
+	void set_player(Player*);
+
 	/**
 	Returns the current position of this game object.
 	@return The current position of this game object.
 	*/
 	glm::vec3 get_position();
+
+	/**
+	Keep game object's position in owned_objects vector under player up-to-date.
+	*/
+	void set_vector_pos(int);
+	int get_vector_pos();
 };
