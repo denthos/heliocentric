@@ -7,3 +7,7 @@ Player* GameObject::get_player() {
 glm::vec3 GameObject::get_position() {
 	return this->position;
 }
+
+void GameObject::update_position(glm::vec3 new_position) {
+	this->position = new_position;
+}

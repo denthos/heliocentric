@@ -28,4 +28,10 @@ public:
 	@return The current position of this game object.
 	*/
 	glm::vec3 get_position();
+
+	/**
+	Updates the position of this game object
+	@param The new position of the game object
+	*/
+	void update_position(glm::vec3 new_position);
 };
