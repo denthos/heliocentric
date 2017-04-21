@@ -123,6 +123,9 @@
     <ClCompile Include="lib.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>
+    <ClCompile Include="logging.cpp">
+      <Filter>Utility Library</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

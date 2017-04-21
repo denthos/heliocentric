@@ -152,6 +152,7 @@
     <ClCompile Include="game_object.cpp" />
     <ClCompile Include="ini_parser.cpp" />
     <ClCompile Include="lib.cpp" />
+    <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="planet.cpp" />
     <ClCompile Include="player.cpp" />
