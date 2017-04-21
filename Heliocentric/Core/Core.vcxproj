@@ -20,12 +20,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="city_update.cpp" />
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="game_channels.cpp" />
+    <ClCompile Include="unit_update.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config_parser.h" />
     <ClInclude Include="game_channels.h" />
+    <ClInclude Include="game_object_update.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -135,6 +138,7 @@
     <ClInclude Include="drawable.h" />
     <ClInclude Include="game_object.h" />
     <ClInclude Include="identifiable.h" />
+    <ClInclude Include="locked_item.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="ini_parser.h" />
     <ClInclude Include="planet.h" />
@@ -150,14 +154,18 @@
   <ItemGroup>
     <ClCompile Include="city.cpp" />
     <ClCompile Include="game_object.cpp" />
+    <ClCompile Include="game_object_update.cpp" />
     <ClCompile Include="ini_parser.cpp" />
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="planet.cpp" />
+    <ClCompile Include="planet_update.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="player_update.cpp" />
     <ClCompile Include="slot.cpp" />
     <ClCompile Include="attackable.cpp" />
+    <ClCompile Include="slot_update.cpp" />
     <ClCompile Include="unit.cpp" />
     <ClCompile Include="unit_sample.cpp" />
   </ItemGroup>

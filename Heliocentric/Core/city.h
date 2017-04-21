@@ -4,7 +4,7 @@
 #include "slot.h"
 #include "player.h"
 
-struct CityUpdate;
+class CityUpdate;
 
 class City : public Attackable {
 public:

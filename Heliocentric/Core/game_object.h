@@ -7,6 +7,7 @@
 #include "identifiable.h"
 #include "lib.h"
 #include "player.h"
+#include "game_object_update.h"
 #include <glm\vec3.hpp>
 
 /**

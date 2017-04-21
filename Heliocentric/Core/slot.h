@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-struct SlotUpdate;
+class SlotUpdate;
 
 class Slot : public GameObject {
 public:

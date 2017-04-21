@@ -8,7 +8,7 @@
 /* Forward declaration is necessary so compiler knows about GameObject. We cannot
 #include "game_object.h" since it #includes "player.h" */
 class GameObject;
-struct PlayerUpdate;
+class PlayerUpdate;
 
 class Player : public Identifiable {
 public:

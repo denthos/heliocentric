@@ -15,6 +15,9 @@
     <Filter Include="Utility Library">
       <UniqueIdentifier>{8356a21f-d01a-4ed3-9a52-78603aa51687}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Updates">
+      <UniqueIdentifier>{bf61f581-def7-422a-9ba7-1bb30df4685b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="city.h">
@@ -44,21 +47,6 @@
     <ClInclude Include="identifiable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="unit_update.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="player_update.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="planet_update.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="city_update.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slot_update.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_channels.h">
       <Filter>Networking</Filter>
     </ClInclude>
@@ -72,6 +60,27 @@
       <Filter>Utility Library</Filter>
     </ClInclude>
     <ClInclude Include="logging.h">
+      <Filter>Utility Library</Filter>
+    </ClInclude>
+    <ClInclude Include="game_object_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="city_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="planet_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="player_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="slot_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="locked_item.h">
       <Filter>Utility Library</Filter>
     </ClInclude>
   </ItemGroup>
@@ -123,6 +132,23 @@
     <ClCompile Include="lib.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>
+    <ClCompile Include="city_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="game_object_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="planet_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="player_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="slot_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_update.cpp">
+      <Filter>Updates</Filter>
     <ClCompile Include="logging.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>

@@ -1,12 +1,9 @@
 #pragma once
 
-#include "identifiable.h"
+#include "game_object_update.h"
 #include "planet.h"
 
-struct PlanetUpdate {
-	UID id;
-
-	void apply(Planet & planet) {
-
-	}
+class PlanetUpdate : public GameObjectUpdate {
+public:
+	void apply(GameObject* obj);
 };

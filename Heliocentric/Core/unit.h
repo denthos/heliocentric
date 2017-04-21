@@ -7,7 +7,7 @@
 #include "attackable.h"
 #include "game_object.h"
 
-struct UnitUpdate;
+class UnitUpdate;
 
 /**
 An abstract class that defines a base unit.

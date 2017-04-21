@@ -7,7 +7,7 @@
 #include <string>
 #include <iostream>
 
-struct PlanetUpdate;
+class PlanetUpdate;
 
 class Planet : public GameObject {
 public:
