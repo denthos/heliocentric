@@ -19,54 +19,58 @@ namespace Test
 			Assert::AreEqual("brandon", "brandon", "Brandon != Brandon!");
 		}
 
-		void claim_a_unit_test() {
-			std::cout << "Claim a single unit test." << std::endl;
-			Player sylvia("Sylvia", 1);
-			Unit* battleShip = new Unit();
+     	TEST_METHOD(claim_a_unit_test) {
+			Player* sylvia = new Player("Sylvia", 1);
+			UID id = 101;
+			Unit* battleShip = new Unit(id);
 
-			sylvia.acquire_object(battleShip);
-			sylvia.print();
+			sylvia->acquire_object(battleShip);
+			std::string s("Player (Sylvia) Unit: 1 ids: {101;} ");
+			Assert::AreEqual(s, sylvia->to_string());
 		}
-
-		void destroy_a_unit_test() {
-			std::cout << "Destroy a single unit test." << std::endl;
+		
+		TEST_METHOD(destroy_a_unit_test) {
 			Player sylvia("Sylvia", 1);
-			Unit* battleShip1 = new Unit();
-			Unit* battleShip2 = new Unit();
-			Unit* battleShip3 = new Unit();
+			UID id1 = 101;
+			UID id2 = 102;
+			UID id3 = 103;
+			Unit* battleShip1 = new Unit(id1);
+			Unit* battleShip2 = new Unit(id2);
+			Unit* battleShip3 = new Unit(id3);
 
 			sylvia.acquire_object(battleShip1);
 			sylvia.acquire_object(battleShip2);
 			sylvia.acquire_object(battleShip3);
 
-			sylvia.add_to_destory(battleShip1);
+			sylvia.add_to_destroy(battleShip1);
 			sylvia.pop();
 
-			sylvia.print();
+			std::string s("Player (Sylvia) Unit: 2 ids: {102;103;} ");
+			Assert::AreEqual(s, sylvia.to_string());
 		}
 
-		void destroy_multiple_units_test() {
-			std::cout << "Destroy multiple units test." << std::endl;
+		TEST_METHOD(destroy_multiple_units_test) {
 			Player sylvia("Sylvia", 1);
-			Unit* battleShip1 = new Unit();
-			Unit* battleShip2 = new Unit();
-			Unit* battleShip3 = new Unit();
+			UID id1 = 101;
+			UID id2 = 102;
+			UID id3 = 103;
+			Unit* battleShip1 = new Unit(id1);
+			Unit* battleShip2 = new Unit(id2);
+			Unit* battleShip3 = new Unit(id3);
 
 			sylvia.acquire_object(battleShip1);
 			sylvia.acquire_object(battleShip2);
 			sylvia.acquire_object(battleShip3);
 
-			sylvia.add_to_destory(battleShip1);
-			sylvia.add_to_destory(battleShip3);
+			sylvia.add_to_destroy(battleShip1);
+			sylvia.add_to_destroy(battleShip3);
 
 			sylvia.pop();
 
-			sylvia.print();
+			std::string s("Player (Sylvia) Unit: 1 ids: {102;} ");
+			Assert::AreEqual(s, sylvia.to_string());
 		}
-
 
 		void claim_a_slot_test() {}
-
-
 	};
 }

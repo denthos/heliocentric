@@ -5,14 +5,14 @@
 #include <iostream>
 #include <string>
 
-Player::Player(std::string player_name, int player_ID) : name(player_name), ID(player_ID), owned_objects(std::unordered_map<std::type_index, std::vector<GameObject*>*>()) {
-	owned_objects[std::type_index(typeid(Unit))] = new std::vector<GameObject*>();
+Player::Player(std::string player_name, int player_ID) : name(player_name), ID(player_ID) {
+	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
 	type_names[std::type_index(typeid(Unit))] = "Unit";
-	owned_objects[std::type_index(typeid(Planet))] = new std::vector<GameObject*>();
+	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
 	type_names[std::type_index(typeid(Planet))] = "Planet";
-	owned_objects[std::type_index(typeid(City))] = new std::vector<GameObject*>();
+	owned_objects[std::type_index(typeid(City))] = std::unordered_map<unsigned int, GameObject*>();
 	type_names[std::type_index(typeid(City))] = "City";
-	owned_objects[std::type_index(typeid(Slot))] = new std::vector<GameObject*>();
+	owned_objects[std::type_index(typeid(Slot))] = std::unordered_map<unsigned int, GameObject*>();
 	type_names[std::type_index(typeid(Slot))] = "Slot";
 }
 
@@ -29,38 +29,37 @@ int Player::get_player_ID() {
 }
 
 void Player::acquire_object(GameObject* object) {
-	owned_objects[std::type_index(typeid(*object))]->push_back(object);
+	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
 	// update object members
 	object->set_player(this);
-	object->set_vector_pos(owned_objects[std::type_index(typeid(*object))]->size()-1);
 }
 
-void Player::print() {
-	std::cout << "Player " << get_player_ID() << "(" << get_name() << ")" << std::endl;
+std::string Player::to_string() {
+	std::string result = "Player (" + get_name() + ") ";
 	for (auto it : owned_objects) {
-		std::cout << type_names[it.first] << ": " << (it.second)->size() << std::endl;
-		for (GameObject* object : (*owned_objects[it.first])) {
-			std::cout << "  " << object->get_vector_pos() << std::endl;
+		// only print when there is object in the map
+		if (it.second.size() > 0) {
+			result += type_names[it.first] + ": ";
+			result += std::to_string(it.second.size());
+			result += " ids: {";
+			
+			for (auto pair : it.second) {
+				result += std::to_string(pair.first) + ";";
+			}
+			result += "} ";
 		}
 	}
+	return result;
 }
 
-void Player::swap_data(GameObject* object) {
-	std::vector<GameObject*>* vec = owned_objects[std::type_index(typeid(*object))];
-	vec->back()->set_vector_pos(object->get_vector_pos());
-	vec->at(object->get_vector_pos()) = vec->back();
-	vec->back() = object;
-}
-
-void Player::add_to_destory(GameObject* object) {
+void Player::add_to_destroy(GameObject* object) {
 	objects_to_destroy.push_back(object);
 }
 
 void Player::pop() {
 	// loop through all objects for each type
 	for (GameObject* object : objects_to_destroy) {
-		swap_data(object);
-		owned_objects[std::type_index(typeid(*object))]->pop_back();
+		owned_objects[std::type_index(typeid(*object))].erase(object->getID());
 	}
 
 	// clear out

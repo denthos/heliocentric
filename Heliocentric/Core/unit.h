@@ -17,6 +17,9 @@ public:
 
 	friend UnitUpdate;
 
+	Unit();
+	Unit(UID id) : GameObject(id) {};
+
 	/**
 	Called continuously by server to update current state of the unit.
 	*/

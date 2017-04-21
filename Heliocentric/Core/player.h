@@ -18,13 +18,12 @@ public:
 	void set_name(std::string new_name);
 	int get_player_ID();
 	void acquire_object(GameObject* object);
-	void print();
-	void swap_data(GameObject*);              // swap an object in any vector under owned_objects with its last element
-	void add_to_destory(GameObject*);         // Add a game object to destroy
+	std::string to_string();
+	void add_to_destroy(GameObject*);         // Add a game object to destroy
 	void pop();                               // Pop all objects queued for destroy
 
 private:
-	std::unordered_map<std::type_index, std::vector<GameObject*>*> owned_objects;
+	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects;
 	std::unordered_map<std::type_index, std::string> type_names;
 	std::string name;
 	std::vector<GameObject*> objects_to_destroy;
