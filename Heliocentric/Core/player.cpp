@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-Player::Player(std::string player_name, int player_ID) : name(player_name), ID(player_ID) {
+Player::Player(std::string player_name) : name(player_name) {
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
 	type_names[std::type_index(typeid(Unit))] = "Unit";
 	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
@@ -22,10 +22,6 @@ std::string Player::get_name() {
 
 void Player::set_name(std::string new_name) {
 	name = new_name;
-}
-
-int Player::get_player_ID() {
-	return ID;
 }
 
 void Player::acquire_object(GameObject* object) {

@@ -20,7 +20,7 @@ namespace Test
 		}
 
      	TEST_METHOD(claim_a_unit_test) {
-			Player* sylvia = new Player("Sylvia", 1);
+			Player* sylvia = new Player("Sylvia");
 			UID id = 101;
 			Unit* battleShip = new Unit(id);
 
@@ -30,7 +30,7 @@ namespace Test
 		}
 		
 		TEST_METHOD(destroy_a_unit_test) {
-			Player sylvia("Sylvia", 1);
+			Player sylvia("Sylvia");
 			UID id1 = 101;
 			UID id2 = 102;
 			UID id3 = 103;
@@ -50,7 +50,7 @@ namespace Test
 		}
 
 		TEST_METHOD(destroy_multiple_units_test) {
-			Player sylvia("Sylvia", 1);
+			Player sylvia("Sylvia");
 			UID id1 = 101;
 			UID id2 = 102;
 			UID id3 = 103;
