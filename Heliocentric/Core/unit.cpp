@@ -49,7 +49,8 @@ Unit* Unit::do_attack(Unit* target) {
 }
 
 glm::vec3 Unit::do_move() {
-	return this->position;
+	// Move towards destination.
+	return position + (glm::normalize(destination - position) * (float) movementSpeedCurrent);
 }
 
 void Unit::handle_out_of_range(AttackableGameObject * opponent)
