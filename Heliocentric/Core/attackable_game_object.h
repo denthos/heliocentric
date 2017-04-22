@@ -35,13 +35,13 @@ protected:
 	virtual void handle_out_of_range(AttackableGameObject* opponent) {}
 
 	/**
-	Hook for handling defeat.
+	Hook for handling when the attackable's health drops below zero.
 	@param The defeating opponent.
 	*/
 	virtual void handle_defeat(AttackableGameObject* opponent) {}
 
 	/**
-	Hook for handling victory.
+	Hook for handling an opponent's defeat. 
 	@param The defeated opponent.
 	*/
 	virtual void handle_victory(AttackableGameObject* opponent) {}
