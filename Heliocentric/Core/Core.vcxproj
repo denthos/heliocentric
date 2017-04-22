@@ -129,7 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="attackable.h" />
+    <ClInclude Include="attackable_game_object.h" />
     <ClInclude Include="city.h" />
     <ClInclude Include="city_update.h" />
     <ClInclude Include="drawable.h" />
@@ -156,7 +156,7 @@
     <ClCompile Include="planet.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="slot.cpp" />
-    <ClCompile Include="attackable.cpp" />
+    <ClCompile Include="attackable_game_object.cpp" />
     <ClCompile Include="unit.cpp" />
     <ClCompile Include="unit_sample.cpp" />
   </ItemGroup>
