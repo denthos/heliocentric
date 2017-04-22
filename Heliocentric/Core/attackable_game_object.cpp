@@ -53,7 +53,7 @@ int AttackableGameObject::take_damage(AttackableGameObject* attacker) {
 	return this->health;
 }
 
-void AttackableGameObject::attack(AttackableGameObject * target)
+void AttackableGameObject::do_attack(AttackableGameObject * target)
 {	
 	Lib::assertTrue(target != this, "Attackable cannot attack itself.");
 	Lib::assertTrue(target->player != this->player, "Player cannot attack their own attackables.");

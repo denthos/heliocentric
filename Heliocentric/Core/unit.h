@@ -50,13 +50,15 @@ public:
 	*/
 	int set_movmennt_speed_max(int movementSpeedMax);
 
-protected:
+
 	/**
 	Tells the unit to attack the target.
-	@param target The target that this unit is attacking.
-	@return Target of this unit.
+	@param The target that this unit is attacking.
 	*/
-	Unit* do_attack(Unit* target);
+	void set_attack_target(AttackableGameObject* target);
+
+
+protected:
 
 	/**
 	Tells the unit to move towards destination.
@@ -70,6 +72,7 @@ protected:
 	int movementSpeedCurrent; // can be used if implementing gravity simulation
 	CommandType currentCommand;
 	glm::vec3 destination;
+	AttackableGameObject* target;
 
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);

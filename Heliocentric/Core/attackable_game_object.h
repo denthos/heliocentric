@@ -115,5 +115,5 @@ public:
 	combat logic, the handle_* hooks are available for subclasses to override. 
 	@param The target to attack.
 	*/
-	void attack(AttackableGameObject* target);
+	void do_attack(AttackableGameObject* target);
 };
