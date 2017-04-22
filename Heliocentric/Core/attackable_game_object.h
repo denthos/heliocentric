@@ -19,15 +19,17 @@ protected:
 	/**
 	Performs a single attack on the target if in range.
 	@param Target to attack.
+	@param Whether or not the caller initiated the attack.
 	@return Whether or not the target is still alive after the attack.
 	*/
-	bool attack_helper(AttackableGameObject* target);
+	bool attack_helper(AttackableGameObject* target, bool is_aggressor);
 
 
 	/** Combat Hooks **/
 
 	/**
-	Hook for handling when opponent is out of range. 
+	Hook for handling when an initiated attack fails because the opponent
+	is out of range. 
 	@param The combat opponent.
 	*/
 	virtual void handle_out_of_range(AttackableGameObject* opponent) {}
