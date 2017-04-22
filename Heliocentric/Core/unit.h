@@ -38,6 +38,13 @@ public:
 	glm::vec3 set_destination(glm::vec3 destination);
 
 	/**
+	Sets the unit to follow the given game object.
+	@param The game object which this unit should follow.
+	@return The destination of this unit.
+	*/
+	glm::vec3 set_destination(GameObject* object);
+
+	/**
 	Returns the maximum movement speed of this unit.
 	@return The maximum movement speed of this unit.
 	*/
@@ -71,7 +78,7 @@ protected:
 	int movementSpeedMax; // maximum speed that this unit can achieve when powered by its own engine
 	int movementSpeedCurrent; // can be used if implementing gravity simulation
 	CommandType currentCommand;
-	glm::vec3 destination;
+	glm::vec3* destination;
 	AttackableGameObject* target;
 
 	virtual void handle_out_of_range(AttackableGameObject* opponent);

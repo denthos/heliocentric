@@ -16,13 +16,23 @@ void Unit::update() {
 }
 
 glm::vec3 Unit::get_destination() {
-	return this->destination;
+	return *this->destination;
 }
 
 glm::vec3 Unit::set_destination(glm::vec3 destination) {
-	this->destination = destination;
-	return this->destination;
+	this->destination = &destination;
+	currentCommand = move;
+	return *this->destination;
 }
+
+
+glm::vec3 Unit::set_destination(GameObject* object) {
+	// Follow object as it moves.
+	this->destination = &object->get_position();
+	currentCommand = move;
+	return *this->destination;
+}
+
 
 int Unit::get_movement_speed_max() {
 	return this->movementSpeedMax;
@@ -40,14 +50,14 @@ void Unit::set_attack_target(AttackableGameObject* target) {
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
-	return position + (glm::normalize(destination - position) * (float) movementSpeedCurrent);
+	return position + (glm::normalize(*destination - position) * (float) movementSpeedCurrent);
 }
 
 void Unit::handle_out_of_range(AttackableGameObject * opponent)
 {
 	// Move towards opponent if in attack mode.
 	if (currentCommand == attack) {
-		set_destination(opponent->get_position());
+		set_destination(opponent);
 		do_move();
 	}
 }
