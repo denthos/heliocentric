@@ -2,10 +2,10 @@
 template <class T>
 class Upgradable {
 public:
-	Upgradable<T>();
+	Upgradable<T>() : MAX_TIER(3) {};
+	Upgradable<T>(int max) : MAX_TIER(max) {};
 	void apply_upgrade(T);
 
 protected:
-	int tier;
 	int MAX_TIER;
 };

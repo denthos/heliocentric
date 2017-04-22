@@ -1,14 +1,15 @@
 #pragma once
-#include "upgradable.h"
-#include "attackable.h"
+#include "attackable_upgradable.h"
+#include "city.h"
 
-class AttackableUpgradable : Upgradable<Attackable> {
+class CityUpgradable : Upgradable<City>, AttackableUpgradable {
 public:
-	void apply_stats_upgrade();
+	CityUpgradable(int, int, int, int, int);
+	CityUpgradable(int, int, int, int, int, int);
 
-protected:
-	int attackDelta;
-	int defenseDelta;
-	int rangeDelta;
-	int healthDelta;
+	void apply_upgrade(City);
+
+private:
+	int production_delta;
+	int population_delta;
 };

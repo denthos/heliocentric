@@ -46,7 +46,7 @@ public:
 	@param The maximum movement speed of this unit.
 	@return The maximum movement speed of this unit.
 	*/
-	int set_movmennt_speed_max(int movementSpeedMax);
+	int set_movement_speed_max(int movementSpeedMax);
 
 protected:
 	/**

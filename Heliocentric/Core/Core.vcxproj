@@ -20,12 +20,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="attackable_upgradable.cpp" />
+    <ClCompile Include="city_upgradable.cpp" />
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="game_channels.cpp" />
+    <ClCompile Include="unit_upgradable.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="attackable_upgradable.h" />
+    <ClInclude Include="city_upgradable.h" />
     <ClInclude Include="config_parser.h" />
     <ClInclude Include="game_channels.h" />
+    <ClInclude Include="unit_upgradable.h" />
+    <ClInclude Include="upgradable.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -36,3 +36,11 @@ int Attackable::take_damage(Attackable* attacker) {
 	this->health = this->health - damage;
 	return this->health;
 }
+
+int Attackable::get_tier() {
+	return tier;
+}
+
+void Attackable::upgrade_tier() {
+	++tier;
+}

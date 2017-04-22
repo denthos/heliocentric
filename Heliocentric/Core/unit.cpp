@@ -29,7 +29,7 @@ int Unit::get_movement_speed_max() {
 	return this->movementSpeedMax;
 }
 
-int Unit::set_movmennt_speed_max(int movementSpeedMax) {
+int Unit::set_movement_speed_max(int movementSpeedMax) {
 	this->movementSpeedMax = movementSpeedMax;
 	return this->movementSpeedMax;
 }

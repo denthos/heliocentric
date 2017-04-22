@@ -9,6 +9,13 @@ City::City(int att, int arm, int heal, int pr, int pop, Slot* assigned_slot) :
 	health = heal;
 }
 
+void City::set_production(int prod) {
+	production = prod;
+}
+int City::get_production() {
+	return production;
+}
+
 int City::get_population() {
 	return population;
 }

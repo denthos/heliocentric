@@ -75,6 +75,18 @@
     <ClInclude Include="lib.h">
       <Filter>Utility Library</Filter>
     </ClInclude>
+    <ClInclude Include="upgradable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="attackable_upgradable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="city_upgradable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_upgradable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -121,6 +133,15 @@
     </ClCompile>
     <ClCompile Include="lib.cpp">
       <Filter>Utility Library</Filter>
+    </ClCompile>
+    <ClCompile Include="attackable_upgradable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="city_upgradable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_upgradable.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

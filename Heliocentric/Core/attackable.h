@@ -14,6 +14,7 @@ protected:
 	int combatDefense;
 	int combatRange; // An attackable can attack its target only when target is in this range.
 	int health;
+	int tier;
 	
 public:
 	/**
@@ -69,4 +70,14 @@ public:
 	@return Health of this unit after taking damage from the attack.
 	*/
 	int take_damage(Attackable* attacker);
+
+	/**
+	Allows to check the current tier.
+	*/	
+	int get_tier();
+
+	/** 
+	Update tier value.
+	*/
+	void upgrade_tier();
 };

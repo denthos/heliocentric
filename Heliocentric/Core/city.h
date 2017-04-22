@@ -10,6 +10,8 @@ class City : public Attackable {
 public:
 	friend CityUpdate;
 	City(int att, int arm, int heal, int pr, int pop, Slot* assigned_slot);
+	void set_production(int);
+	int get_production();
 	int get_population();
 	void set_population(int new_pop);
 	Slot* get_slot();
