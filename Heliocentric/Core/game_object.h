@@ -36,5 +36,5 @@ public:
 	Returns the current position of this game object.
 	@return The current position of this game object.
 	*/
-	glm::vec3& get_position();
+	virtual glm::vec3& get_position();
 };
