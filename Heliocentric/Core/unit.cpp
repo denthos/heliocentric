@@ -67,3 +67,11 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 	// Tell Player you have died.
 	player->add_to_destroy(this);
 }
+
+void Unit::handle_victory(AttackableGameObject * opponent)
+{
+	// Go back to idle if unit was attacking
+	currentCommand = (currentCommand == attack) ? idle : currentCommand;
+	
+	// TODO: Gain experience (?)
+}
