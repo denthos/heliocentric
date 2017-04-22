@@ -70,4 +70,7 @@ protected:
 	int movementSpeedCurrent; // can be used if implementing gravity simulation
 	CommandType currentCommand;
 	glm::vec3 destination;
+
+	virtual void handle_out_of_range(AttackableGameObject* opponent);
+	virtual void handle_defeat(AttackableGameObject* opponent);
 };

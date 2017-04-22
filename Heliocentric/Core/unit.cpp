@@ -51,3 +51,18 @@ Unit* Unit::do_attack(Unit* target) {
 glm::vec3 Unit::do_move() {
 	return this->position;
 }
+
+void Unit::handle_out_of_range(AttackableGameObject * opponent)
+{
+	// Move towards opponent if in attack mode.
+	if (currentCommand == attack) {
+		set_destination(opponent->get_position());
+		do_move();
+	}
+}
+
+void Unit::handle_defeat(AttackableGameObject * opponent)
+{
+	// Tell Player you have died.
+	player->add_to_destroy(this);
+}
