@@ -43,3 +43,9 @@ Release/
 
 # Documentation
 docs/
+
+# Logs
+*.log
+
+# User project files
+*.vcxproj.user

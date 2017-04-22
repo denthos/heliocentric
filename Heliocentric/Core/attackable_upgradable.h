@@ -6,8 +6,8 @@ class AttackableUpgradable : Upgradable<Attackable> {
 public:
 	AttackableUpgradable(int, int, int);
 	AttackableUpgradable(int, int, int, int);
-	void apply_upgrade(Attackable);
-	bool check_max_tier(Attackable);
+	void apply_upgrade(Attackable*);
+	bool is_max_tier(Attackable*);
 
 protected:
 	int attack_delta;
