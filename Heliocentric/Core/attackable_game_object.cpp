@@ -1,5 +1,9 @@
 #include "attackable_game_object.h"
 
+AttackableGameObject::AttackableGameObject(UID id) : GameObject(id) {}
+
+AttackableGameObject::AttackableGameObject(int att, int def, int range, int heal) : combatAttack(att), combatDefense(def), combatRange(range), health(heal) {};
+
 int AttackableGameObject::get_combat_attack() {
 	return this->combatAttack;
 }

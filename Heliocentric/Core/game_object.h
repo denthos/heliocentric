@@ -19,7 +19,9 @@ protected:
 
 public:
 	GameObject();
-	GameObject(UID id) : Identifiable(id) {};
+	GameObject(UID id);
+	GameObject(UID id, glm::vec3 pos);
+	GameObject(UID id, glm::vec3 pos, Player* assigned_player);
 
 	/**
 	Returns the player who owns this game object.
@@ -37,4 +39,9 @@ public:
 	@return The current position of this game object.
 	*/
 	glm::vec3 get_position();
+
+	/**
+	Set the position of an object.
+	*/
+	void set_position(glm::vec3 pos);
 };
