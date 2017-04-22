@@ -83,6 +83,9 @@
     <ClInclude Include="locked_item.h">
       <Filter>Utility Library</Filter>
     </ClInclude>
+    <ClInclude Include="unit_sample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -148,6 +148,7 @@
     <ClInclude Include="player.h" />
     <ClInclude Include="slot_update.h" />
     <ClInclude Include="unit.h" />
+    <ClInclude Include="unit_sample.h" />
     <ClInclude Include="unit_update.h" />
     <ClInclude Include="lib.h" />
   </ItemGroup>
