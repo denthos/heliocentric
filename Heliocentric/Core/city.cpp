@@ -19,14 +19,3 @@ void City::set_population(int new_pop) {
 Slot* City::get_slot() {
 	return slot;
 }
-
-void City::print() {
-	//TO DO
-}
-
-std::ostream& City::operator<< (std::ostream & out) {
-	out << "This city has the following stats: " << "attack " << combatAttack << ", armor " << combatDefense << ", health " << health << ", production rate " << production << ", and population of " << population << " people. ";
-	if (slot != NULL)
-		out << "City is located in " << slot->get_slot_ID() << ", owned by player " << slot->get_player()->get_name() << std::endl;
-	return out;
-}

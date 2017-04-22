@@ -13,8 +13,6 @@ public:
 	int get_population();
 	void set_population(int new_pop);
 	Slot* get_slot();
-	void print();
-	std::ostream& operator<<(std::ostream&);
 
 private:
 	int production;

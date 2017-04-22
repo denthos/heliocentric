@@ -1,5 +1,7 @@
 #include "game_object.h"
 
+GameObject::GameObject() {};
+
 Player* GameObject::get_player() {
 	return this->player;
 }
