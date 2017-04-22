@@ -113,11 +113,6 @@
     <ClCompile Include="unit_sample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <None Include="..\config.ini" />
-    <None Include="ConfigTemplate.ini" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game_channels.cpp">
@@ -149,11 +144,14 @@
     </ClCompile>
     <ClCompile Include="unit_update.cpp">
       <Filter>Updates</Filter>
+    </ClCompile>
     <ClCompile Include="logging.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\config.ini" />
+    <None Include="ConfigTemplate.ini" />
   </ItemGroup>
 </Project>

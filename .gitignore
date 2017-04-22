@@ -49,3 +49,7 @@ docs/
 
 # User project files
 *.vcxproj.user
+
+# vim files
+*.sw*
+*~
