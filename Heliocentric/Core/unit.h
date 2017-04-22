@@ -4,21 +4,20 @@
 */
 #pragma once
 #include "lib.h"
-#include "attackable.h"
-#include "game_object.h"
+#include "attackable_game_object.h"
 
 struct UnitUpdate;
 
 /**
 An abstract class that defines a base unit.
 */
-class Unit : public GameObject, public Attackable {
+class Unit : public AttackableGameObject {
 public:
 
 	friend UnitUpdate;
 
-	Unit();
-	Unit(UID id) : GameObject(id) {};
+	Unit() {};
+	Unit(UID id) : AttackableGameObject(id) {};
 
 	/**
 	Called continuously by server to update current state of the unit.
