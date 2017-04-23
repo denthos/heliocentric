@@ -83,5 +83,5 @@ protected:
 
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);
-	virtual void handle_victory(AttackableGameObject * opponent);
+	virtual void handle_victory(AttackableGameObject* opponent);
 };

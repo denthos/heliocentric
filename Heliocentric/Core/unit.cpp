@@ -79,3 +79,4 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 	
 	// TODO: Gain experience (?)
 }
+
