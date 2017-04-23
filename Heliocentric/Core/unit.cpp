@@ -50,7 +50,9 @@ void Unit::set_combat_target(AttackableGameObject* target) {
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
-	return position + (glm::normalize(*destination - position) * (float) movementSpeedCurrent);
+	float speed = fmin((float) movementSpeedMax, glm::distance(*destination, position));
+	position = position + (glm::normalize(*destination - position) * speed);
+	return position;
 }
 
 void Unit::handle_out_of_range(AttackableGameObject * opponent)
