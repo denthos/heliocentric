@@ -77,7 +77,7 @@ protected:
 
 	int movementSpeedMax; // maximum speed that this unit can achieve when powered by its own engine
 	int movementSpeedCurrent; // can be used if implementing gravity simulation
-	CommandType currentCommand;
+	CommandType currentCommand = idle;
 	const glm::vec3* destination;
 	AttackableGameObject* target;
 
