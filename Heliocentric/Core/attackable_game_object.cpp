@@ -48,7 +48,6 @@ void AttackableGameObject::do_attack(AttackableGameObject * target)
 	Lib::assertTrue(target != this, "Attackable cannot attack itself.");
 	Lib::assertTrue(target->player != this->player, "Player cannot attack their own attackables.");
 
-	float distance = glm::distance(this->position, target->get_position());
 	bool target_is_dead = false, this_is_dead = false;
 
 	if (glm::distance(this->position, target->get_position()) <= (float) this->combatRange) {
