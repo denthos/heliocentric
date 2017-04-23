@@ -1,12 +1,10 @@
 #pragma once
 
-#include "identifiable.h"
+#include "game_object_update.h"
 #include "slot.h"
 
-struct SlotUpdate {
-	UID id;
+class SlotUpdate : public GameObjectUpdate {
+public:
+	void apply(GameObject* obj);
 
-	void apply(Slot & slot) {
-
-	}
 };

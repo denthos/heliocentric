@@ -7,6 +7,7 @@
 #include "identifiable.h"
 #include "lib.h"
 #include "player.h"
+#include "game_object_update.h"
 #include <glm\vec3.hpp>
 
 /**
@@ -41,7 +42,8 @@ public:
 	glm::vec3 get_position();
 
 	/**
-	Set the position of an object.
+	Updates the position of this game object
+	@param The new position of the game object
 	*/
-	void set_position(glm::vec3 pos);
+	void update_position(glm::vec3 new_position);
 };

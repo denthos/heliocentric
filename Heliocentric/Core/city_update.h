@@ -3,10 +3,8 @@
 #include "identifiable.h"
 #include "city.h"
 
-struct CityUpdate {
+class CityUpdate {
+public:
 	UID id;
-
-	void apply(City & city) {
-
-	}
+	void apply(City* city);
 };

@@ -17,6 +17,6 @@ glm::vec3 GameObject::get_position() {
 	return this->position;
 }
 
-void GameObject::set_position(glm::vec3 pos) {
-	position = pos;
+void GameObject::update_position(glm::vec3 new_position) {
+	this->position = new_position;
 }
