@@ -5,11 +5,11 @@
 #include <iostream>
 #include <string>
 
-Player::Player(std::string player_name, int player_ID) : name(player_name), ID(player_ID), owned_objects(std::unordered_map<std::type_index, std::vector<GameObject*>*>()) {
-	owned_objects[std::type_index(typeid(Unit))] = new std::vector<GameObject*>();
-	owned_objects[std::type_index(typeid(Planet))] = new std::vector<GameObject*>();
-	owned_objects[std::type_index(typeid(City))] = new std::vector<GameObject*>();
-	owned_objects[std::type_index(typeid(Slot))] = new std::vector<GameObject*>();
+Player::Player(std::string player_name, UID id) : Identifiable(id), name(player_name) {
+	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
+	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
+	owned_objects[std::type_index(typeid(City))] = std::unordered_map<unsigned int, GameObject*>();
+	owned_objects[std::type_index(typeid(Slot))] = std::unordered_map<unsigned int, GameObject*>();
 }
 
 std::string Player::get_name() {
@@ -20,19 +20,30 @@ void Player::set_name(std::string new_name) {
 	name = new_name;
 }
 
-int Player::get_player_ID() {
-	return ID;
-}
-
 void Player::acquire_object(GameObject* object) {
-	owned_objects[std::type_index(typeid(object))]->push_back(object);
+	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
+	// update object members
+	object->set_player(this);
 }
 
-void Player::print() {
-	std::cout << "Player " << get_player_ID() << "(" << get_name() << ")" << std::endl;
+void Player::add_to_destroy(GameObject* object) {
+	objects_to_destroy.push_back(object);
 }
 
-std::ostream& Player::operator<< (std::ostream & out) {
-	out << "Player " << get_player_ID() << "(" << get_name() << ")" << std::endl;
-	return out;
+void Player::pop() {
+	// loop through all objects for each type
+	for (GameObject* object : objects_to_destroy) {
+		owned_objects[std::type_index(typeid(*object))].erase(object->getID());
+	}
+
+	// clear out
+	objects_to_destroy.clear();
+}
+
+std::unordered_map<unsigned int, GameObject*> Player::get_units() {
+	return owned_objects[std::type_index(typeid(Unit))];
+}
+
+GameObject* Player::get_unit(UID id) {
+	return owned_objects[std::type_index(typeid(Unit))][id];
 }

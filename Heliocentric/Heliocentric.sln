@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Client\Client.vcxproj", "{53C3E546-F4BE-4A46-978A-C60B58CF2CF7}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -20,6 +20,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{8FBFFC03-4B81-4E40-8B7C-A5B1B5A07EEE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{F8275685-D1F5-40F4-B992-5D601D350331}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8FBFFC03-4B81-4E40-8B7C-A5B1B5A07EEE} = {8FBFFC03-4B81-4E40-8B7C-A5B1B5A07EEE}
+		{E88FBE84-45D7-4B16-B0B4-C07326B8E6DC} = {E88FBE84-45D7-4B16-B0B4-C07326B8E6DC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

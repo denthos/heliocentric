@@ -1,21 +1,37 @@
 /**
-@file attackable.h
-@brief An abstract class that defines an attackable object.
+@file attackable_game_object.h
+@brief An abstract class that defines an attackable game object.
 */
 #pragma once
 #include "lib.h"
+#include "game_object.h"
 
 /**
-An abstract class that defines an attackable object.
+An abstract class that defines an attackable game object.
 */
-class Attackable {
+class AttackableGameObject : public GameObject {
 protected:
 	int combatAttack;
 	int combatDefense;
-	int combatRange; // An attackable can attack its target only when target is in this range.
+	int combatRange; // An attackable game object can attack its target only when target is in this range.
 	int health;
 	
 public:
+	/**
+	Default constructor.
+	*/
+	AttackableGameObject();
+	
+	/**
+	Creates an attackable with the given id.
+	*/
+	AttackableGameObject(UID id);
+
+	/**
+	Creates an attackable with the given id.
+	*/
+	AttackableGameObject(int att, int def, int range, int heal);
+
 	/**
 	Returns the attack strength of this object.
 	@return The attack strength of this object.
@@ -68,5 +84,5 @@ public:
 	@param attacker The attackable object that initiated the attack.
 	@return Health of this unit after taking damage from the attack.
 	*/
-	int take_damage(Attackable* attacker);
+	int take_damage(AttackableGameObject* attacker);
 };

@@ -96,7 +96,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/SunNet;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SourceDir)..\packages\Assimp.3.0.0\build\native\include;$(SourceDir)..\packages\nupengl.core.redist.0.1.0.1;$(SourceDir)..\packages\nupengl.core.0.1.0.1;$(SolutionDir)/SunNet;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link />
@@ -132,7 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="attackable.h" />
+    <ClInclude Include="attackable_game_object.h" />
     <ClInclude Include="city.h" />
     <ClInclude Include="city_update.h" />
     <ClInclude Include="drawable.h" />
@@ -165,8 +165,8 @@
     <ClCompile Include="player.cpp" />
     <ClCompile Include="player_update.cpp" />
     <ClCompile Include="slot.cpp" />
-    <ClCompile Include="attackable.cpp" />
     <ClCompile Include="slot_update.cpp" />
+    <ClCompile Include="attackable_game_object.cpp" />
     <ClCompile Include="unit.cpp" />
     <ClCompile Include="unit_sample.cpp" />
   </ItemGroup>
