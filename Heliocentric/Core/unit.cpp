@@ -61,6 +61,7 @@ void Unit::handle_out_of_range(AttackableGameObject * opponent)
 	if (currentCommand == attack) {
 		set_destination(opponent);
 		do_move();
+		currentCommand = attack;
 	}
 }
 
