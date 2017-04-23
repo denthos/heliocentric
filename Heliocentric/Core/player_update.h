@@ -3,10 +3,9 @@
 #include "identifiable.h"
 #include "player.h"
 
-struct PlayerUpdate {
+class PlayerUpdate {
+public:
 	UID id;
 
-	void apply(Player & player) {
-
-	}
+	void apply(Player* player);
 };

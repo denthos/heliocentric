@@ -280,26 +280,26 @@ void Client::clean()
 }
 
 void Client::playerUpdateHandler(PlayerUpdate * update) {
-	update->apply(*playerMap[update->id]);
+	update->apply(playerMap[update->id]);
 }
 
 void Client::unitUpdateHandler(UnitUpdate * update) {
-	update->apply(*unitMap[update->id]);
+	update->apply(unitMap[update->id]);
 	// update octree
 }
 
 void Client::cityUpdateHandler(CityUpdate * update) {
-	update->apply(*cityMap[update->id]);
+	update->apply(cityMap[update->id]);
 	// update octree
 }
 
 void Client::planetUpdateHandler(PlanetUpdate * update) {
-	update->apply(*planetMap[update->id]);
+	update->apply(planetMap[update->id]);
 	// update octree
 }
 
 void Client::slotUpdateHandler(SlotUpdate * update) {
-	update->apply(*slotMap[update->id]);
+	update->apply(slotMap[update->id]);
 	// update octree
 }
 

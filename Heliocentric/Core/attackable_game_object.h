@@ -47,13 +47,21 @@ protected:
 
 public:
 
-	AttackableGameObject() {}
+
+	/**
+	Default constructor.
+	*/
+	AttackableGameObject() {};
+	
+	/**
+	Creates an attackable with the given id.
+	*/
+	AttackableGameObject(UID id);
 
 	/**
 	Creates an attackable with the given id.
 	*/
-	AttackableGameObject(UID id) : GameObject(id) {}
-
+	AttackableGameObject(int att, int def, int range, int heal);
 
 	/**
 	Returns the attack strength of this object.
@@ -117,3 +125,4 @@ public:
 	*/
 	void do_attack(AttackableGameObject* target);
 };
+

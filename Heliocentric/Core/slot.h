@@ -5,16 +5,14 @@
 #include <vector>
 #include <iostream>
 
-struct SlotUpdate;
-//class Planet;
+class SlotUpdate;
 
 class Slot : public GameObject {
 public:
 	friend SlotUpdate;
-	Slot(UID, glm::vec3);
+	Slot(UID id, glm::vec3 pos);
 	bool is_occupied();
 
 private:
-	//Planet* planet;
 	//std::list<Resource> resources;
 };

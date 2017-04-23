@@ -3,7 +3,6 @@
 @brief A library containing all general utility methods.
 */
 #pragma once
-#include <glm/glm.hpp>
 #include <iostream>
 #include <string>
 
