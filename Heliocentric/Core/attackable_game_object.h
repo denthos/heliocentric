@@ -15,17 +15,15 @@ protected:
 	int combatDefense;
 	int combatRange; // An attackable game object can attack its target only when target is in this range.
 	int health;
-	
-	/**
-	Performs a single attack on the target if in range.
-	@param Target to attack.
-	@param Whether or not the caller initiated the attack.
-	@return Whether or not the target is still alive after the attack.
-	*/
-	bool attack_helper(AttackableGameObject* target, bool is_aggressor);
 
 
 	/** Combat Hooks **/
+
+	/**
+	Hook that allows defender to react after being attacked.
+	@param The attacking opponent
+	*/
+	virtual void handle_counter(AttackableGameObject* attacker) {};
 
 	/**
 	Hook for handling when an initiated attack fails because the opponent

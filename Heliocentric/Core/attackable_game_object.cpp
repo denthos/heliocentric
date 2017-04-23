@@ -1,21 +1,5 @@
 #include "attackable_game_object.h"
 
-bool AttackableGameObject::attack_helper(AttackableGameObject * target, bool is_aggressor)
-{
-	if (glm::distance(this->position, target->get_position()) > (float) this->combatRange) {
-		// Delegate out of range handling only when the caller sought out the fight.
-		if (is_aggressor) { handle_out_of_range(target); }
-	}
-	else {
-		target->take_damage(this);
-		if (target->health <= 0) {
-			target->handle_defeat(target);
-			return true;
-		}
-		return false;
-	}
-
-}
 
 int AttackableGameObject::get_combat_attack() {
 	return this->combatAttack;
@@ -59,8 +43,34 @@ void AttackableGameObject::do_attack(AttackableGameObject * target)
 	Lib::assertTrue(target != this, "Attackable cannot attack itself.");
 	Lib::assertTrue(target->player != this->player, "Player cannot attack their own attackables.");
 
-	bool target_dead = attack_helper(target, true), aggressor_dead = target->attack_helper(this, false);
-	if (target_dead != aggressor_dead) {
-		(target_dead ? this : target)->handle_victory(target_dead ? target : this);
+	float distance = glm::distance(this->position, target->get_position());
+	bool target_is_dead = false, this_is_dead = false;
+
+	if (glm::distance(this->position, target->get_position()) <= (float) this->combatRange) {
+		// Target is within range.
+
+		target->take_damage(this);
+
+		if (target->health <= 0) {
+			target->handle_defeat(this);
+			target_is_dead = true;
+		}
+		else {
+			target->handle_counter(this);
+		}
+
+		if (this->health <= 0) {
+			this->handle_defeat(target);
+			this_is_dead = true;
+		}
+		if (target_is_dead != this_is_dead) {
+			// Someone is still alive -- they are the victor. 
+			(target_is_dead ? this : target)->handle_victory((target_is_dead) ? target : this);
+		}
 	}
+	else {
+		// Target is out of range.
+		this->handle_out_of_range(target);
+	}
+
 }
