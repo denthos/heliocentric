@@ -62,7 +62,7 @@ public:
 	Tells the unit to attack the target.
 	@param The target that this unit is attacking.
 	*/
-	void set_attack_target(AttackableGameObject* target);
+	void set_combat_target(AttackableGameObject* target);
 
 
 protected:

@@ -43,7 +43,7 @@ int Unit::set_movmennt_speed_max(int movementSpeedMax) {
 	return this->movementSpeedMax;
 }
 
-void Unit::set_attack_target(AttackableGameObject* target) {
+void Unit::set_combat_target(AttackableGameObject* target) {
 	this->target = target;
 	currentCommand = attack;
 }
