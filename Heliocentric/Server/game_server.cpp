@@ -20,7 +20,7 @@ void GameServer::run() {
 		// Uncomment to force each tick run longer than expected.
 		//while (std::clock() - start_time < 2 * tick_duration);
 
-		while (tick_elapsed_time = std::clock() - tick_start_time < tick_duration);
+		while ((tick_elapsed_time = std::clock() - tick_start_time) < tick_duration);
 		if (tick_elapsed_time > tick_duration)
 			Lib::LOG_WARN("Tick processing took ", tick_elapsed_time - tick_duration, "ms longer than expected");
 	}

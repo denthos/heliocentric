@@ -11,8 +11,10 @@ class PlanetUpdate;
 class Planet : public GameObject {
 public:
 	friend PlanetUpdate;
-	Planet();
-	Planet(std::string planet_name, std::unordered_map<UID, Slot*>);
+
+	Planet(glm::vec3 position, std::string planet_name, std::unordered_map<UID, Slot*>);
+	Planet(UID id, glm::vec3 position, std::string planet_name, std::unordered_map<UID, Slot*>);
+
 	std::unordered_map<UID, Slot*> get_slots();
 	Slot* get_slot(UID);
 	bool check_occupancy();

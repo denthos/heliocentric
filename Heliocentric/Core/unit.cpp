@@ -1,5 +1,11 @@
 #include "unit.h"
 
+Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
+	AttackableGameObject(pos, owner, att, def, range, heal) {}
+
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
+	AttackableGameObject(id, pos, owner, att, def, range, heal) {}
+
 void Unit::update() {
 	switch (currentCommand) {
 	case idle:
@@ -51,7 +57,7 @@ void Unit::set_combat_target(AttackableGameObject* target) {
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
 	float speed = fmin((float) movementSpeedMax, glm::distance(*destination, position));
-	position = position + (glm::normalize(*destination - position) * speed);
+	position += glm::normalize(*destination - position) * speed;
 	return position;
 }
 

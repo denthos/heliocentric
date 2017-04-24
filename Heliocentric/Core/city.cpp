@@ -2,10 +2,12 @@
 #include <iostream>
 #include <string>
 
-City::City(int att, int def, int range, int heal, int pr, int pop, Slot* assigned_slot) :
-	AttackableGameObject(att, def, range, heal), production(pr), population(pop), slot(assigned_slot) {
-	position = slot->get_position();
-}
+City::City(Player* owner, int att, int def, int range, int heal, int pr, int pop, Slot* assigned_slot) :
+	AttackableGameObject(assigned_slot->get_position(), owner, att, def, range, heal), production(pr), population(pop), slot(assigned_slot) {}
+
+
+City::City(UID id, Player* owner, int att, int def, int range, int heal, int pr, int pop, Slot* assigned_slot) :
+	AttackableGameObject(id, assigned_slot->get_position(), owner, att, def, range, heal), production(pr), population(pop), slot(assigned_slot) {}
 
 int City::get_population() {
 	return population;

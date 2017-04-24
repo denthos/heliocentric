@@ -19,10 +19,15 @@ protected:
 	glm::vec3 position;
 
 public:
-	GameObject();
-	GameObject(UID id);
-	GameObject(UID id, glm::vec3 pos);
+
+	GameObject(glm::vec3 pos);
+	GameObject(glm::vec3 pos, Player* assigned_player);
+
+	/* If we are specifying the ID, we should have all information */
 	GameObject(UID id, glm::vec3 pos, Player* assigned_player);
+
+	/* Some game objects dont have players, like planets (should they be another class? maybe) */
+	GameObject(UID id, glm::vec3 pos);
 
 	/**
 	Returns the player who owns this game object.

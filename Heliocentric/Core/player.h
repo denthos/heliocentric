@@ -13,7 +13,10 @@ class PlayerUpdate;
 class Player : public Identifiable {
 public:
 	friend PlayerUpdate;
+
+	Player(std::string player_name);
 	Player(std::string player_name, UID id);
+
 	std::string get_name();
 	void set_name(std::string new_name);
 	void acquire_object(GameObject* object);

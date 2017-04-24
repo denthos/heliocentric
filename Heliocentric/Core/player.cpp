@@ -5,6 +5,13 @@
 #include <iostream>
 #include <string>
 
+Player::Player(std::string player_name) : Identifiable(), name(player_name) {
+	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
+	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
+	owned_objects[std::type_index(typeid(City))] = std::unordered_map<unsigned int, GameObject*>();
+	owned_objects[std::type_index(typeid(Slot))] = std::unordered_map<unsigned int, GameObject*>();
+}
+
 Player::Player(std::string player_name, UID id) : Identifiable(id), name(player_name) {
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
 	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
