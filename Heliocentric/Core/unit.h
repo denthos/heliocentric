@@ -16,8 +16,8 @@ public:
 
 	friend UnitUpdate;
 
-	Unit() {};
-	Unit(UID id) : AttackableGameObject(id) {};
+	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
+	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 
 	/**
 	Called continuously by server to update current state of the unit.

@@ -18,19 +18,12 @@ protected:
 	
 public:
 	/**
-	Default constructor.
+	Creates an attackable 
 	*/
-	AttackableGameObject();
-	
-	/**
-	Creates an attackable with the given id.
-	*/
-	AttackableGameObject(UID id);
+	AttackableGameObject(glm::vec3 position, Player* player, int att, int def, int range, int heal);
 
-	/**
-	Creates an attackable with the given id.
-	*/
-	AttackableGameObject(int att, int def, int range, int heal);
+
+	AttackableGameObject(UID id, glm::vec3 position, Player* player, int att, int def, int range, int heal);
 
 	/**
 	Returns the attack strength of this object.

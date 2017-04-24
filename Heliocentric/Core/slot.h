@@ -10,7 +10,10 @@ class SlotUpdate;
 class Slot : public GameObject {
 public:
 	friend SlotUpdate;
-	Slot(UID id, glm::vec3 pos);
+
+	Slot(glm::vec3 pos);
+	Slot(UID id,glm::vec3 pos);
+
 	bool is_occupied();
 
 private:

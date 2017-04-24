@@ -1,5 +1,11 @@
 #include "unit.h"
 
+Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
+	AttackableGameObject(pos, owner, att, def, range, heal) {}
+
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
+	AttackableGameObject(id, pos, owner, att, def, range, heal) {}
+
 void Unit::update() {
 	switch (currentCommand) {
 	case idle:
