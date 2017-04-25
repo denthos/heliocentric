@@ -1,13 +1,20 @@
 #include "ini_parser.h"
 
+#include <unordered_map>
+
 namespace Lib {
 
 	INIParser& INIParser::getInstance(std::string fname) {
-		static INIParser parser(fname);
-		return parser;
+		static std::unordered_map<std::string, INIParser> parsers;
+		// Functions used here are chosen carefully to avoid requiring
+		// public constructors
+		if (parsers.find(fname) == parsers.end()) {
+			parsers.insert(std::make_pair(fname, INIParser(fname)));
+		}
+		return parsers.at(fname);
 	}
 
-	bool INIParser::reload() {
+	void INIParser::reload() {
 		std::ifstream myfile;
 		myfile.open(file_name.c_str());
 
@@ -26,21 +33,27 @@ namespace Lib {
 				}
 			}
 			myfile.close();
-			return true;
 		}
-
-		return false;
+		else {
+			std::string message("Could not open config file: ");
+			message.append(file_name);
+			throw std::runtime_error(message);
+		}
 	}
 
-	bool INIParser::get_value(std::string key, std::string& ret) {
+	std::string INIParser::get(std::string key) {
 		std::unordered_map<std::string, std::string>::iterator iter = settings.find(key);
 
 		if (iter != settings.end()) {
-			ret = iter->second;
-			return true;
+			return iter->second;
 		}
-
-		return false;
+		else {
+			std::string message("Could not find value for key: ");
+			message.append(key);
+			message.append(", in file: ");
+			message.append(file_name);
+			throw std::runtime_error(message);
+		}
 	}
 
 	void INIParser::update_value(std::string key, std::string value) {

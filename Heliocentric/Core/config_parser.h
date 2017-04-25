@@ -18,7 +18,7 @@ namespace Lib {
 		~ConfigParser() {};
 
 		/* Handles loading for an expected configuration format. */
-		virtual bool reload() = 0;
+		virtual void reload() = 0;
 
 		/* getters
 		*
@@ -28,11 +28,38 @@ namespace Lib {
 		For example, if the key "ScreenWidth" is set to "hello, world",
 		`get_value("ScreenWidth", ret)` will set `ret` to 0.
 		*/
-		virtual bool get_value(std::string key, std::string& ret) = 0;
-		bool get_value(std::string key, bool& ret);
-		bool get_value(std::string key, int& ret);
-		bool get_value(std::string key, float& ret);
-		bool get_value(std::string key, double& ret);
+
+		template<typename T>
+		T get(std::string key);
+
+		template<>
+		std::string get(std::string key) {
+			return this->get(key);
+		}
+
+		template<>
+		bool get(std::string key) {
+			std::string value = this->get(key);
+			return (value == "true") ? true : false;
+		}
+
+		template<>
+		int get(std::string key) {
+			std::string value = this->get(key);
+			return std::atoi(value.c_str());
+		}
+
+		template<>
+		float get(std::string key) {
+			std::string value = this->get(key);
+			return (float)std::atof(value.c_str());
+		}
+
+		template<>
+		double get(std::string key) {
+			std::string value = this->get(key);
+			return std::atof(value.c_str());
+		}
 
 		/* setters */
 		virtual void update_value(std::string key, std::string value) = 0;
@@ -43,6 +70,7 @@ namespace Lib {
 
 
 	protected:
+		virtual std::string get(std::string) = 0;
 		std::string file_name;
 	};
 }

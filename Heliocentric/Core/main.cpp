@@ -9,8 +9,8 @@ void config_test() {
 
 	/* Retrieve an int from the config file. */
 	int value = 600;  // Set 600 as the default.
-	bool exists = config.get_value("ScreenWidth", value);
-	assert(exists && value == 800);
+	value = config.get<int>("ScreenWidth");
+	assert(value == 800);
 }
 
 int main() {

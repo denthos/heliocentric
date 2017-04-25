@@ -32,8 +32,7 @@ namespace Lib {
 
 	template <typename... TLogItems>
 	void LogFunc(int level, const char* file, int line, const TLogItems&... args) {
-		int log_level;
-		INIParser::getInstance().get_value("loglevel", log_level);
+		int log_level = INIParser::getInstance().get<int>("loglevel");
 		if (level < log_level) {
 			return;
 		}

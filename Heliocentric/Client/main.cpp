@@ -5,10 +5,13 @@
 
 #include "client.h"
 #include "logging.h"
+#include "ini_parser.h"
 
 int main() {
+	int width = Lib::INIParser::getInstance("config.ini").get<int>("ScreenWidth");
+	int height = Lib::INIParser::getInstance("config.ini").get<int>("ScreenHeight");
 
-	GLFWwindow * window = Client::createWindow(1366, 768);
+	GLFWwindow * window = Client::createWindow(width, height);
 
 	if (!window) {
 		return 1;
