@@ -9,12 +9,20 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Networking">
+      <UniqueIdentifier>{08d61a7f-8759-4529-8105-e71670604348}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility Library">
+      <UniqueIdentifier>{8356a21f-d01a-4ed3-9a52-78603aa51687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Updates">
+      <UniqueIdentifier>{bf61f581-def7-422a-9ba7-1bb30df4685b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="attackable_game_object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="city.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -33,20 +41,57 @@
     <ClInclude Include="unit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="attackable.h">
+    <ClInclude Include="drawable.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="identifiable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_channels.h">
+      <Filter>Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="config_parser.h">
+      <Filter>Utility Library</Filter>
+    </ClInclude>
+    <ClInclude Include="ini_parser.h">
+      <Filter>Utility Library</Filter>
     </ClInclude>
     <ClInclude Include="lib.h">
-      <Filter>Header Files</Filter>
+      <Filter>Utility Library</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigParser.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="logging.h">
+      <Filter>Utility Library</Filter>
     </ClInclude>
-    <ClInclude Include="INIParser.h">
+    <ClInclude Include="game_object_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="city_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="planet_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="player_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="slot_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="locked_item.h">
+      <Filter>Utility Library</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_sample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+    <ClInclude Include="attackable_game_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClCompile Include="city.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -65,23 +110,51 @@
     <ClCompile Include="unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="attackable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="unit_sample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="game_channels.cpp">
+      <Filter>Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="ini_parser.cpp">
+      <Filter>Utility Library</Filter>
+    </ClCompile>
+    <ClCompile Include="config_parser.cpp">
+      <Filter>Utility Library</Filter>
+    </ClCompile>
     <ClCompile Include="lib.cpp">
-	  <Filter>Source Files</Filter>
-	</ClCompile>
-    <ClCompile Include="ConfigParser.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Utility Library</Filter>
     </ClCompile>
-    <ClCompile Include="INIParser.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="city_update.cpp">
+      <Filter>Updates</Filter>
     </ClCompile>
-    <ClCompile Include="test_iniparser.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="game_object_update.cpp">
+      <Filter>Updates</Filter>
     </ClCompile>
+    <ClCompile Include="planet_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="player_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="slot_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="logging.cpp">
+      <Filter>Utility Library</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="..\config.ini" />
+    <None Include="ConfigTemplate.ini" />
   </ItemGroup>
 </Project>

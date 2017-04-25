@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.obj
+!Heliocentric/models/*/*.obj
 
 # Precompiled Headers
 *.gch
@@ -42,3 +43,13 @@ Release/
 
 # Documentation
 docs/
+
+# Logs
+*.log
+
+# User project files
+*.vcxproj.user
+
+# vim files
+*.sw*
+*~

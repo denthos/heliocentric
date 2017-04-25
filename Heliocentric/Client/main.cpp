@@ -2,39 +2,34 @@
 #include <GL\GL.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <unordered_map>
 
 #include "client.h"
+#include "logging.h"
+#include "ini_parser.h"
 
 int main() {
+	int width = Lib::INIParser::getInstance("config.ini").get<int>("ScreenWidth");
+	int height = Lib::INIParser::getInstance("config.ini").get<int>("ScreenHeight");
 
-	GLFWwindow * window = Client::createWindow(1366, 768);
+	Client client;
 
-	if (!window) {
-		return 1;
-	}
-
-	fprintf(stdout, "Supported OpenGL version: %s\n", glGetString(GL_VERSION));
+	Lib::LOG_DEBUG("Supported OpenGL version: ", glGetString(GL_VERSION));
 #ifdef GL_SHADING_LANGUAGE_VERSION
-	fprintf(stdout, "Supported GLSL version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	Lib::LOG_DEBUG("Supported GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
-	fprintf(stdout, "Glew version: %s\n", glewGetString(GLEW_VERSION));
-	fprintf(stdout, "Renderer: %s\n", glGetString(GL_RENDERER));
+	Lib::LOG_DEBUG("Glew version: ", glewGetString(GLEW_VERSION));
+	Lib::LOG_DEBUG("Renderer: ", glGetString(GL_RENDERER));
 
 	// Set up callback functions
-	glfwSetErrorCallback(Client::errorCallback);
-	glfwSetFramebufferSizeCallback(window, Client::resizeCallback);
-	glfwSetKeyCallback(window, Client::keyCallback);
-	glfwSetMouseButtonCallback(window, Client::mouseButtonCallback);
-	glfwSetCursorPosCallback(window, Client::mouseCursorCallback);
-	glfwSetScrollCallback(window, Client::mouseWheelCallback);
 
-	Client::initialize();
-
-	while (!glfwWindowShouldClose(window)) {
-		Client::display(window);
-		Client::update();
+	while (client.isRunning()) {
+		client.display();
+		client.update();
 	}
 
 	glfwTerminate();
+
 	return 0;
 }
+

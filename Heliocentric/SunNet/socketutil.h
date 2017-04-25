@@ -39,7 +39,7 @@ typedef struct pollfd POLL_DESCRIPTOR;
 typedef nfds_t NUM_POLL_DESCRIPTORS;
 #endif
 
-namespace Sunnet {
+namespace SunNet {
 
 	/**
 	Initializes the OS-specific sockets API. Must be called before any other

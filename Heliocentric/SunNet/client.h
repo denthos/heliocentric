@@ -4,7 +4,7 @@
 #include <vector>
 #include <thread>
 
-namespace Sunnet {
+namespace SunNet {
 	enum ClientState {
 		CLIENT_INIT,
 		CLIENT_CONNECTED
@@ -13,9 +13,9 @@ namespace Sunnet {
 	template <class TSocketConnection>
 	class Client {
 	private:
-		std::shared_ptr<SocketConnection> connection;
 		std::thread poll_thread;
 		PollService poll_service;
+
 		ClientState state;
 
 		void state_transition(ClientState from, ClientState to) {
@@ -26,6 +26,9 @@ namespace Sunnet {
 			this->state = to;
 		}
 
+	protected:
+		std::shared_ptr<SocketConnection> connection;
+
 	public:
 		template <class ... ArgTypes>
 		Client(int poll_timeout, ArgTypes ... args) : state(CLIENT_INIT) {
@@ -34,14 +37,22 @@ namespace Sunnet {
 		}
 
 		virtual ~Client() {
+			/* Only formally disconnect if we are connected */
 			if (this->state == CLIENT_CONNECTED) {
 				this->disconnect();
+			}
+
+			/* Otherwise, just reset the connection. */
+			else {
+				this->connection.reset();
 			}
 		}
 
 		void connect(std::string address, std::string port) {
-			this->state_transition(CLIENT_INIT, CLIENT_CONNECTED);
+			/* Connect. If the connection succeeds, change state */
 			this->connection->connect(address, port);
+
+			this->state_transition(CLIENT_INIT, CLIENT_CONNECTED);
 			this->poll_service.add_socket(this->connection);
 			this->poll_thread = std::thread(&Client<TSocketConnection>::poll, this);
 		}
@@ -88,7 +99,6 @@ namespace Sunnet {
 		virtual void handle_client_error() {}
 		virtual void handle_client_ready_to_read() {}
 		virtual void handle_poll_timeout() {}
-		virtual void handle_connection_disconnect() {}
 
 		class ClientException : public std::exception {};
 		class InvalidStateTransitionException : public ClientException {};

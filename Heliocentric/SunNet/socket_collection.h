@@ -2,7 +2,7 @@
 #include "socket_connection.hpp"
 #include <unordered_set>
 
-namespace Sunnet {
+namespace SunNet {
 	typedef std::unordered_set<SocketConnection_p, SocketConnection_p_hash> SocketCollection;
 	typedef std::shared_ptr<SocketCollection> SocketCollection_p;
 

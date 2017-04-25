@@ -1,16 +1,22 @@
 #pragma once
 
-#include "attackable.h"
+#include "attackable_game_object.h"
 #include "slot.h"
 #include "player.h"
-class City : public Attackable {
+
+class CityUpdate;
+
+class City : public AttackableGameObject {
 public:
-	City(int att, int arm, int heal, int pr, int pop, Slot* assigned_slot);
+	friend CityUpdate;
+
+	City(Player* owner, int att, int def, int range, int heal, int pr, int pop, Slot* assigned_slot);
+	City(UID id, Player* owner, int att, int def, int range, int heal, int pr, int pop, Slot* assigned_slot);
+
 	int get_population();
 	void set_population(int new_pop);
 	Slot* get_slot();
-	void print();
-	std::ostream& operator<<(std::ostream&);
+	glm::vec3 get_position();
 
 private:
 	int production;

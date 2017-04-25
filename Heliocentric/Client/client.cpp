@@ -1,18 +1,42 @@
 #include "client.h"
 
-#include <glm\gtc\matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <functional>
 #include <stdio.h>
 #include <soil.h>
 
-#include "shader_utils.h"
-#include "sphere.h"
+#include "glfw_callback_handler.h"
+#include "game_channels.h"
+#include "Planet.h"
+#include "sphere_mesh.h"
+#include "transformation.h"
+#include "orbit.h"
+#include "model.h"
 
-int Client::width, Client::height;
-float Client::fov = 45.0f, Client::nearPlane = 0.5f, Client::farPlane = 10000.0f;
-glm::mat4 Client::perspectiveMatrix, Client::viewMatrix;
-glm::vec3 Client::camPos(0.0f, 0.f, 20.0f), Client::camLookAt(0.0f, 0.0f, 0.0f), Client::camUp(0.0f, 1.0f, 0.0f);
-std::string Client::windowTitle("Heliocentric");
 
+#define WINDOW_TITLE "Heliocentric"
+#define DEFAULT_WIDTH 1366
+#define DEFAULT_HEIGHT 768
+#define VERT_SHADER "Shaders/shader.vert"
+#define FRAG_SHADER "Shaders/shader.frag"
+
+#define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
+#define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
+
+#define EARTH_TEXTURE "Textures/earth.jpg"
+#define SUN_TEXTURE "Textures/sun.jpg"
+
+#define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+
+Model rocket;
+PlanetModel * earth;
+PlanetModel  * sun;
+
+Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
+Shader* textureShader;
+//don't forget to clean up afterwards
 
 GLuint defaultShader;
 
@@ -26,11 +50,78 @@ bool middleMouseDown = false;
 #define ORBITAL_CAMERA 3
 unsigned char selectedControlScheme = FREE_CAMERA;
 
-GLFWwindow * Client::createWindow(int width, int height) {
+Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO config*/) {
+	// TODO: Replace these hardcoded constants with values read from config file
+	windowTitle = WINDOW_TITLE;
+	createWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_CULL_FACE);
+	glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
+
+	glShadeModel(GL_SMOOTH);
+
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_TEXTURE_2D);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+
+	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000.0f, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+	resizeCallback(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+	shader = new Shader(VERT_SHADER, FRAG_SHADER);
+	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
+
+	rocket = Model(ROCKET_MODEL);
+	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
+	earth = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(50.0f, 0.06f));
+	sun = new PlanetModel(Texture(SUN_TEXTURE), 15.0f, Orbit(0.0f, 0.0f));
+
+	// Set up SunNet client and channel callbacks
+	initializeChannels();
+
+	this->subscribe<PlayerUpdate>(std::bind(&Client::playerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<UnitUpdate>(std::bind(&Client::unitUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+
+	std::string address("localhost");
+	std::string port("9876");
+	try {
+		this->connect(address, port);
+	}
+	catch (const SunNet::ConnectException & ex) {
+		fprintf(stderr, "Caught connect exception\n");
+	}
+	//this->connect(std::string address, std::string port);
+	//this->channeled_send<UnitUpdate>(UnitUpdate*);
+
+	// TODO
+}
+
+Client::~Client() {
+	delete shader;
+	delete textureShader;
+
+	delete earth;
+	delete sun;
+	delete camera;
+
+	GLFWCallbackHandler::remove(window, this);
+}
+
+bool Client::isRunning() {
+	return !glfwWindowShouldClose(window);
+}
+
+void Client::createWindow(int width, int height) {
 	if (!glfwInit()) {
 		fprintf(stderr, "Could not initialize GLFW\n");
-		return NULL;
+		return;
 	}
 
 #ifdef __APPLE__
@@ -40,12 +131,11 @@ GLFWwindow * Client::createWindow(int width, int height) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
 
-	GLFWwindow * window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
+	window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
 
 	if (!window) {
 		fprintf(stderr, "Could not create GLFW window\n");
-		glfwTerminate();
-		return NULL;
+		return;
 	}
 
 	glfwMakeContextCurrent(window);
@@ -58,62 +148,24 @@ GLFWwindow * Client::createWindow(int width, int height) {
 #ifndef __APPLE__
 	if (glewErr != GLEW_OK) {
 		fprintf(stderr, "Glew failed to initialize: %s\n", glewGetErrorString(glewErr));
-		glfwTerminate();
-		return NULL;
+		return;
 	}
 #endif
 
-	Client::resizeCallback(window, width, height);
+	resizeCallback(width, height);
 
-	return window;
+	GLFWCallbackHandler::add(window, this);
 }
 
-void Client::initialize() {
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glEnable(GL_CULL_FACE);
-	glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
-
-	viewMatrix = glm::lookAt(camPos, camLookAt, camUp);
-
-	compileShaders("Shaders/shader.vert", "Shaders/shader.frag", &defaultShader);
-
-	// load earth texture
-	int earthTextureWidth, earthTextureHeight;
-	unsigned char * earthTextureImage = SOIL_load_image("Textures/earth.jpg", &earthTextureWidth, &earthTextureHeight, 0, SOIL_LOAD_RGB);
-	GLuint earthTexture;
-	glGenTextures(1, &earthTexture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, earthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, earthTextureWidth, earthTextureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, earthTextureImage);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// free earth texture resources
-	SOIL_free_image_data(earthTextureImage);
-
-	// load sun texture
-	int sunTextureWidth, sunTextureHeight;
-	unsigned char * sunTextureImage = SOIL_load_image("Textures/sun.jpg", &sunTextureWidth, &sunTextureHeight, 0, SOIL_LOAD_RGB);
-	GLuint sunTexture;
-	glGenTextures(1, &sunTexture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sunTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, sunTextureWidth, sunTextureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, sunTextureImage);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	// free sun texture resources
-	SOIL_free_image_data(sunTextureImage);
-}
-
-void Client::display(GLFWwindow * window) {
-	// Set view matrix
-	viewMatrix = glm::lookAt(camPos, camLookAt, camUp);
-
+void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	camera->calculateViewMatrix();
+	
+	earth->Draw(*textureShader, *camera);
+	rocket.Draw(*textureShader, *camera);
+	sun->Draw(*textureShader, *camera);
 
 	glfwSwapBuffers(window);
 
@@ -121,27 +173,26 @@ void Client::display(GLFWwindow * window) {
 }
 
 void Client::update() {
-
+	sun->Update(glm::mat4(1.0f));
+	earth->Update(glm::mat4(1.0f));
+	rocket.Update(glm::mat4(1.0f));
 }
 
 void Client::errorCallback(int error, const char * description) {
 	fprintf(stderr, "OpenGL error occurred: %s", description);
 }
 
-void Client::resizeCallback(GLFWwindow * window, int width, int height) {
-	
-	Client::width = width;
-	Client::height = height;
-
-	glViewport(0, 0, width, height);
-
-	if (height > 0) {
-		Client::perspectiveMatrix = glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
+void Client::resizeCallback(int width, int height) {
+	if (camera) {
+		camera->width = width;
+		camera->height = height;
+		camera->calculatePerspectiveMatrix();
 	}
 
+	glViewport(0, 0, width, height);
 }
 
-void Client::keyCallback(GLFWwindow * window, int key, int scancode, int action, int mods) {
+void Client::keyCallback(int key, int scancode, int action, int mods) {
 
 	if (action == GLFW_PRESS) {
 		switch (key) {
@@ -152,12 +203,15 @@ void Client::keyCallback(GLFWwindow * window, int key, int scancode, int action,
 	}
 	else if (action == GLFW_RELEASE) {
 		switch (key) {
-
+		case(GLFW_KEY_ESCAPE):
+			break;
+		default:
+			break;
 		}
 	}
 }
 
-void Client::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods) {
+void Client::mouseButtonCallback(int button, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		double x, y;
 		glfwGetCursorPos(window, &x, &y);
@@ -193,32 +247,47 @@ void Client::mouseButtonCallback(GLFWwindow * window, int button, int action, in
 	}
 }
 
-void Client::mouseCursorCallback(GLFWwindow * window, double x, double y) {
-
-	if (leftMouseDown) {
-		// move selected control point
-		glm::vec3 deltaY = glm::normalize(camUp) * (float)(lastMousePos.second - y) / 100.0f;
-		glm::vec3 deltaX = glm::normalize(glm::cross(camPos, camUp)) * (float)(lastMousePos.first - x) / 100.0f;
-		glm::vec3 delta = deltaY + deltaX;
-
-
-		lastMousePos = std::make_pair(x, y);
-	}
+void Client::mouseCursorCallback(double x, double y) {
 	if (rightMouseDown) {
 		float angle;
 		// Perform horizontal (y-axis) rotation
 		angle = (float)(lastMousePos.first - x) / 100.0f;
-		camPos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camPos, 1.0f));
-		camUp = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camUp, 1.0f));
+		camera->position = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camera->position, 1.0f));
+		camera->up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camera->up, 1.0f));
 		//Now rotate vertically based on current orientation
 		angle = (float)(y - lastMousePos.second) / 100.0f;
-		glm::vec3 axis = glm::cross((camPos - camLookAt), camUp);
-		camPos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camPos, 1.0f));
-		camUp = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camUp, 1.0f));
+		glm::vec3 axis = glm::cross((camera->position - camera->target), camera->up);
+		camera->position = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camera->position, 1.0f));
+		camera->up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camera->up, 1.0f));
 		lastMousePos = std::make_pair(x, y);
 	}
 }
 
-void Client::mouseWheelCallback(GLFWwindow * window, double x, double y) {
-	camPos = glm::vec3(glm::translate(glm::mat4(1.0f), camPos * (float)y * -0.05f) * glm::vec4(camPos, 1.0f));
+void Client::mouseWheelCallback(double x, double y) {
+	camera->position = glm::vec3(glm::translate(glm::mat4(1.0f), camera->position * (float)y * -0.05f) * glm::vec4(camera->position, 1.0f));
 }
+
+void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
+	update->apply(playerMap[update->id]);
+}
+
+void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
+	update->apply(unitMap[update->id]);
+	// update octree
+}
+
+void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
+	update->apply(cityMap[update->id]);
+	// update octree
+}
+
+void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
+	update->apply(planetMap[update->id]);
+	// update octree
+}
+
+void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<SlotUpdate> update) {
+	update->apply(slotMap[update->id]);
+	// update octree
+}
+

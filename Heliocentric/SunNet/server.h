@@ -3,8 +3,9 @@
 #include "pollservice.h"
 
 #include <thread>
+#include <mutex>
 
-namespace Sunnet {
+namespace SunNet {
 	enum ServerState {
 		INIT,
 		OPEN,
@@ -15,8 +16,10 @@ namespace Sunnet {
 	class Server {
 	private:
 		SocketConnection_p server_connection;
+
 		PollService poll_service;
 		std::thread poll_thread;
+		std::mutex poll_service_mutex;
 
 		std::string address;
 		std::string port;
@@ -31,6 +34,17 @@ namespace Sunnet {
 			this->state = to;
 		}
 
+	protected:
+		void addToPollService(SocketConnection_p socket) {
+			std::lock_guard<std::mutex> lock(this->poll_service_mutex);
+			this->poll_service.add_socket(socket);
+		}
+
+		void removeFromPollService(SocketConnection_p socket) {
+			std::lock_guard<std::mutex> lock(this->poll_service_mutex);
+			this->poll_service.remove_socket(socket);
+		}
+
 	public:
 		template <class ... ArgType>
 		Server(std::string address, std::string port, int listen_queue_size, int poll_timeout, ArgType ... args) : 
@@ -43,15 +57,23 @@ namespace Sunnet {
 		}
 
 		virtual ~Server() {
+			/* Only formally close if we are serving. */
 			if (this->state == SERVE) {
 				this->close();
+			}
+
+			/* Otherwise, just reset the socket */
+			else {
+				this->server_connection.reset();
 			}
 		}
 
 		void open() {
-			this->state_transition(INIT, OPEN);
+			/* Attempt to bind and listen. Change state if both succeed */
 			this->server_connection->bind(this->port, this->address);
 			this->server_connection->listen(this->listen_queue_size);
+
+			this->state_transition(INIT, OPEN);
 		}
 
 		void serve(int timeout_in_ms) {
@@ -61,6 +83,8 @@ namespace Sunnet {
 
 		void poll() {
 			while (this->state == SERVE) {
+				std::lock_guard<std::mutex> lock(this->poll_service_mutex);
+
 				SocketCollection_p ready_sockets = poll_service.poll();
 
 				if (ready_sockets->size() == 0) {

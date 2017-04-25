@@ -16,5 +16,5 @@ public:
 	@param player The player that built this unit.
 	@param position This unit's position on the map when it's built.
 	*/
-	UnitSample(Player* player, glm::vec3 position);
+	UnitSample(glm::vec3 position, Player* owner);
 };

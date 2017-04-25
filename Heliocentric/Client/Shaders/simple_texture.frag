@@ -1,11 +1,11 @@
 #version 430 core
 
-struct Material {
-    float shininess;
-
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
+layout (std140) uniform material {
+    vec3 m_diffuse;
+    vec3 m_ambient;
+    vec3 m_specular;
+    vec3 m_emissive;
+    float m_shininess;
 }; 
 
 struct PointLight {
@@ -26,7 +26,6 @@ out vec4 color;
 
 uniform vec3 viewPos;
 uniform PointLight pointLight;
-uniform Material material;
 uniform sampler2D ourTexture;
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
@@ -36,18 +35,18 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0f);
     // Specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), material.shininess);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), m_shininess);
     // Attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0f / (light.quadratic * (distance * distance));    
     // Combine results
-    vec3 ambient = light.ambient * material.ambient;
-    vec3 diffuse = light.diffuse * diff * material.diffuse;
-    vec3 specular = light.specular * spec * material.specular;
+    vec3 ambient = light.ambient * m_ambient;
+    vec3 diffuse = light.diffuse * diff * m_diffuse;
+    vec3 specular = light.specular * spec * m_specular;
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse + specular );
 }
 
 void main()

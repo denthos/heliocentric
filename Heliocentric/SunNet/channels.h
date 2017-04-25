@@ -6,7 +6,7 @@
 #include <memory>
 #include <atomic>
 
-namespace Sunnet {
+namespace SunNet {
 	typedef NETWORK_BYTE CHANNEL_ID;
 
 	class ChannelInterface {
@@ -20,14 +20,24 @@ namespace Sunnet {
 	};
 
 	class Channels {
-	public:
-		static std::map<CHANNEL_ID, ChannelInterface*> ids_to_channels;
+	private:
+		static std::map<CHANNEL_ID, std::shared_ptr<ChannelInterface>> ids_to_channels;
 		static std::map<std::type_index, CHANNEL_ID> types_to_ids;
 		static std::atomic<CHANNEL_ID> channel_counter;
+	public:
+
+		template <class TChannelType>
+		static CHANNEL_ID getChannelId() {
+			return types_to_ids.at(typeid(TChannelType));
+		}
+
+		static std::shared_ptr<ChannelInterface> getChannel(CHANNEL_ID id);
+
+		static CHANNEL_ID getNextId() { return channel_counter++; }
 
 		template <class TChannelType>
 		static void addNewChannel() {
-			ChannelInterface* channel = new Channel<TChannelType>();
+			std::shared_ptr<ChannelInterface> channel = std::make_shared<Channel<TChannelType>>();
 			Channels::ids_to_channels[channel->getId()] = channel;
 			Channels::types_to_ids[typeid(TChannelType)] = channel->getId();
 		}
@@ -37,6 +47,6 @@ namespace Sunnet {
 	template <class TData>
 	class Channel : public ChannelInterface {
 	public:
-		Channel() : ChannelInterface(sizeof(TData), Channels::channel_counter++) {}
+		Channel() : ChannelInterface(sizeof(TData), Channels::getNextId()) {}
 	};
 }

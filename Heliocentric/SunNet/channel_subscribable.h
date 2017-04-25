@@ -5,36 +5,52 @@
 #include <set>
 #include "channels.h"
 #include "socket_connection.hpp"
+#include "channel_subscription.h"
+#include "channeled_socket_connection.h"
 
 
-namespace Sunnet {
-	typedef unsigned int SUBSCRIPTION_ID;
-
-	template <class TSubscriptionType>
-	void subscriptionCaster(NETWORK_BYTE* data, std::function<void(TSubscriptionType*)> handler) {
-		TSubscriptionType* obj = reinterpret_cast<TSubscriptionType*>(data);
-		handler(obj);
-	}
-
+namespace SunNet {
 	class ChannelSubscribable {
 	private:
-		static std::atomic<SUBSCRIPTION_ID> subscription_counter;
-		std::unordered_map < CHANNEL_ID, std::set<SUBSCRIPTION_ID>> subscription_ids;
-		std::unordered_map < SUBSCRIPTION_ID, std::function<void(NETWORK_BYTE*)>> subscriptions;
+		std::unordered_map < CHANNEL_ID, std::shared_ptr<ChannelSubscriptionInterface>> subscriptions;
 	public:
-		void handleIncomingMessage(SocketConnection_p socket);
+		void handleIncomingMessage(ChanneledSocketConnection_p socket);
 
 		template <class TSubscriptionType>
-		SUBSCRIPTION_ID subscribe(std::function<void(TSubscriptionType*)> callback) {
-			std::function<void(NETWORK_BYTE*)> callback_func = std::bind(subscriptionCaster<TSubscriptionType>, std::placeholders::_1, callback);
-			CHANNEL_ID channel_id = Channels::types_to_ids[typeid(TSubscriptionType)];
+		SUBSCRIPTION_ID subscribe(std::function<void(ChanneledSocketConnection_p, std::shared_ptr<TSubscriptionType>)> callback) {
+			CHANNEL_ID channel_id = Channels::getChannelId<TSubscriptionType>();
+			std::shared_ptr<ChannelSubscriptionInterface> subscription;
 
-			SUBSCRIPTION_ID sub_id = ChannelSubscribable::subscription_counter++;
-			subscription_ids[channel_id].insert(sub_id);
-			subscriptions[sub_id] = callback_func;
+			auto subscription_iter = this->subscriptions.find(channel_id);
+			if (subscription_iter != this->subscriptions.end()) {
+				subscription = subscription_iter->second;
+			}
+			else {
+				subscription = std::make_shared<ChannelSubscription<TSubscriptionType>>();
+				this->subscriptions[channel_id] = subscription;
+			}
 
-			return sub_id;
+			std::shared_ptr<ChannelSubscription<TSubscriptionType>> typed_subscription = (
+				std::static_pointer_cast<ChannelSubscription<TSubscriptionType>>(subscription)
+			);
+
+			return typed_subscription->subscribe(callback);
 		}
 
+		template <class TSubscriptionType>
+		void unsubscribe(SUBSCRIPTION_ID id) {
+			CHANNEL_ID channel_id = Channels::getChannelId<TSubscriptionType>();
+			std::shared_ptr<ChannelSubscriptionInterface> subscription = this->subscriptions.at(channel_id);
+
+			std::shared_ptr<ChannelSubscription<TSubscriptionType>> typed_subscription = (
+				std::static_pointer_cast<ChannelSubscription<TSubscriptionType>>(subscription);
+			);
+
+			if (typed_subscription->unsubscribe(id)) {
+				this->subscriptions.erase(channel_id);
+			}
+		}
+
+		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) {}
 	};
 }

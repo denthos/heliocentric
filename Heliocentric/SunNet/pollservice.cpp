@@ -3,7 +3,7 @@
 #include <string>
 
 
-namespace Sunnet {
+namespace SunNet {
 
 	PollService::PollService(int timeout) : timeout(timeout) {
 		this->results = std::make_shared<SocketCollection>();
@@ -19,7 +19,7 @@ namespace Sunnet {
 		poll_descriptor.fd = socket->socket_descriptor;
 
 		this->descriptors.push_back(poll_descriptor);
-		this->poll_descriptor_map[socket->socket_descriptor] = std::make_pair(this->descriptors.size() - 1, socket);
+		this->poll_descriptor_map[socket->socket_descriptor] = std::make_pair((int) this->descriptors.size() - 1, socket);
 	}
 
 	void PollService::remove_socket(const SocketConnection_p socket) {

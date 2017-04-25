@@ -1,58 +1,29 @@
 #include "tcp_socket_connection.hpp"
-#include "client.h"
-#include "server.h"
+#include "channeled_client.h"
+#include "channeled_server.h"
 
 #include <memory>
 #include <iostream>
 #include <string>
+#include <cassert>
 
-using namespace Sunnet;
-
-class TestServer : public Server<TCPSocketConnection> {
+class TestServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 public:
 	TestServer(std::string address, std::string port, int queue_size) :
-		Server<TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
+		ChanneledServer<SunNet::TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
 
-	void handle_client_connect(SocketConnection_p client) {
+	void handle_client_connect(SunNet::SocketConnection_p client) {
 		std::cout << "Client connected!" << std::endl;
 	}
 
-	void handle_ready_to_read(SocketConnection_p client) {
-		std::cout << "Client sent data!" << std::endl;
-
-		char data[512];
-		std::memset(data, 0, 512);
-		std::string message = "Hello, world!";
-
-		bool open = client->receive(data, message.size());
-		std::cout << data << std::endl;
-
-		client->send(data, message.size());
-
-		if (!open) {
-			std::cout << "Client disconnect" << std::endl;
-			this->remove_socket(client);
-		}
-	}
-
 	void handle_poll_timeout() {
-		std::cout << "Poll timeout!" << std::endl;
+		std::cout << "Server poll timeout!" << std::endl;
 	}
 };
 
-class TestClient : public Client<TCPSocketConnection> {
+class TestClient : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
-	TestClient(int poll_timeout) : Client<TCPSocketConnection>(poll_timeout) {}
-
-	void handle_client_ready_to_read() {
-		std::cout << "Client ready to read!" << std::endl;
-		char data[512];
-		std::memset(data, 0, 512);
-		std::string message = "Hello, world!";
-
-		this->read(data, message.size());
-		std::cout << data << std::endl;
-	}
+	TestClient(int poll_timeout) : ChanneledClient<SunNet::TCPSocketConnection>(poll_timeout) {}
 
 	void handle_poll_timeout() {
 		std::cout << "Client poll timeout" << std::endl;
@@ -67,18 +38,56 @@ public:
 	}
 };
 
+class GeneralParent {
+public:
+	int msg;
+	int msg2;
+};
+
+class GeneralMessage : public GeneralParent {
+public:
+	int msg2;
+};
+
+void server_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
+	std::cout << "Server received: " << ptr->msg << " and " << ptr->msg2 << std::endl;
+
+	assert(ptr->msg == 1337 && ptr->msg2 == 8888);
+	GeneralMessage response;
+	response.msg = 12345678;
+	response.msg2 = 98765;
+	sender->channeled_send<GeneralMessage>(&response);
+}
+
+void client_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<GeneralMessage> ptr) {
+	std::cout << "Client received: " << ptr->msg << " and " << ptr->msg2 << std::endl;
+
+	assert(ptr->msg == 12345678 && ptr->msg2 == 98765);
+	GeneralMessage response;
+	response.msg = 1337;
+	response.msg2 = 8888;
+	sender->channeled_send(&response);
+}
+
 int main(int argc, char* argv[]) {
+
+	SunNet::Channels::addNewChannel<GeneralMessage>();
 
 	TestServer server("0.0.0.0", "9876", 5);
 	server.open();
 	server.serve(1000 * 2);
 
+	server.subscribe<GeneralMessage>(server_callback);
+
 	TestClient client(1000 * 2);
 	client.connect("127.0.0.1", "9876");
+	client.subscribe<GeneralMessage>(client_callback);
 
-	std::string message = "Hello, world!";
-	client.send(message.c_str(), message.size());
-	client.send(message.c_str(), message.size());
+	GeneralMessage msg;
+	msg.msg = 1337;
+	msg.msg2 = 8888;
+
+	client.channeled_send<GeneralMessage>(&msg);
 
 	std::string dummy;
 	std::getline(std::cin, dummy);

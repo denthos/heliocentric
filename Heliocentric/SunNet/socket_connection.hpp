@@ -10,7 +10,7 @@
 #include <memory>
 #include <atomic>
 
-namespace Sunnet {
+namespace SunNet {
 
 
 	/**

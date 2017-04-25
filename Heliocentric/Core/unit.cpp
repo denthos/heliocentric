@@ -1,5 +1,10 @@
 #include "unit.h"
-#include "lib.h"
+
+Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
+	AttackableGameObject(pos, owner, att, def, range, heal) {}
+
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
+	AttackableGameObject(id, pos, owner, att, def, range, heal) {}
 
 void Unit::update() {
 	switch (currentCommand) {
@@ -37,7 +42,7 @@ int Unit::set_movmennt_speed_max(int movementSpeedMax) {
 
 Unit* Unit::do_attack(Unit* target) {
 	Lib::assertTrue(target != this, "Unit attacking itself.");
-	if (Lib::distance_vec3(this->position, target->get_position()) > (float) this->combatRange) {
+	if (glm::distance(this->position, target->get_position()) > (float) this->combatRange) {
 		do_move();
 	}
 	else {
