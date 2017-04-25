@@ -76,7 +76,7 @@ void Mesh::Draw(Shader &shader, const Camera & camera)
 	glBindVertexArray(VAO);
 
 	//draw
-	glDrawElements(GL_TRIANGLES, mesh_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (GLsizei) mesh_indices.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
 
