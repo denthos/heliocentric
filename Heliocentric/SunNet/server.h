@@ -45,6 +45,12 @@ namespace SunNet {
 			this->poll_service.remove_socket(socket);
 		}
 
+		virtual void handle_server_connection_error() = 0;
+		virtual void handle_client_error(SocketConnection_p client) = 0;
+		virtual void handle_client_connect(SocketConnection_p client) = 0;
+		virtual void handle_ready_to_read(SocketConnection_p client) = 0;
+		virtual void handle_poll_timeout() = 0;
+
 	public:
 		template <class ... ArgType>
 		Server(std::string address, std::string port, int listen_queue_size, int poll_timeout, ArgType ... args) : 
@@ -83,9 +89,11 @@ namespace SunNet {
 
 		void poll() {
 			while (this->state == SERVE) {
-				std::lock_guard<std::mutex> lock(this->poll_service_mutex);
-
-				SocketCollection_p ready_sockets = poll_service.poll();
+				SocketCollection_p ready_sockets;
+				{
+					std::lock_guard<std::mutex> lock(this->poll_service_mutex);
+					ready_sockets = poll_service.poll();
+				}
 
 				if (ready_sockets->size() == 0) {
 					this->handle_poll_timeout();
@@ -94,10 +102,20 @@ namespace SunNet {
 
 				for (auto socket_it = ready_sockets->begin(); socket_it != ready_sockets->end(); ++socket_it) {
 					if (*socket_it == this->server_connection) {
-						this->handle_connection_request();
+						if ((*socket_it)->has_error()) {
+							this->handle_server_connection_error();
+						}
+						else {
+							this->handle_connection_request();
+						}
 					}
 					else {
-						this->handle_ready_to_read(*socket_it);
+						if ((*socket_it)->has_error()) {
+							this->handle_client_error(*socket_it);
+						}
+						else{
+							this->handle_ready_to_read(*socket_it);
+						}
 					}
 				}
 			}
@@ -120,9 +138,6 @@ namespace SunNet {
 			this->handle_client_connect(new_client);
 		}
 
-		virtual void handle_client_connect(SocketConnection_p client) {}
-		virtual void handle_ready_to_read(SocketConnection_p client) {}
-		virtual void handle_poll_timeout() {}
 
 		class ServerException : public std::exception {};
 		class InvalidStateTransitionException : public ServerException {};

@@ -11,6 +11,21 @@ namespace SunNet {
 	private:
 		ChanneledSocketConnection_p channeled_connection;
 
+	protected:
+		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) {
+			this->handle_client_disconnect();
+		}
+
+		virtual void handle_client_ready_to_read() {
+			/* Delegate to ChannelSubscribable */
+			this->handleIncomingMessage(this->channeled_connection);
+		}
+
+		/**** Handlers for ChanneledClient ****/
+		virtual void handle_client_disconnect() = 0;
+		virtual void handle_client_error() = 0;
+		virtual void handle_poll_timeout() = 0;
+
 	public:
 		template <class ... ArgTypes>
 		ChanneledClient(int poll_timeout, ArgTypes ... args) : Client(poll_timeout, args...) {
@@ -28,18 +43,6 @@ namespace SunNet {
 
 		std::unique_ptr<NETWORK_BYTE[]> channeled_read(CHANNEL_ID id) {
 			return this->channeled_connection->channeled_read(id);
-		}
-
-		virtual void handleSocketDisconnect(SocketConnection_p socket) {
-			this->handle_client_disconnect();
-		}
-
-		virtual void handle_client_disconnect() {}
-		virtual void handle_client_error() {}
-		virtual void handle_poll_timeout() {}
-
-		virtual void handle_client_ready_to_read() {
-			this->handleIncomingMessage(this->channeled_connection);
 		}
 	};
 }

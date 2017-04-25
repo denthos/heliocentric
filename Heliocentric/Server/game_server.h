@@ -39,4 +39,15 @@ private:
 
 	Lib::LockedItem < std::queue<std::shared_ptr<GameObjectUpdate>>> object_updates;
 	Lib::LockedItem < std::queue<std::shared_ptr<PlayerUpdate>>> player_updates;
+
+protected:
+	/**** Handlers for ChanneledServer ****/
+	virtual void handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) = 0;
+
+	/**** Handlers for server class ****/
+	virtual void handle_server_connection_error() = 0;
+	virtual void handle_client_error(SunNet::ChanneledSocketConnection_p client) = 0;
+	virtual void handle_client_connect(SunNet::ChanneledSocketConnection_p client) = 0;
+	virtual void handle_poll_timeout() = 0;
+
 };

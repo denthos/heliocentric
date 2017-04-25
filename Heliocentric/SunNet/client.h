@@ -29,6 +29,10 @@ namespace SunNet {
 	protected:
 		std::shared_ptr<SocketConnection> connection;
 
+		virtual void handle_client_error() = 0;
+		virtual void handle_client_ready_to_read() = 0;
+		virtual void handle_poll_timeout() = 0;
+
 	public:
 		template <class ... ArgTypes>
 		Client(int poll_timeout, ArgTypes ... args) : state(CLIENT_INIT) {
@@ -96,9 +100,6 @@ namespace SunNet {
 			}
 		}
 
-		virtual void handle_client_error() {}
-		virtual void handle_client_ready_to_read() {}
-		virtual void handle_poll_timeout() {}
 
 		class ClientException : public std::exception {};
 		class InvalidStateTransitionException : public ClientException {};

@@ -13,6 +13,10 @@ namespace SunNet {
 	class ChannelSubscribable {
 	private:
 		std::unordered_map < CHANNEL_ID, std::shared_ptr<ChannelSubscriptionInterface>> subscriptions;
+
+	protected:
+		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) = 0;
+
 	public:
 		void handleIncomingMessage(ChanneledSocketConnection_p socket);
 
@@ -50,7 +54,5 @@ namespace SunNet {
 				this->subscriptions.erase(channel_id);
 			}
 		}
-
-		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) {}
 	};
 }

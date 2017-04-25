@@ -8,17 +8,30 @@
 #include <cassert>
 
 class TestServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
-public:
-	TestServer(std::string address, std::string port, int queue_size) :
-		ChanneledServer<SunNet::TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
-
-	void handle_client_connect(SunNet::SocketConnection_p client) {
+protected:
+	void handle_channeledclient_connect(SunNet::ChanneledSocketConnection_p client) {
 		std::cout << "Client connected!" << std::endl;
 	}
 
 	void handle_poll_timeout() {
 		std::cout << "Server poll timeout!" << std::endl;
 	}
+
+	void handle_server_connection_error() {
+		std::cout << "SERVER ERROR!" << std::endl;
+	}
+
+	virtual void handle_channeledclient_error(SunNet::ChanneledSocketConnection_p client) {
+		std::cout << "CLIENT ERROR!" << std::endl;
+	}
+
+	virtual void handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) {
+		std::cout << "CLIENT DISCONNECT!" << std::endl;
+	}
+
+public:
+	TestServer(std::string address, std::string port, int queue_size) :
+		ChanneledServer<SunNet::TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
 };
 
 class TestClient : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
@@ -29,7 +42,7 @@ public:
 		std::cout << "Client poll timeout" << std::endl;
 	}
 
-	void handle_connection_disconnect() {
+	void handle_client_disconnect() {
 		std::cout << "Client connection disconnect" << std::endl;
 	}
 
