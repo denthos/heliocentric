@@ -11,6 +11,7 @@
 
 
 #include "camera.h"
+#include "logging.h"
 
 
 void Mesh::Update(glm::mat4 & parent)
@@ -140,7 +141,7 @@ void Mesh::createMesh()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-		std::cerr << "Error while creating mesh!" << std::endl;
+		Lib::LOG_ERR("Error while creating mesh!");
 	}
 
 	//unbind buffers

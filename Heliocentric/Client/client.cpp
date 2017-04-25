@@ -98,15 +98,14 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 	try {
 		this->connect(address, port);
 	}
-	catch (const SunNet::ConnectException & ex) {
-		fprintf(stderr, "Caught connect exception\n");
+	catch (const SunNet::ConnectException&) {
+		Lib::LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
 	//this->connect(std::string address, std::string port);
 	//this->channeled_send<UnitUpdate>(UnitUpdate*);
 
 	// TODO
 }
-
 
 Client::~Client() {
 	delete shader;
@@ -125,7 +124,7 @@ bool Client::isRunning() {
 
 void Client::createWindow(int width, int height) {
 	if (!glfwInit()) {
-		fprintf(stderr, "Could not initialize GLFW\n");
+		Lib::LOG_ERR("Could not initialize GLFW");
 		return;
 	}
 
@@ -139,7 +138,7 @@ void Client::createWindow(int width, int height) {
 	window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
 
 	if (!window) {
-		fprintf(stderr, "Could not create GLFW window\n");
+		Lib::LOG_ERR("Could not create GLFW window");
 		return;
 	}
 
@@ -152,7 +151,7 @@ void Client::createWindow(int width, int height) {
 	GLenum glewErr = glewInit();
 #ifndef __APPLE__
 	if (glewErr != GLEW_OK) {
-		fprintf(stderr, "Glew failed to initialize: %s\n", glewGetErrorString(glewErr));
+		Lib::LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
 		return;
 	}
 #endif
@@ -194,7 +193,7 @@ void Client::update() {
 }
 
 void Client::errorCallback(int error, const char * description) {
-	fprintf(stderr, "OpenGL error occurred: %s", description);
+	Lib::LOG_ERR("OpenGL Error occurred: ", description);
 }
 
 void Client::resizeCallback(int width, int height) {

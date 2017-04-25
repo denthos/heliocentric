@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "logging.h"
 
 Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
 	AttackableGameObject(pos, owner, att, def, range, heal) {}
@@ -18,7 +19,7 @@ void Unit::update() {
 		do_move();
 		break;
 	default:
-		Lib::debug("Invalid command type.");
+		Lib::LOG_ERR("Invalid command type.");
 	}
 }
 
