@@ -18,9 +18,9 @@ PlanetModel::~PlanetModel()
 {
 }
 
-void PlanetModel::Draw(Shader &shader)
+void PlanetModel::Draw(Shader &shader, const Camera & camera)
 {
-	planet_mesh.Draw(shader);
+	planet_mesh.Draw(shader, camera);
 }
 
 void PlanetModel::Update(glm::mat4 & parent)

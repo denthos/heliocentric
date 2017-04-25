@@ -10,7 +10,7 @@
 #define MODEL_UNIFORM "model"
 
 
-
+#include "camera.h"
 
 
 void Mesh::Update(glm::mat4 & parent)
@@ -24,7 +24,7 @@ void Mesh::Update(glm::mat4 & parent)
 }
 
 //TODO: separate binding functions for each mesh component? bind texture, bind material, bind light
-void Mesh::Draw(Shader &shader)
+void Mesh::Draw(Shader &shader, const Camera & camera)
 {
 	//which diffuse and specular samplers
 	GLuint diffuse_num = 1;
@@ -36,11 +36,11 @@ void Mesh::Draw(Shader &shader)
 	shader.bind(); //start using our shader
 
 				   //pass camera, window matrices, and model's world matrix info to shader uniform variables
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, PROJECTION_UNIFORM), 1, GL_FALSE, &Client::perspectiveMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, PROJECTION_UNIFORM), 1, GL_FALSE, &camera.perspective[0][0]);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, VIEW_UNIFORM), 1, GL_FALSE, &Client::viewMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, VIEW_UNIFORM), 1, GL_FALSE, &camera.view[0][0]);
 
-	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), Client::camPos.x, Client::camPos.y, Client::camPos.z);
+	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), camera.position.x, camera.position.y, camera.position.z);
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &world_mat[0][0]);
 
