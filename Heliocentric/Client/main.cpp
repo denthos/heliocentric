@@ -28,6 +28,7 @@ int main() {
 		client.update();
 	}
 
+	client.disconnect();
 	glfwTerminate();
 
 	return 0;

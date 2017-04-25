@@ -23,6 +23,7 @@ namespace SunNet {
 		}
 
 		virtual void handle_client_error(SocketConnection_p client) {
+			this->removeFromPollService(client);
 			handle_channeledclient_error(std::static_pointer_cast<ChanneledSocketConnection>(client));
 		}
 

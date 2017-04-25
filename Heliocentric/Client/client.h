@@ -20,7 +20,7 @@
 #include <string>
 #include <unordered_map>
 
-class Client : SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
+class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:	
 	Client();
 	~Client(); // free all memory here
@@ -40,6 +40,13 @@ public:
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);
 	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
+
+protected:
+	/**** Handlers for ChanneledClient ****/
+	virtual void handle_client_disconnect();
+	virtual void handle_client_error();
+	virtual void handle_poll_timeout();
+
 private:
 	GLFWwindow * window;
 	Camera * camera;

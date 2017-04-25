@@ -63,8 +63,18 @@ namespace SunNet {
 
 		void disconnect() {
 			this->state_transition(CLIENT_CONNECTED, CLIENT_INIT);
+
+			/* 
+			It is possible that disconnect() is being called from the poll_thread.
+			We should only join if that is _not_ the case.
+			*/
+			if (std::this_thread::get_id() != this->poll_thread.get_id()) {
+				if (this->poll_thread.joinable()) {
+					this->poll_thread.join();
+				}
+			}
+
 			this->connection.reset();
-			this->poll_thread.join();
 		}
 
 		void send(const NETWORK_BYTE* buffer, NETWORK_BYTE_SIZE size) {

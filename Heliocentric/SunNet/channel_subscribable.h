@@ -18,6 +18,8 @@ namespace SunNet {
 		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) = 0;
 
 	public:
+		virtual ~ChannelSubscribable();
+
 		void handleIncomingMessage(ChanneledSocketConnection_p socket);
 
 		template <class TSubscriptionType>

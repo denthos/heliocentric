@@ -14,6 +14,7 @@
 #include "transformation.h"
 #include "orbit.h"
 #include "model.h"
+#include "logging.h"
 
 
 #define WINDOW_TITLE "Heliocentric"
@@ -33,6 +34,7 @@
 Model rocket;
 PlanetModel * earth;
 PlanetModel  * sun;
+PlanetModel * mars;
 
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
@@ -77,7 +79,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 
 	rocket = Model(ROCKET_MODEL);
 	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
-	earth = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(50.0f, 0.06f));
+
+	earth = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(0.0f, 0.0f));
+	mars = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(0.0f, 0.0f));
 	sun = new PlanetModel(Texture(SUN_TEXTURE), 15.0f, Orbit(0.0f, 0.0f));
 
 	// Set up SunNet client and channel callbacks
@@ -102,6 +106,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 
 	// TODO
 }
+
 
 Client::~Client() {
 	delete shader;
@@ -164,6 +169,7 @@ void Client::display() {
 	camera->calculateViewMatrix();
 	
 	earth->Draw(*textureShader, *camera);
+	mars->Draw(*textureShader, *camera);
 	rocket.Draw(*textureShader, *camera);
 	sun->Draw(*textureShader, *camera);
 
@@ -174,7 +180,16 @@ void Client::display() {
 
 void Client::update() {
 	sun->Update(glm::mat4(1.0f));
-	earth->Update(glm::mat4(1.0f));
+
+	if (this->planetMap.find(0) != this->planetMap.end()) {
+		Planet* earth_pl = this->planetMap[0];
+		earth->Update(glm::translate(glm::mat4(1.0f), earth_pl->get_position()));
+	}
+
+	if (this->planetMap.find(1) != this->planetMap.end()) {
+		Planet* mars_pl = this->planetMap[1];
+		mars->Update(glm::translate(glm::mat4(1.0f), mars_pl->get_position()));
+	}
 	rocket.Update(glm::mat4(1.0f));
 }
 
@@ -282,7 +297,14 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
-	update->apply(planetMap[update->id]);
+	if (this->planetMap.find(update->id) == this->planetMap.end()) {
+		std::unordered_map<UID, Slot*> lol;
+		auto earth_pl = new Planet(glm::vec3(update->x, update->y, update->z), "name", lol);
+		this->planetMap[update->id] = earth_pl;
+	}
+
+	Planet* pl = planetMap[update->id];
+	update->apply(pl);
 	// update octree
 }
 
@@ -291,3 +313,17 @@ void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	// update octree
 }
 
+void Client::handle_client_disconnect() {
+	/* YEAH? The server wants to disconnect us? WELL LET'S DISCONNECT THEM! */
+	Lib::LOG_ERR("The client has been disconnected from the server...");
+	this->disconnect();
+}
+
+void Client::handle_client_error() {
+	/* If there is some sort of error with the server, just disconnect outright */
+	Lib::LOG_ERR("The client could not contact the server..");
+	this->disconnect();
+	Lib::LOG_ERR("Client disconnected.");
+}
+
+void Client::handle_poll_timeout() {}
