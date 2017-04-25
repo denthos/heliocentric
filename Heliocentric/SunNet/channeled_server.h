@@ -5,10 +5,18 @@
 #include "channeled_socket_connection.h"
 
 namespace SunNet {
+	/**
+	A server meant for hosting channeled communications.
+
+	Note that the user should only connect to a ChanneledServer with a ChanneledClient and
+	should prefer to use subscriptions for sending and receiving data.
+	*/
 	template <typename TSocketConnectionType>
 	class ChanneledServer : public Server<TSocketConnectionType>, public ChannelSubscribable {
 	protected:
-		virtual void handle_ready_to_read(SocketConnection_p client) {
+
+		/* Handler for Server's ready_to_read */
+		void handle_ready_to_read(SocketConnection_p client) {
 			ChanneledSocketConnection_p channeled_socket = (
 				std::static_pointer_cast<ChanneledSocketConnection>(client)
 			);
@@ -17,18 +25,20 @@ namespace SunNet {
 			this->handleIncomingMessage(channeled_socket);
 		}
 
-		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) {
+		/* Handler for when ChannelSubscribable's recv() returns 0*/
+		void handleSocketDisconnect(ChanneledSocketConnection_p socket) {
 			this->removeFromPollService(socket);
 			this->handleClientDisconnect(socket);
 		}
 
-		virtual void handle_client_error(SocketConnection_p client) {
+		/* Handler for Server's handle_client_error */
+		void handle_client_error(SocketConnection_p client) {
 			this->removeFromPollService(client);
 			handle_channeledclient_error(std::static_pointer_cast<ChanneledSocketConnection>(client));
 		}
 
-
-		virtual void handle_client_connect(SocketConnection_p client) {
+		/* Handler for when Server receivies a new connection */
+		void handle_client_connect(SocketConnection_p client) {
 			handle_channeledclient_connect(std::static_pointer_cast<ChanneledSocketConnection>(client));
 		}
 

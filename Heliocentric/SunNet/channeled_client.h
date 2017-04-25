@@ -6,17 +6,27 @@
 
 namespace SunNet {
 
+	/**
+	A wrapper around a client which allows for sending on channeled connections as well as
+	subscribing to channels.
+
+	A ChanneledClient must only be used to connect to a ChanneledServer and should never be used
+	to call "receive" or "send". Instead, the user should use "channeled_send" and subscribe for
+	receipt.
+	*/
 	template <typename TSocketConnection>
 	class ChanneledClient : public Client<TSocketConnection>, public ChannelSubscribable {
 	private:
 		ChanneledSocketConnection_p channeled_connection;
 
 	protected:
-		virtual void handleSocketDisconnect(ChanneledSocketConnection_p socket) {
+		/* Handle ChannelSubscribable's disconnection logic */
+		void handleSocketDisconnect(ChanneledSocketConnection_p socket) {
 			this->handle_client_disconnect();
 		}
 
-		virtual void handle_client_ready_to_read() {
+		/* Handle Client's ready_to_read logic */
+		void handle_client_ready_to_read() {
 			/* Delegate to ChannelSubscribable */
 			this->handleIncomingMessage(this->channeled_connection);
 		}
@@ -32,15 +42,36 @@ namespace SunNet {
 			this->channeled_connection = std::static_pointer_cast<ChanneledSocketConnection>(this->connection);
 		}
 
+		/**
+		Send a message upon a specific channel. The channel is determined
+		by the template type.
+
+		@param message The object to send
+		*/
 		template <class TMessageType>
 		void channeled_send(TMessageType* message) {
 			this->channeled_connection->channeled_send<TMessageType>(message);
 		}
 
+		/**
+		Receive the channel ID from the incoming message. This will block
+		until a channel id is ready to be read.
+
+		It is preferred that the user use subscriptions for reads instead of 
+		reading directly
+		*/
 		CHANNEL_ID channeled_read_id() {
 			return this->channeled_connection->channeled_read_id();
 		}
 
+		/**
+		Receive the bytes from a specific channel. The amount of bytes to read
+		is determined by the channel id. This will block until all bytes are
+		ready to be read.
+
+		It is preferred that the user use subscriptions for reads instead of 
+		reading directly
+		*/
 		std::unique_ptr<NETWORK_BYTE[]> channeled_read(CHANNEL_ID id) {
 			return this->channeled_connection->channeled_read(id);
 		}
