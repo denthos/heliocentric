@@ -115,8 +115,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
-	std::string address("localhost");
-	std::string port("9876");
+	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
+	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
 	try {
 		this->connect(address, port);
 	}
