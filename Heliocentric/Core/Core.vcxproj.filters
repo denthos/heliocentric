@@ -89,6 +89,12 @@
     <ClInclude Include="universe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="debug_pause.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_switch.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

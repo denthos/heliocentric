@@ -4,11 +4,12 @@
 
 #include "game_server.h"
 
-GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) : 
-	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout) {
+GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
+	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
 
 	game_running = true;
 	this->tick_duration = tick_duration;
+	this->subscribeToChannels();
 }
 
 GameServer::~GameServer() {
@@ -54,6 +55,10 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 }
 
 void GameServer::performUpdates() {
+	if (this->game_paused) {
+		return;
+	}
+
 	/* First, update the universe */
 	this->universe.doLogic();
 	for (auto& universe_update : universe.get_updates()) {
@@ -100,4 +105,16 @@ void GameServer::run() {
 void GameServer::end_game() {
 	game_running = false;
 	this->close();
+}
+
+void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause) {
+	{
+		std::lock_guard<std::mutex>(this->connections.get_lock());
+		Lib::LOG_DEBUG("Game paused by connection ", this->connections.get_item().second[sender]);
+	}
+	this->game_paused = !this->game_paused;
+}
+
+void GameServer::subscribeToChannels() {
+	this->subscribe<DebugPause>(std::bind(&GameServer::handleGamePause, this, std::placeholders::_1, std::placeholders::_2));
 }

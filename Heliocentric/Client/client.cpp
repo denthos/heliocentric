@@ -19,6 +19,8 @@
 #include "model.h"
 #include "logging.h"
 
+#include "debug_pause.h"
+
 
 
 #define WINDOW_TITLE "Heliocentric"
@@ -90,9 +92,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
-  cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
+	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	
-	rocket = Model(ROCKET_MODEL);
+	//rocket = Model(ROCKET_MODEL);
 	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
@@ -187,13 +189,12 @@ void Client::display() {
 
 
 	camera->calculateViewMatrix();
-  
 
 	for (auto& planet_pair : this->planetMap) {
 		planet_pair.second.second->Draw(*textureShader, *camera);
 	}
 	
-	rocket.Draw(*textureShader, *camera);
+	//rocket.Draw(*textureShader, *camera);
 
 
 	skybox->Draw(*cubemapShader, *camera);
@@ -230,6 +231,11 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 		switch (key) {
 		case(GLFW_KEY_ESCAPE):
 			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case(GLFW_KEY_F1):
+			/* Toggle the server's pause state */
+			DebugPause pause;
+			this->channeled_send<DebugPause>(&pause);
 			break;
 		}
 	}

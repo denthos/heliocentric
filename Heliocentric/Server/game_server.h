@@ -17,6 +17,8 @@
 #include "game_object_update.h"
 #include "universe.h"
 
+#include "debug_pause.h"
+
 class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 	/*
 	The server will run in a loop with a loop timer (30ms). During each loop we will do the following:
@@ -61,10 +63,13 @@ private:
 		return std::bind(&GameServer::sendUpdateToConnection<TUpdate>, this, update, std::placeholders::_1);
 	}
 
+	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
 
+	void subscribeToChannels();
 	void performUpdates();
 	void sendUpdates();
 
+	std::atomic<bool> game_paused;
 	std::atomic<bool> game_running;
 	int tick_duration;
 

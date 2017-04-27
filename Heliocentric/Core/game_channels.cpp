@@ -8,6 +8,8 @@
 #include "planet_update.h"
 #include "city_update.h"
 
+#include "debug_pause.h"
+
 void initializeChannels() {
 	using channels = SunNet::Channels;
 
@@ -16,4 +18,6 @@ void initializeChannels() {
 	channels::addNewChannel<SlotUpdate>();
 	channels::addNewChannel<PlanetUpdate>();
 	channels::addNewChannel<CityUpdate>();
+
+	channels::addNewChannel<DebugPause>();
 }
