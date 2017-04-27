@@ -86,12 +86,12 @@
     <ClInclude Include="unit_sample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="universe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <ClInclude Include="attackable_game_object.cpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClCompile Include="city.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -150,6 +150,12 @@
     </ClCompile>
     <ClCompile Include="logging.cpp">
       <Filter>Utility Library</Filter>
+    </ClCompile>
+    <ClCompile Include="attackable_game_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="universe.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

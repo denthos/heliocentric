@@ -32,9 +32,6 @@
 #define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
 Model rocket;
-PlanetModel * earth;
-PlanetModel  * sun;
-PlanetModel * mars;
 
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
@@ -77,12 +74,13 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 
-	rocket = Model(ROCKET_MODEL);
+	//rocket = Model(ROCKET_MODEL);
 	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
 
-	earth = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(0.0f, 0.0f));
-	mars = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(0.0f, 0.0f));
-	sun = new PlanetModel(Texture(SUN_TEXTURE), 15.0f, Orbit(0.0f, 0.0f));
+	for (auto& planet : this->universe.get_planets()) {
+		auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
+		this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
+	}
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -111,10 +109,9 @@ Client::~Client() {
 	delete shader;
 	delete textureShader;
 
-	delete earth;
-	delete sun;
-	delete camera;
-
+	for (auto& planet_item : planetMap) {
+		delete planet_item.second.second;
+	}
 	GLFWCallbackHandler::remove(window, this);
 }
 
@@ -166,11 +163,13 @@ void Client::display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	camera->calculateViewMatrix();
+
+
+	for (auto& planet_pair : this->planetMap) {
+		planet_pair.second.second->Draw(*textureShader, *camera);
+	}
 	
-	earth->Draw(*textureShader, *camera);
-	mars->Draw(*textureShader, *camera);
-	rocket.Draw(*textureShader, *camera);
-	sun->Draw(*textureShader, *camera);
+	//rocket.Draw(*textureShader, *camera);
 
 	glfwSwapBuffers(window);
 
@@ -178,17 +177,10 @@ void Client::display() {
 }
 
 void Client::update() {
-	sun->Update(glm::mat4(1.0f));
-
-	if (this->planetMap.find(0) != this->planetMap.end()) {
-		Planet* earth_pl = this->planetMap[0];
-		earth->Update(glm::translate(glm::mat4(1.0f), earth_pl->get_position()));
+	for (auto& planet_pair : this->planetMap) {
+		planet_pair.second.second->Update(glm::translate(glm::mat4(1.0f), planet_pair.second.first->get_position()));
 	}
 
-	if (this->planetMap.find(1) != this->planetMap.end()) {
-		Planet* mars_pl = this->planetMap[1];
-		mars->Update(glm::translate(glm::mat4(1.0f), mars_pl->get_position()));
-	}
 	rocket.Update(glm::mat4(1.0f));
 }
 
@@ -296,13 +288,8 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
-	if (this->planetMap.find(update->id) == this->planetMap.end()) {
-		std::unordered_map<UID, Slot*> lol;
-		auto earth_pl = new Planet(glm::vec3(update->x, update->y, update->z), "name", lol);
-		this->planetMap[update->id] = earth_pl;
-	}
 
-	Planet* pl = planetMap[update->id];
+	Planet* pl = planetMap[update->id].first;
 	update->apply(pl);
 	// update octree
 }
@@ -326,3 +313,4 @@ void Client::handle_client_error() {
 }
 
 void Client::handle_poll_timeout() {}
+

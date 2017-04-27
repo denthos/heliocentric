@@ -15,6 +15,7 @@
 #include "player_update.h"
 #include "planet_update.h"
 #include "game_object_update.h"
+#include "universe.h"
 
 class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 	/*
@@ -34,6 +35,7 @@ private:
 		std::unordered_map<UID, SunNet::ChanneledSocketConnection_p>,
 		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>>> connections;
 
+	Universe universe;
 	std::unordered_map<UID, std::unique_ptr<Player>> players;
 	std::unordered_map<UID, std::unique_ptr<GameObject>> game_objects;
 
@@ -54,7 +56,13 @@ private:
 		}
 	}
 
-	void movePlanets();
+	template <typename TUpdate>
+	std::function<void(SunNet::ChanneledSocketConnection_p)> makeUpdateSendFunction(std::shared_ptr<TUpdate> update) {
+		return std::bind(&GameServer::sendUpdateToConnection<TUpdate>, this, update, std::placeholders::_1);
+	}
+
+
+	void performUpdates();
 	void sendUpdates();
 
 	std::atomic<bool> game_running;
@@ -80,4 +88,3 @@ public:
 	void run();
 	void end_game();
 };
-

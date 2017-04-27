@@ -9,15 +9,6 @@ GameServer::GameServer(int tick_duration, std::string port, int listen_queue, in
 
 	game_running = true;
 	this->tick_duration = tick_duration;
-
-	/* Create the earth */
-	std::unordered_map<UID, Slot*> slots;
-
-	std::unique_ptr<Planet> earth = std::make_unique<Planet>(glm::vec3(50.0f, 0.0f, 0.0f), "earth", slots);
-	game_objects[earth->getID()] = std::move(earth);
-
-	std::unique_ptr<Planet> mars = std::make_unique<Planet>(glm::vec3(100.0f, 0.0f, 0.0f), "mars", slots);
-	game_objects[mars->getID()] = std::move(mars);
 }
 
 GameServer::~GameServer() {
@@ -62,29 +53,11 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	players[player->getID()] = std::move(player);
 }
 
-void GameServer::movePlanets() {
-	int neg = 1;
-	for (auto& obj : game_objects) {
-		neg *= -1;
-		Planet* planet = static_cast<Planet*>(obj.second.get());
-		if (planet) {
-			/* Orbit the planet around the sun (0,0,0) */
-			glm::vec3 currentPosition = planet->get_position();
-			glm::vec3 newPosition = (
-				glm::rotate(glm::mat4(1.0f),((neg * 2.0f) / 180.0f) * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f)) *
-				glm::vec4(currentPosition, 1.0f)
-			);
-
-			planet->update_position(newPosition);
-
-			std::shared_ptr<PlanetUpdate> update = std::make_shared<PlanetUpdate>();
-			update->id = planet->getID();
-			update->x = newPosition.x;
-			update->y = newPosition.y;
-			update->z = newPosition.z;
-
-			updates_to_send.push(std::bind(&GameServer::sendUpdateToConnection<PlanetUpdate>, this, update, std::placeholders::_1));
-		}
+void GameServer::performUpdates() {
+	/* First, update the universe */
+	this->universe.doLogic();
+	for (auto& universe_update : universe.get_updates()) {
+		this->updates_to_send.push(this->makeUpdateSendFunction(universe_update));
 	}
 }
 
@@ -114,7 +87,7 @@ void GameServer::run() {
 		tick_start_time = std::clock();
 
 		// Add server logic
-		movePlanets();
+		performUpdates();
 		sendUpdates();
 
 		while ((tick_elapsed_time = std::clock() - tick_start_time) < tick_duration);
