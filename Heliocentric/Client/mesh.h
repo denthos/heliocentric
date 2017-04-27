@@ -28,7 +28,9 @@ public:
 	glm::mat4 trans_mat = glm::mat4(1.0f);
 
 	void Update(glm::mat4 &parent); //TODO
+
 	void Draw(Shader &shader, const Camera & camera); //draws mesh
+
 
 
 

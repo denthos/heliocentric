@@ -7,9 +7,12 @@
 #include <stdio.h>
 #include <soil.h>
 
+
+
+#include "planet.h"
+#include "skybox_mesh.h"
 #include "glfw_callback_handler.h"
 #include "game_channels.h"
-#include "Planet.h"
 #include "sphere_mesh.h"
 #include "transformation.h"
 #include "orbit.h"
@@ -17,12 +20,14 @@
 #include "logging.h"
 
 
+
 #define WINDOW_TITLE "Heliocentric"
 #define DEFAULT_WIDTH 1366
 #define DEFAULT_HEIGHT 768
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
-
+#define CUBEMAP_VERT_SHADER "Shaders/cubemap.vert"
+#define CUBEMAP_FRAG_SHADER "Shaders/cubemap.frag"
 #define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 
@@ -31,10 +36,22 @@
 
 #define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
+//skybox texture files
+#define SKYBOX_FRONT "Textures/Skybox/front.png" 
+#define SKYBOX_BACK "Textures/Skybox/back.png"
+#define SKYBOX_TOP "Textures/Skybox/top.png"
+#define SKYBOX_BOTTOM "Textures/Skybox/bottom.png"
+#define SKYBOX_LEFT "Textures/Skybox/left.png"
+#define SKYBOX_RIGHT "Textures/Skybox/right.png"
+
 Model rocket;
+
+SkyboxMesh* skybox;
+
 
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
+Shader* cubemapShader;
 //don't forget to clean up afterwards
 
 GLuint defaultShader;
@@ -73,9 +90,14 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
-
-	//rocket = Model(ROCKET_MODEL);
+  cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
+	
+	rocket = Model(ROCKET_MODEL);
 	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
+
+	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
+	//TODO rewrite this
+	skybox->world_mat =  glm::scale(skybox->world_mat, glm::vec3(4000.0f));
 
 	for (auto& planet : this->universe.get_planets()) {
 		auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
@@ -156,21 +178,25 @@ void Client::createWindow(int width, int height) {
 	resizeCallback(width, height);
 
 	GLFWCallbackHandler::add(window, this);
+
 }
 
 void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	camera->calculateViewMatrix();
 
+	camera->calculateViewMatrix();
+  
 
 	for (auto& planet_pair : this->planetMap) {
 		planet_pair.second.second->Draw(*textureShader, *camera);
 	}
 	
-	//rocket.Draw(*textureShader, *camera);
+	rocket.Draw(*textureShader, *camera);
 
+
+	skybox->Draw(*cubemapShader, *camera);
 	glfwSwapBuffers(window);
 
 	glfwPollEvents();
@@ -273,8 +299,10 @@ void Client::mouseWheelCallback(double x, double y) {
 	camera->position = glm::vec3(glm::translate(glm::mat4(1.0f), camera->position * (float)y * -0.05f) * glm::vec4(camera->position, 1.0f));
 }
 
+
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
 	update->apply(playerMap[update->id]);
+
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {

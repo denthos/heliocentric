@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="skybox_mesh.h" />
     <ClInclude Include="file_mesh.h" />
     <ClInclude Include="glfw_callback_handler.h" />
     <ClInclude Include="mesh.h" />
@@ -153,6 +154,7 @@
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
+    <ClCompile Include="skybox_mesh.cpp" />
     <ClCompile Include="file_mesh.cpp" />
     <ClCompile Include="glfw_callback_handler.cpp" />
     <ClCompile Include="main.cpp" />

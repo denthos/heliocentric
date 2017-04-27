@@ -17,9 +17,10 @@
 void Mesh::Update(glm::mat4 & parent)
 {
 	world_mat = glm::mat4(1.0f);
+	world_mat = world_mat * scale_mat;
 	world_mat = world_mat * rot_mat;
 	world_mat = world_mat * trans_mat;
-	world_mat = world_mat * scale_mat;
+	
 
 	world_mat = parent * world_mat;
 }
