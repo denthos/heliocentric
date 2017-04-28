@@ -6,6 +6,7 @@
 #include <functional>
 #include <stdio.h>
 #include <soil.h>
+#include <GL/glut.h>
 
 
 
@@ -106,6 +107,11 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 		this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
 	}
 
+	for (auto& unit : this->unit_manager.get_units()) {
+		auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), 10, Orbit(0.0f, 0.0f));
+		this->unitMap[unit->getID()] = std::make_pair(unit.get(), earth_model);
+	}
+
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
 
@@ -189,9 +195,15 @@ void Client::display() {
 
 
 	camera->calculateViewMatrix();
-
+	/*
 	for (auto& planet_pair : this->planetMap) {
 		planet_pair.second.second->Draw(*textureShader, *camera);
+	}*/
+	for (auto& unit_pair : this->unitMap) {
+		glm::vec3 pos = unit_pair.second.first->get_position();
+		Lib::LOG_DEBUG("Draw position is " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z));
+		
+		unit_pair.second.second->Draw(*textureShader, *camera);
 	}
 	
 	//rocket.Draw(*textureShader, *camera);
@@ -211,6 +223,10 @@ void Client::display() {
 void Client::update() {
 	for (auto& planet_pair : this->planetMap) {
 		planet_pair.second.second->Update(glm::translate(glm::mat4(1.0f), planet_pair.second.first->get_position()));
+	}
+
+	for (auto& unit_pair : this->unitMap) {
+		unit_pair.second.second->Update(glm::translate(glm::mat4(1.0f), unit_pair.second.first->get_position()));
 	}
 
 	rocket.Update(glm::mat4(1.0f));
@@ -317,8 +333,9 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	update->apply(unitMap[update->id]);
-	octree.insert(unitMap[update->id]);
+	Unit * u1 = unitMap[update->id].first;
+	update->apply(u1);
+	octree.insert(u1);
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {

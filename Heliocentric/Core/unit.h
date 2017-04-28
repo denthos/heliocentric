@@ -6,6 +6,8 @@
 #include "lib.h"
 #include "attackable_game_object.h"
 
+#include <memory>
+
 class UnitUpdate;
 
 /**
@@ -22,7 +24,17 @@ public:
 	/**
 	Called continuously by server to update current state of the unit.
 	*/
-	void update();
+	void update_command();
+
+	/** 
+	Perform logic based on command
+	*/
+	void do_logic();
+
+	/**
+	Perform update
+	*/
+	std::shared_ptr<UnitUpdate> make_update();
 
 	/**
 	Returns the destination where the unit is moving towards.
@@ -70,4 +82,5 @@ protected:
 	int movementSpeedCurrent; // can be used if implementing gravity simulation
 	CommandType currentCommand;
 	glm::vec3 destination;
+	std::shared_ptr<UnitUpdate> update;
 };

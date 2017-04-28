@@ -16,6 +16,7 @@
 #include "channeled_client.h"
 #include "tcp_socket_connection.hpp"
 #include "universe.h"
+#include "unit_manager.h"
 #include <GL\glew.h>
 #include <GLFW/glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
@@ -28,6 +29,7 @@ public:
 	~Client(); // free all memory here
 
 	Universe universe;
+	UnitManager unit_manager;
 
 	bool isRunning();
 	void display();
@@ -57,7 +59,7 @@ private:
 	std::string windowTitle;
 	std::unordered_map<UID, Player *> playerMap;
 	std::unordered_map<UID, std::pair<Planet*, PlanetModel*>> planetMap;
-	std::unordered_map<UID, Unit *> unitMap;
+	std::unordered_map<UID, std::pair<Unit *, PlanetModel*>> unitMap;
 	std::unordered_map<UID, City *> cityMap;
 	std::unordered_map<UID, Slot *> slotMap;
 	Octree octree;

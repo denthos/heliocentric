@@ -36,7 +36,7 @@ Octree::~Octree() {
 }
 
 void Octree::insert(Drawable * object) {
-	objects.insert(object);
+	//objects.insert(object);
 }
 
 void Octree::clear() {

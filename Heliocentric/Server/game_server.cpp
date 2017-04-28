@@ -64,6 +64,12 @@ void GameServer::performUpdates() {
 	for (auto& universe_update : universe.get_updates()) {
 		this->updates_to_send.push(this->makeUpdateSendFunction(universe_update));
 	}
+
+	/* update the unit manager */
+	this->unit_manager.doLogic();
+	for (auto& unit_update : unit_manager.get_updates()) {
+		this->updates_to_send.push(this->makeUpdateSendFunction(unit_update));
+	}
 }
 
 void GameServer::sendUpdates() {

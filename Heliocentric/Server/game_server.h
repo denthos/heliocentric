@@ -16,6 +16,7 @@
 #include "planet_update.h"
 #include "game_object_update.h"
 #include "universe.h"
+#include "unit_manager.h"
 
 #include "debug_pause.h"
 
@@ -38,6 +39,7 @@ private:
 		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>>> connections;
 
 	Universe universe;
+	UnitManager unit_manager;
 	std::unordered_map<UID, std::unique_ptr<Player>> players;
 	std::unordered_map<UID, std::unique_ptr<GameObject>> game_objects;
 

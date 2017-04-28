@@ -1,13 +1,18 @@
 #include "unit.h"
 #include "logging.h"
+#include "unit_update.h"
 
 Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
-	AttackableGameObject(pos, owner, att, def, range, heal) {}
+	AttackableGameObject(pos, owner, att, def, range, heal) {
+	this->update = std::make_shared<UnitUpdate>();
+}
 
 Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
-	AttackableGameObject(id, pos, owner, att, def, range, heal) {}
+	AttackableGameObject(id, pos, owner, att, def, range, heal) {
+	this->update = std::make_shared<UnitUpdate>();
+}
 
-void Unit::update() {
+void Unit::update_command() {
 	switch (currentCommand) {
 	case idle:
 		break;
@@ -22,6 +27,20 @@ void Unit::update() {
 		Lib::LOG_ERR("Invalid command type.");
 	}
 }
+
+void Unit::do_logic() {
+	glm::vec3 new_pos = this->get_position() + glm::vec3(0.01f, 0.01f, 0.0f);
+	this->position = new_pos;
+}
+
+std::shared_ptr<UnitUpdate> Unit::make_update() {
+	this->update->id = this->getID();
+	this->update->x = this->position.x;
+	this->update->y = this->position.y;
+	this->update->z = this->position.z;
+	Lib::LOG_DEBUG("Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
+	return this->update;
+};
 
 glm::vec3 Unit::get_destination() {
 	return this->destination;
