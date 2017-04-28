@@ -73,12 +73,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="plane.h">
-	  <Filter>Header Files</Filter>
-	</ClInclude>
-    <ClInclude Include="skybox_mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
+    <ClInclude Include="skybox_mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -120,12 +117,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="view_frustum.cpp">
-	  <Filter>Source Files</Filter>
-	</ClCompile>
-    <ClCompile Include="skybox_mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
+    <ClCompile Include="skybox_mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="glfw_callback_handler.cpp">
