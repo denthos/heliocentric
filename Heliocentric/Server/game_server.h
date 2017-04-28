@@ -54,7 +54,7 @@ private:
 			If there is an error sending data to the client, let's log it and forget about it.
 			Maybe the error is only transient :)
 			*/
-			Lib::LOG_ERR("Error when trying to send an update to a client", e.what());
+			Lib::LOG_ERR("Error when trying to send an update to a client: ", e.what());
 		}
 	}
 

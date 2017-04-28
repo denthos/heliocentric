@@ -16,9 +16,6 @@ namespace SunNet {
 	*/
 	template <typename TSocketConnection>
 	class ChanneledClient : public Client<TSocketConnection>, public ChannelSubscribable {
-	private:
-		ChanneledSocketConnection_p channeled_connection;
-
 	protected:
 		/* Handle ChannelSubscribable's disconnection logic */
 		void handleSocketDisconnect(ChanneledSocketConnection_p socket) {
@@ -28,7 +25,8 @@ namespace SunNet {
 		/* Handle Client's ready_to_read logic */
 		void handle_client_ready_to_read() {
 			/* Delegate to ChannelSubscribable */
-			this->handleIncomingMessage(this->channeled_connection);
+			ChanneledSocketConnection_p channeled_con = std::static_pointer_cast<ChanneledSocketConnection>(this->connection);
+			this->handleIncomingMessage(channeled_con);
 		}
 
 		/**** Handlers for ChanneledClient ****/
@@ -38,9 +36,7 @@ namespace SunNet {
 
 	public:
 		template <class ... ArgTypes>
-		ChanneledClient(int poll_timeout, ArgTypes ... args) : Client(poll_timeout, args...) {
-			this->channeled_connection = std::static_pointer_cast<ChanneledSocketConnection>(this->connection);
-		}
+		ChanneledClient(int poll_timeout, ArgTypes ... args) : Client(poll_timeout, args...) {}
 
 		/**
 		Send a message upon a specific channel. The channel is determined
@@ -50,7 +46,8 @@ namespace SunNet {
 		*/
 		template <class TMessageType>
 		void channeled_send(TMessageType* message) {
-			this->channeled_connection->channeled_send<TMessageType>(message);
+			ChanneledSocketConnection_p channeled_con = std::static_pointer_cast<ChanneledSocketConnection>(this->connection);
+			channeled_con->channeled_send<TMessageType>(message);
 		}
 
 		/**
@@ -61,7 +58,8 @@ namespace SunNet {
 		reading directly
 		*/
 		CHANNEL_ID channeled_read_id() {
-			return this->channeled_connection->channeled_read_id();
+			ChanneledSocketConnection_p channeled_con = std::static_pointer_cast<ChanneledSocketConnection>(this->connection);
+			return channeled_con->channeled_read_id();
 		}
 
 		/**
@@ -73,7 +71,8 @@ namespace SunNet {
 		reading directly
 		*/
 		std::unique_ptr<NETWORK_BYTE[]> channeled_read(CHANNEL_ID id) {
-			return this->channeled_connection->channeled_read(id);
+			ChanneledSocketConnection_p channeled_con = std::static_pointer_cast<ChanneledSocketConnection>(this->connection);
+			return channeled_con->channeled_read(id);
 		}
 	};
 }

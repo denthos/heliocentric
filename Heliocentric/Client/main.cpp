@@ -30,7 +30,6 @@ int main() {
 
 	client.disconnect();
 	glfwTerminate();
-
 	return 0;
 }
 

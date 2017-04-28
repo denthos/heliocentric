@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
 	TestServer server("0.0.0.0", "9876", 5);
 	server.open();
-	server.serve(1000 * 2);
+	server.serve();
 
 	server.subscribe<GeneralMessage>(server_callback);
 

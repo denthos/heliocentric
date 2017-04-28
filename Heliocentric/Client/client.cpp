@@ -340,11 +340,14 @@ void Client::handle_client_disconnect() {
 	/* YEAH? The server wants to disconnect us? WELL LET'S DISCONNECT THEM! */
 	Lib::LOG_ERR("The client has been disconnected from the server...");
 	this->disconnect();
+	Lib::LOG_ERR("Client disconnected.");
 }
 
 void Client::handle_client_error() {
 	/* If there is some sort of error with the server, just disconnect outright */
 	Lib::LOG_ERR("The client could not contact the server..");
+
+	// TODO: Add retry logic/connection fix logic.
 	this->disconnect();
 	Lib::LOG_ERR("Client disconnected.");
 }

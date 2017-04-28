@@ -17,7 +17,7 @@ GameServer::~GameServer() {
 	Let's be a good citizen. When we are closing, let's _gracefully_ close
 	all the player connections ^^
 	*/
-	std::lock_guard<std::mutex>(connections.get_lock());
+	std::lock_guard<std::mutex> guard(connections.get_lock());
 	for (auto& connection : connections.get_item().first) {
 		connection.second.reset();
 	}
@@ -26,7 +26,7 @@ GameServer::~GameServer() {
 void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) {
 	/* If a client wishes to disconnect, we just drop them entirely. */
 	Lib::LOG_DEBUG("Disconnecting client");
-	std::lock_guard<std::mutex>(connections.get_lock());
+	std::lock_guard<std::mutex> guard(connections.get_lock());
 	auto id_it = connections.get_item().second.find(client);
 	if (id_it != connections.get_item().second.end()) {
 		connections.get_item().first.erase(id_it->second);
@@ -46,7 +46,7 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	std::unique_ptr<Player> player = std::make_unique<Player>("PLAYER_NAME");
 
 	{
-		std::lock_guard<std::mutex>(connections.get_lock());
+		std::lock_guard<std::mutex> guard(connections.get_lock());
 		connections.get_item().first[player->getID()] = client;
 		connections.get_item().second[client] = player->getID();
 	}
@@ -70,7 +70,7 @@ void GameServer::sendUpdates() {
 	while (!updates_to_send.empty()) {
 		auto& update = updates_to_send.front();
 		{
-			std::lock_guard<std::mutex>(connections.get_lock());
+			std::lock_guard<std::mutex> guard(connections.get_lock());
 			for (auto& player_conn : connections.get_item().first) {
 				update(player_conn.second);
 			}
@@ -83,7 +83,7 @@ void GameServer::sendUpdates() {
 
 void GameServer::run() {
 	this->open();
-	this->serve(10);
+	this->serve();
 
 	std::clock_t tick_start_time;
 	std::clock_t tick_elapsed_time;
