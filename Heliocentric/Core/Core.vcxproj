@@ -20,6 +20,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bounding_box.cpp" />
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="city_update.cpp" />
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="fileutils.cpp" />
@@ -28,6 +30,8 @@
     <ClCompile Include="universe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bounding_box.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="config_parser.h" />
     <ClInclude Include="fileutils.h" />
     <ClInclude Include="debug_pause.h" />

@@ -136,23 +136,24 @@
     <None Include="Shaders\simple_texture.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="skybox_mesh.h" />
     <ClInclude Include="file_mesh.h" />
     <ClInclude Include="glfw_callback_handler.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
+    <ClInclude Include="octree.h" />
     <ClInclude Include="orbit.h" />
+    <ClInclude Include="plane.h" />
     <ClInclude Include="planet.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="sphere_mesh.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="transformation.h" />
     <ClInclude Include="vertex.h" />
+    <ClInclude Include="view_frustum.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
     <ClCompile Include="skybox_mesh.cpp" />
     <ClCompile Include="file_mesh.cpp" />
@@ -160,12 +161,14 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />
+    <ClCompile Include="octree.cpp" />
     <ClCompile Include="orbit.cpp" />
     <ClCompile Include="planet.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="sphere_mesh.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="transformation.cpp" />
+    <ClCompile Include="view_frustum.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

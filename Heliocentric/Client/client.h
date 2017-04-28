@@ -2,6 +2,7 @@
 
 #include "identifiable.h"
 #include "camera.h"
+#include "octree.h"
 #include "player.h"
 #include "unit.h"
 #include "city.h"
@@ -59,7 +60,7 @@ private:
 	std::unordered_map<UID, Unit *> unitMap;
 	std::unordered_map<UID, City *> cityMap;
 	std::unordered_map<UID, Slot *> slotMap;
-	//Octree<GameObject *> octree;
+	Octree octree;
 
 	void createWindow(int width, int height);
 };

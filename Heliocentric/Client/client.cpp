@@ -197,7 +197,12 @@ void Client::display() {
 	//rocket.Draw(*textureShader, *camera);
 
 
+	octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
+	//octree.draw(textureShader->getPid(), *camera);
+	octree.clear(); // empty octree each frame
+
 	skybox->Draw(*cubemapShader, *camera);
+
 	glfwSwapBuffers(window);
 
 	glfwPollEvents();
@@ -313,24 +318,22 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	update->apply(unitMap[update->id]);
-	// update octree
+	octree.insert(unitMap[update->id]);
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
 	update->apply(cityMap[update->id]);
-	// update octree
+	octree.insert(cityMap[update->id]);
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
-
 	Planet* pl = planetMap[update->id].first;
 	update->apply(pl);
-	// update octree
+	octree.insert(planetMap[update->id].first);
 }
 
 void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<SlotUpdate> update) {
 	update->apply(slotMap[update->id]);
-	// update octree
 }
 
 void Client::handle_client_disconnect() {
