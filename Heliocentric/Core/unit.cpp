@@ -12,7 +12,7 @@ Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, in
 	this->update = std::make_shared<UnitUpdate>();
 }
 
-void Unit::update_command() {
+void Unit::do_logic() {
 	switch (currentCommand) {
 	case idle:
 		break;
@@ -27,10 +27,6 @@ void Unit::update_command() {
 	}
 }
 
-void Unit::do_logic() {
-	glm::vec3 new_pos = this->get_position() + glm::vec3(0.01f, 0.01f, 0.0f);
-	this->position = new_pos;
-}
 
 std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->id = this->getID();

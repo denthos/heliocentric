@@ -56,7 +56,7 @@ namespace Test
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
-			unit_1->update();
+			unit_1->do_logic();
 			Assert::AreEqual(unit_2->get_health(), 50);
 			Assert::AreEqual(unit_1->get_health(), 100);
 		}
@@ -77,7 +77,7 @@ namespace Test
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
-			unit_1->update();
+			unit_1->do_logic();
 
 			// Unit got closer
 			Assert::IsTrue(glm::distance(unit_1->get_position(), unit_2->get_position()) < 250.0f);
@@ -106,8 +106,8 @@ namespace Test
 			unit_1->set_combat_target(unit_2);
 
 			// Kill unit_2 : should take two hits
-			unit_1->update();
-			unit_1->update();
+			unit_1->do_logic();
+			unit_1->do_logic();
 
 			// Check  dthat unit_2 is dead and unit_1 is still alive
 			Assert::IsTrue(unit_1->is_in_idle_mode());

@@ -21,18 +21,14 @@ public:
 	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 
-	/**
-	Called continuously by server to update current state of the unit.
-	*/
-	void update_command();
-
 	/** 
-	Perform logic based on command
+	Perform logic based on command. Called continuously by server to update current state 
+	of the unit.
 	*/
 	void do_logic();
 
 	/**
-	Perform update
+	Perform update.
 	*/
 	std::shared_ptr<UnitUpdate> make_update();
 
