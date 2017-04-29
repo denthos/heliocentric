@@ -26,7 +26,7 @@ glm::vec3 Unit::get_destination() {
 	return *this->destination;
 }
 
-glm::vec3 Unit::set_destination(glm::vec3 destination) {
+glm::vec3 Unit::set_destination(glm::vec3& destination) {
 	this->destination = &destination;
 	currentCommand = move;
 	return *this->destination;
