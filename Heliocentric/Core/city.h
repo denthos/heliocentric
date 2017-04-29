@@ -22,4 +22,11 @@ private:
 	int production;
 	int population;
 	Slot* slot;
+
+protected:
+	// TODO: Override these combat hooks
+	virtual void handle_out_of_range(AttackableGameObject* opponent) {}
+	virtual void handle_defeat(AttackableGameObject* opponent) {}
+	virtual void handle_victory(AttackableGameObject* opponent) {}
+	virtual void handle_counter(AttackableGameObject* opponent) {}
 };
