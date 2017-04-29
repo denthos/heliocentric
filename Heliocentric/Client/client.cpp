@@ -20,6 +20,7 @@
 #include "logging.h"
 
 #include "debug_pause.h"
+#include "unit_create_command.h"
 
 
 
@@ -242,6 +243,16 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 			DebugPause pause;
 			this->channeled_send<DebugPause>(&pause);
 			break;
+		case(GLFW_KEY_F2):
+			/* Create a new unit */
+			UnitCreateCommand command;
+			command.player_id = 0;
+			command.x = 50.0f;
+			command.y = 50.0f;
+			command.z = 0.0f;
+
+			this->channeled_send(&command);
+			break;
 		}
 	}
 	else if (action == GLFW_RELEASE) {
@@ -317,8 +328,11 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
+	Lib::LOG_DEBUG("Unit update received");
+	/*
 	update->apply(unitMap[update->id]);
 	octree.insert(unitMap[update->id]);
+	*/
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {

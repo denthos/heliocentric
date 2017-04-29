@@ -2,7 +2,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "unit_update.h"
 #include "game_server.h"
+
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
@@ -115,6 +117,22 @@ void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std
 	this->game_paused = !this->game_paused;
 }
 
+
+void GameServer::handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCreateCommand> creation_command) {
+	Lib::LOG_DEBUG("Received unit creation command.");
+	/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
+	// TODO: Create the new unit (should probably be a unique_ptr) and move it into the UnitManager
+
+	// TODO: Queue up UnitUpdates for the unit
+	std::shared_ptr<UnitUpdate> update = std::make_shared<UnitUpdate>();
+	update->x = creation_command->x;
+	update->y = creation_command->y;
+	update->z = creation_command->z;
+
+	this->updates_to_send.push(this->makeUpdateSendFunction(update));
+}
+
 void GameServer::subscribeToChannels() {
 	this->subscribe<DebugPause>(std::bind(&GameServer::handleGamePause, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<UnitCreateCommand>(std::bind(&GameServer::handleUnitCreation, this, std::placeholders::_1, std::placeholders::_2));
 }

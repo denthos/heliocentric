@@ -38,6 +38,7 @@
     <ClInclude Include="debug_switch.h" />
     <ClInclude Include="game_channels.h" />
     <ClInclude Include="game_object_update.h" />
+    <ClInclude Include="unit_create_command.h" />
     <ClInclude Include="universe.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

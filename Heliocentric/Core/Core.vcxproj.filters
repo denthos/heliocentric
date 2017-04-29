@@ -18,6 +18,9 @@
     <Filter Include="Updates">
       <UniqueIdentifier>{bf61f581-def7-422a-9ba7-1bb30df4685b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Commands">
+      <UniqueIdentifier>{55d9c2c1-1a8e-4fc5-9629-10e6cd39efa6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="attackable_game_object.h">
@@ -94,7 +97,7 @@
     </ClInclude>
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="universe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -103,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="debug_switch.h">
       <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_create_command.h">
+      <Filter>Commands</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,8 +179,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="camera.cpp">
-	  <Filter>Source Files</Filter>
-	</ClCompile>
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="fileutils.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>
