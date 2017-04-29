@@ -76,7 +76,7 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 {
 	// Tell Player you have died.
 	player->add_to_destroy(this);
-	player = NULL;
+	player = nullptr;
 }
 
 void Unit::handle_victory(AttackableGameObject * opponent)
