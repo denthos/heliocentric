@@ -45,7 +45,7 @@ glm::vec3 Unit::get_destination() {
 	return *this->destination;
 }
 
-glm::vec3 Unit::set_destination(glm::vec3 destination) {
+glm::vec3 Unit::set_destination(glm::vec3& destination) {
 	this->destination = &destination;
 	currentCommand = move;
 	return *this->destination;
@@ -95,7 +95,7 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 {
 	// Tell Player you have died.
 	player->add_to_destroy(this);
-	player = NULL;
+	player = nullptr;
 }
 
 void Unit::handle_victory(AttackableGameObject * opponent)

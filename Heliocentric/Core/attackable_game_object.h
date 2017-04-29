@@ -23,26 +23,26 @@ protected:
 	Hook that allows defender to react after being attacked.
 	@param The attacking opponent
 	*/
-	virtual void handle_counter(AttackableGameObject* attacker) {};
+	virtual void handle_counter(AttackableGameObject* attacker) = 0;
 
 	/**
 	Hook for handling when an initiated attack fails because the opponent
 	is out of range. 
 	@param The combat opponent.
 	*/
-	virtual void handle_out_of_range(AttackableGameObject* opponent) {}
+	virtual void handle_out_of_range(AttackableGameObject* opponent) = 0;
 
 	/**
 	Hook for handling when the attackable's health drops below zero.
 	@param The defeating opponent.
 	*/
-	virtual void handle_defeat(AttackableGameObject* opponent) {}
+	virtual void handle_defeat(AttackableGameObject* opponent) = 0;
 
 	/**
 	Hook for handling an opponent's defeat. 
 	@param The defeated opponent.
 	*/
-	virtual void handle_victory(AttackableGameObject* opponent) {}
+	virtual void handle_victory(AttackableGameObject* opponent) = 0;
 
 
 public:

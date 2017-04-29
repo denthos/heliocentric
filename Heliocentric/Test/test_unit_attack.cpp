@@ -47,8 +47,12 @@ namespace Test
 		*/
 		TEST_METHOD(basic_unit_attack_test) {
 			/* Setup */
+			Player player_1("Player 1", 102);
+			Player player_2("Player 2", 203);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(2.0f));
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f));
+			player_1.acquire_object(unit_1);
+			player_2.acquire_object(unit_2);
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
@@ -62,8 +66,12 @@ namespace Test
 		*/
 		TEST_METHOD(out_of_range_test) {
 			/* Setup */
+			Player player_1("Player 1", 102);
+			Player player_2("Player 2", 203);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f));
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(250.0f));
+			player_1.acquire_object(unit_1);
+			player_2.acquire_object(unit_2);
 
 			Assert::IsTrue(glm::distance(unit_1->get_position(), unit_2->get_position()) >= 250.0f);
 
