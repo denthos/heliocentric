@@ -17,14 +17,14 @@ namespace Lib {
 	class INIParser : public ConfigParser
 	{
 	public:
-		using ConfigParser::get_value;
+		using ConfigParser::get;
 
 		static INIParser& getInstance(std::string fname = "../config.ini");
 
-		virtual bool reload();
-		virtual bool get_value(std::string key, std::string& ret);
+		virtual void reload();
 		virtual void update_value(std::string key, std::string value);
-
+	protected:
+		virtual std::string get(std::string key);
 	private:
 		INIParser(std::string fname) : ConfigParser(fname) { reload(); };
 		std::unordered_map<std::string, std::string> settings;

@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
+#include "camera.h"
 
 #include <string>
 
@@ -27,7 +28,9 @@ public:
 	glm::mat4 trans_mat = glm::mat4(1.0f);
 
 	void Update(glm::mat4 &parent); //TODO
-	void Draw(Shader &shader); //draws mesh
+
+	void Draw(Shader &shader, const Camera & camera); //draws mesh
+
 
 
 

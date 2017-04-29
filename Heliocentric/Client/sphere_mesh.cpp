@@ -105,6 +105,6 @@ void SphereMesh::genMesh()
 		}
 	}
 
-	numIndices = mesh_indices.size();
+	numIndices = (unsigned int) mesh_indices.size();
 }
 

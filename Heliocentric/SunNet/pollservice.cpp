@@ -23,11 +23,27 @@ namespace SunNet {
 	}
 
 	void PollService::remove_socket(const SocketConnection_p socket) {
-		std::pair<int, SocketConnection_p> info = this->poll_descriptor_map.at(socket->socket_descriptor);
-		int index = info.first;
+		auto& info = this->poll_descriptor_map.find(socket->socket_descriptor);
+		if (info == this->poll_descriptor_map.end()) {
+			/* Socket is already gone! */
+			return;
+		}
 
+		int index = info->second.first;
+
+		/* Step 1: Erase the element from the descriptors, which will cause all elements to shift down */
 		this->descriptors.erase(this->descriptors.begin() + index);
-		this->poll_descriptor_map.erase(socket->socket_descriptor);
+		this->poll_descriptor_map.erase(info);
+
+		/* Step 2: Change the indices of all elements in poll_descritor_map after this one*/
+		for (int i = index; i < this->descriptors.size(); i++) {
+			this->poll_descriptor_map[this->descriptors[i].fd].first = i;
+		}
+	}
+
+	void PollService::clear_sockets() {
+		this->descriptors.clear();
+		this->poll_descriptor_map.clear();
 	}
 
 	SocketCollection_p PollService::poll() {
@@ -40,8 +56,17 @@ namespace SunNet {
 		else if (poll_return > 0) {
 			for (auto poll_iter = this->descriptors.begin(); poll_iter != this->descriptors.end(); ++poll_iter) {
 				if (poll_iter->revents & (POLLIN | POLLERR | POLLNVAL | POLLHUP)) {
-					std::pair<int, SocketConnection_p> socket_info = this->poll_descriptor_map.at(poll_iter->fd);
-					SocketConnection_p ready_socket = socket_info.second;
+					auto& socket_iter = this->poll_descriptor_map.find(poll_iter->fd);
+					if (socket_iter == this->poll_descriptor_map.end()) {
+						/* 
+						Something weird has happened. We've encountered something for a socket we are not keeping track of anymore.
+						Maybe it's not a big deal? Let's just skip over it.
+						*/
+						continue;
+					}
+
+
+					SocketConnection_p ready_socket = socket_iter->second.second;
 
 					if (!ready_socket) {
 						throw InvalidSocketConnectionException("Invalid socket descriptor", poll_iter->fd);

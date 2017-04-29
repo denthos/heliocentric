@@ -7,6 +7,7 @@
 
 #include <soil.h>
 #include "file_mesh.h"
+#include "camera.h"
 
 #include <string>
 #include <iostream>
@@ -15,7 +16,7 @@ class Model {
 public:
 	Model() {}
 	Model(GLchar* file);
-	void Draw(Shader &shader);
+	void Draw(Shader &shader, const Camera & camera);
 	void Update(glm::mat4 &parent);
 
 	glm::mat4 world_mat;

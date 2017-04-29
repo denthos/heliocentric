@@ -1,4 +1,5 @@
 #pragma once
+#include "camera.h"
 #include "sphere_mesh.h"
 #include "orbit.h"
 class PlanetModel {
@@ -15,7 +16,7 @@ public:
 	~PlanetModel();
 
 
-	void Draw(Shader &shader);
+	void Draw(Shader &shader, const Camera &);
 	void Update(glm::mat4 &parent);
 
 };

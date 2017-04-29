@@ -10,21 +10,23 @@
 #define MODEL_UNIFORM "model"
 
 
-
+#include "camera.h"
+#include "logging.h"
 
 
 void Mesh::Update(glm::mat4 & parent)
 {
 	world_mat = glm::mat4(1.0f);
+	world_mat = world_mat * scale_mat;
 	world_mat = world_mat * rot_mat;
 	world_mat = world_mat * trans_mat;
-	world_mat = world_mat * scale_mat;
+	
 
 	world_mat = parent * world_mat;
 }
 
 //TODO: separate binding functions for each mesh component? bind texture, bind material, bind light
-void Mesh::Draw(Shader &shader)
+void Mesh::Draw(Shader &shader, const Camera & camera)
 {
 	//which diffuse and specular samplers
 	GLuint diffuse_num = 1;
@@ -36,11 +38,11 @@ void Mesh::Draw(Shader &shader)
 	shader.bind(); //start using our shader
 
 				   //pass camera, window matrices, and model's world matrix info to shader uniform variables
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, PROJECTION_UNIFORM), 1, GL_FALSE, &Client::perspectiveMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, PROJECTION_UNIFORM), 1, GL_FALSE, &camera.perspective[0][0]);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, VIEW_UNIFORM), 1, GL_FALSE, &Client::viewMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, VIEW_UNIFORM), 1, GL_FALSE, &camera.view[0][0]);
 
-	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), Client::camPos.x, Client::camPos.y, Client::camPos.z);
+	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), camera.position.x, camera.position.y, camera.position.z);
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &world_mat[0][0]);
 
@@ -76,7 +78,7 @@ void Mesh::Draw(Shader &shader)
 	glBindVertexArray(VAO);
 
 	//draw
-	glDrawElements(GL_TRIANGLES, mesh_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (GLsizei) mesh_indices.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
 
@@ -140,7 +142,7 @@ void Mesh::createMesh()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-		std::cerr << "Error while creating mesh!" << std::endl;
+		Lib::LOG_ERR("Error while creating mesh!");
 	}
 
 	//unbind buffers

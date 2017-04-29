@@ -13,7 +13,6 @@ class PlayerUpdate;
 class Player : public Identifiable {
 public:
 	friend PlayerUpdate;
-
 	Player(std::string player_name);
 	Player(std::string player_name, UID id);
 

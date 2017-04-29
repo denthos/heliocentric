@@ -11,10 +11,10 @@ Model::Model(GLchar * file)
 
 }
 
-void Model::Draw(Shader &shader)
+void Model::Draw(Shader &shader, const Camera & camera)
 {
 	for (GLuint i = 0; i < meshes.size(); i++) {
-		meshes[i].Draw(shader);
+		meshes[i].Draw(shader, camera);
 	}
 }
 
