@@ -15,8 +15,39 @@ protected:
 	int combatDefense;
 	int combatRange; // An attackable game object can attack its target only when target is in this range.
 	int health;
-	
+
+
+	/** Combat Hooks **/
+
+	/**
+	Hook that allows defender to react after being attacked.
+	@param The attacking opponent
+	*/
+	virtual void handle_counter(AttackableGameObject* attacker) {};
+
+	/**
+	Hook for handling when an initiated attack fails because the opponent
+	is out of range. 
+	@param The combat opponent.
+	*/
+	virtual void handle_out_of_range(AttackableGameObject* opponent) {}
+
+	/**
+	Hook for handling when the attackable's health drops below zero.
+	@param The defeating opponent.
+	*/
+	virtual void handle_defeat(AttackableGameObject* opponent) {}
+
+	/**
+	Hook for handling an opponent's defeat. 
+	@param The defeated opponent.
+	*/
+	virtual void handle_victory(AttackableGameObject* opponent) {}
+
+
 public:
+
+
 	/**
 	Creates an attackable 
 	*/
@@ -78,4 +109,13 @@ public:
 	@return Health of this unit after taking damage from the attack.
 	*/
 	int take_damage(AttackableGameObject* attacker);
+
+
+	/**
+	Performs combat logic for attackable game objects. For implementing interesting 
+	combat logic, the handle_* hooks are available for subclasses to override. 
+	@param The target to attack.
+	*/
+	void do_attack(AttackableGameObject* target);
 };
+

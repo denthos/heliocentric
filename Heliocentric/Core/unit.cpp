@@ -17,8 +17,7 @@ void Unit::update_command() {
 	case idle:
 		break;
 	case attack:
-		// Placeholder parameter. Cannot quite get target yet, as "delta" of a unit has not been implemented.
-		do_attack(this);
+		do_attack(this->target);
 		break;
 	case move:
 		do_move();
@@ -43,13 +42,23 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 };
 
 glm::vec3 Unit::get_destination() {
-	return this->destination;
+	return *this->destination;
 }
 
 glm::vec3 Unit::set_destination(glm::vec3 destination) {
-	this->destination = destination;
-	return this->destination;
+	this->destination = &destination;
+	currentCommand = move;
+	return *this->destination;
 }
+
+
+glm::vec3 Unit::set_destination(GameObject* object) {
+	// Follow object as it moves.
+	this->destination = &object->get_position();
+	currentCommand = move;
+	return *this->destination;
+}
+
 
 int Unit::get_movement_speed_max() {
 	return this->movementSpeedMax;
@@ -60,20 +69,40 @@ int Unit::set_movmennt_speed_max(int movementSpeedMax) {
 	return this->movementSpeedMax;
 }
 
-Unit* Unit::do_attack(Unit* target) {
-	Lib::assertTrue(target != this, "Unit attacking itself.");
-	if (glm::distance(this->position, target->get_position()) > (float) this->combatRange) {
-		do_move();
-	}
-	else {
-		int targetHealth = target->take_damage(this);
-		// Reset unit to idle if target is dead.
-		if (targetHealth <= 0) this->currentCommand = idle;
-	}
-
-	return target;
+void Unit::set_combat_target(AttackableGameObject* target) {
+	this->target = target;
+	currentCommand = attack;
 }
 
 glm::vec3 Unit::do_move() {
-	return this->position;
+	// Move towards destination.
+	float speed = fmin((float) movementSpeedMax, glm::distance(*destination, position));
+	position += glm::normalize(*destination - position) * speed;
+	return position;
 }
+
+void Unit::handle_out_of_range(AttackableGameObject * opponent)
+{
+	// Move towards opponent if in attack mode.
+	if (currentCommand == attack) {
+		set_destination(opponent);
+		do_move();
+		currentCommand = attack;
+	}
+}
+
+void Unit::handle_defeat(AttackableGameObject * opponent)
+{
+	// Tell Player you have died.
+	player->add_to_destroy(this);
+	player = NULL;
+}
+
+void Unit::handle_victory(AttackableGameObject * opponent)
+{
+	// Go back to idle if unit was attacking
+	currentCommand = (currentCommand == attack) ? idle : currentCommand;
+	
+	// TODO: Gain experience (?)
+}
+
