@@ -41,9 +41,9 @@ int AttackableGameObject::get_health() {
 	return this->health;
 }
 
-int AttackableGameObject::take_damage(AttackableGameObject* attacker) {
-	int damage = (int)((attacker->get_combat_attack() / this->combatDefense) * 50);
-	this->health = this->health - damage;
+int AttackableGameObject::take_damage(int damage) {
+	int total_damage = (int)((damage / this->combatDefense) * 50);
+	this->health = this->health - total_damage;
 	return this->health;
 }
 
@@ -59,7 +59,7 @@ void AttackableGameObject::do_attack(AttackableGameObject * target)
 	if (glm::distance(this->position, target->get_position()) <= (float) this->combatRange) {
 		// Target is within range.
 
-		target->take_damage(this);
+		target->take_damage(this->get_combat_attack());
 
 		if (target->health <= 0) {
 			target->handle_defeat(this);
