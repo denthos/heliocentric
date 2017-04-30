@@ -12,7 +12,7 @@ namespace Test
 
 	public: 
 		TestUnit(UID id, glm::vec3 position) : Unit(id, position, NULL, 1, 1, 200, 100) {
-			this->movementSpeedMax = 200;
+			this->movement_speed = 200;
 		}
 
 		bool is_in_attack_mode() {

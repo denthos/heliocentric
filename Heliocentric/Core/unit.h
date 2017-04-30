@@ -18,8 +18,8 @@ public:
 
 	friend UnitUpdate;
 
-	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed = 1);
-	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed = 1);
+	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
+	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
 
 	/** 
 	Perform logic based on command. Called continuously by server to update current state 
@@ -56,14 +56,14 @@ public:
 	Returns the maximum movement speed of this unit.
 	@return The maximum movement speed of this unit.
 	*/
-	int get_movement_speed_max();
+	float get_movement_speed_max();
 
 	/**
 	Sets the maximum movement speed of this unit.
 	@param The maximum movement speed of this unit.
 	@return The maximum movement speed of this unit.
 	*/
-	int set_movmennt_speed_max(int movementSpeedMax);
+	void set_movement_speed_max(float movement_speed);
 
 
 	/**
@@ -83,8 +83,7 @@ protected:
 
 	enum CommandType { attack, idle, move };
 
-	int movementSpeedMax; // maximum speed that this unit can achieve when powered by its own engine
-	int movementSpeedCurrent; // can be used if implementing gravity simulation
+	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
 
 	std::shared_ptr<UnitUpdate> update;
 	CommandType currentCommand = idle;

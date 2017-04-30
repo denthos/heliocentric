@@ -2,16 +2,16 @@
 #include "logging.h"
 #include "unit_update.h"
 
-Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed):
+Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed):
 	AttackableGameObject(pos, owner, att, def, range, heal) {
 	this->update = std::make_shared<UnitUpdate>();
-	this->movementSpeedMax = movement_speed;
+	this->movement_speed = movement_speed;
 }
 
-Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed):
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
 	AttackableGameObject(id, pos, owner, att, def, range, heal) {
 	this->update = std::make_shared<UnitUpdate>();
-	this->movementSpeedMax = movement_speed;
+	this->movement_speed = movement_speed;
 }
 
 void Unit::do_logic() {
@@ -58,13 +58,12 @@ glm::vec3 Unit::set_destination(GameObject* object) {
 }
 
 
-int Unit::get_movement_speed_max() {
-	return this->movementSpeedMax;
+float Unit::get_movement_speed_max() {
+	return this->movement_speed;
 }
 
-int Unit::set_movmennt_speed_max(int movementSpeedMax) {
-	this->movementSpeedMax = movementSpeedMax;
-	return this->movementSpeedMax;
+void Unit::set_movement_speed_max(float movement_speed) {
+	this->movement_speed = movement_speed;
 }
 
 void Unit::set_combat_target(AttackableGameObject* target) {
@@ -75,7 +74,7 @@ void Unit::set_combat_target(AttackableGameObject* target) {
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
 	if (destination != position) {
-		float speed = fmin((float)movementSpeedMax, glm::distance(destination, position));
+		float speed = fmin(movement_speed, glm::distance(destination, position));
 		position += glm::normalize(destination - position) * speed;
 	}
 	else {
