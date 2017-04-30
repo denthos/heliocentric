@@ -73,7 +73,7 @@ namespace SunNet {
 					}
 
 					SocketStatus status;
-					if ((poll_iter->revents & (POLLERR | POLLNVAL)) {
+					if (poll_iter->revents & (POLLERR | POLLNVAL)) {
 						status = SOCKET_STATUS_ERROR;
 					}
 					else if (poll_iter->revents & (POLLHUP)) {
