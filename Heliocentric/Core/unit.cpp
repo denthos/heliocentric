@@ -12,6 +12,12 @@ Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, in
 	this->update = std::make_shared<UnitUpdate>();
 }
 
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed) :
+	AttackableGameObject(id, pos, owner, att, def, range, heal) {
+	this->update = std::make_shared<UnitUpdate>();
+	this->movementSpeedMax = movement_speed;
+}
+
 void Unit::do_logic() {
 	switch (currentCommand) {
 	case idle:

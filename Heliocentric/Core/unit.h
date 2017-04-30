@@ -20,6 +20,7 @@ public:
 
 	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
+	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed);
 
 	/** 
 	Perform logic based on command. Called continuously by server to update current state 
