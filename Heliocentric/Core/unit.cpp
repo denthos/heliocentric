@@ -40,21 +40,21 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 };
 
 glm::vec3 Unit::get_destination() {
-	return *this->destination;
+	return this->destination;
 }
 
-glm::vec3 Unit::set_destination(glm::vec3& destination) {
-	this->destination = &destination;
+glm::vec3 Unit::set_destination(glm::vec3 destination) {
+	this->destination = destination;
 	currentCommand = move;
-	return *this->destination;
+	return this->destination;
 }
 
 
 glm::vec3 Unit::set_destination(GameObject* object) {
 	// Follow object as it moves.
-	this->destination = &object->get_position();
+	this->destination = object->get_position();
 	currentCommand = move;
-	return *this->destination;
+	return this->destination;
 }
 
 
@@ -74,8 +74,8 @@ void Unit::set_combat_target(AttackableGameObject* target) {
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
-	float speed = fmin((float) movementSpeedMax, glm::distance(*destination, position));
-	position += glm::normalize(*destination - position) * speed;
+	float speed = fmin((float) movementSpeedMax, glm::distance(destination, position));
+	position += glm::normalize(destination - position) * speed;
 	return position;
 }
 
