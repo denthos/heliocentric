@@ -67,6 +67,12 @@ public:
 	void set_combat_target(AttackableGameObject* target);
 
 
+	/**
+	Sets the command state of the unit
+	**/
+	void set_command(CommandType command);
+
+
 protected:
 
 	/**

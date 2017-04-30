@@ -28,7 +28,6 @@ glm::vec3 Unit::get_destination() {
 
 glm::vec3 Unit::set_destination(glm::vec3 destination) {
 	this->destination = destination;
-	currentCommand = UNIT_MOVE;
 	return this->destination;
 }
 
@@ -36,7 +35,6 @@ glm::vec3 Unit::set_destination(glm::vec3 destination) {
 glm::vec3 Unit::set_destination(GameObject* object) {
 	// Follow object as it moves.
 	this->destination = object->get_position();
-	currentCommand = UNIT_MOVE;
 	return this->destination;
 }
 
@@ -52,8 +50,12 @@ int Unit::set_movmennt_speed_max(int movementSpeedMax) {
 
 void Unit::set_combat_target(AttackableGameObject* target) {
 	this->target = target;
-	currentCommand = UNIT_ATTACK;
 }
+
+void Unit::set_command(CommandType command) {
+	currentCommand = command;
+}
+
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
@@ -74,7 +76,6 @@ void Unit::handle_out_of_range(AttackableGameObject * opponent)
 	if (currentCommand == UNIT_ATTACK) {
 		set_destination(opponent);
 		do_move();
-		currentCommand = UNIT_ATTACK;
 	}
 }
 
