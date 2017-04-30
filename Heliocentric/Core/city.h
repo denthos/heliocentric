@@ -16,7 +16,7 @@ public:
 	int get_population();
 	void set_population(int new_pop);
 	Slot* get_slot();
-	const glm::vec3& get_position();
+	glm::vec3 get_position();
 
 private:
 	int production;
