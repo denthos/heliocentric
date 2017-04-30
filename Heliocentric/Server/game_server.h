@@ -84,6 +84,10 @@ protected:
 		Lib::LOG_ERR("Server error");
 	}
 
+	virtual void handle_server_disconnect() {
+		Lib::LOG_ERR("Server disconnect...");
+	}
+
 	virtual void handle_channeledclient_error(SunNet::ChanneledSocketConnection_p client);
 	virtual void handle_channeledclient_connect(SunNet::ChanneledSocketConnection_p client);
 	virtual void handle_poll_timeout() {}

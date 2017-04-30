@@ -29,6 +29,10 @@ protected:
 		std::cout << "CLIENT DISCONNECT!" << std::endl;
 	}
 
+	virtual void handle_server_disconnect() {
+		std::cout << "SERVER DISCONNECT" << std::endl;
+	}
+
 public:
 	TestServer(std::string address, std::string port, int queue_size) :
 		ChanneledServer<SunNet::TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}

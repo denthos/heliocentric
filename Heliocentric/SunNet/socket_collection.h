@@ -3,12 +3,27 @@
 #include <unordered_set>
 
 namespace SunNet {
-	typedef std::unordered_set<SocketConnection_p, SocketConnection_p_hash> SocketCollection;
-	typedef std::shared_ptr<SocketCollection> SocketCollection_p;
+	enum SocketStatus {
+		SOCKET_STATUS_NORMAL,
+		SOCKET_STATUS_DISCONNECT,
+		SOCKET_STATUS_ERROR
+	};
 
-	struct SocketConnection_p_hash {
-		std::size_t operator()(const SocketConnection_p& connection_ptr) const {
-			return std::hash<SOCKET>()(connection_ptr->socket_descriptor);
+	struct SocketCollectionEntry {
+		SocketConnection_p connection;
+		SocketStatus status;
+
+		friend bool operator==(const SocketCollectionEntry& lhs, const SocketCollectionEntry& rhs) {
+			return (lhs.connection == rhs.connection);
 		}
 	};
+
+	struct SocketCollectionEntry_hash {
+		std::size_t operator()(const SocketCollectionEntry& collection_entry) const {
+			return std::hash<SOCKET>()(collection_entry.connection->socket_descriptor);
+		}
+	};
+
+	typedef std::unordered_set<SocketCollectionEntry, SocketCollectionEntry_hash> SocketCollection;
+	typedef std::shared_ptr<SocketCollection> SocketCollection_p;
 }

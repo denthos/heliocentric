@@ -43,11 +43,10 @@ namespace SunNet {
 	 */
 	class SocketConnection {
 
-	friend struct SocketConnection_p_hash;
+	friend struct SocketCollectionEntry_hash;
 	friend class PollService;
 
 	private:
-		bool in_error_state;
 		SOCKET socket_descriptor; /** < The underlying OS socket descriptor */
 		std::unique_ptr<struct addrinfo_data, addrinfo_delete> address_info; 
 
@@ -134,9 +133,6 @@ namespace SunNet {
 		@throws AcceptException if there is an error accepting
 		*/
 		std::shared_ptr<SocketConnection> accept() const;
-
-		bool has_error() { return this->in_error_state;  }
-		void set_error() { this->in_error_state = true; }
 	};
 
 	class ApiInitializationException : public std::runtime_error {

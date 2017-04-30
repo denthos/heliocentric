@@ -93,11 +93,16 @@ namespace SunNet {
 				}
 
 				for (auto socket_it = ready_sockets->begin(); socket_it != ready_sockets->end(); ++socket_it) {
-					if (*socket_it == this->server_connection) {
-						if ((*socket_it)->has_error()) {
+					if (socket_it->connection == this->server_connection) {
+						if (socket_it->status == SOCKET_STATUS_ERROR) {
 							/* CHECKPOINT */
 							if (this->state == DESTRUCTING) break;
 							this->handle_server_connection_error();
+						}
+						else if (socket_it->status == SOCKET_STATUS_DISCONNECT) {
+							/* CHECKPOINT */
+							if (this->state == DESTRUCTING) break;
+							this->handle_server_disconnect();
 						}
 						else {
 							/* CHECKPOINT */
@@ -106,15 +111,21 @@ namespace SunNet {
 						}
 					}
 					else {
-						if ((*socket_it)->has_error()) {
+						if (socket_it->status == SOCKET_STATUS_ERROR) {
 							/* CHECKPOINT */
 							if (this->state == DESTRUCTING) break;
-							this->handle_client_error(*socket_it);
+							this->handle_client_error(socket_it->connection);
+						}
+						else if (socket_it->status == SOCKET_STATUS_DISCONNECT) {
+
+							/* CHECKPOINT */
+							if (this->state == DESTRUCTING) break;
+							this->handle_client_disconnect(socket_it->connection);
 						}
 						else{
 							/* CHECKPOINT */
 							if (this->state == DESTRUCTING) break;
-							this->handle_ready_to_read(*socket_it);
+							this->handle_ready_to_read(socket_it->connection);
 						}
 					}
 				}
@@ -158,9 +169,11 @@ namespace SunNet {
 
 		/* Handlers for an inheritor to implement */
 		virtual void handle_server_connection_error() = 0;
+		virtual void handle_server_disconnect() = 0;
 		virtual void handle_client_error(SocketConnection_p client) = 0;
 		virtual void handle_client_connect(SocketConnection_p client) = 0;
 		virtual void handle_ready_to_read(SocketConnection_p client) = 0;
+		virtual void handle_client_disconnect(SocketConnection_p client) = 0;
 		virtual void handle_poll_timeout() = 0;
 
 	public:

@@ -86,11 +86,16 @@ namespace SunNet {
 				
 				for (auto socket_iter = ready_sockets->begin(); socket_iter != ready_sockets->end(); ++socket_iter) {
 
-					if (*socket_iter == this->connection) {
-						if ((*socket_iter)->has_error()) {
+					if (socket_iter->connection == this->connection) {
+						if (socket_iter->status == SOCKET_STATUS_ERROR) {
 							/* CHECKPOINT */
 							if (this->state == CLIENT_DESTRUCTING) break;
 							this->handle_client_error();
+						}
+						else if (socket_iter->status == SOCKET_STATUS_DISCONNECT) {
+							/* CHECKPOINT */
+							if (this->state == CLIENT_DESTRUCTING) break;
+							this->handle_client_disconnect();
 						}
 						else {
 							/* CHECKPOINT */
@@ -112,6 +117,7 @@ namespace SunNet {
 		virtual void handle_client_error() = 0;
 		virtual void handle_client_ready_to_read() = 0;
 		virtual void handle_poll_timeout() = 0;
+		virtual void handle_client_disconnect() = 0;
 
 	public:
 		template <class ... ArgTypes>

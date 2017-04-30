@@ -42,11 +42,18 @@ namespace SunNet {
 			handle_channeledclient_connect(std::static_pointer_cast<ChanneledSocketConnection>(client));
 		}
 
+		/* Handler for server's handle_client_disconnect */
+		void handle_client_disconnect(SocketConnection_p client) {
+			this->removeFromPollService(client);
+			handleClientDisconnect(std::static_pointer_cast<ChanneledSocketConnection>(client));
+		}
+
 		/**** Handlers for ChanneledServer ****/
 		virtual void handleClientDisconnect(ChanneledSocketConnection_p client) = 0;
 
 		/**** Handlers for server class ****/
 		virtual void handle_server_connection_error() = 0;
+		virtual void handle_server_disconnect() = 0;
 		virtual void handle_channeledclient_error(ChanneledSocketConnection_p client) = 0;
 		virtual void handle_channeledclient_connect(ChanneledSocketConnection_p client) = 0;
 		virtual void handle_poll_timeout() = 0;
