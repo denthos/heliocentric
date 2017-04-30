@@ -16,6 +16,8 @@ public:
 
 	friend UnitUpdate;
 
+	enum CommandType { UNIT_ATTACK , UNIT_IDLE, UNIT_MOVE };
+
 	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 
@@ -73,11 +75,9 @@ protected:
 	*/
 	glm::vec3 do_move();
 
-	enum CommandType { attack, idle, move };
-
 	int movementSpeedMax; // maximum speed that this unit can achieve when powered by its own engine
 	int movementSpeedCurrent; // can be used if implementing gravity simulation
-	CommandType currentCommand = idle;
+	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
 	AttackableGameObject* target;
 

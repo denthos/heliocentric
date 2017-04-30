@@ -16,11 +16,11 @@ namespace Test
 		}
 
 		bool is_in_attack_mode() {
-			return this->currentCommand == Unit::attack;
+			return this->currentCommand == Unit::UNIT_ATTACK;
 		}
 
 		bool is_in_idle_mode() {
-			return this->currentCommand == Unit::idle;
+			return this->currentCommand == Unit::UNIT_IDLE;
 		}
 	};
 

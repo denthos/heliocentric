@@ -9,12 +9,12 @@ Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, in
 
 void Unit::update() {
 	switch (currentCommand) {
-	case idle:
+	case UNIT_IDLE:
 		break;
-	case attack:
+	case UNIT_ATTACK:
 		do_attack(this->target);
 		break;
-	case move:
+	case UNIT_MOVE:
 		do_move();
 		break;
 	default:
@@ -28,7 +28,7 @@ glm::vec3 Unit::get_destination() {
 
 glm::vec3 Unit::set_destination(glm::vec3 destination) {
 	this->destination = destination;
-	currentCommand = move;
+	currentCommand = UNIT_MOVE;
 	return this->destination;
 }
 
@@ -36,7 +36,7 @@ glm::vec3 Unit::set_destination(glm::vec3 destination) {
 glm::vec3 Unit::set_destination(GameObject* object) {
 	// Follow object as it moves.
 	this->destination = object->get_position();
-	currentCommand = move;
+	currentCommand = UNIT_MOVE;
 	return this->destination;
 }
 
@@ -52,7 +52,7 @@ int Unit::set_movmennt_speed_max(int movementSpeedMax) {
 
 void Unit::set_combat_target(AttackableGameObject* target) {
 	this->target = target;
-	currentCommand = attack;
+	currentCommand = UNIT_ATTACK;
 }
 
 glm::vec3 Unit::do_move() {
@@ -63,7 +63,7 @@ glm::vec3 Unit::do_move() {
 	}
 	else {
 		// Reaced destination
-		currentCommand = idle;
+		currentCommand = UNIT_IDLE;
 	}
 	return position;
 }
@@ -71,10 +71,10 @@ glm::vec3 Unit::do_move() {
 void Unit::handle_out_of_range(AttackableGameObject * opponent)
 {
 	// Move towards opponent if in attack mode.
-	if (currentCommand == attack) {
+	if (currentCommand == UNIT_ATTACK) {
 		set_destination(opponent);
 		do_move();
-		currentCommand = attack;
+		currentCommand = UNIT_ATTACK;
 	}
 }
 
@@ -88,7 +88,7 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 void Unit::handle_victory(AttackableGameObject * opponent)
 {
 	// Go back to idle if unit was attacking
-	currentCommand = (currentCommand == attack) ? idle : currentCommand;
+	currentCommand = (currentCommand == UNIT_ATTACK) ? UNIT_IDLE : currentCommand;
 	
 	// TODO: Gain experience (?)
 }
