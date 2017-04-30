@@ -1,4 +1,5 @@
 #include "attackable_game_object.h"
+#include "logging.h"
 
 
 AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, int att, int def, int range, int heal) : 
@@ -48,8 +49,10 @@ int AttackableGameObject::take_damage(AttackableGameObject* attacker) {
 
 void AttackableGameObject::do_attack(AttackableGameObject * target)
 {	
-	Lib::assertTrue(target != this, "Attackable cannot attack itself.");
-	Lib::assertTrue(target->player != this->player, "Player cannot attack their own attackables.");
+	if (target == this || target->player == this->player) {
+		Lib::LOG_ERR("Cannot attack same player.");
+		return;
+	}
 
 	bool target_is_dead = false, this_is_dead = false;
 
