@@ -57,8 +57,14 @@ void Unit::set_combat_target(AttackableGameObject* target) {
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
-	float speed = fmin((float) movementSpeedMax, glm::distance(destination, position));
-	position += glm::normalize(destination - position) * speed;
+	if (destination != position) {
+		float speed = fmin((float)movementSpeedMax, glm::distance(destination, position));
+		position += glm::normalize(destination - position) * speed;
+	}
+	else {
+		// Reaced destination
+		currentCommand = idle;
+	}
 	return position;
 }
 
