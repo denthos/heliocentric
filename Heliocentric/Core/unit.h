@@ -18,6 +18,8 @@ public:
 
 	friend UnitUpdate;
 
+	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE };
+
 	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
 	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
 
@@ -73,6 +75,12 @@ public:
 	void set_combat_target(AttackableGameObject* target);
 
 
+	/**
+	Sets the command state of the unit
+	**/
+	void set_command(CommandType command);
+
+
 protected:
 
 	/**
@@ -81,12 +89,10 @@ protected:
 	*/
 	glm::vec3 do_move();
 
-	enum CommandType { attack, idle, move };
-
 	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
 
 	std::shared_ptr<UnitUpdate> update;
-	CommandType currentCommand = idle;
+	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
 	AttackableGameObject* target;
 

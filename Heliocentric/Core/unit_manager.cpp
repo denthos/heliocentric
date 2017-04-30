@@ -10,6 +10,7 @@ UnitManager::UnitManager() {
 	glm::vec3 destination(100.0f, 100.0f, 100.0f);
 	for (auto& active_unit : this->active_units) {
 		active_unit->set_destination(destination);
+		active_unit->set_command(Unit::UNIT_MOVE);
 	}
 }
 

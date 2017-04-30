@@ -16,11 +16,11 @@ namespace Test
 		}
 
 		bool is_in_attack_mode() {
-			return this->currentCommand == Unit::attack;
+			return this->currentCommand == Unit::UNIT_ATTACK;
 		}
 
 		bool is_in_idle_mode() {
-			return this->currentCommand == Unit::idle;
+			return this->currentCommand == Unit::UNIT_IDLE;
 		}
 	};
 
@@ -38,6 +38,7 @@ namespace Test
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
+			unit_1->set_command(Unit::UNIT_ATTACK);
 			Assert::IsTrue(unit_1->is_in_attack_mode());
 			Assert::IsTrue(unit_2->is_in_idle_mode());
 		}
@@ -56,6 +57,7 @@ namespace Test
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
+			unit_1->set_command(Unit::UNIT_ATTACK);
 			unit_1->do_logic();
 			Assert::AreEqual(unit_2->get_health(), 50);
 			Assert::AreEqual(unit_1->get_health(), 100);
@@ -77,6 +79,7 @@ namespace Test
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
+			unit_1->set_command(Unit::UNIT_ATTACK);
 			unit_1->do_logic();
 
 			// Unit got closer
@@ -104,6 +107,7 @@ namespace Test
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
+			unit_1->set_command(Unit::UNIT_ATTACK);
 
 			// Kill unit_2 : should take two hits
 			unit_1->do_logic();

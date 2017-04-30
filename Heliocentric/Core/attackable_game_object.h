@@ -102,13 +102,12 @@ public:
 	int get_health();
 
 	/**
-	Calculates damage inflicted on this unit and set subtract damage from this
-	unit's health. Returns unit's health after taking damage. Unit is dead if
-	remaining health becomes less than or equal to zero.
+	Subtract damage from this unit's health. Returns unit's health after taking 
+	damage. Unit is dead if remaining health becomes less than or equal to zero.
 	@param attacker The attackable object that initiated the attack.
 	@return Health of this unit after taking damage from the attack.
 	*/
-	int take_damage(AttackableGameObject* attacker);
+	int take_damage(int damage);
 
 
 	/**
