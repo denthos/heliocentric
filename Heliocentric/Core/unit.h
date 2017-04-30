@@ -18,9 +18,8 @@ public:
 
 	friend UnitUpdate;
 
-	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
-	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
-	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed);
+	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed = 1);
+	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed = 1);
 
 	/** 
 	Perform logic based on command. Called continuously by server to update current state 

@@ -2,17 +2,13 @@
 #include "logging.h"
 #include "unit_update.h"
 
-Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
+Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed):
 	AttackableGameObject(pos, owner, att, def, range, heal) {
 	this->update = std::make_shared<UnitUpdate>();
+	this->movementSpeedMax = movement_speed;
 }
 
-Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
-	AttackableGameObject(id, pos, owner, att, def, range, heal) {
-	this->update = std::make_shared<UnitUpdate>();
-}
-
-Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed) :
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, int movement_speed):
 	AttackableGameObject(id, pos, owner, att, def, range, heal) {
 	this->update = std::make_shared<UnitUpdate>();
 	this->movementSpeedMax = movement_speed;
