@@ -28,13 +28,17 @@
     <ClCompile Include="universe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="base_command.h" />
+    <ClInclude Include="bounding_box.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="config_parser.h" />
-    <ClInclude Include="fileutils.h" />
     <ClInclude Include="debug_pause.h" />
     <ClInclude Include="debug_switch.h" />
+    <ClInclude Include="fileutils.h" />
     <ClInclude Include="game_channels.h" />
     <ClInclude Include="game_object_update.h" />
-    <ClInclude Include="unit_create_command.h" />
+    <ClInclude Include="unit_command.h" />
+    <ClInclude Include="player_command.h" />
     <ClInclude Include="universe.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

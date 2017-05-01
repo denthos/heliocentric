@@ -9,7 +9,7 @@
 #include "city_update.h"
 
 #include "debug_pause.h"
-#include "unit_create_command.h"
+#include "player_command.h"
 
 void initializeChannels() {
 	using channels = SunNet::Channels;
@@ -21,5 +21,5 @@ void initializeChannels() {
 	channels::addNewChannel<CityUpdate>();
 
 	channels::addNewChannel<DebugPause>();
-	channels::addNewChannel<UnitCreateCommand>();
+	channels::addNewChannel<PlayerCommand>();
 }

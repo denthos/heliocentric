@@ -18,7 +18,7 @@
 #include "universe.h"
 
 #include "debug_pause.h"
-#include "unit_create_command.h"
+#include "player_command.h"
 
 class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 	/*
@@ -65,7 +65,7 @@ private:
 	}
 
 	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
-	void handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCreateCommand> creation_command);
+	void handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
 
 	void subscribeToChannels();
 	void performUpdates();

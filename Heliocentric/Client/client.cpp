@@ -20,7 +20,7 @@
 #include "logging.h"
 
 #include "debug_pause.h"
-#include "unit_create_command.h"
+#include "player_command.h"
 
 
 #define VERT_SHADER "Shaders/shader.vert"
@@ -228,7 +228,8 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 			break;
 		case(GLFW_KEY_F2):
 			/* Create a new unit */
-			UnitCreateCommand command;
+			PlayerCommand command;
+			command.command_type = PlayerCommand::cmd_create;
 			command.player_id = 0;
 			command.x = 50.0f;
 			command.y = 50.0f;
