@@ -16,6 +16,8 @@ public:
 
 	friend UnitUpdate;
 
+	enum CommandType { UNIT_ATTACK , UNIT_IDLE, UNIT_MOVE };
+
 	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
 
@@ -38,6 +40,13 @@ public:
 	glm::vec3 set_destination(glm::vec3 destination);
 
 	/**
+	Sets the unit to follow the given game object.
+	@param The game object which this unit should follow.
+	@return The destination of this unit.
+	*/
+	glm::vec3 set_destination(GameObject* object);
+
+	/**
 	Returns the maximum movement speed of this unit.
 	@return The maximum movement speed of this unit.
 	*/
@@ -50,13 +59,21 @@ public:
 	*/
 	int set_movmennt_speed_max(int movementSpeedMax);
 
-protected:
+
 	/**
 	Tells the unit to attack the target.
-	@param target The target that this unit is attacking.
-	@return Target of this unit.
+	@param The target that this unit is attacking.
 	*/
-	Unit* do_attack(Unit* target);
+	void set_combat_target(AttackableGameObject* target);
+
+
+	/**
+	Sets the command state of the unit
+	**/
+	void set_command(CommandType command);
+
+
+protected:
 
 	/**
 	Tells the unit to move towards destination.
@@ -64,10 +81,14 @@ protected:
 	*/
 	glm::vec3 do_move();
 
-	enum CommandType { attack, idle, move };
-
 	int movementSpeedMax; // maximum speed that this unit can achieve when powered by its own engine
 	int movementSpeedCurrent; // can be used if implementing gravity simulation
-	CommandType currentCommand;
+	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
+	AttackableGameObject* target;
+
+	virtual void handle_out_of_range(AttackableGameObject* opponent);
+	virtual void handle_defeat(AttackableGameObject* opponent);
+	virtual void handle_victory(AttackableGameObject* opponent);
+	virtual void handle_counter(AttackableGameObject* opponent) {}
 };
