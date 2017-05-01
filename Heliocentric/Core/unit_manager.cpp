@@ -22,7 +22,7 @@ void UnitManager::doLogic() {
 	}
 }
 
-std::set<std::unique_ptr<Unit>>& UnitManager::get_units() {
+std::unordered_set<std::unique_ptr<Unit>>& UnitManager::get_units() {
 	return this->active_units;
 }
 
