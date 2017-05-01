@@ -18,9 +18,6 @@ SphereMesh::SphereMesh()
 	genMesh();
 
 	createMesh();
-
-	
-
 }
 
 SphereMesh::SphereMesh(float radius, int rings, int sectors)
@@ -44,18 +41,6 @@ SphereMesh::SphereMesh(float radius, int rings, int sectors)
 SphereMesh::~SphereMesh()
 {
 }
-
-void SphereMesh::setTexture(Texture texture)
-{
-	if (mesh_textures.size()) {
-		mesh_textures[0] = texture;
-	}
-	else {
-		mesh_textures.push_back(texture);
-	}
-}
-
-
 
 void SphereMesh::genMesh()
 {

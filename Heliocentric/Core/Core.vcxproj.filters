@@ -44,9 +44,6 @@
     <ClInclude Include="unit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="drawable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="identifiable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -90,12 +87,6 @@
       <Filter>Utility Library</Filter>
     </ClInclude>
     <ClInclude Include="unit_sample.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="bounding_box.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="universe.h">
@@ -173,12 +164,6 @@
       <Filter>Utility Library</Filter>
     </ClCompile>
     <ClCompile Include="attackable_game_object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bounding_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fileutils.cpp">

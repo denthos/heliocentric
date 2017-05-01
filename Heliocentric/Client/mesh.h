@@ -22,17 +22,11 @@ class Mesh
 {
 public:
 
-	glm::mat4 world_mat = glm::mat4(1.0f); //world matrix
-	glm::mat4 scale_mat = glm::mat4(1.0f);
-	glm::mat4 rot_mat = glm::mat4(1.0f);
-	glm::mat4 trans_mat = glm::mat4(1.0f);
+	virtual void update();
 
-	void Update(glm::mat4 &parent); //TODO
+	virtual void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld); //draws mesh
 
-	void Draw(Shader &shader, const Camera & camera); //draws mesh
-
-
-
+	virtual void setTexture(Texture & texture);
 
 	std::vector<GLuint> mesh_indices;
 	std::vector<Vertex> mesh_vertices; //mesh vertices and their info
@@ -43,11 +37,10 @@ public:
 	//TODO set material functions
 	//TODO add Texture
 
-	void setScale(glm::mat4 scale);
-
 protected:
 	//vertex array, vertex buffer, uniform buffer
 	GLuint VAO, VBO, EBO, UBO;
 
 	void createMesh(); //opengl binding of mesh data
+	virtual void genMesh();
 };

@@ -47,12 +47,12 @@ void Octree::clear() {
 	}
 }
 
-void Octree::draw(GLuint shader, const Camera & camera) {
+void Octree::draw(const Shader & shader, const Camera & camera) {
 	update();
 	drawNode(shader, camera);
 }
 
-void Octree::drawNode(GLuint shader, const Camera & camera) {
+void Octree::drawNode(const Shader & shader, const Camera & camera) {
 	// Draw this nodes objects
 	for (auto it = objects.begin(); it != objects.end(); ++it) {
 		(*it)->draw(shader, camera);
@@ -110,7 +110,7 @@ void Octree::update() {
 	std::vector<Drawable *> delist;
 
 	for (auto it = objects.begin(); it != objects.end(); ++it) {
-		BoundingBox & boundingBox = (*it)->boundingBox;
+		const BoundingBox & boundingBox = (*it)->getBoundingBox();
 
 		if (boundingBox.min != boundingBox.max) {
 			for (int i = 0; i < 8; ++i) {

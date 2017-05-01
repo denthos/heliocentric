@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="config.ini" />
     <None Include="packages.config" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />
@@ -136,7 +137,10 @@
     <None Include="Shaders\simple_texture.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bounding_box.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="drawable.h" />
     <ClInclude Include="skybox_mesh.h" />
     <ClInclude Include="file_mesh.h" />
     <ClInclude Include="glfw_callback_handler.h" />
@@ -145,7 +149,7 @@
     <ClInclude Include="octree.h" />
     <ClInclude Include="orbit.h" />
     <ClInclude Include="plane.h" />
-    <ClInclude Include="planet.h" />
+    <ClInclude Include="drawable_planet.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="sphere_mesh.h" />
     <ClInclude Include="texture.h" />
@@ -154,7 +158,10 @@
     <ClInclude Include="view_frustum.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bounding_box.cpp" />
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
+    <ClCompile Include="drawable.cpp" />
     <ClCompile Include="skybox_mesh.cpp" />
     <ClCompile Include="file_mesh.cpp" />
     <ClCompile Include="glfw_callback_handler.cpp" />
@@ -163,7 +170,7 @@
     <ClCompile Include="model.cpp" />
     <ClCompile Include="octree.cpp" />
     <ClCompile Include="orbit.cpp" />
-    <ClCompile Include="planet.cpp" />
+    <ClCompile Include="drawable_planet.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="sphere_mesh.cpp" />
     <ClCompile Include="texture.cpp" />

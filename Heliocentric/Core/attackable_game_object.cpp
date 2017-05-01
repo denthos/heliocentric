@@ -1,5 +1,6 @@
 #include "attackable_game_object.h"
 #include "logging.h"
+#include <glm\gtc\matrix_transform.hpp>
 
 
 AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, int att, int def, int range, int heal) : 

@@ -5,41 +5,19 @@
 
 Model::Model(GLchar * file)
 {
-	world_mat = glm::mat4(1.0f);
 	load(file);
-
-
 }
 
-void Model::Draw(Shader &shader, const Camera & camera)
-{
+void Model::draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld) {
 	for (GLuint i = 0; i < meshes.size(); i++) {
-		meshes[i].Draw(shader, camera);
+		meshes[i].draw(shader, camera, toWorld);
 	}
 }
 
-void Model::Update(glm::mat4 &parent)
-{
-	//calc local matrix
-	world_mat = glm::mat4(1.0f);
-	//world_mat = world_mat * rot_mat;
-	//world_mat = world_mat * trans_mat;
-	world_mat = world_mat * scale_mat;
-
-	world_mat = parent * world_mat;
-
-
-	//recursively update children
-
-
+void Model::update() {
 	for (GLuint i = 0; i < meshes.size(); i++) {
-		meshes[i].Update(world_mat);
+		meshes[i].update();
 	}
-}
-
-void Model::setScale(glm::mat4 scale)
-{
-	scale_mat = scale;
 }
 
 void Model::load(std::string file)

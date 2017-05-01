@@ -9,7 +9,7 @@
 
 
 
-#include "planet.h"
+#include "drawable_planet.h"
 #include "skybox_mesh.h"
 #include "glfw_callback_handler.h"
 #include "game_channels.h"
@@ -23,10 +23,6 @@
 #include "unit_create_command.h"
 
 
-
-#define WINDOW_TITLE "Heliocentric"
-#define DEFAULT_WIDTH 1366
-#define DEFAULT_HEIGHT 768
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
 #define CUBEMAP_VERT_SHADER "Shaders/cubemap.vert"
@@ -47,11 +43,7 @@
 #define SKYBOX_LEFT "Textures/Skybox/left.png"
 #define SKYBOX_RIGHT "Textures/Skybox/right.png"
 
-Model rocket;
-
 SkyboxMesh* skybox;
-
-
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
 Shader* cubemapShader;
@@ -69,10 +61,12 @@ bool middleMouseDown = false;
 #define ORBITAL_CAMERA 3
 unsigned char selectedControlScheme = FREE_CAMERA;
 
-Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO config*/) {
-	// TODO: Replace these hardcoded constants with values read from config file
-	windowTitle = WINDOW_TITLE;
-	createWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
+	Lib::INIParser & config = Lib::INIParser::getInstance("config.ini");
+	int width = config.get<int>("ScreenWidth");
+	int height = config.get<int>("ScreenHeight");
+	windowTitle = config.get<std::string>("WindowTitle");
+	createWindow(width, height);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -87,24 +81,24 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 	glEnable(GL_TEXTURE_2D);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000.0f, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000.0f, width, height);
 
-	resizeCallback(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	resizeCallback(width, height);
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
-	
-	//rocket = Model(ROCKET_MODEL);
-	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
 	//TODO rewrite this
-	skybox->world_mat =  glm::scale(skybox->world_mat, glm::vec3(4000.0f));
+	//skybox->world_mat =  glm::scale(skybox->world_mat, glm::vec3(4000.0f));
 
 	for (auto& planet : this->universe.get_planets()) {
-		auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
-		this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
+		//auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
+		//this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
+		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get(), Texture(EARTH_TEXTURE));
+		gameObjects[planet->getID()] = drawablePlanet;
+		planets[planet->getID()] = drawablePlanet;
 	}
 
 	// Set up SunNet client and channel callbacks
@@ -124,18 +118,14 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 	catch (const SunNet::ConnectException&) {
 		Lib::LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
-	//this->connect(std::string address, std::string port);
-	//this->channeled_send<UnitUpdate>(UnitUpdate*);
-
-	// TODO
 }
 
 Client::~Client() {
 	delete shader;
 	delete textureShader;
 
-	for (auto& planet_item : planetMap) {
-		delete planet_item.second.second;
+	for (auto & gameObject : gameObjects) {
+		delete gameObject.second;
 	}
 	GLFWCallbackHandler::remove(window, this);
 }
@@ -191,18 +181,15 @@ void Client::display() {
 
 	camera->calculateViewMatrix();
 
-	for (auto& planet_pair : this->planetMap) {
-		planet_pair.second.second->Draw(*textureShader, *camera);
+	for (auto & gameObject : gameObjects) {
+		octree.insert(gameObject.second);
 	}
-	
-	//rocket.Draw(*textureShader, *camera);
 
-
-	octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
-	//octree.draw(textureShader->getPid(), *camera);
+	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
+	octree.draw(*textureShader, *camera);
 	octree.clear(); // empty octree each frame
 
-	skybox->Draw(*cubemapShader, *camera);
+	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 
 	glfwSwapBuffers(window);
 
@@ -210,11 +197,7 @@ void Client::display() {
 }
 
 void Client::update() {
-	for (auto& planet_pair : this->planetMap) {
-		planet_pair.second.second->Update(glm::translate(glm::mat4(1.0f), planet_pair.second.first->get_position()));
-	}
 
-	rocket.Update(glm::mat4(1.0f));
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -323,31 +306,26 @@ void Client::mouseWheelCallback(double x, double y) {
 
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
-	update->apply(playerMap[update->id]);
+	update->apply(players[update->id]);
 
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
+	update->apply(units[update->id]);
 	Lib::LOG_DEBUG("Unit update received");
-	/*
-	update->apply(unitMap[update->id]);
-	octree.insert(unitMap[update->id]);
-	*/
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
-	update->apply(cityMap[update->id]);
-	octree.insert(cityMap[update->id]);
+	update->apply(cities[update->id]);
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
-	Planet* pl = planetMap[update->id].first;
-	update->apply(pl);
-	octree.insert(planetMap[update->id].first);
+	update->apply(planets[update->id]);
+	gameObjects[update->id]->update();
 }
 
 void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<SlotUpdate> update) {
-	update->apply(slotMap[update->id]);
+	update->apply(slots[update->id]);
 }
 
 void Client::handle_client_disconnect() {

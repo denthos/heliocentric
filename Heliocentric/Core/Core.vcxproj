@@ -20,8 +20,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bounding_box.cpp" />
-    <ClCompile Include="camera.cpp" />
     <ClCompile Include="city_update.cpp" />
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="fileutils.cpp" />
@@ -30,8 +28,6 @@
     <ClCompile Include="universe.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bounding_box.h" />
-    <ClInclude Include="camera.h" />
     <ClInclude Include="config_parser.h" />
     <ClInclude Include="fileutils.h" />
     <ClInclude Include="debug_pause.h" />
@@ -146,7 +142,6 @@
     <ClInclude Include="attackable_game_object.h" />
     <ClInclude Include="city.h" />
     <ClInclude Include="city_update.h" />
-    <ClInclude Include="drawable.h" />
     <ClInclude Include="game_object.h" />
     <ClInclude Include="identifiable.h" />
     <ClInclude Include="locked_item.h" />
@@ -187,16 +182,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets" Condition="Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" />
-    <Import Project="..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets" Condition="Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" />
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GLMathematics.0.9.5.4\build\native\GLMathematics.props'))" />
-    <Error Condition="!Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets'))" />
-    <Error Condition="!Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets'))" />
   </Target>
 </Project>

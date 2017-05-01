@@ -3,7 +3,6 @@
 @brief An abstract class that defines basic game object.
 */
 #pragma once
-#include "drawable.h"
 #include "identifiable.h"
 #include "lib.h"
 #include "player.h"
@@ -13,7 +12,7 @@
 /**
 An abstract class that defines base game object.
 */
-class GameObject : public Drawable, public Identifiable {
+class GameObject : public Identifiable {
 protected:
 	Player* player;
 	glm::vec3 position;
@@ -33,7 +32,7 @@ public:
 	Returns the player who owns this game object.
 	@return The owner of this game object.
 	*/
-	Player* get_player();
+	Player* get_player() const;
 
 	/* *
 	Assign player while no constructor is doing so.
@@ -44,7 +43,7 @@ public:
 	Returns the current position of this game object.
 	@return The current position of this game object.
 	*/
-	glm::vec3 get_position();
+	glm::vec3 get_position() const;
 
 	/**
 	Updates the position of this game object

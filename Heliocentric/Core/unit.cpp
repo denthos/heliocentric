@@ -1,6 +1,8 @@
 #include "unit.h"
 #include "logging.h"
 
+#include <glm\gtc\matrix_transform.hpp>
+
 Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
 	AttackableGameObject(pos, owner, att, def, range, heal) {}
 
