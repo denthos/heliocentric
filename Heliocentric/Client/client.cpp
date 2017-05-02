@@ -116,6 +116,11 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
+		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
+
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
 	try {
@@ -226,6 +231,25 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 	}
 	else if (action == GLFW_RELEASE) {
 		this->keyboard_handler.setKeyUp(key);
+	}
+}
+
+void Client::handleCameraPanButtonDown(int key) {
+	/* We are going to attempt to move the camera! */
+	auto speed = 1.0f;
+	switch (key) {
+	case GLFW_KEY_W:
+		camera->position += speed * glm::vec3(0.0f, 0.0f, -1.0f);
+		break;
+	case GLFW_KEY_S:
+		camera->position -= speed * glm::vec3(0.0f, 0.0f, -1.0f);
+		break;
+	case GLFW_KEY_D:
+		camera->position += glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
+		break;
+	case GLFW_KEY_A:
+		camera->position -= glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
+		break;
 	}
 }
 
