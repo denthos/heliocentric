@@ -229,11 +229,10 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 		case(GLFW_KEY_F2):
 			/* Create a new unit */
 			PlayerCommand command;
-			command.command_type = PlayerCommand::cmd_create;
-			command.player_id = 0;
-			command.x = 50.0f;
-			command.y = 50.0f;
-			command.z = 0.0f;
+			command.command_type = BaseCommand::CMD_CREATE;
+			command.create_location_x = 50.0f;
+			command.create_location_y = 50.0f;
+			command.create_location_z = 0.0f;
 
 			this->channeled_send(&command);
 			break;
