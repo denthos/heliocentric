@@ -1,9 +1,10 @@
 #include "glfw_callback_handler.h"
+#include "logging.h"
 
 std::unordered_map<GLFWwindow *, Client *> GLFWCallbackHandler::clients;
 
 void errorCallback(int error, const char * description) {
-	fprintf(stderr, "%s\n", description); // TODO: use logging utility
+	Lib::LOG_ERR(description);
 }
 void resizeCallback(GLFWwindow * window, int width, int height) {
 	if (GLFWCallbackHandler::clients[window])

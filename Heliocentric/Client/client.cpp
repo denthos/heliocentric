@@ -7,21 +7,26 @@
 #include <stdio.h>
 #include <soil.h>
 
+
+
+#include "drawable_planet.h"
+#include "skybox_mesh.h"
 #include "glfw_callback_handler.h"
 #include "game_channels.h"
-#include "Planet.h"
 #include "sphere_mesh.h"
 #include "transformation.h"
 #include "orbit.h"
 #include "model.h"
+#include "logging.h"
+
+#include "debug_pause.h"
+#include "player_command.h"
 
 
-#define WINDOW_TITLE "Heliocentric"
-#define DEFAULT_WIDTH 1366
-#define DEFAULT_HEIGHT 768
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
-
+#define CUBEMAP_VERT_SHADER "Shaders/cubemap.vert"
+#define CUBEMAP_FRAG_SHADER "Shaders/cubemap.frag"
 #define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 
@@ -30,12 +35,18 @@
 
 #define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
-Model rocket;
-PlanetModel * earth;
-PlanetModel  * sun;
+//skybox texture files
+#define SKYBOX_FRONT "Textures/Skybox/front.png" 
+#define SKYBOX_BACK "Textures/Skybox/back.png"
+#define SKYBOX_TOP "Textures/Skybox/top.png"
+#define SKYBOX_BOTTOM "Textures/Skybox/bottom.png"
+#define SKYBOX_LEFT "Textures/Skybox/left.png"
+#define SKYBOX_RIGHT "Textures/Skybox/right.png"
 
+SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
+Shader* cubemapShader;
 //don't forget to clean up afterwards
 
 GLuint defaultShader;
@@ -50,10 +61,12 @@ bool middleMouseDown = false;
 #define ORBITAL_CAMERA 3
 unsigned char selectedControlScheme = FREE_CAMERA;
 
-Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO config*/) {
-	// TODO: Replace these hardcoded constants with values read from config file
-	windowTitle = WINDOW_TITLE;
-	createWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
+	Lib::INIParser & config = Lib::INIParser::getInstance("config.ini");
+	int width = config.get<int>("ScreenWidth");
+	int height = config.get<int>("ScreenHeight");
+	windowTitle = config.get<std::string>("WindowTitle");
+	createWindow(width, height);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -68,17 +81,25 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 	glEnable(GL_TEXTURE_2D);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000.0f, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000.0f, width, height);
 
-	resizeCallback(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	resizeCallback(width, height);
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
+	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 
-	rocket = Model(ROCKET_MODEL);
-	//rocket.setScale(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f)));
-	earth = new PlanetModel(Texture(EARTH_TEXTURE), 5.0f, Orbit(50.0f, 0.06f));
-	sun = new PlanetModel(Texture(SUN_TEXTURE), 15.0f, Orbit(0.0f, 0.0f));
+	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
+	//TODO rewrite this
+	//skybox->world_mat =  glm::scale(skybox->world_mat, glm::vec3(4000.0f));
+
+	for (auto& planet : this->universe.get_planets()) {
+		//auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
+		//this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
+		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get(), Texture(EARTH_TEXTURE));
+		gameObjects[planet->getID()] = drawablePlanet;
+		planets[planet->getID()] = drawablePlanet;
+	}
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -89,28 +110,23 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(10/*TODO
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
-	std::string address("localhost");
-	std::string port("9876");
+	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
+	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
 	try {
 		this->connect(address, port);
 	}
-	catch (const SunNet::ConnectException & ex) {
-		fprintf(stderr, "Caught connect exception\n");
+	catch (const SunNet::ConnectException&) {
+		Lib::LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
-	//this->connect(std::string address, std::string port);
-	//this->channeled_send<UnitUpdate>(UnitUpdate*);
-
-	// TODO
 }
 
 Client::~Client() {
 	delete shader;
 	delete textureShader;
 
-	delete earth;
-	delete sun;
-	delete camera;
-
+	for (auto & gameObject : gameObjects) {
+		delete gameObject.second;
+	}
 	GLFWCallbackHandler::remove(window, this);
 }
 
@@ -120,7 +136,7 @@ bool Client::isRunning() {
 
 void Client::createWindow(int width, int height) {
 	if (!glfwInit()) {
-		fprintf(stderr, "Could not initialize GLFW\n");
+		Lib::LOG_ERR("Could not initialize GLFW");
 		return;
 	}
 
@@ -134,7 +150,7 @@ void Client::createWindow(int width, int height) {
 	window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
 
 	if (!window) {
-		fprintf(stderr, "Could not create GLFW window\n");
+		Lib::LOG_ERR("Could not create GLFW window");
 		return;
 	}
 
@@ -147,7 +163,7 @@ void Client::createWindow(int width, int height) {
 	GLenum glewErr = glewInit();
 #ifndef __APPLE__
 	if (glewErr != GLEW_OK) {
-		fprintf(stderr, "Glew failed to initialize: %s\n", glewGetErrorString(glewErr));
+		Lib::LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
 		return;
 	}
 #endif
@@ -155,17 +171,25 @@ void Client::createWindow(int width, int height) {
 	resizeCallback(width, height);
 
 	GLFWCallbackHandler::add(window, this);
+
 }
 
 void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 	camera->calculateViewMatrix();
-	
-	earth->Draw(*textureShader, *camera);
-	rocket.Draw(*textureShader, *camera);
-	sun->Draw(*textureShader, *camera);
+
+	for (auto & gameObject : gameObjects) {
+		octree.insert(gameObject.second);
+	}
+
+	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
+	octree.draw(*textureShader, *camera);
+	octree.clear(); // empty octree each frame
+
+	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 
 	glfwSwapBuffers(window);
 
@@ -173,13 +197,11 @@ void Client::display() {
 }
 
 void Client::update() {
-	sun->Update(glm::mat4(1.0f));
-	earth->Update(glm::mat4(1.0f));
-	rocket.Update(glm::mat4(1.0f));
+
 }
 
 void Client::errorCallback(int error, const char * description) {
-	fprintf(stderr, "OpenGL error occurred: %s", description);
+	Lib::LOG_ERR("OpenGL Error occurred: ", description);
 }
 
 void Client::resizeCallback(int width, int height) {
@@ -198,6 +220,21 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 		switch (key) {
 		case(GLFW_KEY_ESCAPE):
 			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case(GLFW_KEY_F1):
+			/* Toggle the server's pause state */
+			DebugPause pause;
+			this->channeled_send<DebugPause>(&pause);
+			break;
+		case(GLFW_KEY_F2):
+			/* Create a new unit */
+			PlayerCommand command;
+			command.command_type = BaseCommand::CMD_CREATE;
+			command.create_location_x = 50.0f;
+			command.create_location_y = 50.0f;
+			command.create_location_z = 0.0f;
+
+			this->channeled_send(&command);
 			break;
 		}
 	}
@@ -267,27 +304,45 @@ void Client::mouseWheelCallback(double x, double y) {
 	camera->position = glm::vec3(glm::translate(glm::mat4(1.0f), camera->position * (float)y * -0.05f) * glm::vec4(camera->position, 1.0f));
 }
 
+
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
-	update->apply(playerMap[update->id]);
+	update->apply(players[update->id]);
+
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	update->apply(unitMap[update->id]);
-	// update octree
+	update->apply(units[update->id]);
+	Lib::LOG_DEBUG("Unit update received");
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
-	update->apply(cityMap[update->id]);
-	// update octree
+	update->apply(cities[update->id]);
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
-	update->apply(planetMap[update->id]);
-	// update octree
+	update->apply(planets[update->id]);
+	gameObjects[update->id]->update();
 }
 
 void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<SlotUpdate> update) {
-	update->apply(slotMap[update->id]);
-	// update octree
+	update->apply(slots[update->id]);
 }
+
+void Client::handle_client_disconnect() {
+	/* YEAH? The server wants to disconnect us? WELL LET'S DISCONNECT THEM! */
+	Lib::LOG_ERR("The client has been disconnected from the server...");
+	this->disconnect();
+	Lib::LOG_ERR("Client disconnected.");
+}
+
+void Client::handle_client_error() {
+	/* If there is some sort of error with the server, just disconnect outright */
+	Lib::LOG_ERR("The client could not contact the server..");
+
+	// TODO: Add retry logic/connection fix logic.
+	this->disconnect();
+	Lib::LOG_ERR("Client disconnected.");
+}
+
+void Client::handle_poll_timeout() {}
 

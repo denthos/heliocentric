@@ -1,6 +1,7 @@
 #include "logging.h"
 
 namespace Lib {
+	
 	std::ofstream& getLogFile(std::string dir) {
 		static std::ofstream log_file;
 		if (!log_file.is_open()) {
@@ -25,8 +26,11 @@ namespace Lib {
 			level_string = "LOG";
 		}
 
-		write_log_to_stream(std::cerr, level_string, file, ext, line, time_str, stream);
-		write_log_to_stream(getLogFile(dir), level_string, file, ext, line, time_str, stream);
+		{
+			std::lock_guard<std::mutex> log_guard(log_lock);
+			write_log_to_stream(std::cerr, level_string, file, ext, line, time_str, stream);
+			write_log_to_stream(getLogFile(dir), level_string, file, ext, line, time_str, stream);
+		}
 	}
 
 

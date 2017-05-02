@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Drawables">
+      <UniqueIdentifier>{d8324c74-8739-43d5-ac6e-fd992bfdf8aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader.frag">
@@ -26,6 +29,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Shaders\simple_texture.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="config.ini">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -45,9 +51,6 @@
     <ClInclude Include="orbit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="planet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,11 +66,32 @@
     <ClInclude Include="vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="glfw_callback_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="octree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="view_frustum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="skybox_mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bounding_box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="glfw_callback_handler.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="drawable_planet.h">
+      <Filter>Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable.h">
+      <Filter>Drawables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -89,9 +113,6 @@
     <ClCompile Include="orbit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="planet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -104,11 +125,29 @@
     <ClCompile Include="transformation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
+    <ClCompile Include="octree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="view_frustum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="skybox_mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="glfw_callback_handler.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bounding_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable_planet.cpp">
+      <Filter>Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable.cpp">
+      <Filter>Drawables</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

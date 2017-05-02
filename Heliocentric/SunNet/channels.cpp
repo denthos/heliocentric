@@ -9,6 +9,12 @@ namespace SunNet {
 		message_size(size), channel_id(id) {}
 
 	std::shared_ptr<ChannelInterface> Channels::getChannel(CHANNEL_ID id) {
-			return ids_to_channels.at(id);
+		auto& channel_it = ids_to_channels.find(id);
+		if (channel_it == ids_to_channels.end()) {
+			throw BadChannelException();
+		}
+		else {
+			return channel_it->second;
+		}
 	}
 }

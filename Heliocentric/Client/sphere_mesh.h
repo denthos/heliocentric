@@ -11,8 +11,6 @@ public:
 
 	~SphereMesh();
 
-	void setTexture(Texture texture);
-
 	static bool init;
 
 private:
@@ -23,7 +21,7 @@ private:
 	float radius;
 	int rings, sectors;
 
-	void genMesh(); //generates data to be used in mesh
+	virtual void genMesh(); //generates data to be used in mesh
 
 
 

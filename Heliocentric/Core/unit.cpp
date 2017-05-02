@@ -1,4 +1,7 @@
 #include "unit.h"
+#include "logging.h"
+
+#include <glm\gtc\matrix_transform.hpp>
 
 Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal):
 	AttackableGameObject(pos, owner, att, def, range, heal) {}
@@ -8,17 +11,16 @@ Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, in
 
 void Unit::update() {
 	switch (currentCommand) {
-	case idle:
+	case UNIT_IDLE:
 		break;
-	case attack:
-		// Placeholder parameter. Cannot quite get target yet, as "delta" of a unit has not been implemented.
-		do_attack(this);
+	case UNIT_ATTACK:
+		do_attack(this->target);
 		break;
-	case move:
+	case UNIT_MOVE:
 		do_move();
 		break;
 	default:
-		Lib::debug("Invalid command type.");
+		Lib::LOG_ERR("Invalid command type.");
 	}
 }
 
@@ -31,6 +33,14 @@ glm::vec3 Unit::set_destination(glm::vec3 destination) {
 	return this->destination;
 }
 
+
+glm::vec3 Unit::set_destination(GameObject* object) {
+	// Follow object as it moves.
+	this->destination = object->get_position();
+	return this->destination;
+}
+
+
 int Unit::get_movement_speed_max() {
 	return this->movementSpeedMax;
 }
@@ -40,20 +50,49 @@ int Unit::set_movmennt_speed_max(int movementSpeedMax) {
 	return this->movementSpeedMax;
 }
 
-Unit* Unit::do_attack(Unit* target) {
-	Lib::assertTrue(target != this, "Unit attacking itself.");
-	if (glm::distance(this->position, target->get_position()) > (float) this->combatRange) {
-		do_move();
-	}
-	else {
-		int targetHealth = target->take_damage(this);
-		// Reset unit to idle if target is dead.
-		if (targetHealth <= 0) this->currentCommand = idle;
-	}
-
-	return target;
+void Unit::set_combat_target(AttackableGameObject* target) {
+	this->target = target;
 }
+
+void Unit::set_command(CommandType command) {
+	currentCommand = command;
+}
+
 
 glm::vec3 Unit::do_move() {
-	return this->position;
+	// Move towards destination.
+	if (destination != position) {
+		float speed = fmin((float)movementSpeedMax, glm::distance(destination, position));
+		position += glm::normalize(destination - position) * speed;
+	}
+	else {
+		// Reaced destination
+		currentCommand = UNIT_IDLE;
+	}
+	return position;
 }
+
+void Unit::handle_out_of_range(AttackableGameObject * opponent)
+{
+	// Move towards opponent if in attack mode.
+	if (currentCommand == UNIT_ATTACK) {
+		set_destination(opponent);
+		do_move();
+	}
+}
+
+void Unit::handle_defeat(AttackableGameObject * opponent)
+{
+	// Tell Player you have died.
+	player->add_to_destroy(this);
+	player = nullptr;
+}
+
+void Unit::handle_victory(AttackableGameObject * opponent)
+{
+	// Go back to idle if unit was attacking
+	currentCommand = (currentCommand == UNIT_ATTACK) ? UNIT_IDLE : currentCommand;
+	
+	// TODO: Gain experience (?)
+}
+

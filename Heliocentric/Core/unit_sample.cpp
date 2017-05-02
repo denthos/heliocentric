@@ -5,5 +5,5 @@ UnitSample::UnitSample(glm::vec3 position, Player* owner) :
 
 	this->movementSpeedMax = 300;
 
-	this->currentCommand = idle;
+	this->currentCommand = UNIT_IDLE;
 }

@@ -11,20 +11,15 @@
 
 
 #include "camera.h"
+#include "logging.h"
 
 
-void Mesh::Update(glm::mat4 & parent)
-{
-	world_mat = glm::mat4(1.0f);
-	world_mat = world_mat * rot_mat;
-	world_mat = world_mat * trans_mat;
-	world_mat = world_mat * scale_mat;
+void Mesh::update() {
 
-	world_mat = parent * world_mat;
 }
 
 //TODO: separate binding functions for each mesh component? bind texture, bind material, bind light
-void Mesh::Draw(Shader &shader, const Camera & camera)
+void Mesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld)
 {
 	//which diffuse and specular samplers
 	GLuint diffuse_num = 1;
@@ -42,7 +37,7 @@ void Mesh::Draw(Shader &shader, const Camera & camera)
 
 	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), camera.position.x, camera.position.y, camera.position.z);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &world_mat[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &toWorld[0][0]);
 
 	//TODO: bind lights -- naming convention for lights in shader, make UBO for light types. this should probably be moved made its own class or so
 	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.position"), 0.0f, 0.0f, 0.0f);
@@ -76,7 +71,7 @@ void Mesh::Draw(Shader &shader, const Camera & camera)
 	glBindVertexArray(VAO);
 
 	//draw
-	glDrawElements(GL_TRIANGLES, mesh_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (GLsizei) mesh_indices.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
 
@@ -92,14 +87,19 @@ void Mesh::Draw(Shader &shader, const Camera & camera)
 	//shader.unbind();
 }
 
-
-void Mesh::setScale(glm::mat4 scale)
-{
-	scale_mat = scale;
+void Mesh::setTexture(Texture & texture) {
+	if (mesh_textures.size()) {
+		mesh_textures[0] = texture;
+	}
+	else {
+		mesh_textures.push_back(texture);
+	}
 }
 
 void Mesh::createMesh()
 {
+	genMesh();
+
 	//set up buffers and specify vertex shader
 
 	//generate vertex arrays and buffers
@@ -140,7 +140,7 @@ void Mesh::createMesh()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-		std::cerr << "Error while creating mesh!" << std::endl;
+		Lib::LOG_ERR("Error while creating mesh!");
 	}
 
 	//unbind buffers
@@ -148,8 +148,8 @@ void Mesh::createMesh()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
-
-
+void Mesh::genMesh() {
 
 }

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <iomanip> 
 #include <time.h>
+#include <mutex>
 
 #ifndef _WIN32
 #include <libgen.h>
@@ -23,6 +24,7 @@ namespace Lib {
 #define LOG_WARN(...) LOG(LOG_LEVEL_WARN, __VA_ARGS__)
 #define LOG_ERR(...) LOG(LOG_LEVEL_ERR, __VA_ARGS__)
 
+	static std::mutex log_lock;
 	std::ofstream& getLogFile(std::string dir);
 
 	template <typename TStreamType>

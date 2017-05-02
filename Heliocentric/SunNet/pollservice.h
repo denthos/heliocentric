@@ -21,6 +21,7 @@ namespace SunNet {
 	class PollService {
 	private:
 		int timeout; /** < How long to wait before declaring no socket can be read */
+
 		std::vector<POLL_DESCRIPTOR> descriptors; /** < The corresponding poll() descriptors */
 		std::unordered_map<SOCKET, std::pair<int, SocketConnection_p>> poll_descriptor_map; /** < Points to elements in descriptors for fast updating */
 
@@ -57,6 +58,8 @@ namespace SunNet {
 		}
 
 		void remove_socket(const SocketConnection_p socket);
+
+		void clear_sockets();
 
 		/**
 		Poll all sockets, returning those ready to be read

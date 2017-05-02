@@ -16,14 +16,8 @@ class Model {
 public:
 	Model() {}
 	Model(GLchar* file);
-	void Draw(Shader &shader, const Camera & camera);
-	void Update(glm::mat4 &parent);
-
-	glm::mat4 world_mat;
-
-	glm::mat4 scale_mat = glm::mat4(1.0f);
-
-	void setScale(glm::mat4 scale);
+	void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld);
+	void update();
 private:
 	std::vector<Mesh> meshes; //meshes in the model
 	std::string directory; //folder that model files belong in

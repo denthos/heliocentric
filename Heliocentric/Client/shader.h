@@ -31,10 +31,10 @@ public:
 	Shader(const char *vert, const char *frag); //constructor : takes in file names of shaders
 	~Shader(); //destructor
     
-	void bind(); //when you want to use shader program
-	void unbind(); //stop using shader
+	void bind() const; //when you want to use shader program
+	void unbind() const; //stop using shader
     
-	GLuint getPid();
+	GLuint getPid() const;
     
 	
     

@@ -9,9 +9,6 @@
 #include "ini_parser.h"
 
 int main() {
-	int width = Lib::INIParser::getInstance("config.ini").get<int>("ScreenWidth");
-	int height = Lib::INIParser::getInstance("config.ini").get<int>("ScreenHeight");
-
 	Client client;
 
 	Lib::LOG_DEBUG("Supported OpenGL version: ", glGetString(GL_VERSION));
@@ -28,8 +25,8 @@ int main() {
 		client.update();
 	}
 
+	client.disconnect();
 	glfwTerminate();
-
 	return 0;
 }
 

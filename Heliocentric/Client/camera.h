@@ -3,7 +3,7 @@
 #include <glm\vec3.hpp>
 #include <glm\mat4x4.hpp>
 
-class Camera { 
+class Camera {
 public:
 	glm::vec3 position, target, up;
 	float fov, nearPlane, farPlane;
