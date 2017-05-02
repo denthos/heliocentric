@@ -20,6 +20,7 @@
 
 #include "debug_pause.h"
 #include "player_command.h"
+#include "unit_command.h"
 
 #include "player_client_to_server_xfer.h"
 
@@ -63,6 +64,8 @@ private:
 			/* 
 			If there is an error sending data to the client, let's log it and forget about it.
 			Maybe the error is only transient :)
+
+			RIP game experience
 			*/
 			Lib::LOG_ERR("Error when trying to send an update to a client: ", e.what());
 		}
@@ -79,7 +82,8 @@ private:
 	}
 
 	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
-	void handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
+	void handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
+	void handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> creation_command);
 
 	template <typename TUpdate>
 	void addUpdateToSendQueue(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {

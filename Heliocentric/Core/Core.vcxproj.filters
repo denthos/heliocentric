@@ -107,16 +107,16 @@
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="debug_pause.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
-    <ClInclude Include="debug_switch.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
     <ClInclude Include="fileutils.h">
       <Filter>Utility Library</Filter>
     </ClInclude>
     <ClInclude Include="player_command.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_pause.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_switch.h">
       <Filter>Commands</Filter>
     </ClInclude>
   </ItemGroup>
@@ -188,12 +188,6 @@
       <Filter>Updates</Filter>
     </ClCompile>
     <ClCompile Include="universe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="bounding_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fileutils.cpp">

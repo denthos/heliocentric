@@ -198,24 +198,49 @@ void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std
 	this->game_paused = !this->game_paused;
 }
 
+void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> command) {
+	Lib::LOG_DEBUG("Received a player command.");
 
-void GameServer::handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command) {
-	Lib::LOG_DEBUG("Received unit creation command.");
-	/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
-	// TODO: Create the new unit (should probably be a unique_ptr) and move it into the UnitManager
+	/* This currently only handles create command */
+	switch (command->command_type) {
+		case PlayerCommand::CMD_CREATE: {
+			Lib::LOG_DEBUG("Play command type: CMD_CREATE.");
+			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
+			// TODO: Create the new unit (should probably be a unique_ptr) and move it into the UnitManager
+			// TODO: Queue up UnitUpdates for the unit
+			std::shared_ptr<UnitUpdate> update = std::make_shared<UnitUpdate>();
+			update->x = command->create_location_x;
+			update->y = command->create_location_y;
+			update->z = command->create_location_z;
 
-	// TODO: Queue up UnitUpdates for the unit
-	std::shared_ptr<UnitUpdate> update = std::make_shared<UnitUpdate>();
-	update->x = creation_command->create_location_x;
-	update->y = creation_command->create_location_y;
-	update->z = creation_command->create_location_z;
+			this->addUpdateToSendQueue(update, { sender });
+			break;
+		}
+		default:
+			Lib::LOG_ERR("Invalid player command.");
+		}
+}
 
-	this->addUpdateToSendQueue(update);
+void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> command) {
+	Lib::LOG_DEBUG("Received a unit command.");
+
+	/* This currently only handles attack and move commands */
+	switch (command->command_type) {
+		case UnitCommand::CMD_ATTACK:
+			Lib::LOG_DEBUG("Unit command type: CMD_ATTACK");
+			break;
+		case UnitCommand::CMD_MOVE:
+			Lib::LOG_DEBUG("Unit command type: CMD_MOVE");
+			// TODO: Delegate to UnitManager
+			break;
+		default:
+			Lib::LOG_ERR("Invalid unit command.");
+	}
 }
 
 void GameServer::subscribeToChannels() {
 	/* Subscribe to important channels */
 	this->subscribe<DebugPause>(std::bind(&GameServer::handleGamePause, this, std::placeholders::_1, std::placeholders::_2));
-	this->subscribe<PlayerClientToServerTransfer>(std::bind(&GameServer::handleReceivePlayerClientToServerTransfer, this, std::placeholders::_1, std::placeholders::_2));
-	this->subscribe<PlayerCommand>(std::bind(&GameServer::handleUnitCreation, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlayerCommand>(std::bind(&GameServer::handlePlayerCommand, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<UnitCommand>(std::bind(&GameServer::handleUnitCommand, this, std::placeholders::_1, std::placeholders::_2));
 }
