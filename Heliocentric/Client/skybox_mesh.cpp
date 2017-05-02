@@ -168,8 +168,7 @@ void SkyboxMesh::genMesh()
 	mesh_vertices.push_back(vertex);
 }
 
-void SkyboxMesh::Draw(Shader &shader, const Camera & camera)
-{
+void SkyboxMesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld) {
 	GLuint shaderID = shader.getPid(); //shader program number
 	shader.bind(); //start using our shader
 
@@ -180,7 +179,7 @@ void SkyboxMesh::Draw(Shader &shader, const Camera & camera)
 
 	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), camera.position.x, camera.position.y, camera.position.z);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &world_mat[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &toWorld[0][0]);
 
 	//bind cubemap texture
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTextureID);

@@ -17,7 +17,7 @@ public:
 	~Octree();
 	void insert(Drawable * object);
 	void clear();
-	void draw(GLuint shader, const Camera & camera);
+	void draw(const Shader & shader, const Camera & camera);
 	void viewFrustumCull(ViewFrustum frustum);
 
 protected:
@@ -30,5 +30,5 @@ protected:
 	bool hasChildren = false;
 
 	void update();
-	void drawNode(GLuint shader, const Camera & camera);
+	void drawNode(const Shader & shader, const Camera & camera);
 };

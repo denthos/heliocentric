@@ -57,11 +57,13 @@ private:
 	GLFWwindow * window;
 	Camera * camera;
 	std::string windowTitle;
-	std::unordered_map<UID, Player *> playerMap;
-	std::unordered_map<UID, std::pair<Planet*, PlanetModel*>> planetMap;
-	std::unordered_map<UID, std::pair<Unit *, PlanetModel*>> unitMap;
-	std::unordered_map<UID, City *> cityMap;
-	std::unordered_map<UID, Slot *> slotMap;
+
+	std::unordered_map<UID, Player *> players;
+	std::unordered_map<UID, Planet *> planets;
+	std::unordered_map<UID, Unit *> units;
+	std::unordered_map<UID, City *> cities;
+	std::unordered_map<UID, Slot *> slots;
+	std::unordered_map<UID, Drawable *> gameObjects;
 	Octree octree;
 
 	void createWindow(int width, int height);

@@ -6,7 +6,7 @@ GameObject::GameObject(glm::vec3 pos) : GameObject(pos, NULL) {}
 GameObject::GameObject(UID id, glm::vec3 pos, Player* assigned_player) : Identifiable(id), position(pos), player(assigned_player) {}
 GameObject::GameObject(UID id, glm::vec3 pos) : GameObject(id, pos, NULL) {}
 
-Player* GameObject::get_player() {
+Player* GameObject::get_player() const {
 	return this->player;
 }
 
@@ -14,7 +14,7 @@ void GameObject::set_player(Player* assigned_player) {
 	player = assigned_player;
 }
 
-glm::vec3 GameObject::get_position() {
+glm::vec3 GameObject::get_position() const {
 	return this->position;
 }
 

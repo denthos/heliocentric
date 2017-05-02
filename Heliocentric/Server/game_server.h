@@ -19,6 +19,7 @@
 #include "unit_manager.h"
 
 #include "debug_pause.h"
+#include "player_command.h"
 
 class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 	/*
@@ -66,6 +67,7 @@ private:
 	}
 
 	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
+	void handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
 
 	void subscribeToChannels();
 	void performUpdates();
@@ -82,6 +84,10 @@ protected:
 	/**** Handlers for server class ****/
 	virtual void handle_server_connection_error() {
 		Lib::LOG_ERR("Server error");
+	}
+
+	virtual void handle_server_disconnect() {
+		Lib::LOG_ERR("Server disconnect...");
 	}
 
 	virtual void handle_channeledclient_error(SunNet::ChanneledSocketConnection_p client);

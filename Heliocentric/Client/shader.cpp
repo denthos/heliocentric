@@ -27,8 +27,7 @@ Shader::~Shader()
     glDeleteProgram(pid);
 }
 
-void Shader::bind()
-{
+void Shader::bind() const {
     if(currentlyBoundShaderID != pid)
     {
         currentlyBoundShaderID = pid;
@@ -36,8 +35,7 @@ void Shader::bind()
     }
 }
 
-void Shader::unbind()
-{
+void Shader::unbind() const {
     if(currentlyBoundShaderID != (0x0))
     {
         currentlyBoundShaderID = (0x0);
@@ -45,8 +43,7 @@ void Shader::unbind()
     }
 }
 
-GLhandleARB Shader::getPid()
-{
+GLhandleARB Shader::getPid() const {
     return pid;
 }
 

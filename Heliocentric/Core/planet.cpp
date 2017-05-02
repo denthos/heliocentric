@@ -14,7 +14,8 @@ Planet::Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_
 	this->update = std::make_shared<PlanetUpdate>();
 }
 
-std::unordered_map<UID, Slot*> Planet::get_slots() {
+
+std::unordered_map<UID, Slot*> Planet::get_slots() const {
 	return slots;
 }
 
@@ -22,7 +23,7 @@ Slot* Planet::get_slot(UID id) {
 	return slots[id];
 }
 
-bool Planet::check_occupancy() {
+bool Planet::check_occupancy() const {
 	if (slots.size() == 0) {
 		return false;
 	}
@@ -53,6 +54,6 @@ std::shared_ptr<PlanetUpdate> Planet::makeUpdate() {
 	return this->update;
 }
 
-float Planet::get_radius() {
+float Planet::get_radius() const {
 	return this->radius;
 }

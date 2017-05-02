@@ -6,7 +6,7 @@ namespace SunNet {
 	std::atomic_uint SocketConnection::open_connection_count = 0;
 	std::atomic_uint SocketConnection::initializations = 0;
 
-	SocketConnection::SocketConnection(int domain, int type, int protocol) : in_error_state(false) {
+	SocketConnection::SocketConnection(int domain, int type, int protocol) {
 		if (SocketConnection::open_connection_count++ == 0) {
 			this->initialize_api();
 		}
@@ -43,7 +43,7 @@ namespace SunNet {
 	}
 
 	SocketConnection::SocketConnection(SOCKET socket_fd, int domain, int type, int protocol) :
-		socket_descriptor(socket_fd), in_error_state(false) {
+		socket_descriptor(socket_fd){
 
 		if (SocketConnection::open_connection_count++ == 0) {
 			this->initialize_api();

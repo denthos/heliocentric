@@ -72,11 +72,18 @@ namespace SunNet {
 						throw InvalidSocketConnectionException("Invalid socket descriptor", poll_iter->fd);
 					}
 
-					if (poll_iter->revents & (POLLERR | POLLNVAL | POLLHUP)) {
-						ready_socket->set_error();
+					SocketStatus status;
+					if (poll_iter->revents & (POLLERR | POLLNVAL)) {
+						status = SOCKET_STATUS_ERROR;
+					}
+					else if (poll_iter->revents & (POLLHUP)) {
+						status = SOCKET_STATUS_DISCONNECT;
+					}
+					else {
+						status = SOCKET_STATUS_NORMAL;
 					}
 
-					this->results->insert(ready_socket);
+					this->results->insert(SocketCollectionEntry{ ready_socket, status });
 				}
 			}
 		}

@@ -72,6 +72,28 @@ void Unit::set_command(CommandType command) {
 	currentCommand = command;
 }
 
+void Unit::set_combat_target(AttackableGameObject* target) {
+	this->target = target;
+}
+
+void Unit::set_command(CommandType command) {
+	currentCommand = command;
+}
+
+
+glm::vec3 Unit::do_move() {
+	// Move towards destination.
+	if (destination != position) {
+		float speed = fmin((float)movementSpeedMax, glm::distance(destination, position));
+		position += glm::normalize(destination - position) * speed;
+	}
+	else {
+		// Reaced destination
+		currentCommand = UNIT_IDLE;
+	}
+	return position;
+}
+
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
