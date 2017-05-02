@@ -8,6 +8,8 @@
 #include "planet_update.h"
 #include "city_update.h"
 
+#include "player_id_confirmation.h"
+#include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
 
@@ -20,6 +22,8 @@ void initializeChannels() {
 	channels::addNewChannel<PlanetUpdate>();
 	channels::addNewChannel<CityUpdate>();
 
+	channels::addNewChannel<PlayerIDConfirmation>();
+	channels::addNewChannel<PlayerClientToServerTransfer>();
 	channels::addNewChannel<DebugPause>();
 	channels::addNewChannel<PlayerCommand>();
 }

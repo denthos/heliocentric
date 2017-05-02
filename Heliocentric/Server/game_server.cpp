@@ -5,6 +5,7 @@
 #include "unit_update.h"
 #include "game_server.h"
 
+#include "player_id_confirmation.h"
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
@@ -31,6 +32,7 @@ void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p clie
 	std::lock_guard<std::mutex> guard(connections.get_lock());
 	auto id_it = connections.get_item().second.find(client);
 	if (id_it != connections.get_item().second.end()) {
+		players.erase(id_it->second);
 		connections.get_item().first.erase(id_it->second);
 		connections.get_item().second.erase(id_it);
 	}
@@ -53,7 +55,75 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 		connections.get_item().second[client] = player->getID();
 	}
 
+	/* 
+	Now that we've saved all the player's information, let's send the player to the client
+	so that the client knows what its player ID is. In return, the client will send us information
+	about the player (like his name)
+	*/
+	std::shared_ptr<PlayerIDConfirmation> id_confirm = std::make_shared<PlayerIDConfirmation>();
+	id_confirm->id = player->getID();
+
+	Lib::LOG_DEBUG("Assigned id ", player->getID(), " to new player.. sending confirmation");
+	this->addUpdateToSendQueue(id_confirm, { client });
+
 	players[player->getID()] = std::move(player);
+}
+
+void GameServer::handleReceivePlayerClientToServerTransfer(
+	SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerClientToServerTransfer> info) {
+
+	std::lock_guard<std::mutex> guard(this->connections.get_lock());
+	auto& player_id_it = this->connections.get_item().second.find(sender);
+	if (player_id_it == this->connections.get_item().second.end()) {
+		/* What the.. we received player info from a connection we don't know about? This is weird. */
+		Lib::LOG_WARN("Received player info from connection we haven't heard of before...");
+
+		/* 
+		Luckily, if we send them another ID confirmation, the client will take the new ID and overwrite
+		what they already have. Let's just act like they're brand new.
+		*/
+		this->handle_channeledclient_connect(sender);
+		return;
+	}
+
+	auto& player_it = this->players.find(player_id_it->second);
+	if (player_it == this->players.end()) {
+		/* This is even weirder.. we received player info from a connection we know about, but we don't know about the player... */
+		Lib::LOG_WARN("Received player info for unknown player ID: ", player_id_it->second);
+
+		/*
+		In this situation, it seems like the client simply ACKd a different ID number than we gave them.
+		Let's start the process over for them. We will remove their data and act like they're a new connection.
+		*/
+		this->handleClientDisconnect(sender);
+		this->handle_channeledclient_connect(sender);
+		return;
+	}
+
+	Lib::LOG_DEBUG("Received player client->server info transfer. Player with ID ", player_it->first, " has name ", info->name);
+	info->apply(player_it->second.get());
+
+	/* OK. We've applied the information to the player. Now we'd like to send this information to all other players */
+	std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>();
+	player_update->id = player_it->first;
+	strcpy_s(player_update->player_name, sizeof(player_update->player_name), info->name);
+
+	Lib::LOG_DEBUG("Sending information about new player to all others..");
+	this->addUpdateToSendQueue(player_update);
+
+	/* OK. Finally, let's send information about _all_ other players to this player */
+	Lib::LOG_DEBUG("Sending information about all others to new player...");
+	for (auto& other_player_it : this->players) {
+		if (other_player_it.first == player_it->first) {
+			continue;
+		}
+
+		std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>();
+		player_update->id = other_player_it.first;
+		snprintf(player_update->player_name, PLAYER_NAME_MAX_SIZE, "%s", other_player_it.second->get_name().c_str());
+
+		this->addUpdateToSendQueue(player_update, { sender });
+	}
 }
 
 void GameServer::performUpdates() {
@@ -63,22 +133,33 @@ void GameServer::performUpdates() {
 
 	/* First, update the universe */
 	this->universe.doLogic();
-	for (auto& universe_update : universe.get_updates()) {
-		this->updates_to_send.push(this->makeUpdateSendFunction(universe_update));
-	}
+	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
 }
 
 void GameServer::sendUpdates() {
-	while (!updates_to_send.empty()) {
-		auto& update = updates_to_send.front();
+	std::lock_guard<std::mutex> guard(this->updates_to_send.get_lock());
+	auto& update_queue = this->updates_to_send.get_item();
+	while (!update_queue.empty()) {
+		auto& update = update_queue.front();
 		{
-			std::lock_guard<std::mutex> guard(connections.get_lock());
-			for (auto& player_conn : connections.get_item().first) {
-				update(player_conn.second);
+			/* 
+			If the update is intended to be sent to a particular person, send it to them.
+			Otherwise, send it to all connections
+			*/
+			if (update.intended_recipients.size() > 0) {
+				for (auto& recipient : update.intended_recipients) {
+					update.send_function(recipient);
+				}
+			}
+			else {
+				std::lock_guard<std::mutex> guard(connections.get_lock());
+				for (auto& player_conn : connections.get_item().first) {
+					update.send_function(player_conn.second);
+				}
 			}
 		}
 
-		updates_to_send.pop();
+		update_queue.pop();
 	}
 }
 
@@ -129,10 +210,12 @@ void GameServer::handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, 
 	update->y = creation_command->create_location_y;
 	update->z = creation_command->create_location_z;
 
-	this->updates_to_send.push(this->makeUpdateSendFunction(update));
+	this->addUpdateToSendQueue(update);
 }
 
 void GameServer::subscribeToChannels() {
+	/* Subscribe to important channels */
 	this->subscribe<DebugPause>(std::bind(&GameServer::handleGamePause, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlayerClientToServerTransfer>(std::bind(&GameServer::handleReceivePlayerClientToServerTransfer, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerCommand>(std::bind(&GameServer::handleUnitCreation, this, std::placeholders::_1, std::placeholders::_2));
 }

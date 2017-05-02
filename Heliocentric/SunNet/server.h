@@ -9,7 +9,8 @@
 namespace SunNet {
 	/**
 	A collection of states that the server can be in
-
+        +----+
+        |    V
 	  +--------+        +------+         +-------+        +-------------+
 	->| CLOSED |  ----> | OPEN |  ---->  | SERVE | ---->  | DESTRUCTING |
 	  +--------+        +------+         +-------+        +-------------+
@@ -249,7 +250,7 @@ namespace SunNet {
 		*/
 		void close() {
 			/* Force a closing state change, which will stop the poll thread when its ready */
-			this->state_transition({ SERVE, OPEN }, CLOSED);
+			this->state_transition({ SERVE, OPEN, CLOSED }, CLOSED);
 
 			/* 
 			It is possible that close() is being called from the poll_thread. 

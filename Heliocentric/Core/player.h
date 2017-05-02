@@ -5,6 +5,8 @@
 #include <typeinfo>
 #include <typeindex>
 
+#define PLAYER_NAME_MAX_SIZE 16
+
 /* Forward declaration is necessary so compiler knows about GameObject. We cannot
 #include "game_object.h" since it #includes "player.h" */
 class GameObject;

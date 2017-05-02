@@ -19,6 +19,7 @@
 #include "model.h"
 #include "logging.h"
 
+#include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
 
@@ -109,6 +110,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+
+	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -306,8 +309,28 @@ void Client::mouseWheelCallback(double x, double y) {
 
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
+	Lib::LOG_DEBUG("Received update for player with id: ", update->id);
+	auto& player_it = players.find(update->id);
+	if (player_it == players.end()) {
+		Player* new_player = new Player(update->player_name, update->id);
+		players[update->id] = new_player;
+	}
+
 	update->apply(players[update->id]);
 
+}
+
+
+void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
+	Lib::LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
+	std::string player_name = Lib::INIParser::getInstance("config.ini").get<std::string>("PlayerName");
+	this->player = new Player(player_name, update->id);
+	players[update->id] = this->player;
+
+	PlayerClientToServerTransfer info_transfer;
+	snprintf(info_transfer.name, PLAYER_NAME_MAX_SIZE, "%s", player_name.c_str());
+
+	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
