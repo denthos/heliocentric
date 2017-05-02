@@ -22,6 +22,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <string>
 #include <unordered_map>
+#include "keyboard_handler.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:	
@@ -29,6 +30,7 @@ public:
 	~Client(); // free all memory here
 
 	Universe universe;
+	KeyboardHandler keyboard_handler;
 
 	bool isRunning();
 	void display();
@@ -69,5 +71,9 @@ private:
 	Player* player;
 
 	void createWindow(int width, int height);
+
+	void handleEscapeKey(int);
+	void handleF1Key(int);
+	void handleF3Key(int);
 };
 

@@ -110,8 +110,11 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
-
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
+
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -200,7 +203,7 @@ void Client::display() {
 }
 
 void Client::update() {
-
+	this->keyboard_handler.callKeyboardHandlers();
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -218,37 +221,31 @@ void Client::resizeCallback(int width, int height) {
 }
 
 void Client::keyCallback(int key, int scancode, int action, int mods) {
-
 	if (action == GLFW_PRESS) {
-		switch (key) {
-		case(GLFW_KEY_ESCAPE):
-			glfwSetWindowShouldClose(window, GL_TRUE);
-			break;
-		case(GLFW_KEY_F1):
-			/* Toggle the server's pause state */
-			DebugPause pause;
-			this->channeled_send<DebugPause>(&pause);
-			break;
-		case(GLFW_KEY_F2):
-			/* Create a new unit */
-			PlayerCommand command;
-			command.command_type = BaseCommand::CMD_CREATE;
-			command.create_location_x = 50.0f;
-			command.create_location_y = 50.0f;
-			command.create_location_z = 0.0f;
-
-			this->channeled_send(&command);
-			break;
-		}
+		this->keyboard_handler.setKeyDown(key);
 	}
 	else if (action == GLFW_RELEASE) {
-		switch (key) {
-		case(GLFW_KEY_ESCAPE):
-			break;
-		default:
-			break;
-		}
+		this->keyboard_handler.setKeyUp(key);
 	}
+}
+
+void Client::handleF1Key(int key) {
+	DebugPause pause;
+	this->channeled_send<DebugPause>(&pause);
+}
+
+void Client::handleEscapeKey(int key) {
+	glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+void Client::handleF3Key(int key) {
+	PlayerCommand command;
+	command.command_type = BaseCommand::CMD_CREATE;
+	command.create_location_x = 50.0f;
+	command.create_location_y = 50.0f;
+	command.create_location_z = 0.0f;
+
+	this->channeled_send(&command);
 }
 
 void Client::mouseButtonCallback(int button, int action, int mods) {
