@@ -5,6 +5,8 @@
 #include <typeinfo>
 #include <typeindex>
 
+#define PLAYER_NAME_MAX_SIZE 16
+
 /* Forward declaration is necessary so compiler knows about GameObject. We cannot
 #include "game_object.h" since it #includes "player.h" */
 class GameObject;
@@ -23,9 +25,9 @@ public:
 	void pop();                               // Pop all objects queued for destroy
 	std::unordered_map<unsigned int, GameObject*> get_units();   // return list of owned units
 	GameObject* get_unit(UID id);
+	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects;
 
 private:
-	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects;
 	std::string name;
 	std::vector<GameObject*> objects_to_destroy;
 	//list<Resource> recourses;

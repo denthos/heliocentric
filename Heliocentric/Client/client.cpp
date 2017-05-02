@@ -102,9 +102,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		gameObjects[planet->getID()] = drawablePlanet;
 		planets[planet->getID()] = drawablePlanet;
 	}
-
+	
 	for (auto& unit : this->unit_manager.get_units()) {
-		//gameObjects[unit->getID()] = unit.get();
 		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get(), Texture(EARTH_TEXTURE));
 		gameObjects[unit->getID()] = drawableUnit;
 		units[unit->getID()] = drawableUnit;
@@ -219,12 +218,7 @@ void Client::display() {
 	glfwPollEvents();
 }
 
-void Client::update() {
-	/*
-	for (auto& unit_pair : this->unitMap) {
-		unit_pair.second.second->Update(glm::translate(glm::mat4(1.0f), unit_pair.second.first->get_position()));
-	}*/
-}
+void Client::update() {}
 
 void Client::errorCallback(int error, const char * description) {
 	Lib::LOG_ERR("OpenGL Error occurred: ", description);
@@ -337,9 +331,9 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	update->apply(units[update->id]);
+	/*update->apply(units[update->id]);
 	//Lib::LOG_DEBUG("Unit update received");
-	gameObjects[update->id]->update();
+	gameObjects[update->id]->update();*/
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {

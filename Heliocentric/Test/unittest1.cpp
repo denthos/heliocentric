@@ -20,14 +20,16 @@ namespace Test
         TEST_METHOD(claim_a_unit_test) {
 			UID playerID = 123;
             Player sylvia("Sylvia", playerID);
-            unsigned id = 101;
-
-            Unit* battleShip = new Unit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0, 0.0);
-
-            sylvia.acquire_object(battleShip);
+            UID id = 101;
+			Slot* slot = new Slot(id, glm::vec3(0.0f, 1.0f, id));
+            Unit* battleShip = new Unit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 25, 1, 0, 100);
+			Assert::AreEqual(4, (int)sylvia.owned_objects.size());
+            //sylvia.acquire_object(slot);
+			sylvia.acquire_object(battleShip);
             Assert::AreEqual(playerID, sylvia.getID());
 			//Assert::AreEqual(playerID , battleShip->get_player()->getID());
-            Assert::AreEqual(0, (int) sylvia.get_units().size());
+			Assert::AreEqual(4, (int)sylvia.owned_objects.size());
+			//Assert::AreEqual(1, (int) sylvia.get_units().size());
             //Assert::AreEqual(id, sylvia.get_unit(id)->getID());
         }
         
