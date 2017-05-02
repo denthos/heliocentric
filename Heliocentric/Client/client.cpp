@@ -11,6 +11,7 @@
 
 
 #include "drawable_planet.h"
+#include "drawable_unit.h"
 #include "skybox_mesh.h"
 #include "glfw_callback_handler.h"
 #include "game_channels.h"
@@ -102,10 +103,12 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		planets[planet->getID()] = drawablePlanet;
 	}
 
-	/*for (auto& unit : this->unit_manager.get_units()) {
-		auto earth_model = new DrawablePlanet(*unit.get(), Texture(EARTH_TEXTURE));
-		this->units[unit->getID()] = std::make_pair(unit.get(), earth_model);
-	}*/
+	for (auto& unit : this->unit_manager.get_units()) {
+		//gameObjects[unit->getID()] = unit.get();
+		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get(), Texture(EARTH_TEXTURE));
+		gameObjects[unit->getID()] = drawableUnit;
+		units[unit->getID()] = drawableUnit;
+	}
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -189,15 +192,20 @@ void Client::display() {
 
 	for (auto & gameObject : gameObjects) {
 		octree.insert(gameObject.second);
+	}
 	/*
 	for (auto& planet_pair : this->planetMap) {
 		planet_pair.second.second->Draw(*textureShader, *camera);
 	}*/
-	/*for (auto& unit_pair : this->units) {
-		glm::vec3 pos = unit_pair.second.first->get_position();
+	/*glColor3f(0.9, 0.3, 0.2);
+	for (auto& unit_pair : this->units) {
+		glm::vec3 pos = unit_pair.second->get_position();
 		Lib::LOG_DEBUG("Draw position is " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z));
 		
-		unit_pair.second.second->Draw(*textureShader, *camera);
+		glPushMatrix();
+		glTranslatef(pos.x, pos.y, pos.z);
+		glutWireSphere(20.0f, 20, 20);
+		glPopMatrix();
 	}*/
 
 	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
@@ -330,10 +338,8 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	update->apply(units[update->id]);
-	Lib::LOG_DEBUG("Unit update received");
-	Unit * u1 = unitMap[update->id].first;
-	update->apply(u1);
-	octree.insert(u1);
+	//Lib::LOG_DEBUG("Unit update received");
+	gameObjects[update->id]->update();
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "unit.h"
-#include <glm\gtc\matrix_transform.hpp>
+#include "glm/gtc/matrix_transform.hpp"
 
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -11,9 +11,9 @@ namespace Test
 
 	class TestUnit : public Unit {
 
-	public: 
+	public:
 		TestUnit(UID id, glm::vec3 position) : Unit(id, position, NULL, 1, 1, 200, 100) {
-			this->movementSpeedMax = 200;
+			this->movement_speed = 200;
 		}
 
 		bool is_in_attack_mode() {
@@ -59,7 +59,7 @@ namespace Test
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
-			unit_1->update();
+			unit_1->do_logic();
 			Assert::AreEqual(unit_2->get_health(), 50);
 			Assert::AreEqual(unit_1->get_health(), 100);
 		}
@@ -81,7 +81,7 @@ namespace Test
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
-			unit_1->update();
+			unit_1->do_logic();
 
 			// Unit got closer
 			Assert::IsTrue(glm::distance(unit_1->get_position(), unit_2->get_position()) < 250.0f);
@@ -111,8 +111,8 @@ namespace Test
 			unit_1->set_command(Unit::UNIT_ATTACK);
 
 			// Kill unit_2 : should take two hits
-			unit_1->update();
-			unit_1->update();
+			unit_1->do_logic();
+			unit_1->do_logic();
 
 			// Check  dthat unit_2 is dead and unit_1 is still alive
 			Assert::IsTrue(unit_1->is_in_idle_mode());
