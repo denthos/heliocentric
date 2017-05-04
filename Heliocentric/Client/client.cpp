@@ -31,7 +31,7 @@
 #define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 
-#define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+#define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
 //skybox texture files
 #define SKYBOX_FRONT "Textures/Skybox/front.png" 
@@ -60,7 +60,7 @@ bool middleMouseDown = false;
 unsigned char selectedControlScheme = FREE_CAMERA;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
-	Lib::INIParser & config = Lib::INIParser::getInstance("config.ini");
+	Lib::INIParser & config = Lib::INIParser::getInstance();
 	int width = config.get<int>("ScreenWidth");
 	int height = config.get<int>("ScreenHeight");
 	windowTitle = config.get<std::string>("WindowTitle");
@@ -124,7 +124,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		this->connect(address, port);
 	}
 	catch (const SunNet::ConnectException&) {
-		Lib::LOG_ERR("Could not connect to host at address ", address, " and port ", port);
+		LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
 }
 
@@ -144,7 +144,7 @@ bool Client::isRunning() {
 
 void Client::createWindow(int width, int height) {
 	if (!glfwInit()) {
-		Lib::LOG_ERR("Could not initialize GLFW");
+		LOG_ERR("Could not initialize GLFW");
 		return;
 	}
 
@@ -158,7 +158,7 @@ void Client::createWindow(int width, int height) {
 	window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
 
 	if (!window) {
-		Lib::LOG_ERR("Could not create GLFW window");
+		LOG_ERR("Could not create GLFW window");
 		return;
 	}
 
@@ -171,7 +171,7 @@ void Client::createWindow(int width, int height) {
 	GLenum glewErr = glewInit();
 #ifndef __APPLE__
 	if (glewErr != GLEW_OK) {
-		Lib::LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
+		LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
 		return;
 	}
 #endif
@@ -209,7 +209,7 @@ void Client::update() {
 }
 
 void Client::errorCallback(int error, const char * description) {
-	Lib::LOG_ERR("OpenGL Error occurred: ", description);
+	LOG_ERR("OpenGL Error occurred: ", description);
 }
 
 void Client::resizeCallback(int width, int height) {
@@ -346,7 +346,7 @@ void Client::mouseWheelCallback(double x, double y) {
 
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
-	Lib::LOG_DEBUG("Received update for player with id: ", update->id);
+	LOG_DEBUG("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
 	if (player_it == players.end()) {
 		Player* new_player = new Player(update->player_name, update->id);
@@ -359,8 +359,8 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
-	Lib::LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
-	std::string player_name = Lib::INIParser::getInstance("config.ini").get<std::string>("PlayerName");
+	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
+	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
 	this->player = new Player(player_name, update->id);
 	players[update->id] = this->player;
 
@@ -372,7 +372,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	update->apply(units[update->id]);
-	Lib::LOG_DEBUG("Unit update received");
+	LOG_DEBUG("Unit update received");
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
@@ -390,18 +390,18 @@ void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 
 void Client::handle_client_disconnect() {
 	/* YEAH? The server wants to disconnect us? WELL LET'S DISCONNECT THEM! */
-	Lib::LOG_ERR("The client has been disconnected from the server...");
+	LOG_ERR("The client has been disconnected from the server...");
 	this->disconnect();
-	Lib::LOG_ERR("Client disconnected.");
+	LOG_ERR("Client disconnected.");
 }
 
 void Client::handle_client_error() {
 	/* If there is some sort of error with the server, just disconnect outright */
-	Lib::LOG_ERR("The client could not contact the server..");
+	LOG_ERR("The client could not contact the server..");
 
 	// TODO: Add retry logic/connection fix logic.
 	this->disconnect();
-	Lib::LOG_ERR("Client disconnected.");
+	LOG_ERR("Client disconnected.");
 }
 
 void Client::handle_poll_timeout() {}

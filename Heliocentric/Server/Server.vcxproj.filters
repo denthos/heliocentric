@@ -29,5 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Server_config.ini" />
   </ItemGroup>
 </Project>

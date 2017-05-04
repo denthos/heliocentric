@@ -20,7 +20,7 @@ void Unit::update() {
 		do_move();
 		break;
 	default:
-		Lib::LOG_ERR("Invalid command type.");
+		LOG_ERR("Invalid command type.");
 	}
 }
 

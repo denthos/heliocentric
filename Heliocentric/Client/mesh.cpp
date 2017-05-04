@@ -140,7 +140,7 @@ void Mesh::createMesh()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-		Lib::LOG_ERR("Error while creating mesh!");
+		LOG_ERR("Error while creating mesh!");
 	}
 
 	//unbind buffers

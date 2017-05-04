@@ -31,9 +31,7 @@
     <None Include="Shaders\simple_texture.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="config.ini">
-      <Filter>Resource Files</Filter>
-    </None>
+    <None Include="Client_config.ini" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="client.h">

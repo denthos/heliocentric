@@ -128,9 +128,6 @@
     <ClCompile Include="city.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -205,7 +202,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\config.ini" />
-    <None Include="ConfigTemplate.ini" />
   </ItemGroup>
 </Project>

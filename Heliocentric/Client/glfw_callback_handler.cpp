@@ -4,7 +4,7 @@
 std::unordered_map<GLFWwindow *, Client *> GLFWCallbackHandler::clients;
 
 void errorCallback(int error, const char * description) {
-	Lib::LOG_ERR(description);
+	LOG_ERR(description);
 }
 void resizeCallback(GLFWwindow * window, int width, int height) {
 	if (GLFWCallbackHandler::clients[window])

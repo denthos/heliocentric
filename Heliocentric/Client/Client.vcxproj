@@ -90,11 +90,42 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SourceDir)..\packages\Assimp.3.0.0\build\native\include;$(SourceDir)..\packages\nupengl.core.redist.0.1.0.1;$(SourceDir)..\packages\nupengl.core.0.1.0.1;$(SourceDir)..\packages\soil.1.16.0\build\native\lib\x64\Release;$(SourceDir)..\packages\soil.1.16.0\build\native\include;$(MSBuildThisFileDirectory)include;$(SolutionDir)/Core;$(SolutionDir)/SunNet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>COMPILE_TIME_LOG_LEVEL=0;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Core.lib;SunNet.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)/$(Platform)/$(Configuration);$(MSBuildThisFileDirectory)lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>
+      </Outputs>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>xcopy /D /Y Client_config.ini $(OutDir)
+xcopy /I /D /E /Y Shaders\* $(OutDir)Shaders\
+xcopy /I /D /E /Y Textures\* $(OutDir)Textures\
+xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Copying game resource files</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -120,6 +151,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SourceDir)..\packages\Assimp.3.0.0\build\native\include;$(SourceDir)..\packages\nupengl.core.redist.0.1.0.1;$(SourceDir)..\packages\nupengl.core.0.1.0.1;$(SourceDir)..\packages\soil.1.16.0\build\native\lib\x64\Release;$(SourceDir)..\packages\soil.1.16.0\build\native\include; $(MSBuildThisFileDirectory)include;$(SolutionDir)/Core;$(SolutionDir)/SunNet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>COMPILE_TIME_LOG_LEVEL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -127,9 +159,39 @@
       <AdditionalDependencies>Core.lib;SunNet.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)/$(Platform)/$(Configuration);$(MSBuildThisFileDirectory)lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>
+      </Outputs>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>xcopy /D /Y Client_config.ini $(OutDir)
+xcopy /I /D /E /Y Shaders\* $(OutDir)Shaders\
+xcopy /I /D /E /Y Textures\* $(OutDir)Textures\
+xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Copying game resource files</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="config.ini" />
+    <None Include="Client_config.ini" />
     <None Include="packages.config" />
     <None Include="Shaders\shader.frag" />
     <None Include="Shaders\shader.vert" />

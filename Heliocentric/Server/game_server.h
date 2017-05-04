@@ -67,7 +67,7 @@ private:
 
 			RIP game experience
 			*/
-			Lib::LOG_ERR("Error when trying to send an update to a client: ", e.what());
+			LOG_ERR("Error when trying to send an update to a client: ", e.what());
 		}
 	}
 
@@ -115,11 +115,11 @@ protected:
 
 	/**** Handlers for server class ****/
 	virtual void handle_server_connection_error() {
-		Lib::LOG_ERR("Server error");
+		LOG_ERR("Server error");
 	}
 
 	virtual void handle_server_disconnect() {
-		Lib::LOG_ERR("Server disconnect...");
+		LOG_ERR("Server disconnect...");
 	}
 
 	virtual void handle_channeledclient_error(SunNet::ChanneledSocketConnection_p client);

@@ -51,7 +51,7 @@ int AttackableGameObject::take_damage(int damage) {
 void AttackableGameObject::do_attack(AttackableGameObject * target)
 {	
 	if (target == this || target->player == this->player) {
-		Lib::LOG_ERR("Cannot attack same player.");
+		LOG_ERR("Cannot attack same player.");
 		return;
 	}
 
