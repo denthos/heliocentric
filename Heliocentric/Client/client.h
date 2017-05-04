@@ -9,6 +9,7 @@
 #include "planet.h"
 #include "slot.h"
 #include "player_update.h"
+#include "unit_creation_update.h"
 #include "unit_update.h"
 #include "city_update.h"
 #include "planet_update.h"
@@ -17,6 +18,7 @@
 #include "channeled_client.h"
 #include "tcp_socket_connection.hpp"
 #include "universe.h"
+#include "unit_manager.h"
 #include <GL\glew.h>
 #include <GLFW/glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
@@ -30,6 +32,7 @@ public:
 	~Client(); // free all memory here
 
 	Universe universe;
+	UnitManager unit_manager;
 	KeyboardHandler keyboard_handler;
 
 	bool isRunning();
@@ -43,6 +46,7 @@ public:
 	void mouseWheelCallback(double x, double y);
 	
 	void playerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerUpdate>);
+	void unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitCreationUpdate>);
 	void unitUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitUpdate>);
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);

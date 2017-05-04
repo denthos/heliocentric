@@ -16,16 +16,25 @@
 
 namespace Lib {
 #define LOG_LEVEL_DEBUG 0
-#define LOG_LEVEL_WARN 1
-#define LOG_LEVEL_ERR 2
+#define LOG_LEVEL_INFO 1
+#define LOG_LEVEL_WARN 2
+#define LOG_LEVEL_ERR 3
 
-#define LOG(level, ...) LogFunc(level, __FILE__, __LINE__, __VA_ARGS__)
+#ifndef COMPILE_TIME_LOG_LEVEL
+#define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_DEBUG
+#endif
+
+
+#define LOG(level, ...) if (level >= COMPILE_TIME_LOG_LEVEL) Lib::LogFunc(level, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_DEBUG(...) LOG(LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define LOG_INFO(...) LOG(LOG_LEVEL_INFO, __VA_ARGS__)
 #define LOG_WARN(...) LOG(LOG_LEVEL_WARN, __VA_ARGS__)
 #define LOG_ERR(...) LOG(LOG_LEVEL_ERR, __VA_ARGS__)
 
+	static std::string log_file;
 	static std::mutex log_lock;
-	std::ofstream& getLogFile(std::string dir);
+
+	std::ofstream& getLogFile();
 
 	template <typename TStreamType>
 	void write_log_to_stream(TStreamType& out_stream, std::string& level_string, const char* file, const char* ext, int line, const char* time_str, std::ostringstream& stream) {

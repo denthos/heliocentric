@@ -101,11 +101,11 @@
     <ClInclude Include="base_command.h">
       <Filter>Commands</Filter>
     </ClInclude>
-    <ClInclude Include="bounding_box.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="debug_pause.h">
+      <Filter>Updates</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="debug_switch.h">
+      <Filter>Updates</Filter>
     </ClInclude>
     <ClInclude Include="fileutils.h">
       <Filter>Utility Library</Filter>
@@ -113,19 +113,24 @@
     <ClInclude Include="player_command.h">
       <Filter>Commands</Filter>
     </ClInclude>
+    <ClInclude Include="unit_creation_update.h">
+      <Filter>Updates</Filter>
+    <ClInclude Include="planet_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="debug_pause.h">
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="debug_switch.h">
       <Filter>Commands</Filter>
     </ClInclude>
+    <ClInclude Include="unit_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <ClCompile Include="city.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="player.cpp">
@@ -193,16 +198,24 @@
     <ClCompile Include="fileutils.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>
+    <ClCompile Include="unit_creation_update.cpp">
+      <Filter>Updates</Filter>
+    </Clcompile>
     <ClCompile Include="attackable_game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fileutils.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>
+    <ClCompile Include="attackable_game_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+
+    <ClCompile Include="unit_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\config.ini" />
-    <None Include="ConfigTemplate.ini" />
   </ItemGroup>
 </Project>

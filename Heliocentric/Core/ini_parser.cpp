@@ -1,4 +1,5 @@
 #include "ini_parser.h"
+#include "fileutils.h"
 
 #include <unordered_map>
 
@@ -12,6 +13,13 @@ namespace Lib {
 			parsers.insert(std::make_pair(fname, INIParser(fname)));
 		}
 		return parsers.at(fname);
+	}
+
+	INIParser& INIParser::getInstance() {
+		auto path_pair = Lib::splitIntoParentAndChildPath(Lib::getProcessPath());
+		std::string fname = Lib::joinPaths(path_pair.first, Lib::stripExtension(path_pair.second) + "_config.ini");
+
+		return getInstance(fname);
 	}
 
 	void INIParser::reload() {

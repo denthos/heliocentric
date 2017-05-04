@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "unit_creation_update.h"
 #include "unit_update.h"
 #include "game_server.h"
 
@@ -28,7 +29,7 @@ GameServer::~GameServer() {
 
 void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) {
 	/* If a client wishes to disconnect, we just drop them entirely. */
-	Lib::LOG_DEBUG("Disconnecting client");
+	LOG_DEBUG("Disconnecting client");
 	std::lock_guard<std::mutex> guard(connections.get_lock());
 	auto id_it = connections.get_item().second.find(client);
 	if (id_it != connections.get_item().second.end()) {
@@ -40,13 +41,13 @@ void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p clie
 
 void GameServer::handle_channeledclient_error(SunNet::ChanneledSocketConnection_p client) {
 	/* If a client error occurs, we just drop them entirely. */
-	Lib::LOG_ERR("Client error!");
+	LOG_ERR("Client error!");
 	this->handleClientDisconnect(client);
 }
 
 void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnection_p client) {
 	/* A new client is connected! Assign them an ID */
-	Lib::LOG_DEBUG("A new client connected.");
+	LOG_DEBUG("A new client connected.");
 	std::unique_ptr<Player> player = std::make_unique<Player>("PLAYER_NAME");
 
 	{
@@ -63,7 +64,7 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	std::shared_ptr<PlayerIDConfirmation> id_confirm = std::make_shared<PlayerIDConfirmation>();
 	id_confirm->id = player->getID();
 
-	Lib::LOG_DEBUG("Assigned id ", player->getID(), " to new player.. sending confirmation");
+	LOG_DEBUG("Assigned id ", player->getID(), " to new player.. sending confirmation");
 	this->addUpdateToSendQueue(id_confirm, { client });
 
 	players[player->getID()] = std::move(player);
@@ -76,7 +77,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	auto& player_id_it = this->connections.get_item().second.find(sender);
 	if (player_id_it == this->connections.get_item().second.end()) {
 		/* What the.. we received player info from a connection we don't know about? This is weird. */
-		Lib::LOG_WARN("Received player info from connection we haven't heard of before...");
+		LOG_WARN("Received player info from connection we haven't heard of before...");
 
 		/* 
 		Luckily, if we send them another ID confirmation, the client will take the new ID and overwrite
@@ -89,7 +90,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	auto& player_it = this->players.find(player_id_it->second);
 	if (player_it == this->players.end()) {
 		/* This is even weirder.. we received player info from a connection we know about, but we don't know about the player... */
-		Lib::LOG_WARN("Received player info for unknown player ID: ", player_id_it->second);
+		LOG_WARN("Received player info for unknown player ID: ", player_id_it->second);
 
 		/*
 		In this situation, it seems like the client simply ACKd a different ID number than we gave them.
@@ -100,7 +101,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 		return;
 	}
 
-	Lib::LOG_DEBUG("Received player client->server info transfer. Player with ID ", player_it->first, " has name ", info->name);
+	LOG_DEBUG("Received player client->server info transfer. Player with ID ", player_it->first, " has name ", info->name);
 	info->apply(player_it->second.get());
 
 	/* OK. We've applied the information to the player. Now we'd like to send this information to all other players */
@@ -108,11 +109,11 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	player_update->id = player_it->first;
 	strcpy_s(player_update->player_name, sizeof(player_update->player_name), info->name);
 
-	Lib::LOG_DEBUG("Sending information about new player to all others..");
+	LOG_DEBUG("Sending information about new player to all others..");
 	this->addUpdateToSendQueue(player_update);
 
 	/* OK. Finally, let's send information about _all_ other players to this player */
-	Lib::LOG_DEBUG("Sending information about all others to new player...");
+	LOG_DEBUG("Sending information about all others to new player...");
 	for (auto& other_player_it : this->players) {
 		if (other_player_it.first == player_it->first) {
 			continue;
@@ -134,6 +135,10 @@ void GameServer::performUpdates() {
 	/* First, update the universe */
 	this->universe.doLogic();
 	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
+
+	/* update the unit manager */
+	this->unit_manager.doLogic();
+	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
 }
 
 void GameServer::sendUpdates() {
@@ -180,9 +185,9 @@ void GameServer::run() {
 
 		while ((tick_elapsed_time = std::clock() - tick_start_time) < tick_duration);
 		if (tick_elapsed_time > tick_duration)
-			Lib::LOG_WARN("Tick processing took ", tick_elapsed_time - tick_duration, "ms longer than expected");
+			LOG_WARN("Tick processing took ", tick_elapsed_time - tick_duration, "ms longer than expected");
 	}
-	Lib::LOG_DEBUG("Server exited safely");
+	LOG_DEBUG("Server exited safely");
 }
 
 void GameServer::end_game() {
@@ -193,48 +198,74 @@ void GameServer::end_game() {
 void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause) {
 	{
 		std::lock_guard<std::mutex>(this->connections.get_lock());
-		Lib::LOG_DEBUG("Game paused by connection ", this->connections.get_item().second[sender]);
+		LOG_DEBUG("Game paused by connection ", this->connections.get_item().second[sender]);
 	}
 	this->game_paused = !this->game_paused;
 }
 
 void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> command) {
-	Lib::LOG_DEBUG("Received a player command.");
+	LOG_DEBUG("Received a player command.");
 
 	/* This currently only handles create command */
 	switch (command->command_type) {
 		case PlayerCommand::CMD_CREATE: {
-			Lib::LOG_DEBUG("Play command type: CMD_CREATE.");
+			LOG_DEBUG("Play command type: CMD_CREATE.");
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			// TODO: Create the new unit (should probably be a unique_ptr) and move it into the UnitManager
 			// TODO: Queue up UnitUpdates for the unit
-			std::shared_ptr<UnitUpdate> update = std::make_shared<UnitUpdate>();
+
+			UID unit_owner_id; // ID of the player who sent the command
+			{
+				/* These operations need to be locked */
+				std::lock_guard<std::mutex>(this->connections.get_lock());
+				/* Get player ID if player does exist */
+				if ((connections.get_item().second).find(sender) != (connections.get_item().second).end()) {
+					unit_owner_id = (connections.get_item().second)[sender];
+				}
+				else {
+					LOG_ERR("Player does not exist");
+					return;
+				}
+			}
+
+			/* Let's just create a variable for the unit position, because it's so long. */
+			glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
+			std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
+																																	 // TODO: Put this unit into unit manager
+
+			std::shared_ptr<UnitCreationUpdate> update = std::make_shared<UnitCreationUpdate>(); // Creates an update for the unit to be sent to client
+			update->id = new_unit->getID();
 			update->x = command->create_location_x;
 			update->y = command->create_location_y;
 			update->z = command->create_location_z;
+			update->player_id = unit_owner_id;
+			update->att = 100;
+			update->def = 100;
+			update->range = 20;
+			update->health = 100;
 
 			this->addUpdateToSendQueue(update, { sender });
 			break;
 		}
 		default:
-			Lib::LOG_ERR("Invalid player command.");
+			LOG_ERR("Invalid player command.");
 		}
 }
-
+  
 void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> command) {
-	Lib::LOG_DEBUG("Received a unit command.");
+	LOG_DEBUG("Received a unit command.");
 
 	/* This currently only handles attack and move commands */
 	switch (command->command_type) {
 		case UnitCommand::CMD_ATTACK:
-			Lib::LOG_DEBUG("Unit command type: CMD_ATTACK");
+			LOG_DEBUG("Unit command type: CMD_ATTACK");
 			break;
 		case UnitCommand::CMD_MOVE:
-			Lib::LOG_DEBUG("Unit command type: CMD_MOVE");
+			LOG_DEBUG("Unit command type: CMD_MOVE");
 			// TODO: Delegate to UnitManager
 			break;
 		default:
-			Lib::LOG_ERR("Invalid unit command.");
+			LOG_ERR("Invalid unit command.");
 	}
 }
 

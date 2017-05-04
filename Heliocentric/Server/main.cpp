@@ -10,7 +10,7 @@ int main() {
 
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
 	GameServer server(30, port, 5, 10);
-	Lib::LOG_DEBUG("Starting server on port ", 9876);
+	LOG_DEBUG("Starting server on port ", 9876);
 
 
 	server.run();

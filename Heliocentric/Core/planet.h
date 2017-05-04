@@ -2,6 +2,7 @@
 
 #include "game_object.h"
 #include "slot.h"
+#include "planet_types.h"
 
 #include <vector>
 #include <string>
@@ -14,8 +15,8 @@ class Planet : public GameObject {
 public:
 	friend PlanetUpdate;
 
-	Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, std::unordered_map<UID, Slot*>);
-	Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, std::unordered_map<UID, Slot*>);
+	Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>);
+	Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>);
 
 	std::unordered_map<UID, Slot*> get_slots() const;
 
@@ -26,10 +27,13 @@ public:
 	bool check_occupancy() const;
 
 	float get_radius() const;
+	PlanetType get_type() const;
 
 private:
 	std::string name;       // planet name
 	std::unordered_map<UID, Slot*> slots;  // list of slots available
+
+	PlanetType type;
 
 	float orbit_speed;
 	float radius;

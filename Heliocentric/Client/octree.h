@@ -16,9 +16,12 @@ public:
 	Octree(BoundingBox region, std::set<Drawable *> objects);
 	~Octree();
 	void insert(Drawable * object);
+	void update();
 	void clear();
 	void draw(const Shader & shader, const Camera & camera);
 	void viewFrustumCull(ViewFrustum frustum);
+	void enableViewFrustumCulling(const ViewFrustum * frustum);
+	void disableViewFrustumCulling();
 
 protected:
 	static float MIN_VOLUME;
@@ -28,7 +31,8 @@ protected:
 	std::set<Drawable *> objects;
 	Octree * children[8];
 	bool hasChildren = false;
+	const ViewFrustum * viewFrustum;
+	bool shouldCull = false;
 
-	void update();
 	void drawNode(const Shader & shader, const Camera & camera);
 };

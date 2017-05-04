@@ -1,6 +1,6 @@
 #include "bounding_box.h"
 
-BoundingBox::BoundingBox() : min(glm::vec3(0.0f)), max(glm::vec3(1.0f)) {
+BoundingBox::BoundingBox() : min(glm::vec3(0.0f)), max(glm::vec3(0.0f)) {
 
 }
 
@@ -14,4 +14,18 @@ bool BoundingBox::contains(const BoundingBox & box) {
 			return true;
 	}
 	return false;
+}
+
+void BoundingBox::expand(const glm::vec3 & vertex) {
+	if (vertex.x < min.x) min.x = vertex.x;
+	if (vertex.y < min.y) min.y = vertex.y;
+	if (vertex.z < min.z) min.z = vertex.z;
+	if (vertex.x > max.x) max.x = vertex.x;
+	if (vertex.y > max.y) max.y = vertex.y;
+	if (vertex.z > max.z) max.z = vertex.z;
+}
+
+void BoundingBox::expand(const BoundingBox & box) {
+	expand(box.min);
+	expand(box.max);
 }

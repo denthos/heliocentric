@@ -36,7 +36,12 @@ Octree::~Octree() {
 }
 
 void Octree::insert(Drawable * object) {
-	objects.insert(object);
+	if (!shouldCull) {
+		objects.insert(object);
+	}
+	else if (viewFrustum->containsOrIntersects(object->getBoundingBox())) {
+			objects.insert(object);
+	}
 }
 
 void Octree::clear() {
@@ -72,7 +77,7 @@ void Octree::viewFrustumCull(ViewFrustum frustum) {
 	hasChildren = false;
 	for (int i = 0; i < 8; ++i) {
 		if (children[i]) {
-			if (!frustum.containsOrIntersects(children[i]->region)) {
+			if (!viewFrustum->containsOrIntersects(children[i]->region)) {
 				delete(children[i]);
 				children[i] = NULL;
 			}
@@ -82,6 +87,15 @@ void Octree::viewFrustumCull(ViewFrustum frustum) {
 			}
 		}
 	}
+}
+
+void Octree::enableViewFrustumCulling(const ViewFrustum * frustum) {
+	shouldCull = true;
+	this->viewFrustum = frustum;
+}
+
+void Octree::disableViewFrustumCulling() {
+	shouldCull = false;
 }
 
 void Octree::update() {
@@ -110,15 +124,11 @@ void Octree::update() {
 	std::vector<Drawable *> delist;
 
 	for (auto it = objects.begin(); it != objects.end(); ++it) {
-		const BoundingBox & boundingBox = (*it)->getBoundingBox();
-
-		if (boundingBox.min != boundingBox.max) {
-			for (int i = 0; i < 8; ++i) {
-				if (octant[i].contains(boundingBox)) {
-					objectLists[i].insert(*it);
-					delist.push_back(*it);
-					break;
-				}
+		for (int i = 0; i < 8; ++i) {
+			if (octant[i].contains((*it)->getBoundingBox())) {
+				objectLists[i].insert(*it);
+				delist.push_back(*it);
+				break;
 			}
 		}
 	}

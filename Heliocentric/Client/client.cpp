@@ -6,10 +6,12 @@
 #include <functional>
 #include <stdio.h>
 #include <soil.h>
+#include <GL/glut.h>
 
 
 
 #include "drawable_planet.h"
+#include "drawable_unit.h"
 #include "skybox_mesh.h"
 #include "glfw_callback_handler.h"
 #include "game_channels.h"
@@ -31,10 +33,7 @@
 #define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 
-#define EARTH_TEXTURE "Textures/earth.jpg"
-#define SUN_TEXTURE "Textures/sun.jpg"
-
-#define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+#define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
 //skybox texture files
 #define SKYBOX_FRONT "Textures/Skybox/front.png" 
@@ -63,9 +62,10 @@ bool middleMouseDown = false;
 unsigned char selectedControlScheme = FREE_CAMERA;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
-	Lib::INIParser & config = Lib::INIParser::getInstance("config.ini");
+	Lib::INIParser & config = Lib::INIParser::getInstance();
 	int width = config.get<int>("ScreenWidth");
 	int height = config.get<int>("ScreenHeight");
+
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
@@ -82,7 +82,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	glEnable(GL_TEXTURE_2D);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000.0f, width, height);
+	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height);
+	octree.enableViewFrustumCulling(&camera->viewFrustum);
 
 	resizeCallback(width, height);
 
@@ -97,15 +98,22 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	for (auto& planet : this->universe.get_planets()) {
 		//auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
 		//this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
-		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get(), Texture(EARTH_TEXTURE));
+		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get());
 		gameObjects[planet->getID()] = drawablePlanet;
 		planets[planet->getID()] = drawablePlanet;
+	}
+
+	for (auto& unit : this->unit_manager.get_units()) {
+		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get());
+		gameObjects[unit->getID()] = drawableUnit;
+		units[unit->getID()] = drawableUnit;
 	}
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
 
 	this->subscribe<PlayerUpdate>(std::bind(&Client::playerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<UnitCreationUpdate>(std::bind(&Client::unitCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitUpdate>(std::bind(&Client::unitUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -127,7 +135,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		this->connect(address, port);
 	}
 	catch (const SunNet::ConnectException&) {
-		Lib::LOG_ERR("Could not connect to host at address ", address, " and port ", port);
+		LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
 }
 
@@ -147,7 +155,7 @@ bool Client::isRunning() {
 
 void Client::createWindow(int width, int height) {
 	if (!glfwInit()) {
-		Lib::LOG_ERR("Could not initialize GLFW");
+		LOG_ERR("Could not initialize GLFW");
 		return;
 	}
 
@@ -161,7 +169,7 @@ void Client::createWindow(int width, int height) {
 	window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
 
 	if (!window) {
-		Lib::LOG_ERR("Could not create GLFW window");
+		LOG_ERR("Could not create GLFW window");
 		return;
 	}
 
@@ -174,7 +182,7 @@ void Client::createWindow(int width, int height) {
 	GLenum glewErr = glewInit();
 #ifndef __APPLE__
 	if (glewErr != GLEW_OK) {
-		Lib::LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
+		LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
 		return;
 	}
 #endif
@@ -189,16 +197,15 @@ void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 	camera->calculateViewMatrix();
+	camera->calculateViewFrustum();
 
+	octree.clear();
 	for (auto & gameObject : gameObjects) {
 		octree.insert(gameObject.second);
 	}
-
-	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
+	octree.update();
 	octree.draw(*textureShader, *camera);
-	octree.clear(); // empty octree each frame
 
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 
@@ -212,7 +219,7 @@ void Client::update() {
 }
 
 void Client::errorCallback(int error, const char * description) {
-	Lib::LOG_ERR("OpenGL Error occurred: ", description);
+	LOG_ERR("OpenGL Error occurred: ", description);
 }
 
 void Client::resizeCallback(int width, int height) {
@@ -227,26 +234,7 @@ void Client::resizeCallback(int width, int height) {
 
 void Client::keyCallback(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
-		switch (key) {
-		case(GLFW_KEY_ESCAPE):
-			glfwSetWindowShouldClose(window, GL_TRUE);
-			break;
-		case(GLFW_KEY_F1):
-			/* Toggle the server's pause state */
-			DebugPause pause;
-			this->channeled_send<DebugPause>(&pause);
-			break;
-		case(GLFW_KEY_F2):
-			/* Create a new unit */
-			PlayerCommand command;
-			command.command_type = PlayerCommand::CMD_CREATE;
-			command.create_location_x = 50.0f;
-			command.create_location_y = 50.0f;
-			command.create_location_z = 0.0f;
-
-			this->channeled_send(&command);
-			break;
-		}
+		this->keyboard_handler.setKeyDown(key);
 	}
 	else if (action == GLFW_RELEASE) {
 		this->keyboard_handler.setKeyUp(key);
@@ -349,7 +337,7 @@ void Client::mouseWheelCallback(double x, double y) {
 
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
-	Lib::LOG_DEBUG("Received update for player with id: ", update->id);
+	LOG_DEBUG("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
 	if (player_it == players.end()) {
 		Player* new_player = new Player(update->player_name, update->id);
@@ -360,10 +348,15 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 
 }
 
+void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
+	LOG_DEBUG("Unit creation update received");
+	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
+	units[update->id] = new Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id], update->att, update->def, update->range, update->health);
+}
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
-	Lib::LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
-	std::string player_name = Lib::INIParser::getInstance("config.ini").get<std::string>("PlayerName");
+	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
+	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
 	this->player = new Player(player_name, update->id);
 	players[update->id] = this->player;
 
@@ -374,8 +367,9 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	update->apply(units[update->id]);
-	Lib::LOG_DEBUG("Unit update received");
+	LOG_DEBUG("Unit update received");
+  update->apply(units[update->id]);
+	gameObjects[update->id]->update();
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
@@ -393,18 +387,18 @@ void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 
 void Client::handle_client_disconnect() {
 	/* YEAH? The server wants to disconnect us? WELL LET'S DISCONNECT THEM! */
-	Lib::LOG_ERR("The client has been disconnected from the server...");
+	LOG_ERR("The client has been disconnected from the server...");
 	this->disconnect();
-	Lib::LOG_ERR("Client disconnected.");
+	LOG_ERR("Client disconnected.");
 }
 
 void Client::handle_client_error() {
 	/* If there is some sort of error with the server, just disconnect outright */
-	Lib::LOG_ERR("The client could not contact the server..");
+	LOG_ERR("The client could not contact the server..");
 
 	// TODO: Add retry logic/connection fix logic.
 	this->disconnect();
-	Lib::LOG_ERR("Client disconnected.");
+	LOG_ERR("Client disconnected.");
 }
 
 void Client::handle_poll_timeout() {}

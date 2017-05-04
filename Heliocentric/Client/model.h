@@ -18,10 +18,12 @@ public:
 	Model(GLchar* file);
 	void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld);
 	void update();
-private:
+	BoundingBox getBoundingBox();
+protected:
+	BoundingBox boundingBox;
 	std::vector<Mesh> meshes; //meshes in the model
+private:
 	std::string directory; //folder that model files belong in
-
 	void load(std::string file); //load the model file info
 	void processNode(aiNode* node, const aiScene* scene); 
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);

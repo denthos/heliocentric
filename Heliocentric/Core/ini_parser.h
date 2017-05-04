@@ -19,7 +19,8 @@ namespace Lib {
 	public:
 		using ConfigParser::get;
 
-		static INIParser& getInstance(std::string fname = "../config.ini");
+		static INIParser& getInstance(std::string fname);
+		static INIParser& getInstance();
 
 		virtual void reload();
 		virtual void update_value(std::string key, std::string value);
