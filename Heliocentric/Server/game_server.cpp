@@ -134,6 +134,10 @@ void GameServer::performUpdates() {
 	/* First, update the universe */
 	this->universe.doLogic();
 	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
+
+	/* update the unit manager */
+	this->unit_manager.doLogic();
+	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
 }
 
 void GameServer::sendUpdates() {

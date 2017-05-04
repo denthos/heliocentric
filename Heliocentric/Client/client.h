@@ -17,6 +17,7 @@
 #include "channeled_client.h"
 #include "tcp_socket_connection.hpp"
 #include "universe.h"
+#include "unit_manager.h"
 #include <GL\glew.h>
 #include <GLFW/glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
@@ -30,6 +31,7 @@ public:
 	~Client(); // free all memory here
 
 	Universe universe;
+	UnitManager unit_manager;
 	KeyboardHandler keyboard_handler;
 
 	bool isRunning();

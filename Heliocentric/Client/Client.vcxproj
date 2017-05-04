@@ -205,6 +205,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="keyboard_handler.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="drawable_data.h" />
+    <ClInclude Include="drawable_unit.h" />
     <ClInclude Include="skybox_mesh.h" />
     <ClInclude Include="file_mesh.h" />
     <ClInclude Include="glfw_callback_handler.h" />
@@ -228,6 +229,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClCompile Include="keyboard_handler.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="drawable_data.cpp" />
+    <ClCompile Include="drawable_unit.cpp" />
     <ClCompile Include="skybox_mesh.cpp" />
     <ClCompile Include="file_mesh.cpp" />
     <ClCompile Include="glfw_callback_handler.cpp" />

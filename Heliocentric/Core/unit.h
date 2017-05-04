@@ -6,6 +6,8 @@
 #include "lib.h"
 #include "attackable_game_object.h"
 
+#include <memory>
+
 class UnitUpdate;
 
 /**
@@ -16,15 +18,21 @@ public:
 
 	friend UnitUpdate;
 
-	enum CommandType { UNIT_ATTACK , UNIT_IDLE, UNIT_MOVE };
+	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE };
 
-	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
-	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal);
+	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
+	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
+
+	/** 
+	Perform logic based on command. Called continuously by server to update current state 
+	of the unit.
+	*/
+	void do_logic();
 
 	/**
-	Called continuously by server to update current state of the unit.
+	Perform update.
 	*/
-	void update();
+	std::shared_ptr<UnitUpdate> make_update();
 
 	/**
 	Returns the destination where the unit is moving towards.
@@ -50,14 +58,14 @@ public:
 	Returns the maximum movement speed of this unit.
 	@return The maximum movement speed of this unit.
 	*/
-	int get_movement_speed_max();
+	float get_movement_speed_max();
 
 	/**
 	Sets the maximum movement speed of this unit.
 	@param The maximum movement speed of this unit.
 	@return The maximum movement speed of this unit.
 	*/
-	int set_movmennt_speed_max(int movementSpeedMax);
+	void set_movement_speed_max(float movement_speed);
 
 
 	/**
@@ -81,8 +89,9 @@ protected:
 	*/
 	glm::vec3 do_move();
 
-	int movementSpeedMax; // maximum speed that this unit can achieve when powered by its own engine
-	int movementSpeedCurrent; // can be used if implementing gravity simulation
+	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
+
+	std::shared_ptr<UnitUpdate> update;
 	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
 	AttackableGameObject* target;

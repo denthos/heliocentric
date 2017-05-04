@@ -122,6 +122,9 @@
     <ClInclude Include="debug_switch.h">
       <Filter>Commands</Filter>
     </ClInclude>
+    <ClInclude Include="unit_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -198,6 +201,13 @@
     </ClCompile>
     <ClCompile Include="fileutils.cpp">
       <Filter>Utility Library</Filter>
+    </ClCompile>
+    <ClCompile Include="attackable_game_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+
+    <ClCompile Include="unit_manager.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

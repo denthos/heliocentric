@@ -6,10 +6,12 @@
 #include <functional>
 #include <stdio.h>
 #include <soil.h>
+#include <GL/glut.h>
 
 
 
 #include "drawable_planet.h"
+#include "drawable_unit.h"
 #include "skybox_mesh.h"
 #include "glfw_callback_handler.h"
 #include "game_channels.h"
@@ -97,6 +99,12 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get());
 		gameObjects[planet->getID()] = drawablePlanet;
 		planets[planet->getID()] = drawablePlanet;
+	}
+
+	for (auto& unit : this->unit_manager.get_units()) {
+		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get());
+		gameObjects[unit->getID()] = drawableUnit;
+		units[unit->getID()] = drawableUnit;
 	}
 
 	// Set up SunNet client and channel callbacks
@@ -372,7 +380,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	update->apply(units[update->id]);
-	LOG_DEBUG("Unit update received");
+	gameObjects[update->id]->update();
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
