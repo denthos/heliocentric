@@ -2,13 +2,14 @@
 
 #include "model.h"
 #include "bounding_box.h"
+#include <memory>
 
 class Drawable {
 public:
 	Drawable();
-	virtual void draw(const Shader &, const Camera &);
+	virtual void draw(const Shader &, const Camera &) const;
 	virtual void update() = 0;
-	virtual const BoundingBox & getBoundingBox();
+	virtual BoundingBox getBoundingBox() const;
 protected:
 	Mesh * mesh;
 	glm::mat4 toWorld;

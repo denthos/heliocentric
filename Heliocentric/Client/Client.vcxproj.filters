@@ -135,9 +135,6 @@
     <ClCompile Include="octree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="view_frustum.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="skybox_mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -159,6 +156,9 @@
     <ClCompile Include="drawable.cpp">
       <Filter>Drawables</Filter>
     </ClCompile>
+    <ClCompile Include="view_frustum.cpp">
+      <Filter>Source Files</Filter>
+	</ClCompile>
     <ClCompile Include="drawable_data.cpp">
       <Filter>Drawables</Filter>
     </ClCompile>

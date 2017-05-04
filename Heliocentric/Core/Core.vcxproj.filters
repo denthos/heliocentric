@@ -101,11 +101,11 @@
     <ClInclude Include="base_command.h">
       <Filter>Commands</Filter>
     </ClInclude>
-    <ClInclude Include="bounding_box.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="debug_pause.h">
+      <Filter>Updates</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="debug_switch.h">
+      <Filter>Updates</Filter>
     </ClInclude>
     <ClInclude Include="fileutils.h">
       <Filter>Utility Library</Filter>

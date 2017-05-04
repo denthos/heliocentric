@@ -1,6 +1,6 @@
 #include "bounding_box.h"
 
-BoundingBox::BoundingBox() : min(glm::vec3(0.0f)), max(glm::vec3(1.0f)) {
+BoundingBox::BoundingBox() : min(glm::vec3(0.0f)), max(glm::vec3(0.0f)) {
 
 }
 

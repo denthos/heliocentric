@@ -31,8 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base_command.h" />
-    <ClInclude Include="bounding_box.h" />
-    <ClInclude Include="camera.h" />
     <ClInclude Include="config_parser.h" />
     <ClInclude Include="debug_pause.h" />
     <ClInclude Include="debug_switch.h" />

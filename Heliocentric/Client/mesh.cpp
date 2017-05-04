@@ -54,24 +54,24 @@ void Mesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & 
 
 	//bind textures
 	for (GLuint i = 0; i < mesh_textures.size(); i++) {
-		//set which texture we're using
-		glActiveTexture(GL_TEXTURE0 + i);
+//set which texture we're using
+glActiveTexture(GL_TEXTURE0 + i);
 
-		std::string tex_name = mesh_textures[i].type;
-		std::string tex_num = (tex_name == "texture_diffuse") ? std::to_string(diffuse_num++) : std::to_string(spec_num++);
+std::string tex_name = mesh_textures[i].type;
+std::string tex_num = (tex_name == "texture_diffuse") ? std::to_string(diffuse_num++) : std::to_string(spec_num++);
 
-		//bind texture
-		glUniform1i(glGetUniformLocation(shaderID, (tex_name + tex_num).c_str()), i);
-		glBindTexture(GL_TEXTURE_2D, mesh_textures[i].id);
+//bind texture
+glUniform1i(glGetUniformLocation(shaderID, (tex_name + tex_num).c_str()), i);
+glBindTexture(GL_TEXTURE_2D, mesh_textures[i].id);
 	}
 
-	
+
 
 	//bind vao 
 	glBindVertexArray(VAO);
 
 	//draw
-	glDrawElements(GL_TRIANGLES, (GLsizei) mesh_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (GLsizei)mesh_indices.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
 
@@ -94,6 +94,10 @@ void Mesh::setTexture(Texture & texture) {
 	else {
 		mesh_textures.push_back(texture);
 	}
+}
+
+BoundingBox Mesh::getBoundingBox() const {
+	return boundingBox;
 }
 
 void Mesh::createMesh()
@@ -148,6 +152,19 @@ void Mesh::createMesh()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	// create bounding box around vertices
+	boundingBox.min = glm::vec3(100000000.0f);
+	boundingBox.max = glm::vec3(-100000000.0f);
+	for (unsigned int i = 0; i < mesh_vertices.size(); ++i) {
+		glm::vec3 & vertex = mesh_vertices[i].pos;
+		if (vertex.x < boundingBox.min.x) boundingBox.min.x = vertex.x;
+		if (vertex.y < boundingBox.min.y) boundingBox.min.y = vertex.y;
+		if (vertex.z < boundingBox.min.z) boundingBox.min.z = vertex.z;
+		if (vertex.x > boundingBox.max.x) boundingBox.max.x = vertex.x;
+		if (vertex.y > boundingBox.max.y) boundingBox.max.y = vertex.y;
+		if (vertex.z > boundingBox.max.z) boundingBox.max.z = vertex.z;
+	}
 }
 
 void Mesh::genMesh() {

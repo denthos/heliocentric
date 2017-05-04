@@ -65,6 +65,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	Lib::INIParser & config = Lib::INIParser::getInstance();
 	int width = config.get<int>("ScreenWidth");
 	int height = config.get<int>("ScreenHeight");
+
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
@@ -81,7 +82,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	glEnable(GL_TEXTURE_2D);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000.0f, width, height);
+	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height);
+	octree.enableViewFrustumCulling(&camera->viewFrustum);
 
 	resizeCallback(width, height);
 
@@ -194,16 +196,15 @@ void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
 	camera->calculateViewMatrix();
+	camera->calculateViewFrustum();
 
+	octree.clear();
 	for (auto & gameObject : gameObjects) {
 		octree.insert(gameObject.second);
 	}
-
-	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
+	octree.update();
 	octree.draw(*textureShader, *camera);
-	octree.clear(); // empty octree each frame
 
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 
