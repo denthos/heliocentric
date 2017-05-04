@@ -2,6 +2,7 @@
 #include "channels.h"
  
 /* Update objects to create channels for */
+#include "unit_creation_update.h"
 #include "unit_update.h"
 #include "player_update.h"
 #include "slot_update.h"
@@ -17,6 +18,7 @@
 void initializeChannels() {
 	using channels = SunNet::Channels;
 
+	channels::addNewChannel<UnitCreationUpdate>();
 	channels::addNewChannel<UnitUpdate>();
 	channels::addNewChannel<PlayerUpdate>();
 	channels::addNewChannel<SlotUpdate>();

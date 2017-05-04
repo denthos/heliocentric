@@ -113,6 +113,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	initializeChannels();
 
 	this->subscribe<PlayerUpdate>(std::bind(&Client::playerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<UnitCreationUpdate>(std::bind(&Client::unitCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitUpdate>(std::bind(&Client::unitUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -347,6 +348,11 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 
 }
 
+void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
+	LOG_DEBUG("Unit creation update received");
+	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
+	units[update->id] = new Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id], update->att, update->def, update->range, update->health);
+}
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
 	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
@@ -361,7 +367,8 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	update->apply(units[update->id]);
+	LOG_DEBUG("Unit update received");
+  update->apply(units[update->id]);
 	gameObjects[update->id]->update();
 }
 

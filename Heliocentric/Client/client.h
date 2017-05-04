@@ -9,6 +9,7 @@
 #include "planet.h"
 #include "slot.h"
 #include "player_update.h"
+#include "unit_creation_update.h"
 #include "unit_update.h"
 #include "city_update.h"
 #include "planet_update.h"
@@ -45,6 +46,7 @@ public:
 	void mouseWheelCallback(double x, double y);
 	
 	void playerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerUpdate>);
+	void unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitCreationUpdate>);
 	void unitUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitUpdate>);
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);

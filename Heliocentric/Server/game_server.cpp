@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "unit_creation_update.h"
 #include "unit_update.h"
 #include "game_server.h"
 
@@ -212,10 +213,36 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			// TODO: Create the new unit (should probably be a unique_ptr) and move it into the UnitManager
 			// TODO: Queue up UnitUpdates for the unit
-			std::shared_ptr<UnitUpdate> update = std::make_shared<UnitUpdate>();
+
+			UID unit_owner_id; // ID of the player who sent the command
+			{
+				/* These operations need to be locked */
+				std::lock_guard<std::mutex>(this->connections.get_lock());
+				/* Get player ID if player does exist */
+				if ((connections.get_item().second).find(sender) != (connections.get_item().second).end()) {
+					unit_owner_id = (connections.get_item().second)[sender];
+				}
+				else {
+					LOG_ERR("Player does not exist");
+					return;
+				}
+			}
+
+			/* Let's just create a variable for the unit position, because it's so long. */
+			glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
+			std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
+																																	 // TODO: Put this unit into unit manager
+
+			std::shared_ptr<UnitCreationUpdate> update = std::make_shared<UnitCreationUpdate>(); // Creates an update for the unit to be sent to client
+			update->id = new_unit->getID();
 			update->x = command->create_location_x;
 			update->y = command->create_location_y;
 			update->z = command->create_location_z;
+			update->player_id = unit_owner_id;
+			update->att = 100;
+			update->def = 100;
+			update->range = 20;
+			update->health = 100;
 
 			this->addUpdateToSendQueue(update, { sender });
 			break;
@@ -224,7 +251,7 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			LOG_ERR("Invalid player command.");
 		}
 }
-
+  
 void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> command) {
 	LOG_DEBUG("Received a unit command.");
 

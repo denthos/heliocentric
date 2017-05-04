@@ -20,9 +20,32 @@ public:
 
 	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE };
 
+	/**
+	Unit constructor without specifying UID. Used on server end.
+	@param pos Position of the unit.
+	@param owner Indicates which player owns this unit.
+	@param att Attack stat of this unit.
+	@param def Defense stat of this unit.
+	@param range Range stat of this unit.
+	@param heal Health stat of this unit.
+  @param movement_speed Movement speed of this unit.
+	*/
 	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
-	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
 
+	/**
+	Unit constructor with a specified UID. Essentially creates a "copy" of this
+	unit, since it does not create a new UID for it. Used on client end.
+	@param id UID of this unit.
+	@param pos Position of the unit.
+	@param owner Indicates which player owns this unit.
+	@param att Attack stat of this unit.
+	@param def Defense stat of this unit.
+	@param range Range stat of this unit.
+	@param heal Health stat of this unit.
+  @param movement_speed Movement speed of this unit.
+	*/
+	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
+  
 	/** 
 	Perform logic based on command. Called continuously by server to update current state 
 	of the unit.
