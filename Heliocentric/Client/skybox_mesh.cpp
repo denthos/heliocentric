@@ -172,12 +172,15 @@ void SkyboxMesh::draw(const Shader & shader, const Camera & camera, const glm::m
 	GLuint shaderID = shader.getPid(); //shader program number
 	shader.bind(); //start using our shader
 
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(false);
+
 				   //pass camera, window matrices, and model's world matrix info to shader uniform variables
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, PROJECTION_UNIFORM), 1, GL_FALSE, &camera.perspective[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, PROJECTION_UNIFORM), 1, GL_FALSE, &camera.infinite_perspective[0][0]);
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, VIEW_UNIFORM), 1, GL_FALSE, &camera.view[0][0]);
 
-	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), camera.position.x, camera.position.y, camera.position.z);
+	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), 0.0,0.0,0.0);
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &toWorld[0][0]);
 
@@ -194,4 +197,7 @@ void SkyboxMesh::draw(const Shader & shader, const Camera & camera, const glm::m
 	//reset
 	glBindVertexArray(0);
 	shader.unbind();
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(true);
 }

@@ -204,10 +204,14 @@ void Client::display() {
 	for (auto & gameObject : gameObjects) {
 		octree.insert(gameObject.second);
 	}
+
+	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
+
 	octree.update();
 	octree.draw(*textureShader, *camera);
 
-	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+	
 
 	glfwSwapBuffers(window);
 

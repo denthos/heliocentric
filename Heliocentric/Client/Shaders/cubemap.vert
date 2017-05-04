@@ -10,6 +10,10 @@ out vec3 TexCoord;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(position, 1.0f);
+    mat4 view_no_translate = view;
+    view_no_translate[3][0] = 0.0; 
+    view_no_translate[3][1] = 0.0; 
+    view_no_translate[3][2] = 0.0; 
+    gl_Position = projection * view_no_translate * model * vec4(position, 1.0f);
     TexCoord = position;
 }

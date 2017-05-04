@@ -12,6 +12,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, fl
 	position(position), target(target), up(up), fov(fov), nearDist(nearDist), farDist(farDist), width(width), height(height) {
 	calculateViewMatrix();
 	calculatePerspectiveMatrix();
+	calculateInfinitePerspectiveMatrix();
 }
 
 void Camera::calculateViewMatrix() {
@@ -19,11 +20,20 @@ void Camera::calculateViewMatrix() {
 }
 
 void Camera::calculatePerspectiveMatrix() {
+
 	if (height > 0) {
 		aspectRatio = (float)width / (float)height;
 		perspective = glm::perspective((float)fov, aspectRatio, nearDist, farDist);
 	}
 }
+
+void Camera::calculateInfinitePerspectiveMatrix()
+{
+	if (height > 0) {
+		infinite_perspective = glm::infinitePerspective((float)fov, aspectRatio, nearDist);
+	}
+}
+
 
 void Camera::calculateViewFrustum() {
 	float tang = glm::tan(toRad * fov);
@@ -61,3 +71,4 @@ void Camera::calculateViewFrustum() {
 	normal = glm::cross(y, aux);
 	viewFrustum.planes[RIGHT_PLANE] = Plane(nearCenter + (x * nearWidth), normal);
 }
+

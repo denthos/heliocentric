@@ -10,10 +10,17 @@ public:
 	float fov, nearDist, farDist, aspectRatio;
 	int width, height;
 	glm::mat4 view, perspective;
+
+	glm::mat4 infinite_perspective;
+
 	ViewFrustum viewFrustum;
+
 	Camera();
 	Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, float nearDist, float farDist, int width, int height);
 	void calculateViewMatrix();
 	void calculatePerspectiveMatrix();
+
+	void calculateInfinitePerspectiveMatrix();
 	void calculateViewFrustum();
+
 };
