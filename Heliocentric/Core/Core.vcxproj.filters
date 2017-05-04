@@ -86,6 +86,12 @@
     <ClInclude Include="unit_sample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="player_id_confirmation.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="player_client_to_server_xfer.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
     <ClInclude Include="universe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -101,16 +107,19 @@
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="debug_pause.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
-    <ClInclude Include="debug_switch.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
     <ClInclude Include="fileutils.h">
       <Filter>Utility Library</Filter>
     </ClInclude>
     <ClInclude Include="player_command.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="planet_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_pause.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_switch.h">
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="unit_manager.h">
@@ -120,9 +129,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <ClCompile Include="city.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="player.cpp">
@@ -181,13 +187,16 @@
     <ClCompile Include="attackable_game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="player_client_to_server_xfer.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
     <ClCompile Include="universe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bounding_box.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="fileutils.cpp">
+      <Filter>Utility Library</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
+    <ClCompile Include="attackable_game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fileutils.cpp">
@@ -203,7 +212,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\config.ini" />
-    <None Include="ConfigTemplate.ini" />
   </ItemGroup>
 </Project>

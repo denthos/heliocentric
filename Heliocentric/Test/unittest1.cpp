@@ -87,7 +87,7 @@ namespace Test
                 map.insert(std::pair<UID, Slot*>(id, slot));
                 ++id;
             }
-			Planet mars(glm::vec3(0.0f, 0.0f, 0.0f), "Mars", 0.0f, 0.0f, map);
+			Planet mars(glm::vec3(0.0f, 0.0f, 0.0f), "Mars", 0.0f, 0.0f, EARTH, map);
             Assert::AreEqual(3, (int) mars.get_slots().size());
             Assert::IsFalse(mars.get_slots().empty());
             Assert::AreEqual(id-1, mars.get_slot(id-1)->getID());

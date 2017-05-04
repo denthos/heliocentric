@@ -4,13 +4,13 @@
 #include "planet.h"
 #include "planet_update.h"
 
-Planet::Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, std::unordered_map<UID, Slot*> map) :
-	GameObject(position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius) {
+Planet::Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*> map) :
+	GameObject(position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius), type(type) {
 	this->update = std::make_shared<PlanetUpdate>();
 }
 
-Planet::Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, std::unordered_map<UID, Slot*> map) :
-	GameObject(id, position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius) {
+Planet::Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*> map) :
+	GameObject(id, position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius), type(type) {
 	this->update = std::make_shared<PlanetUpdate>();
 }
 
@@ -56,4 +56,8 @@ std::shared_ptr<PlanetUpdate> Planet::makeUpdate() {
 
 float Planet::get_radius() const {
 	return this->radius;
+}
+
+PlanetType Planet::get_type() const {
+	return this->type;
 }

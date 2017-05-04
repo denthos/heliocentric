@@ -5,6 +5,7 @@
 #include <functional>
 #include <atomic>
 #include <ctime>
+#include <initializer_list>
 
 #include "logging.h"
 #include "player.h"
@@ -20,6 +21,9 @@
 
 #include "debug_pause.h"
 #include "player_command.h"
+#include "unit_command.h"
+
+#include "player_client_to_server_xfer.h"
 
 class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 	/*
@@ -45,7 +49,13 @@ private:
 	std::unordered_map<UID, std::unique_ptr<GameObject>> game_objects;
 
 	Lib::LockedItem<std::queue<std::shared_ptr<GameObjectUpdate>>> object_updates;
-	std::queue<std::function<void(SunNet::ChanneledSocketConnection_p)>> updates_to_send;
+
+	struct UpdateToSend {
+		std::function<void(SunNet::ChanneledSocketConnection_p)> send_function;
+		std::vector<SunNet::ChanneledSocketConnection_p> intended_recipients;
+	};
+
+	Lib::LockedItem<std::queue<UpdateToSend>> updates_to_send;
 
 	template <typename TUpdate>
 	void sendUpdateToConnection(std::shared_ptr<TUpdate> update, SunNet::ChanneledSocketConnection_p connection) {
@@ -56,18 +66,40 @@ private:
 			/* 
 			If there is an error sending data to the client, let's log it and forget about it.
 			Maybe the error is only transient :)
+
+			RIP game experience
 			*/
-			Lib::LOG_ERR("Error when trying to send an update to a client: ", e.what());
+			LOG_ERR("Error when trying to send an update to a client: ", e.what());
 		}
 	}
 
 	template <typename TUpdate>
-	std::function<void(SunNet::ChanneledSocketConnection_p)> makeUpdateSendFunction(std::shared_ptr<TUpdate> update) {
-		return std::bind(&GameServer::sendUpdateToConnection<TUpdate>, this, update, std::placeholders::_1);
+	void makeUpdateToSend(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients) {
+		UpdateToSend sendable_update{
+			std::bind(&GameServer::sendUpdateToConnection<TUpdate>, this, update, std::placeholders::_1),
+			intended_recipients
+		};
+
+		this->updates_to_send.get_item().push(sendable_update);
 	}
 
 	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
-	void handleUnitCreation(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
+	void handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
+	void handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> creation_command);
+
+	template <typename TUpdate>
+	void addUpdateToSendQueue(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {
+		std::lock_guard<std::mutex> guard(this->updates_to_send.get_lock());
+		this->makeUpdateToSend(update, intended_recipients);
+	}
+
+	template <typename Iter>
+	void addUpdateToSendQueue(Iter& begin, Iter& end, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {
+		std::lock_guard<std::mutex> guard(this->updates_to_send.get_lock());
+		for (auto& it = begin; it != end; ++it) {
+			this->makeUpdateToSend(*it, intended_recipients);
+		}
+	}
 
 	void subscribeToChannels();
 	void performUpdates();
@@ -77,17 +109,19 @@ private:
 	std::atomic<bool> game_running;
 	int tick_duration;
 
+	void handleReceivePlayerClientToServerTransfer(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerClientToServerTransfer>);
+
 protected:
 	/**** Handlers for ChanneledServer ****/
 	virtual void handleClientDisconnect(SunNet::ChanneledSocketConnection_p client);
 
 	/**** Handlers for server class ****/
 	virtual void handle_server_connection_error() {
-		Lib::LOG_ERR("Server error");
+		LOG_ERR("Server error");
 	}
 
 	virtual void handle_server_disconnect() {
-		Lib::LOG_ERR("Server disconnect...");
+		LOG_ERR("Server disconnect...");
 	}
 
 	virtual void handle_channeledclient_error(SunNet::ChanneledSocketConnection_p client);

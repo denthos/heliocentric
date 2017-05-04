@@ -91,10 +91,10 @@ bool Shader::setup(std::string vertSource, std::string fragSource)
         glDeleteShader(vertexShader);
 
         //Dump the infolog
-        Lib::LOG_ERR(&infoLog[0]);
+        LOG_ERR(&infoLog[0]);
 
         //Give error message and return
-        Lib::LOG_ERR("Failed to compile vertex shader.");
+        LOG_ERR("Failed to compile vertex shader.");
         return false;
     }
 
@@ -125,10 +125,10 @@ bool Shader::setup(std::string vertSource, std::string fragSource)
         glDeleteShader(vertexShader);
 
         //Dump the infolog
-        Lib::LOG_ERR(&infoLog[0]);
+        LOG_ERR(&infoLog[0]);
 
         //Give error message and return
-        Lib::LOG_ERR("Failed to compile fragment shader");
+        LOG_ERR("Failed to compile fragment shader");
         return false;
     }
 
@@ -163,10 +163,10 @@ bool Shader::setup(std::string vertSource, std::string fragSource)
         glDeleteShader(fragmentShader);
 
         //Dump the infolog
-        Lib::LOG_ERR(&infoLog[0]);
+        LOG_ERR(&infoLog[0]);
 
         //Give error message and return
-        Lib::LOG_ERR("Failed to link shaders");
+        LOG_ERR("Failed to link shaders");
         return false;
     }
 

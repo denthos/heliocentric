@@ -24,6 +24,7 @@
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="fileutils.cpp" />
     <ClCompile Include="game_channels.cpp" />
+    <ClCompile Include="player_client_to_server_xfer.cpp" />
     <ClCompile Include="unit_manager.cpp" />
     <ClCompile Include="unit_update.cpp" />
     <ClCompile Include="universe.cpp" />
@@ -40,6 +41,7 @@
     <ClInclude Include="game_object_update.h" />
     <ClInclude Include="unit_command.h" />
     <ClInclude Include="player_command.h" />
+    <ClInclude Include="planet_types.h" />
     <ClInclude Include="unit_manager.h" />
     <ClInclude Include="universe.h" />
   </ItemGroup>
@@ -155,6 +157,8 @@
     <ClInclude Include="ini_parser.h" />
     <ClInclude Include="planet.h" />
     <ClInclude Include="planet_update.h" />
+    <ClInclude Include="player_client_to_server_xfer.h" />
+    <ClInclude Include="player_id_confirmation.h" />
     <ClInclude Include="player_update.h" />
     <ClInclude Include="slot.h" />
     <ClInclude Include="player.h" />
@@ -171,7 +175,6 @@
     <ClCompile Include="ini_parser.cpp" />
     <ClCompile Include="lib.cpp" />
     <ClCompile Include="logging.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="planet.cpp" />
     <ClCompile Include="planet_update.cpp" />
     <ClCompile Include="player.cpp" />
@@ -183,8 +186,6 @@
     <ClCompile Include="unit_sample.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\config.ini" />
-    <None Include="ConfigTemplate.ini" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

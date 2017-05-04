@@ -26,7 +26,7 @@ void Unit::do_logic() {
 		do_move();
 		break;
 	default:
-		Lib::LOG_ERR("Invalid command type.");
+		LOG_ERR("Invalid command type.");
 	}
 }
 
@@ -36,7 +36,7 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->x = this->position.x;
 	this->update->y = this->position.y;
 	this->update->z = this->position.z;
-	Lib::LOG_DEBUG("Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
+	LOG_DEBUG("Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
 	return this->update;
 };
 

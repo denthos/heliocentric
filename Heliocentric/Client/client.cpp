@@ -21,6 +21,7 @@
 #include "model.h"
 #include "logging.h"
 
+#include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
 
@@ -32,10 +33,7 @@
 #define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 
-#define EARTH_TEXTURE "Textures/earth.jpg"
-#define SUN_TEXTURE "Textures/sun.jpg"
-
-#define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+#define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
 //skybox texture files
 #define SKYBOX_FRONT "Textures/Skybox/front.png" 
@@ -64,7 +62,7 @@ bool middleMouseDown = false;
 unsigned char selectedControlScheme = FREE_CAMERA;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
-	Lib::INIParser & config = Lib::INIParser::getInstance("config.ini");
+	Lib::INIParser & config = Lib::INIParser::getInstance();
 	int width = config.get<int>("ScreenWidth");
 	int height = config.get<int>("ScreenHeight");
 	windowTitle = config.get<std::string>("WindowTitle");
@@ -98,13 +96,13 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	for (auto& planet : this->universe.get_planets()) {
 		//auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
 		//this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
-		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get(), Texture(EARTH_TEXTURE));
+		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get());
 		gameObjects[planet->getID()] = drawablePlanet;
 		planets[planet->getID()] = drawablePlanet;
 	}
 
 	for (auto& unit : this->unit_manager.get_units()) {
-		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get(), Texture(EARTH_TEXTURE));
+		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get());
 		gameObjects[unit->getID()] = drawableUnit;
 		units[unit->getID()] = drawableUnit;
 	}
@@ -117,6 +115,16 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
+
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
+
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
+		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -124,7 +132,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		this->connect(address, port);
 	}
 	catch (const SunNet::ConnectException&) {
-		Lib::LOG_ERR("Could not connect to host at address ", address, " and port ", port);
+		LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
 }
 
@@ -144,7 +152,7 @@ bool Client::isRunning() {
 
 void Client::createWindow(int width, int height) {
 	if (!glfwInit()) {
-		Lib::LOG_ERR("Could not initialize GLFW");
+		LOG_ERR("Could not initialize GLFW");
 		return;
 	}
 
@@ -158,7 +166,7 @@ void Client::createWindow(int width, int height) {
 	window = glfwCreateWindow(width, height, windowTitle.c_str(), NULL, NULL);
 
 	if (!window) {
-		Lib::LOG_ERR("Could not create GLFW window");
+		LOG_ERR("Could not create GLFW window");
 		return;
 	}
 
@@ -171,7 +179,7 @@ void Client::createWindow(int width, int height) {
 	GLenum glewErr = glewInit();
 #ifndef __APPLE__
 	if (glewErr != GLEW_OK) {
-		Lib::LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
+		LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
 		return;
 	}
 #endif
@@ -192,20 +200,6 @@ void Client::display() {
 	for (auto & gameObject : gameObjects) {
 		octree.insert(gameObject.second);
 	}
-	/*
-	for (auto& planet_pair : this->planetMap) {
-		planet_pair.second.second->Draw(*textureShader, *camera);
-	}*/
-	/*glColor3f(0.9, 0.3, 0.2);
-	for (auto& unit_pair : this->units) {
-		glm::vec3 pos = unit_pair.second->get_position();
-		Lib::LOG_DEBUG("Draw position is " + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z));
-		
-		glPushMatrix();
-		glTranslatef(pos.x, pos.y, pos.z);
-		glutWireSphere(20.0f, 20, 20);
-		glPopMatrix();
-	}*/
 
 	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
 	octree.draw(*textureShader, *camera);
@@ -218,10 +212,12 @@ void Client::display() {
 	glfwPollEvents();
 }
 
-void Client::update() {}
+void Client::update() {
+	this->keyboard_handler.callKeyboardHandlers();
+}
 
 void Client::errorCallback(int error, const char * description) {
-	Lib::LOG_ERR("OpenGL Error occurred: ", description);
+	LOG_ERR("OpenGL Error occurred: ", description);
 }
 
 void Client::resizeCallback(int width, int height) {
@@ -235,7 +231,6 @@ void Client::resizeCallback(int width, int height) {
 }
 
 void Client::keyCallback(int key, int scancode, int action, int mods) {
-
 	if (action == GLFW_PRESS) {
 		switch (key) {
 		case(GLFW_KEY_ESCAPE):
@@ -249,7 +244,7 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 		case(GLFW_KEY_F2):
 			/* Create a new unit */
 			PlayerCommand command;
-			command.command_type = BaseCommand::CMD_CREATE;
+			command.command_type = PlayerCommand::CMD_CREATE;
 			command.create_location_x = 50.0f;
 			command.create_location_y = 50.0f;
 			command.create_location_z = 0.0f;
@@ -259,13 +254,46 @@ void Client::keyCallback(int key, int scancode, int action, int mods) {
 		}
 	}
 	else if (action == GLFW_RELEASE) {
-		switch (key) {
-		case(GLFW_KEY_ESCAPE):
-			break;
-		default:
-			break;
-		}
+		this->keyboard_handler.setKeyUp(key);
 	}
+}
+
+void Client::handleCameraPanButtonDown(int key) {
+	/* We are going to attempt to move the camera! */
+	auto speed = 1.0f;
+	switch (key) {
+	case GLFW_KEY_W:
+		camera->position += speed * glm::vec3(0.0f, 0.0f, -1.0f);
+		break;
+	case GLFW_KEY_S:
+		camera->position -= speed * glm::vec3(0.0f, 0.0f, -1.0f);
+		break;
+	case GLFW_KEY_D:
+		camera->position += glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
+		break;
+	case GLFW_KEY_A:
+		camera->position -= glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
+		break;
+	}
+}
+
+void Client::handleF1Key(int key) {
+	DebugPause pause;
+	this->channeled_send<DebugPause>(&pause);
+}
+
+void Client::handleEscapeKey(int key) {
+	glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+void Client::handleF3Key(int key) {
+	PlayerCommand command;
+	command.command_type = BaseCommand::CMD_CREATE;
+	command.create_location_x = 50.0f;
+	command.create_location_y = 50.0f;
+	command.create_location_z = 0.0f;
+
+	this->channeled_send(&command);
 }
 
 void Client::mouseButtonCallback(int button, int action, int mods) {
@@ -326,14 +354,33 @@ void Client::mouseWheelCallback(double x, double y) {
 
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
+	LOG_DEBUG("Received update for player with id: ", update->id);
+	auto& player_it = players.find(update->id);
+	if (player_it == players.end()) {
+		Player* new_player = new Player(update->player_name, update->id);
+		players[update->id] = new_player;
+	}
+
 	update->apply(players[update->id]);
 
 }
 
+
+void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
+	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
+	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
+	this->player = new Player(player_name, update->id);
+	players[update->id] = this->player;
+
+	PlayerClientToServerTransfer info_transfer;
+	snprintf(info_transfer.name, PLAYER_NAME_MAX_SIZE, "%s", player_name.c_str());
+
+	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
+}
+
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	/*update->apply(units[update->id]);
-	//Lib::LOG_DEBUG("Unit update received");
-	gameObjects[update->id]->update();*/
+	update->apply(units[update->id]);
+	gameObjects[update->id]->update();
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
@@ -351,18 +398,18 @@ void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 
 void Client::handle_client_disconnect() {
 	/* YEAH? The server wants to disconnect us? WELL LET'S DISCONNECT THEM! */
-	Lib::LOG_ERR("The client has been disconnected from the server...");
+	LOG_ERR("The client has been disconnected from the server...");
 	this->disconnect();
-	Lib::LOG_ERR("Client disconnected.");
+	LOG_ERR("Client disconnected.");
 }
 
 void Client::handle_client_error() {
 	/* If there is some sort of error with the server, just disconnect outright */
-	Lib::LOG_ERR("The client could not contact the server..");
+	LOG_ERR("The client could not contact the server..");
 
 	// TODO: Add retry logic/connection fix logic.
 	this->disconnect();
-	Lib::LOG_ERR("Client disconnected.");
+	LOG_ERR("Client disconnected.");
 }
 
 void Client::handle_poll_timeout() {}

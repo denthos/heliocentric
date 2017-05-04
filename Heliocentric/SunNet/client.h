@@ -8,7 +8,8 @@
 namespace SunNet {
 	/**
 	A collection of states that the client can be in.
-
+        +---+
+        |   V
 	  +--------+        +-----------+         +-------------+
 	->| CLOSED |  ----> | CONNECTED |  ---->  | DESTRUCTING |
 	  +--------+        +-----------+         +-------------+
@@ -184,7 +185,7 @@ namespace SunNet {
 		@throws InvalidStateTransitionException if the client is not connected
 		*/
 		void disconnect() {
-			this->state_transition({ CLIENT_CONNECTED }, CLIENT_CLOSED);
+			this->state_transition({ CLIENT_CONNECTED, CLIENT_CLOSED }, CLIENT_CLOSED);
 
 			/* 
 			It is possible that disconnect() is being called from the poll_thread.

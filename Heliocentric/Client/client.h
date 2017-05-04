@@ -13,6 +13,7 @@
 #include "city_update.h"
 #include "planet_update.h"
 #include "slot_update.h"
+#include "player_id_confirmation.h"
 #include "channeled_client.h"
 #include "tcp_socket_connection.hpp"
 #include "universe.h"
@@ -22,6 +23,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <string>
 #include <unordered_map>
+#include "keyboard_handler.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:	
@@ -30,6 +32,7 @@ public:
 
 	Universe universe;
 	UnitManager unit_manager;
+	KeyboardHandler keyboard_handler;
 
 	bool isRunning();
 	void display();
@@ -46,6 +49,7 @@ public:
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);
 	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
+	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
 
 protected:
 	/**** Handlers for ChanneledClient ****/
@@ -66,6 +70,13 @@ private:
 	std::unordered_map<UID, Drawable *> gameObjects;
 	Octree octree;
 
+	Player* player;
+
 	void createWindow(int width, int height);
+
+	void handleEscapeKey(int);
+	void handleF1Key(int);
+	void handleCameraPanButtonDown(int);
+	void handleF3Key(int);
 };
 

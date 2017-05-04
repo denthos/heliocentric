@@ -11,12 +11,12 @@
 int main() {
 	Client client;
 
-	Lib::LOG_DEBUG("Supported OpenGL version: ", glGetString(GL_VERSION));
+	LOG_DEBUG("Supported OpenGL version: ", glGetString(GL_VERSION));
 #ifdef GL_SHADING_LANGUAGE_VERSION
-	Lib::LOG_DEBUG("Supported GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	LOG_DEBUG("Supported GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
-	Lib::LOG_DEBUG("Glew version: ", glewGetString(GLEW_VERSION));
-	Lib::LOG_DEBUG("Renderer: ", glGetString(GL_RENDERER));
+	LOG_DEBUG("Glew version: ", glewGetString(GLEW_VERSION));
+	LOG_DEBUG("Renderer: ", glGetString(GL_RENDERER));
 
 	// Set up callback functions
 
