@@ -102,7 +102,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		gameObjects[planet->getID()] = drawablePlanet;
 		planets[planet->getID()] = drawablePlanet;
 	}
-	
+
 	for (auto& unit : this->unit_manager.get_units()) {
 		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get(), Texture(EARTH_TEXTURE));
 		gameObjects[unit->getID()] = drawableUnit;
