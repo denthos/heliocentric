@@ -233,26 +233,7 @@ void Client::resizeCallback(int width, int height) {
 
 void Client::keyCallback(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
-		switch (key) {
-		case(GLFW_KEY_ESCAPE):
-			glfwSetWindowShouldClose(window, GL_TRUE);
-			break;
-		case(GLFW_KEY_F1):
-			/* Toggle the server's pause state */
-			DebugPause pause;
-			this->channeled_send<DebugPause>(&pause);
-			break;
-		case(GLFW_KEY_F2):
-			/* Create a new unit */
-			PlayerCommand command;
-			command.command_type = PlayerCommand::CMD_CREATE;
-			command.create_location_x = 50.0f;
-			command.create_location_y = 50.0f;
-			command.create_location_z = 0.0f;
-
-			this->channeled_send(&command);
-			break;
-		}
+		this->keyboard_handler.setKeyDown(key);
 	}
 	else if (action == GLFW_RELEASE) {
 		this->keyboard_handler.setKeyUp(key);
