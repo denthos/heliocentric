@@ -183,9 +183,12 @@ void GameServer::run() {
 		performUpdates();
 		sendUpdates();
 
-		while ((tick_elapsed_time = std::clock() - tick_start_time) < tick_duration);
-		if (tick_elapsed_time > tick_duration)
+		tick_elapsed_time = std::clock() - tick_start_time;
+		if (tick_elapsed_time > tick_duration) {
 			LOG_WARN("Tick processing took ", tick_elapsed_time - tick_duration, "ms longer than expected");
+		}
+
+		while ((tick_elapsed_time = std::clock() - tick_start_time) < tick_duration);
 	}
 	LOG_DEBUG("Server exited safely");
 }
