@@ -8,7 +8,7 @@
 
 class DrawablePlanet : public Planet, public Drawable {
 public:
-	std::unordered_map<PlanetType, DrawableData>& getDataMap();
+	static std::unordered_map<PlanetType, DrawableData>& getDataMap();
 
 	DrawablePlanet(const Planet & planet);
 	~DrawablePlanet();

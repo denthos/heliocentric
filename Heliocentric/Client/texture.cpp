@@ -1,23 +1,12 @@
 #include "texture.h"
+#include <unordered_map>
 
-Texture::Texture()
+Texture::Texture(std::string file, std::string type) : type(type)
 {
-	type = "none";
-	id = 0;
-}
-
-Texture::Texture(const char * file)
-{
-	type = "none";
 	load(file);
 }
 
-Texture::Texture(const char * file, std::string type)
-{
-	this->type = type;
-
-	load(file);
-}
+Texture::Texture(std::string file) : Texture(file, "none") {}
 
 
 void Texture::bind()
@@ -32,12 +21,8 @@ void Texture::unbind()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::load(const char * file)
+void Texture::load(std::string filename)
 {
-	//Generate texture ID and load texture data 
-	std::string filename = std::string(file);
-	//filename = directory + '/' + filename;
-	
 	glGenTextures(1, &id); //create a texture
 	int width, height; //texture dimensions
 	//load texture with soil

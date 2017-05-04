@@ -5,12 +5,12 @@
 std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 	static std::unordered_map<PlanetType, DrawableData> drawable_data_map;
 	if (drawable_data_map.empty()) {
-		drawable_data_map[SUN] = DrawableData(Texture("Textures/sun.jpg"));
-		drawable_data_map[MERCURY] = DrawableData(Texture("Textures/mercury.jpg"));
-		drawable_data_map[VENUS] = DrawableData(Texture("Textures/venus.jpg"));
-		drawable_data_map[EARTH] = DrawableData(Texture("Textures/earth.jpg"));
-		drawable_data_map[MARS] = DrawableData(Texture("Textures/mars.jpg"));
-		drawable_data_map[JUPITER] = DrawableData(Texture("Textures/jupiter.jpg"));
+		drawable_data_map.insert(std::make_pair(SUN, DrawableData(Texture::getTexture("Textures/sun.jpg"))));
+		drawable_data_map.insert(std::make_pair(MERCURY, DrawableData(Texture::getTexture("Textures/mercury.jpg"))));
+		drawable_data_map.insert(std::make_pair(VENUS, DrawableData(Texture::getTexture("Textures/venus.jpg"))));
+		drawable_data_map.insert(std::make_pair(EARTH, DrawableData(Texture::getTexture("Textures/earth.jpg"))));
+		drawable_data_map.insert(std::make_pair(MARS, DrawableData(Texture::getTexture("Textures/mars.jpg"))));
+		drawable_data_map.insert(std::make_pair(JUPITER, DrawableData(Texture::getTexture("Textures/jupiter.jpg"))));
 	}
 
 	return drawable_data_map;

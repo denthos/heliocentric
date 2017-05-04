@@ -6,8 +6,7 @@ A class which holds important data about how something should be drawn
 */
 class DrawableData {
 public:
-	DrawableData();
-	DrawableData(Texture texture);
+	DrawableData(const Texture* texture);
 
-	Texture texture;
+	const Texture* texture;
 };

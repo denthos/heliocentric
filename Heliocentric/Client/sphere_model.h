@@ -5,5 +5,5 @@
 
 class SphereModel : public Model {
 public:
-	SphereModel(Texture);
+	SphereModel(const Texture*);
 };

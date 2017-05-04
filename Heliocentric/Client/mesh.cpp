@@ -57,12 +57,12 @@ void Mesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & 
 //set which texture we're using
 glActiveTexture(GL_TEXTURE0 + i);
 
-std::string tex_name = mesh_textures[i].type;
-std::string tex_num = (tex_name == "texture_diffuse") ? std::to_string(diffuse_num++) : std::to_string(spec_num++);
+		std::string tex_name = mesh_textures[i]->type;
+		std::string tex_num = (tex_name == "texture_diffuse") ? std::to_string(diffuse_num++) : std::to_string(spec_num++);
 
-//bind texture
-glUniform1i(glGetUniformLocation(shaderID, (tex_name + tex_num).c_str()), i);
-glBindTexture(GL_TEXTURE_2D, mesh_textures[i].id);
+		//bind texture
+		glUniform1i(glGetUniformLocation(shaderID, (tex_name + tex_num).c_str()), i);
+		glBindTexture(GL_TEXTURE_2D, mesh_textures[i]->id);
 	}
 
 
@@ -87,7 +87,7 @@ glBindTexture(GL_TEXTURE_2D, mesh_textures[i].id);
 	//shader.unbind();
 }
 
-void Mesh::setTexture(Texture & texture) {
+void Mesh::setTexture(const Texture* texture) {
 	if (mesh_textures.size()) {
 		mesh_textures[0] = texture;
 	}

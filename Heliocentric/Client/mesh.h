@@ -27,13 +27,13 @@ public:
 
 	virtual void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld); //draws mesh
 
-	virtual void setTexture(Texture & texture);
+	virtual void setTexture(const Texture* texture);
 	
 	BoundingBox getBoundingBox() const;
 
 	std::vector<GLuint> mesh_indices;
 	std::vector<Vertex> mesh_vertices; //mesh vertices and their info
-	std::vector<Texture> mesh_textures;
+	std::vector<const Texture*> mesh_textures;
 
 	Material mtl; //mesh material
 

@@ -5,7 +5,7 @@
 
 
 
-FileMesh::FileMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures, Material materials)
+FileMesh::FileMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<const Texture*> textures, Material materials)
 {
 	
 	mesh_vertices = vertices;

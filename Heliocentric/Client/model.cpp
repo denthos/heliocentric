@@ -62,7 +62,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 {
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
-	std::vector<Texture> textures;
+	std::vector<const Texture*> textures;
 	
 	Material mtl;
 	
@@ -104,14 +104,11 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		std::vector<const Texture*> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-		std::vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texure_specular");
+		std::vector<const Texture*> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texure_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-
-	
 
 		//get color material
 		
@@ -141,16 +138,12 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		
 	}
 
-	
-
 	return FileMesh(vertices, indices, textures, mtl);
 }
 
-
-
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)
+std::vector<const Texture*> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)
 {
-	std::vector<Texture> textures;
+	std::vector<const Texture*> textures;
 
 	//check amount of textures stored in material
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++) {
@@ -160,13 +153,9 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType
 		//retrieve each texture file location
 		mat->GetTexture(type, i, &str);
 		std::string fp = directory + "/" + std::string(str.C_Str());
-		const char* filepath = (fp).c_str();
 		
-		
-		Texture texture = Texture( filepath , typeName);
-	
-		textures.push_back(texture);
-
+		textures.push_back(Texture::getTexture(fp, typeName));
 	}
+
 	return textures;
 }
