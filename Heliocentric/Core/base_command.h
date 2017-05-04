@@ -19,4 +19,11 @@ public:
 	UID initiator; // The object that will execute this command.
 				   // uh... is there a better name for it?
 	CommandType command_type; // Specifies what the command is.
+
+	/**
+	Constructor for the base command.
+	@param initiator UID of the object that the player sent this command to.
+	@param command_type Specifies the command type.
+	*/
+	BaseCommand(UID, CommandType);
 };

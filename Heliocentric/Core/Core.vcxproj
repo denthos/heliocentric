@@ -20,12 +20,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="base_command.cpp" />
     <ClCompile Include="city_update.cpp" />
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="fileutils.cpp" />
     <ClCompile Include="game_channels.cpp" />
     <ClCompile Include="unit_creation_update.cpp" />
     <ClCompile Include="player_client_to_server_xfer.cpp" />
+    <ClCompile Include="player_command.cpp" />
+    <ClCompile Include="unit_command.cpp" />
     <ClCompile Include="unit_manager.cpp" />
     <ClCompile Include="unit_update.cpp" />
     <ClCompile Include="universe.cpp" />

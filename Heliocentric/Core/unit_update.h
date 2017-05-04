@@ -5,5 +5,13 @@
 
 class UnitUpdate : public GameObjectUpdate {
 public:
+	/**
+	Constructor for a unit update.
+	@param id UID of the unit to be updated.
+	@param x x-axis of the new position of the unit.
+	@param y y-axis of the new position of the unit.
+	@param z z-axis of the new position of the unit.
+	*/
+	UnitUpdate(UID, float, float, float);
 	void apply(GameObject* obj);
 };

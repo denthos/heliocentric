@@ -274,11 +274,7 @@ void Client::handleEscapeKey(int key) {
 }
 
 void Client::handleF3Key(int key) {
-	PlayerCommand command;
-	command.command_type = BaseCommand::CMD_CREATE;
-	command.create_location_x = 50.0f;
-	command.create_location_y = 50.0f;
-	command.create_location_z = 0.0f;
+	PlayerCommand command(50.0f, 50.0f, 0.0f);
 
 	this->channeled_send(&command);
 }
@@ -364,8 +360,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 	this->player = new Player(player_name, update->id);
 	players[update->id] = this->player;
 
-	PlayerClientToServerTransfer info_transfer;
-	snprintf(info_transfer.name, PLAYER_NAME_MAX_SIZE, "%s", player_name.c_str());
+	PlayerClientToServerTransfer info_transfer(player_name);
 
 	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
 }

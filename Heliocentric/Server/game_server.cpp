@@ -105,9 +105,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	info->apply(player_it->second.get());
 
 	/* OK. We've applied the information to the player. Now we'd like to send this information to all other players */
-	std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>();
-	player_update->id = player_it->first;
-	strcpy_s(player_update->player_name, sizeof(player_update->player_name), info->name);
+	std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(player_it->first, info->name);
 
 	LOG_DEBUG("Sending information about new player to all others..");
 	this->addUpdateToSendQueue(player_update);
@@ -119,9 +117,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 			continue;
 		}
 
-		std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>();
-		player_update->id = other_player_it.first;
-		snprintf(player_update->player_name, PLAYER_NAME_MAX_SIZE, "%s", other_player_it.second->get_name().c_str());
+		std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(other_player_it.first, other_player_it.second->get_name().c_str());
 
 		this->addUpdateToSendQueue(player_update, { sender });
 	}
@@ -216,7 +212,6 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			// TODO: Create the new unit (should probably be a unique_ptr) and move it into the UnitManager
 			// TODO: Queue up UnitUpdates for the unit
-
 			UID unit_owner_id; // ID of the player who sent the command
 			{
 				/* These operations need to be locked */
@@ -236,16 +231,9 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
 																																	 // TODO: Put this unit into unit manager
 
-			std::shared_ptr<UnitCreationUpdate> update = std::make_shared<UnitCreationUpdate>(); // Creates an update for the unit to be sent to client
-			update->id = new_unit->getID();
-			update->x = command->create_location_x;
-			update->y = command->create_location_y;
-			update->z = command->create_location_z;
-			update->player_id = unit_owner_id;
-			update->att = 100;
-			update->def = 100;
-			update->range = 20;
-			update->health = 100;
+			std::shared_ptr<UnitCreationUpdate> update = std::make_shared<UnitCreationUpdate>(new_unit->getID(),
+				command->create_location_x, command->create_location_y, command->create_location_z,
+				unit_owner_id, 100, 100, 20, 100); // Creates an update for the unit to be sent to client
 
 			this->addUpdateToSendQueue(update, { sender });
 			break;
