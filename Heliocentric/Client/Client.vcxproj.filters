@@ -100,6 +100,9 @@
     <ClInclude Include="drawable_unit.h">
       <Filter>Drawables</Filter>
     </ClInclude>
+    <ClInclude Include="sphere_model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
@@ -158,12 +161,15 @@
     </ClCompile>
     <ClCompile Include="view_frustum.cpp">
       <Filter>Source Files</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="drawable_data.cpp">
       <Filter>Drawables</Filter>
     </ClCompile>
     <ClCompile Include="drawable_unit.cpp">
       <Filter>Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="sphere_model.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

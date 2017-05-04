@@ -157,13 +157,7 @@ void Mesh::createMesh()
 	boundingBox.min = glm::vec3(100000000.0f);
 	boundingBox.max = glm::vec3(-100000000.0f);
 	for (unsigned int i = 0; i < mesh_vertices.size(); ++i) {
-		glm::vec3 & vertex = mesh_vertices[i].pos;
-		if (vertex.x < boundingBox.min.x) boundingBox.min.x = vertex.x;
-		if (vertex.y < boundingBox.min.y) boundingBox.min.y = vertex.y;
-		if (vertex.z < boundingBox.min.z) boundingBox.min.z = vertex.z;
-		if (vertex.x > boundingBox.max.x) boundingBox.max.x = vertex.x;
-		if (vertex.y > boundingBox.max.y) boundingBox.max.y = vertex.y;
-		if (vertex.z > boundingBox.max.z) boundingBox.max.z = vertex.z;
+		boundingBox.expand(mesh_vertices[i].pos);
 	}
 }
 

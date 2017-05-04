@@ -11,6 +11,6 @@ public:
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;
 protected:
-	Mesh * mesh;
+	Model * model;
 	glm::mat4 toWorld;
 };

@@ -1,6 +1,6 @@
 #include "drawable_planet.h"
 
-#include "sphere_mesh.h"
+#include "sphere_model.h"
 
 std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 	static std::unordered_map<PlanetType, DrawableData> drawable_data_map;
@@ -18,8 +18,7 @@ std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 
 DrawablePlanet::DrawablePlanet(const Planet & planet) : Planet(planet) {
 	this->toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(get_radius())), planet.get_position());
-	mesh = new SphereMesh();
-	mesh->setTexture(getDataMap().at(planet.get_type()).texture);
+	model = new SphereModel(getDataMap().at(planet.get_type()).texture);
 }
 
 DrawablePlanet::~DrawablePlanet() {

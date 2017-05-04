@@ -20,6 +20,10 @@ void Model::update() {
 	}
 }
 
+BoundingBox Model::getBoundingBox() {
+	return boundingBox;
+}
+
 void Model::load(std::string file)
 {
 	//load model into scene data structure (root)
@@ -46,6 +50,11 @@ void Model::processNode(aiNode * node, const aiScene * scene)
 
 	for (GLuint i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
+	}
+
+	boundingBox = BoundingBox(glm::vec3(-1000000000.0f), glm::vec3(1000000000.0f));
+	for (unsigned int i = 0; i < meshes.size(); ++i) {
+		boundingBox.expand(meshes[i].getBoundingBox());
 	}
 }
 

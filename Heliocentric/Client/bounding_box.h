@@ -8,4 +8,6 @@ public:
 	BoundingBox();
 	BoundingBox(glm::vec3, glm::vec3);
 	bool contains(const BoundingBox &);
+	void expand(const glm::vec3 &);
+	void expand(const BoundingBox &);
 };

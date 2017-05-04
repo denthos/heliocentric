@@ -10,7 +10,4 @@ public:
 	DrawableUnit(const Unit & unit);
 	~DrawableUnit();
 	virtual void update();
-
-private:
-	DrawableData texture;
 };
