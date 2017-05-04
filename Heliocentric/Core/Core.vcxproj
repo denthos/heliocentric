@@ -40,6 +40,8 @@
     <ClInclude Include="game_object_update.h" />
     <ClInclude Include="unit_command.h" />
     <ClInclude Include="player_command.h" />
+    <ClInclude Include="planet_types.h" />
+    <ClInclude Include="unit_create_command.h" />
     <ClInclude Include="universe.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -113,6 +113,9 @@
     <ClInclude Include="player_command.h">
       <Filter>Commands</Filter>
     </ClInclude>
+    <ClInclude Include="planet_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="debug_pause.h">
       <Filter>Commands</Filter>
     </ClInclude>

@@ -31,9 +31,6 @@
 #define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 
-#define EARTH_TEXTURE "Textures/earth.jpg"
-#define SUN_TEXTURE "Textures/sun.jpg"
-
 #define ROCKET_MODEL "../models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
 //skybox texture files
@@ -97,7 +94,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	for (auto& planet : this->universe.get_planets()) {
 		//auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
 		//this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
-		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get(), Texture(EARTH_TEXTURE));
+		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get());
 		gameObjects[planet->getID()] = drawablePlanet;
 		planets[planet->getID()] = drawablePlanet;
 	}

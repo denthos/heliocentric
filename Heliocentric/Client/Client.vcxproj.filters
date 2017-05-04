@@ -96,6 +96,9 @@
     <ClInclude Include="drawable.h">
       <Filter>Drawables</Filter>
     </ClInclude>
+    <ClInclude Include="drawable_data.h">
+      <Filter>Drawables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
@@ -153,6 +156,9 @@
       <Filter>Drawables</Filter>
     </ClCompile>
     <ClCompile Include="drawable.cpp">
+      <Filter>Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable_data.cpp">
       <Filter>Drawables</Filter>
     </ClCompile>
   </ItemGroup>
