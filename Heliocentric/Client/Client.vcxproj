@@ -202,6 +202,8 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="bounding_box.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="drawable_city.h" />
+    <ClInclude Include="drawable_slot.h" />
     <ClInclude Include="keyboard_handler.h" />
     <ClInclude Include="drawable.h" />
     <ClInclude Include="drawable_data.h" />

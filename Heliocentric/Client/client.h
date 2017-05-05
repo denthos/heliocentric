@@ -5,9 +5,13 @@
 #include "octree.h"
 #include "player.h"
 #include "unit.h"
+#include "drawable_unit.h"
 #include "city.h"
+#include "drawable_city.h"
 #include "planet.h"
+#include "drawable_planet.h"
 #include "slot.h"
+#include "drawable_slot.h"
 #include "player_update.h"
 #include "unit_creation_update.h"
 #include "unit_update.h"
@@ -64,15 +68,14 @@ private:
 	Camera * camera;
 	std::string windowTitle;
 
-	std::unordered_map<UID, Player *> players;
-	std::unordered_map<UID, Planet *> planets;
-	std::unordered_map<UID, Unit *> units;
-	std::unordered_map<UID, City *> cities;
-	std::unordered_map<UID, Slot *> slots;
-	std::unordered_map<UID, Drawable *> gameObjects;
+	std::unordered_map<UID, std::shared_ptr<Player>> players;
+	std::unordered_map<UID, std::unique_ptr<DrawablePlanet>> planets;
+	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
+	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
+	std::unordered_map<UID, std::unique_ptr<DrawableSlot>> slots;
 	Octree octree;
 
-	Player* player;
+	std::shared_ptr<Player> player;
 
 	void createWindow(int width, int height);
 

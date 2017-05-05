@@ -103,6 +103,12 @@
     <ClInclude Include="sphere_model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="drawable_city.h">
+      <Filter>Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable_slot.h">
+      <Filter>Drawables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">

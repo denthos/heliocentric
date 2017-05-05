@@ -94,19 +94,14 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
-	//TODO rewrite this
-	//skybox->world_mat =  glm::scale(skybox->world_mat, glm::vec3(4000.0f));
 
 	for (auto& planet : this->universe.get_planets()) {
-		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get());
-		gameObjects[planet->getID()] = drawablePlanet;
-		planets[planet->getID()] = drawablePlanet;
+		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
 	}
+
 	spaceship = new Model(ROCKET_MODEL);
 	for (auto& unit : this->unit_manager.get_active_units()) {
-		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get(), spaceship);
-		gameObjects[unit->getID()] = drawableUnit;
-		units[unit->getID()] = drawableUnit;
+		units[unit->getID()] = std::make_unique<DrawableUnit>(*unit.get(), spaceship);
 	}
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -142,9 +137,12 @@ Client::~Client() {
 	delete shader;
 	delete textureShader;
 
-	for (auto & gameObject : gameObjects) {
-		delete gameObject.second;
-	}
+	players.clear();
+	planets.clear();
+	units.clear();
+	cities.clear();
+	slots.clear();
+
 	GLFWCallbackHandler::remove(window, this);
 }
 
@@ -200,8 +198,17 @@ void Client::display() {
 	camera->calculateViewFrustum();
 
 	octree.clear();
-	for (auto & gameObject : gameObjects) {
-		octree.insert(gameObject.second);
+	for (auto it = planets.begin(); it != planets.end(); ++it) {
+		octree.insert((*it).second.get());
+	}
+	for (auto it = units.begin(); it != units.end(); ++it) {
+		octree.insert((*it).second.get());
+	}
+	for (auto it = cities.begin(); it != cities.end(); ++it) {
+		octree.insert((*it).second.get());
+	}
+	for (auto it = slots.begin(); it != slots.end(); ++it) {
+		octree.insert((*it).second.get());
 	}
 
 	if (spaceship != NULL) {
@@ -344,26 +351,25 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 	LOG_DEBUG("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
 	if (player_it == players.end()) {
-		Player* new_player = new Player(update->player_name, update->id);
-		players[update->id] = new_player;
+		players[update->id] = std::make_shared<Player>(update->player_name, update->id);
 	}
 
-	update->apply(players[update->id]);
+	update->apply(players[update->id].get());
 }
 
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
 	LOG_DEBUG("Unit creation update received");
 	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
-	Unit* new_unit = new Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id], update->att, update->def, update->range, update->health);
-	DrawableUnit * drawableUnit = new DrawableUnit(*new_unit, spaceship);
-	gameObjects[new_unit->getID()] = drawableUnit;
-	units[new_unit->getID()] = drawableUnit;
+	units[update->id] = std::make_unique<DrawableUnit>(
+		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), update->att, update->def, update->range, update->health),
+		spaceship
+	);
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
 	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
 	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
-	this->player = new Player(player_name, update->id);
+	this->player = std::make_shared<Player>(player_name, update->id);
 	players[update->id] = this->player;
 
 	PlayerClientToServerTransfer info_transfer(player_name);
@@ -372,23 +378,22 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	//LOG_DEBUG("Unit update received");
-    update->apply(units[update->id]);
-	if (gameObjects[update->id] != NULL)
-		gameObjects[update->id]->update();
+	LOG_DEBUG("Unit update received");
+	update->apply(units[update->id].get());
+	units[update->id]->update();
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
-	update->apply(cities[update->id]);
+	update->apply(cities[update->id].get());
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
-	update->apply(planets[update->id]);
-	gameObjects[update->id]->update();
+	update->apply(planets[update->id].get());
+	planets[update->id]->update();
 }
 
 void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<SlotUpdate> update) {
-	update->apply(slots[update->id]);
+	update->apply(slots[update->id].get());
 }
 
 void Client::handle_client_disconnect() {
