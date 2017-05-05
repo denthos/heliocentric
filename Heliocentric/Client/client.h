@@ -25,6 +25,7 @@
 #include <string>
 #include <unordered_map>
 #include "keyboard_handler.h"
+#include "ini_parser.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:	
@@ -63,6 +64,9 @@ private:
 	GLFWwindow * window;
 	Camera * camera;
 	std::string windowTitle;
+
+	Lib::INIParser& config_client = Lib::INIParser::getInstance();
+	Lib::INIParser& config_core = Lib::INIParser::getInstance("../Core/Core_config.ini");
 
 	std::unordered_map<UID, Player *> players;
 	std::unordered_map<UID, Planet *> planets;

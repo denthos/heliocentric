@@ -43,6 +43,9 @@ private:
 		std::unordered_map<UID, SunNet::ChanneledSocketConnection_p>,
 		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>>> connections;
 
+	Lib::INIParser& config_server = Lib::INIParser::getInstance();
+	Lib::INIParser& config_core = Lib::INIParser::getInstance("../Core/Core_config.ini");
+
 	Universe universe;
 	UnitManager unit_manager;
 	std::unordered_map<UID, std::unique_ptr<Player>> players;

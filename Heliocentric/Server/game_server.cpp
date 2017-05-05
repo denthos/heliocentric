@@ -226,7 +226,6 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			}
 
 			/* Let's just create a variable for the unit position, because it's so long. */
-			Lib::INIParser& config_core = Lib::INIParser::getInstance("../Core/Core_config.ini"); // Load the core config file for unit creation
 			glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
 			std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(),
 				config_core.get<int>("Unit_attack"), config_core.get<int>("Unit_defense"),
