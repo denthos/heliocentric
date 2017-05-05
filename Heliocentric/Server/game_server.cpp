@@ -10,9 +10,6 @@
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
-	Lib::INIParser& config_server = Lib::INIParser::getInstance();
-	Lib::INIParser& config_core = Lib::INIParser::getInstance("../Core/Core_config.ini");
-
 	game_running = true;
 	this->tick_duration = tick_duration;
 	this->subscribeToChannels();
@@ -229,13 +226,18 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			}
 
 			/* Let's just create a variable for the unit position, because it's so long. */
+			Lib::INIParser& config_core = Lib::INIParser::getInstance("../Core/Core_config.ini"); // Load the core config file for unit creation
 			glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
-			std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
-																																	 // TODO: Put this unit into unit manager
+			std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(),
+				config_core.get<int>("Unit_attack"), config_core.get<int>("Unit_defense"),
+				config_core.get<int>("Unit_range"), config_core.get<int>("Unit_health"),
+				config_core.get<int>("Unit_movement_speed")); // Creates a new unit
+			// TODO: Put this unit into unit manager
 
 			std::shared_ptr<UnitCreationUpdate> update = std::make_shared<UnitCreationUpdate>(new_unit->getID(),
-				command->create_location_x, command->create_location_y, command->create_location_z,
-				unit_owner_id, 100, 100, 20, 100); // Creates an update for the unit to be sent to client
+				command->create_location_x, command->create_location_y, command->create_location_z, unit_owner_id,
+				new_unit->get_combat_attack(), new_unit->get_combat_defense(), new_unit->get_combat_range(),
+				new_unit->get_health(), new_unit->get_movement_speed_max()); // Creates an update for the unit to be sent to client
 
 			this->addUpdateToSendQueue(update, { sender });
 			break;
