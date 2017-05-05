@@ -62,11 +62,13 @@ bool middleMouseDown = false;
 unsigned char selectedControlScheme = FREE_CAMERA;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
-	Lib::INIParser & config = Lib::INIParser::getInstance();
-	int width = config.get<int>("ScreenWidth");
-	int height = config.get<int>("ScreenHeight");
+	Lib::INIParser& config_client = Lib::INIParser::getInstance();
+	Lib::INIParser& config_core = Lib::INIParser::getInstance("../Core/Core_config.ini");
 
-	windowTitle = config.get<std::string>("WindowTitle");
+	int width = config_client.get<int>("ScreenWidth");
+	int height = config_client.get<int>("ScreenHeight");
+
+	windowTitle = config_client.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
 	glEnable(GL_DEPTH_TEST);

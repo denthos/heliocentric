@@ -189,6 +189,7 @@
     <ClCompile Include="unit_sample.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Core_config.ini" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -10,6 +10,8 @@
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
+	Lib::INIParser& config_server = Lib::INIParser::getInstance();
+	Lib::INIParser& config_core = Lib::INIParser::getInstance("../Core/Core_config.ini");
 
 	game_running = true;
 	this->tick_duration = tick_duration;
