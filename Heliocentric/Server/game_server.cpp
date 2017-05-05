@@ -227,14 +227,9 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			}
 
 			/* Let's just create a variable for the unit position, because it's so long. */
-			glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
-			std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
-																																	 // TODO: Put this unit into unit manager
-
-			std::shared_ptr<UnitCreationUpdate> update = std::make_shared<UnitCreationUpdate>(new_unit->getID(),
-				command->create_location_x, command->create_location_y, command->create_location_z,
-				unit_owner_id, 100, 100, 20, 100); // Creates an update for the unit to be sent to client
-
+			//glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
+			//std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
+			std::shared_ptr<UnitCreationUpdate>update = unit_manager.add_unit(command, players[unit_owner_id].get());				// TODO: Put this unit into unit manager
 			this->addUpdateToSendQueue(update, { sender });
 			break;
 		}
@@ -254,6 +249,7 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 		case UnitCommand::CMD_MOVE:
 			LOG_DEBUG("Unit command type: CMD_MOVE");
 			// TODO: Delegate to UnitManager
+			unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
 			break;
 		default:
 			LOG_ERR("Invalid unit command.");

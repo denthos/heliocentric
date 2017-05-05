@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
 #include <stdio.h>
+#include <stdlib.h>
 #include <soil.h>
 #include <GL/glut.h>
 
@@ -47,6 +48,7 @@ SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
 Shader* cubemapShader;
+Model* spaceship;
 //don't forget to clean up afterwards
 
 GLuint defaultShader;
@@ -96,19 +98,16 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	//skybox->world_mat =  glm::scale(skybox->world_mat, glm::vec3(4000.0f));
 
 	for (auto& planet : this->universe.get_planets()) {
-		//auto earth_model = new PlanetModel(Texture(EARTH_TEXTURE), planet->get_radius(), Orbit(0.0f, 0.0f));
-		//this->planetMap[planet->getID()] = std::make_pair(planet.get(), earth_model);
 		DrawablePlanet * drawablePlanet = new DrawablePlanet(*planet.get());
 		gameObjects[planet->getID()] = drawablePlanet;
 		planets[planet->getID()] = drawablePlanet;
 	}
-
-	for (auto& unit : this->unit_manager.get_units()) {
-		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get());
+	spaceship = new Model(ROCKET_MODEL);
+	for (auto& unit : this->unit_manager.get_active_units()) {
+		DrawableUnit * drawableUnit = new DrawableUnit(*unit.get(), spaceship);
 		gameObjects[unit->getID()] = drawableUnit;
 		units[unit->getID()] = drawableUnit;
 	}
-
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
 
@@ -205,6 +204,10 @@ void Client::display() {
 		octree.insert(gameObject.second);
 	}
 
+	if (spaceship != NULL) {
+		spaceship->draw(*textureShader, *camera, glm::mat4(1.0f));
+	}
+
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
 
@@ -274,7 +277,8 @@ void Client::handleEscapeKey(int key) {
 }
 
 void Client::handleF3Key(int key) {
-	PlayerCommand command(50.0f, 50.0f, 0.0f);
+
+	PlayerCommand command(rand() % 1000, rand() % 1000, rand() % 1000);
 
 	this->channeled_send(&command);
 }
@@ -345,13 +349,15 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 	}
 
 	update->apply(players[update->id]);
-
 }
 
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
 	LOG_DEBUG("Unit creation update received");
 	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
-	units[update->id] = new Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id], update->att, update->def, update->range, update->health);
+	Unit* new_unit = new Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id], update->att, update->def, update->range, update->health);
+	DrawableUnit * drawableUnit = new DrawableUnit(*new_unit, spaceship);
+	gameObjects[new_unit->getID()] = drawableUnit;
+	units[new_unit->getID()] = drawableUnit;
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
@@ -366,9 +372,10 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	LOG_DEBUG("Unit update received");
-  update->apply(units[update->id]);
-	gameObjects[update->id]->update();
+	//LOG_DEBUG("Unit update received");
+    update->apply(units[update->id]);
+	if (gameObjects[update->id] != NULL)
+		gameObjects[update->id]->update();
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {

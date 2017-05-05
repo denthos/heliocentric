@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include "unit.h"
 #include "unit_update.h"
+#include "player_command.h"
+#include "unit_creation_update.h"
 
 class UnitManager {
 private:
@@ -15,6 +17,8 @@ public:
 	UnitManager();
 	void doLogic();
 
-	std::unordered_set<std::unique_ptr<Unit>>& get_units();
+	std::unordered_set<std::unique_ptr<Unit>>& get_active_units();
+	std::shared_ptr<UnitCreationUpdate> add_unit(std::shared_ptr<PlayerCommand> command, Player* player);
+	void do_move(UID id, float x, float y, float z);
 	std::unordered_set<std::shared_ptr<UnitUpdate>>& get_updates();
 };
