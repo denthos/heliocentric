@@ -7,6 +7,7 @@ class UnitCreationUpdate : public GameObjectUpdate {
 public:
 	UID player_id;
 	int att, def, range, health;
+	float movement_speed;
 
 	/**
 	Constructor for a UnitCreationUpdate, used when a unit is created.
@@ -19,7 +20,8 @@ public:
 	@param def Defense of this unit.
 	@param range Attack range of this unit.
 	@param health Health of this unit.
+	@param movement_speed Maximum movement speed of this unit.
 	*/
-	UnitCreationUpdate(UID, float, float, float, UID, int, int, int, int);
+	UnitCreationUpdate(UID, float, float, float, UID, int, int, int, int, float);
 	void apply(GameObject* obj);
 };

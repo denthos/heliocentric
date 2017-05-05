@@ -1,9 +1,9 @@
 #include "unit_creation_update.h"
 
 UnitCreationUpdate::UnitCreationUpdate(UID id, float x, float y, float z,
-	UID player_id, int att, int def, int range, int health) :
-	GameObjectUpdate(id, x, y, z), player_id(player_id),
-	att(att), def(def), range(range), health(health) {
+	UID player_id, int att, int def, int range, int health, float movement_speed) :
+	GameObjectUpdate(id, x, y, z), player_id(player_id), att(att), def(def),
+	range(range), health(health), movement_speed(movement_speed) {
 
 }
 
