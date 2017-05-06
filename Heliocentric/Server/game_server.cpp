@@ -230,7 +230,7 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			//glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
 			//std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
 			std::shared_ptr<UnitCreationUpdate>update = unit_manager.add_unit(command, players[unit_owner_id].get());				// TODO: Put this unit into unit manager
-			this->addUpdateToSendQueue(update, { sender });
+			this->addUpdateToSendQueue(update);
 			break;
 		}
 		default:

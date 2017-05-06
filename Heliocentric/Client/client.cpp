@@ -117,9 +117,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
-
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
 		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
 
@@ -211,9 +208,6 @@ void Client::display() {
 		octree.insert((*it).second.get());
 	}
 
-	if (spaceship != NULL) {
-		spaceship->draw(*textureShader, *camera, glm::mat4(1.0f));
-	}
 
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
