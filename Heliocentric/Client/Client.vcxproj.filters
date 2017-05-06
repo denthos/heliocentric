@@ -103,6 +103,9 @@
     <ClInclude Include="sphere_model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="rocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
@@ -169,6 +172,9 @@
       <Filter>Drawables</Filter>
     </ClCompile>
     <ClCompile Include="sphere_model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

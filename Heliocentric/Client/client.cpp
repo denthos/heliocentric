@@ -8,7 +8,7 @@
 #include <soil.h>
 #include <GL/glut.h>
 
-
+#include "rocket.h"
 
 #include "drawable_planet.h"
 #include "drawable_unit.h"
@@ -48,6 +48,8 @@ Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
 Shader* cubemapShader;
 //don't forget to clean up afterwards
+
+Rocket * rocket;
 
 GLuint defaultShader;
 
@@ -91,7 +93,10 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 
-	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
+
+	rocket = new Rocket(new Model(ROCKET_MODEL));
+
+	//skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
 	//TODO rewrite this
 	//skybox->world_mat =  glm::scale(skybox->world_mat, glm::vec3(4000.0f));
 
@@ -126,7 +131,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
+	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D, GLFW_KEY_C },
 		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
@@ -207,7 +212,10 @@ void Client::display() {
 	octree.update();
 	octree.draw(*textureShader, *camera);
 
-	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+	//skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+
+	rocket->update(glm::vec3( 200.0, 100.0, 00.0));
+	rocket->draw(*textureShader, *camera, glm::mat4(1.0f));
 
 	glfwSwapBuffers(window);
 
@@ -256,6 +264,11 @@ void Client::handleCameraPanButtonDown(int key) {
 		break;
 	case GLFW_KEY_A:
 		camera->position -= glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
+		break;
+
+	case GLFW_KEY_C:
+		rocket->turn = true;
+		std::cerr << "HELLO" << std::endl;
 		break;
 	}
 }

@@ -3,6 +3,7 @@
 #include "drawable_unit.h"
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\quaternion.hpp>
+#include <ctime>
 
 class Rocket{ //TODO extend drawable unit
 public:
@@ -16,13 +17,17 @@ public:
 	void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld);
 	void update(glm::vec3 point);
 
+	bool turn = false; //whether the ship should turn or not
+
 private:
 	Model *model; //TODO remove
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); //up direction is always positive y axis
 	glm::mat4 rot_mat = glm::mat4(1.0f);
 	glm::vec3 position = glm::vec3(0.0f); //TODO remove
 
-	bool turn = false;
+	float turn_start = 0.0f; //turn animation start time;
+
+	
 	
 	
 
