@@ -1,10 +1,10 @@
 #pragma once
 
 #include "attackable_game_object.h"
-#include "slot.h"
 #include "player.h"
 
 class CityUpdate;
+class Slot;
 
 class City : public AttackableGameObject {
 public:
@@ -16,12 +16,13 @@ public:
 	int get_population();
 	void set_population(int new_pop);
 	Slot* get_slot();
-	glm::vec3 get_position();
+	glm::vec3 get_position() const;
+
+	Slot* slot;
 
 private:
 	int production;
 	int population;
-	Slot* slot;
 
 protected:
 	// TODO: Override these combat hooks

@@ -29,9 +29,10 @@ public:
 	float get_radius() const;
 	PlanetType get_type() const;
 
+	std::unordered_map<UID, Slot*> slots;  // list of slots available
+
 private:
 	std::string name;       // planet name
-	std::unordered_map<UID, Slot*> slots;  // list of slots available
 
 	PlanetType type;
 

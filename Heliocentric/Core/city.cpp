@@ -1,4 +1,5 @@
 #include "city.h"
+#include "slot.h"
 #include <iostream>
 #include <string>
 
@@ -21,6 +22,6 @@ Slot* City::get_slot() {
 	return slot;
 }
 
-glm::vec3 City::get_position() {
+glm::vec3 City::get_position() const {
 	return slot->get_position();
 }

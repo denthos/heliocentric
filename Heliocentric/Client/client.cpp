@@ -117,6 +117,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F5, std::bind(&Client::handleF5Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
 		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
 
@@ -282,6 +283,17 @@ void Client::handleF3Key(int key) {
 	PlayerCommand command(rand() % 1000, rand() % 1000, rand() % 1000);
 
 	this->channeled_send(&command);
+}
+
+void Client::handleF5Key(int key) {
+	/* We are going to select a planet's slot and found a city there */
+	auto planet_it = planets.begin();
+	if (planet_it->first == 0) {
+		std::advance(planet_it, 1);
+	}
+
+	auto slot_it = planet_it->second->slots.begin();
+	slot_it->second->foundCity(this->player.get(), 0, 0, 0, 0, 0, 0);
 }
 
 void Client::mouseButtonCallback(int button, int action, int mods) {

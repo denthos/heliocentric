@@ -11,7 +11,6 @@ class DrawablePlanet : public Planet, public Drawable {
 public:
 	static std::unordered_map<PlanetType, DrawableData>& getDataMap();
 
-	std::unordered_map<UID, DrawableSlot> drawable_slots; 
 	DrawablePlanet(const Planet & planet);
 	~DrawablePlanet();
 	virtual void update();
