@@ -19,6 +19,24 @@ std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 DrawablePlanet::DrawablePlanet(const Planet & planet) : Planet(planet) {
 	this->toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(get_radius())), planet.get_position());
 	model = new SphereModel(getDataMap().at(planet.get_type()).texture);
+
+	/* Now load all the slots into drawble slots*/
+	for (auto slot_pair : this->get_slots()) {
+		this->drawable_slots.insert(
+			std::make_pair(slot_pair.first, DrawableSlot(*(slot_pair.second), this))
+		);
+	}
+}
+
+
+void DrawablePlanet::draw(const Shader & shader, const Camera & camera) const {
+	/* First, draw the planet model */
+	this->model->draw(shader, camera, this->toWorld);
+
+	/* Now let's draw all the slots */
+	for (auto& drawable_slot_pair : this->drawable_slots) {
+		drawable_slot_pair.second.draw(shader, camera);
+	}
 }
 
 DrawablePlanet::~DrawablePlanet() {
@@ -27,4 +45,9 @@ DrawablePlanet::~DrawablePlanet() {
 
 void DrawablePlanet::update() {
 	this->toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(get_radius())), get_position());
+
+	/* Now let's update all the slots */
+	for (auto& drawable_slot_pair : this->drawable_slots) {
+		drawable_slot_pair.second.update();
+	}
 }

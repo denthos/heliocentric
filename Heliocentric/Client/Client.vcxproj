@@ -229,6 +229,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClCompile Include="bounding_box.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
+    <ClCompile Include="drawable_slot.cpp" />
     <ClCompile Include="keyboard_handler.cpp" />
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="drawable_data.cpp" />

@@ -13,6 +13,8 @@ private:
 	std::set<std::unique_ptr<Planet>> planets;
 	std::vector<std::shared_ptr<PlanetUpdate>> planet_updates;
 
+	std::unique_ptr<Planet> createPlanet(glm::vec3 position, std::string name, float speed, float radius, PlanetType type);
+
 public:
 	Universe();
 
