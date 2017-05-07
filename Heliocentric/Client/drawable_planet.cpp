@@ -17,7 +17,7 @@ std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 }
 
 DrawablePlanet::DrawablePlanet(const Planet & planet) : Planet(planet) {
-	this->toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(get_radius())), planet.get_position());
+	this->toWorld = glm::scale(glm::translate(glm::mat4(1.0f), planet.get_position()), glm::vec3(get_radius()));
 	model = new SphereModel(getDataMap().at(planet.get_type()).texture);
 }
 
@@ -26,5 +26,5 @@ DrawablePlanet::~DrawablePlanet() {
 }
 
 void DrawablePlanet::update() {
-	this->toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(get_radius())), get_position());
+	this->toWorld = glm::scale(glm::translate(glm::mat4(1.0f), get_position()), glm::vec3(get_radius()));
 }
