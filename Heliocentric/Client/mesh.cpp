@@ -39,18 +39,9 @@ void Mesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & 
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &toWorld[0][0]);
 
-	//TODO: bind lights -- naming convention for lights in shader, make UBO for light types. this should probably be moved made its own class or so
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.position"), 0.0f, 0.0f, 0.0f);
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.ambient"), 0.3f, 0.3f, 0.3f);
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.diffuse"), 0.5f, 0.5f, 0.5f);
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.specular"), 0.7f, 0.7f, 0.7f);
-	glUniform1f(glGetUniformLocation(shader.getPid(), "pointLight.quadratic"), 0.00032f);
-
 	//bind material
-	glUniformBlockBinding(shaderID, glGetUniformBlockIndex(shaderID, MTL_UNIFORM), 0);
-
-	glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, sizeof(Material));
-	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+	glUniformBlockBinding(shaderID, glGetUniformBlockIndex(shaderID, MTL_UNIFORM), 1);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO);
 
 	//bind textures
 	for (GLuint i = 0; i < mesh_textures.size(); i++) {

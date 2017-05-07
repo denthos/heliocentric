@@ -9,11 +9,11 @@ SphereMesh::SphereMesh()
 	sectors = 48;
 
 	//TODO set material funciton
-	mtl.diffuse = glm::vec3(0.5f);
+	mtl.diffuse = glm::vec3(0.8f);
 	mtl.ambient = glm::vec3(0.3f);
 	mtl.specular = glm::vec3(0.0f);
 	mtl.emission = glm::vec3(0.0f);
-	mtl.shininess = 0.2f;
+	mtl.shininess = 10.0f;
 
 	genMesh();
 
@@ -27,13 +27,11 @@ SphereMesh::SphereMesh(float radius, int rings, int sectors)
 	this->sectors = sectors;
 
 	//TODO set material funciton
-	mtl.diffuse = glm::vec3(0.5f);
-	mtl.ambient = glm::vec3(0.3f);
+	mtl.diffuse = glm::vec3(0.0f);
+	mtl.ambient = glm::vec3(0.0f);
 	mtl.specular = glm::vec3(0.0f);
 	mtl.emission = glm::vec3(0.0f);
-	mtl.shininess = 0.2f;
-
-	genMesh();
+	mtl.shininess = 10.0f;
 
 	createMesh();
 }

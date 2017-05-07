@@ -18,20 +18,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\shader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="Shaders\shader.vert">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="Client_config.ini" />
+    <None Include="Shaders\shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="Shaders\simple_texture.frag">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Shaders\simple_texture.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Client_config.ini" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="client.h">

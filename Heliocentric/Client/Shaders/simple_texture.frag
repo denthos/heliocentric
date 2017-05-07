@@ -25,8 +25,22 @@ in vec2 TexCoord;
 out vec4 color;
 
 uniform vec3 viewPos;
-uniform PointLight pointLight;
 uniform sampler2D ourTexture;
+
+vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
+    vec3 lightDir = normalize(-fragPos);
+    // Diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0f);
+    // Specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), m_shininess);
+    // Combine results
+    vec3 ambient = m_ambient;
+    vec3 diffuse = diff * m_diffuse;
+    vec3 specular = spec * m_specular;
+	specular = clamp(specular, 0.0f, 1.0f);
+    return (ambient + diffuse + specular);
+}
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
@@ -38,7 +52,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), m_shininess);
     // Attenuation
     float distance = length(light.position - fragPos);
-    float attenuation = 1.0f / (light.quadratic * (distance * distance));    
+    float attenuation = 1.0f / (light.quadratic * (distance * distance));
     // Combine results
     vec3 ambient = light.ambient * m_ambient;
     vec3 diffuse = light.diffuse * diff * m_diffuse;
@@ -54,6 +68,6 @@ void main()
 	vec3 norm = normalize(Normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 
-	vec3 result = calcPointLight(pointLight, norm, FragPos, viewDir);
+	vec3 result = calcSunLight(norm, FragPos, viewDir);
 	color = texture(ourTexture, TexCoord) * vec4(result, 1.0f);
 }
