@@ -16,7 +16,7 @@ Planet::Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_
 }
 
 
-std::unordered_map<UID, Slot*> Planet::get_slots() const {
+std::unordered_map<UID, Slot*>& Planet::get_slots() {
 	return slots;
 }
 
@@ -30,7 +30,7 @@ bool Planet::check_occupancy() const {
 	}
 
 	for (auto pair : slots) {
-		if (pair.second->is_occupied())
+		if (pair.second->hasCity())
 			return false;
 	}
 

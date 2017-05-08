@@ -18,7 +18,7 @@ public:
 	Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>);
 	Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>);
 
-	std::unordered_map<UID, Slot*> get_slots() const;
+	std::unordered_map<UID, Slot*>& get_slots();
 
 	void doLogic();
 	std::shared_ptr<PlanetUpdate> makeUpdate();

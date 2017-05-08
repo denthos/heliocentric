@@ -74,9 +74,6 @@
     <ClInclude Include="player_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
-    <ClInclude Include="slot_update.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
     <ClInclude Include="unit_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
@@ -126,6 +123,9 @@
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="unit_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="spherical_coordinate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -178,9 +178,6 @@
     <ClCompile Include="player_update.cpp">
       <Filter>Updates</Filter>
     </ClCompile>
-    <ClCompile Include="slot_update.cpp">
-      <Filter>Updates</Filter>
-    </ClCompile>
     <ClCompile Include="unit_update.cpp">
       <Filter>Updates</Filter>
     </ClCompile>
@@ -220,8 +217,10 @@
     <ClCompile Include="attackable_game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-
     <ClCompile Include="unit_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="spherical_coordinate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

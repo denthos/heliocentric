@@ -110,7 +110,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<UnitUpdate>(std::bind(&Client::unitUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
-	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
@@ -394,10 +393,6 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
 	update->apply(planets[update->id].get());
 	planets[update->id]->update();
-}
-
-void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<SlotUpdate> update) {
-	update->apply(slots[update->id].get());
 }
 
 void Client::handle_client_disconnect() {

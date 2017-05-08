@@ -17,7 +17,6 @@
 #include "unit_update.h"
 #include "city_update.h"
 #include "planet_update.h"
-#include "slot_update.h"
 #include "player_id_confirmation.h"
 #include "channeled_client.h"
 #include "tcp_socket_connection.hpp"
