@@ -109,6 +109,7 @@ private:
 	std::atomic<bool> game_running;
 	int tick_duration;
 
+	Player* extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p, bool retry=false);
 	void handleReceivePlayerClientToServerTransfer(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerClientToServerTransfer>);
 
 protected:

@@ -70,42 +70,71 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	players[player->getID()] = std::move(player);
 }
 
+Player* GameServer::extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p connection, bool retrying) {
+	UID player_id;
+	{
+		/* First, let's extract the player id from the connection */
+		std::lock_guard<std::mutex> guard(this->connections.get_lock());
+		auto& player_id_it = this->connections.get_item().second.find(connection);
+
+		if (player_id_it == this->connections.get_item().second.end()) {
+			if (retrying) {
+				/*
+				Okay. We've had this problem once and we tried to reconnect the user. Something is seriously
+				wrong that the devs need to fix. Let's log this and return something bad. This should _never_
+				happen and we should be unforgiving about crashing.
+				*/
+				LOG_ERR("Could not find player for connection, even after retry.");
+				return NULL;
+			}
+
+			/*
+			The player was not found. As a rudimentary solution, let's log the problem and
+			reconnect the connection, considering them a "new" player. We will then retry this
+			operation
+			*/
+			LOG_WARN("Could not find player for connection. Gracefully retrying...");
+			this->handle_client_connect(connection);
+			return this->extractPlayerFromConnection(connection, true);
+		}
+
+		player_id = player_id_it->second;
+	}
+
+	/* We now have the player id. Let's look it up. */
+	auto& player_it = this->players.find(player_id);
+
+	if (player_it == this->players.end()) {
+		/*
+		We've had this error before. Something is very wrong that the devs need to fix. Let's log it
+		and be unforgiving about returning garbage.
+		*/
+		if (retrying) {
+			LOG_ERR("Could not find player with UID ", player_id, " even after retry.");
+			return NULL;
+		}
+		/* 
+		WOAH THERE. We have a Connection->UID mapping for the player, but we don't know
+		about the UID. This is weird, but we are going to reconnect the user.
+		*/
+		this->handleClientDisconnect(connection);
+		this->handle_client_connect(connection);
+		return this->extractPlayerFromConnection(connection, true);
+	}
+
+	LOG_DEBUG("Receivied valid communcation from player ", player_it->first);
+	return player_it->second.get();
+}
+
 void GameServer::handleReceivePlayerClientToServerTransfer(
 	SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerClientToServerTransfer> info) {
 
-	std::lock_guard<std::mutex> guard(this->connections.get_lock());
-	auto& player_id_it = this->connections.get_item().second.find(sender);
-	if (player_id_it == this->connections.get_item().second.end()) {
-		/* What the.. we received player info from a connection we don't know about? This is weird. */
-		LOG_WARN("Received player info from connection we haven't heard of before...");
-
-		/* 
-		Luckily, if we send them another ID confirmation, the client will take the new ID and overwrite
-		what they already have. Let's just act like they're brand new.
-		*/
-		this->handle_channeledclient_connect(sender);
-		return;
-	}
-
-	auto& player_it = this->players.find(player_id_it->second);
-	if (player_it == this->players.end()) {
-		/* This is even weirder.. we received player info from a connection we know about, but we don't know about the player... */
-		LOG_WARN("Received player info for unknown player ID: ", player_id_it->second);
-
-		/*
-		In this situation, it seems like the client simply ACKd a different ID number than we gave them.
-		Let's start the process over for them. We will remove their data and act like they're a new connection.
-		*/
-		this->handleClientDisconnect(sender);
-		this->handle_channeledclient_connect(sender);
-		return;
-	}
-
-	LOG_DEBUG("Received player client->server info transfer. Player with ID ", player_it->first, " has name ", info->name);
-	info->apply(player_it->second.get());
+	Player* player = this->extractPlayerFromConnection(sender);
+	LOG_DEBUG("Received player client->server info transfer. Player with ID ", player->getID(), " has name ", info->name);
+	info->apply(player);
 
 	/* OK. We've applied the information to the player. Now we'd like to send this information to all other players */
-	std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(player_it->first, info->name);
+	std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(player->getID(), info->name);
 
 	LOG_DEBUG("Sending information about new player to all others..");
 	this->addUpdateToSendQueue(player_update);
@@ -113,12 +142,11 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	/* OK. Finally, let's send information about _all_ other players to this player */
 	LOG_DEBUG("Sending information about all others to new player...");
 	for (auto& other_player_it : this->players) {
-		if (other_player_it.first == player_it->first) {
+		if (other_player_it.first == player->getID()) {
 			continue;
 		}
 
 		std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(other_player_it.first, other_player_it.second->get_name().c_str());
-
 		this->addUpdateToSendQueue(player_update, { sender });
 	}
 }
@@ -210,26 +238,10 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 		case PlayerCommand::CMD_CREATE: {
 			LOG_DEBUG("Play command type: CMD_CREATE.");
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
-			// TODO: Create the new unit (should probably be a unique_ptr) and move it into the UnitManager
-			// TODO: Queue up UnitUpdates for the unit
-			UID unit_owner_id; // ID of the player who sent the command
-			{
-				/* These operations need to be locked */
-				std::lock_guard<std::mutex>(this->connections.get_lock());
-				/* Get player ID if player does exist */
-				if ((connections.get_item().second).find(sender) != (connections.get_item().second).end()) {
-					unit_owner_id = (connections.get_item().second)[sender];
-				}
-				else {
-					LOG_ERR("Player does not exist");
-					return;
-				}
-			}
+			Player* owner = this->extractPlayerFromConnection(sender);
 
 			/* Let's just create a variable for the unit position, because it's so long. */
-			//glm::vec3 unit_position(command->create_location_x, command->create_location_y, command->create_location_z);
-			//std::unique_ptr<Unit> new_unit = std::make_unique<Unit>(unit_position, players[unit_owner_id].get(), 100, 100, 20, 100); // Creates a new unit
-			std::shared_ptr<UnitCreationUpdate>update = unit_manager.add_unit(command, players[unit_owner_id].get());				// TODO: Put this unit into unit manager
+			std::shared_ptr<UnitCreationUpdate>update = unit_manager.add_unit(command, owner);
 			this->addUpdateToSendQueue(update);
 			break;
 		}
