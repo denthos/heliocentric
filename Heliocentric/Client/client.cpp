@@ -25,7 +25,7 @@
 #include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
-
+#include "unit_command.h"
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -99,10 +99,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
 	}
 
+	// LOAD MODEL, IMPORTANT
 	spaceship = new Model(ROCKET_MODEL);
-	for (auto& unit : this->unit_manager.get_active_units()) {
-		units[unit->getID()] = std::make_unique<DrawableUnit>(*unit.get(), spaceship);
-	}
+
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
 
@@ -117,6 +116,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
 		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
 
@@ -208,7 +208,6 @@ void Client::display() {
 		octree.insert((*it).second.get());
 	}
 
-
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
 
@@ -281,6 +280,17 @@ void Client::handleF3Key(int key) {
 
 	PlayerCommand command(rand() % 1000, rand() % 1000, rand() % 1000);
 
+	this->channeled_send(&command);
+}
+
+void Client::handleF4Key(int key) {
+	auto unit_it = units.begin();
+	if (units.size() == 0) {
+		return;
+	}
+	std::advance(unit_it, rand() % units.size());
+
+	UnitCommand command(unit_it->first, rand() % 1000, rand() % 1000, rand() % 1000);
 	this->channeled_send(&command);
 }
 

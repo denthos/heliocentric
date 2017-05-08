@@ -50,7 +50,7 @@ public:
 	Perform logic based on command. Called continuously by server to update current state 
 	of the unit.
 	*/
-	void do_logic();
+	CommandType do_logic();
 
 	/**
 	Perform update.

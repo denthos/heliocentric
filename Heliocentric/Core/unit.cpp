@@ -15,7 +15,7 @@ Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, in
 	this->movement_speed = movement_speed;
 }
 
-void Unit::do_logic() {
+Unit::CommandType Unit::do_logic() {
 	switch (currentCommand) {
 	case UNIT_IDLE:
 		break;
@@ -28,6 +28,7 @@ void Unit::do_logic() {
 	default:
 		LOG_ERR("Invalid command type.");
 	}
+	return currentCommand;
 }
 
 

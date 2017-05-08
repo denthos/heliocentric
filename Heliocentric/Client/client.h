@@ -83,5 +83,6 @@ private:
 	void handleF1Key(int);
 	void handleCameraPanButtonDown(int);
 	void handleF3Key(int);
+	void handleF4Key(int);
 };
 
