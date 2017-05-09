@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base_command.h"
+#include "resources.h"
 
 /**
 This class works as a medium for client-to-server communication by carrying
@@ -21,6 +22,10 @@ public:
 	float create_location_y;
 	float create_location_z;
 
+	UID trade_recipient;
+	Resources::ResourceType trade_selling;
+	int trade_sell_amount;
+
 	/* TODO: Include things like */
 	// UNIT_TYPE unit_type;
 
@@ -35,4 +40,6 @@ public:
 	@param create_location_z z-axis of the location where the unit should be created.
 	*/
 	PlayerCommand(float, float, float);
+
+	PlayerCommand(UID, Resources::ResourceType, int);
 };

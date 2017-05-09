@@ -80,8 +80,9 @@ private:
 
 	void handleEscapeKey(int);
 	void handleF1Key(int);
-	void handleCameraPanButtonDown(int);
+	void handleF2Key(int);
 	void handleF3Key(int);
 	void handleF4Key(int);
+  void handleCameraPanButtonDown(int);
 };
 

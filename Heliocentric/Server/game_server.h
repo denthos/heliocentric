@@ -23,6 +23,8 @@
 #include "player_command.h"
 #include "unit_command.h"
 
+#include "trade_deal.h"
+
 #include "player_client_to_server_xfer.h"
 
 class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
@@ -86,6 +88,7 @@ private:
 	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
 	void handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
 	void handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> creation_command);
+	void handleTradeDeal(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeDeal> trade_deal);
 
 	template <typename TUpdate>
 	void addUpdateToSendQueue(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {

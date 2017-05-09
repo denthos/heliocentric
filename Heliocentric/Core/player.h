@@ -1,5 +1,6 @@
 #pragma once
 #include "identifiable.h"
+#include "resources.h"
 #include <unordered_map>
 #include <vector>
 #include <typeinfo>
@@ -23,6 +24,9 @@ public:
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
 	void pop();                               // Pop all objects queued for destroy
+
+	float get_resource_amount(Resources::ResourceType);
+
 	std::unordered_map<unsigned int, GameObject*> get_units();   // return list of owned units
 	GameObject* get_unit(UID id);
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects;
@@ -30,5 +34,7 @@ public:
 private:
 	std::string name;
 	std::vector<GameObject*> objects_to_destroy;
-	//list<Resource> recourses;
+	std::unordered_map<Resources::ResourceType, float> owned_resources; // Stores the amount of each type of resources the player owns
+
+	void initialize(); // Called by both constructors to initialize player.
 };

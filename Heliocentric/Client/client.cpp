@@ -26,6 +26,7 @@
 #include "debug_pause.h"
 #include "player_command.h"
 #include "unit_command.h"
+#include "trade_deal.h"
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -114,6 +115,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
@@ -266,13 +268,37 @@ void Client::handleCameraPanButtonDown(int key) {
 	}
 }
 
+void Client::handleEscapeKey(int key) {
+	glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
 void Client::handleF1Key(int key) {
 	DebugPause pause;
 	this->channeled_send<DebugPause>(&pause);
 }
 
-void Client::handleEscapeKey(int key) {
-	glfwSetWindowShouldClose(window, GL_TRUE);
+void Client::handleF2Key(int key) {
+	/* Find the first player that is not this client and send him a trade deal ^^ */
+	UID recipient;
+	bool recipient_found = false;
+	for (auto it = players.begin(); it != players.end(); it++) {
+		LOG_DEBUG("Iterating through player with id: ", it->first);
+		if (it->second != this->player) {
+			recipient = it->first;
+			recipient_found = true;
+			LOG_DEBUG("Recipient found with id: ", recipient);
+			break;
+		}
+	}
+
+	if (!recipient_found) {
+		LOG_ERR("Cannot send trade deal because no other player is in game.");
+		return;
+	}
+
+	PlayerCommand deal(recipient, Resources::GOLD, 10);
+
+	this->channeled_send(&deal);
 }
 
 void Client::handleF3Key(int key) {
@@ -357,7 +383,9 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 		players[update->id] = std::make_shared<Player>(update->player_name, update->id);
 	}
 
+	LOG_DEBUG("Player gold amount before trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
 	update->apply(players[update->id].get());
+	LOG_DEBUG("Player gold amount after trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
 }
 
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
@@ -381,7 +409,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
-	LOG_DEBUG("Unit update received");
+	//LOG_DEBUG("Unit update received");
 	update->apply(units[update->id].get());
 	units[update->id]->update();
 }

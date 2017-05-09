@@ -14,6 +14,8 @@
 #include "player_command.h"
 #include "unit_command.h"
 
+#include "trade_deal.h"
+
 void initializeChannels() {
 	using channels = SunNet::Channels;
 
@@ -28,4 +30,6 @@ void initializeChannels() {
 	channels::addNewChannel<DebugPause>();
 	channels::addNewChannel<PlayerCommand>();
 	channels::addNewChannel<UnitCommand>();
+
+	channels::addNewChannel<TradeDeal>();
 }

@@ -236,13 +236,41 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 	/* This currently only handles create command */
 	switch (command->command_type) {
 		case PlayerCommand::CMD_CREATE: {
-			LOG_DEBUG("Play command type: CMD_CREATE.");
+			LOG_DEBUG("Player command type: CMD_CREATE.");
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			Player* owner = this->extractPlayerFromConnection(sender);
 
-			/* Let's just create a variable for the unit position, because it's so long. */
 			std::shared_ptr<UnitCreationUpdate>update = unit_manager.add_unit(command, owner);
 			this->addUpdateToSendQueue(update);
+			break;
+		}
+		case PlayerCommand::CMD_TRADE: {
+			LOG_DEBUG("Player command type: CMD_TRADE");
+
+			/* For now, let's just assume that the recipient is gonna accept this trade deal. */
+			UID sender_id;
+			SunNet::ChanneledSocketConnection_p recipient;
+			{
+				/* These operations need to be locked */
+				std::lock_guard<std::mutex> guard(this->connections.get_lock());
+				sender_id = (connections.get_item().second)[sender]; // Get UID of the sender
+
+				if ((connections.get_item().first).find(command->trade_recipient) != (connections.get_item().first).end()) {
+					recipient = (connections.get_item().first)[command->trade_recipient];
+				}
+				else {
+					/* UID does not correspond to a player */
+					LOG_ERR("Invalid player UID.");
+				}
+			}
+
+			std::shared_ptr<PlayerUpdate> seller_update = std::make_shared<PlayerUpdate>(sender_id,
+				command->trade_selling, -command->trade_sell_amount);
+			std::shared_ptr<PlayerUpdate> recipient_update = std::make_shared<PlayerUpdate>(command->trade_recipient,
+				command->trade_selling, command->trade_sell_amount);
+
+			this->addUpdateToSendQueue(seller_update, { sender });
+			this->addUpdateToSendQueue(recipient_update, { recipient });
 			break;
 		}
 		default:
@@ -265,6 +293,22 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 			break;
 		default:
 			LOG_ERR("Invalid unit command.");
+	}
+}
+
+void GameServer::handleTradeDeal(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeDeal> trade_deal) {
+	LOG_DEBUG("Received a trade deal.");
+
+	if (trade_deal->isAccepted()) {
+		/* Trade deal accepted */
+		if (players.find(trade_deal->recipient) == players.end()) {
+			/* If UID does not correspond to a player */
+			LOG_ERR("Invalid player UID.");
+		}
+	}
+	else {
+		/* Trade deal declined */
+
 	}
 }
 

@@ -13,7 +13,8 @@ class BaseCommand {
 public:
 	/* This enum should include all possible commands that a player can send. */
 	enum CommandType { CMD_ATTACK, CMD_BUILD, CMD_CREATE, CMD_DELETE,
-					 CMD_MOVE, CMD_PURCHASE, CMD_SETTLE_CITY, CMD_SLEEP
+	                   CMD_MOVE, CMD_PURCHASE, CMD_SETTLE_CITY, CMD_SLEEP,
+	                   CMD_TRADE
 	};
 
 	UID initiator; // The object that will execute this command.

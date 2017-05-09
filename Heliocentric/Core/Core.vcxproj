@@ -25,6 +25,7 @@
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="fileutils.cpp" />
     <ClCompile Include="game_channels.cpp" />
+    <ClCompile Include="trade_deal.cpp" />
     <ClCompile Include="spherical_coordinate.cpp" />
     <ClCompile Include="unit_creation_update.cpp" />
     <ClCompile Include="player_client_to_server_xfer.cpp" />
@@ -42,6 +43,8 @@
     <ClInclude Include="fileutils.h" />
     <ClInclude Include="game_channels.h" />
     <ClInclude Include="game_object_update.h" />
+    <ClInclude Include="resources.h" />
+    <ClInclude Include="trade_deal.h" />
     <ClInclude Include="spherical_coordinate.h" />
     <ClInclude Include="unit_command.h" />
     <ClInclude Include="player_command.h" />

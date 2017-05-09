@@ -1,7 +1,13 @@
 #pragma once
 
+#include "game_object.h"
+#include "player.h"
+#include "resources.h"
 #include "identifiable.h"
 #include "spherical_coordinate.h"
+#include <vector>
+#include <iostream>
+
 
 class SlotUpdate;
 
@@ -24,8 +30,8 @@ public:
 	City* getCity() const;
 
 protected:
-	//std::list<Resource> resources;
-
+	Resources::ResourceType resource_type;
+	float resource_deposit;
 	SphericalCoordinate coordinate;
 	Planet* planet;
 	City* city;
