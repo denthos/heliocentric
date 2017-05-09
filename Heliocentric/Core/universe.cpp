@@ -6,12 +6,12 @@ Universe::Universe() {
 	std::unordered_map<UID, Slot*> slots;
 
 	/* Generate standard planets for this universe */
-	this->planets.insert(std::make_unique<Planet>(glm::vec3(0.0f, 0.0f, 0.0f), "Sun", 0.0f, 60.0f, SUN, slots));
-	this->planets.insert(std::make_unique<Planet>(glm::vec3(200.0f, 0.0f, 0.0f), "Mercury", 0.5f, 20.0f, MERCURY, slots));
-	this->planets.insert(std::make_unique<Planet>(glm::vec3(440.0f, 0.0f, 0.0f), "Venus", 0.3f, 24.0f, VENUS, slots));
-	this->planets.insert(std::make_unique<Planet>(glm::vec3(700.0f, 0.0f, 0.0f), "Earth", 0.2f, 28.0f, EARTH, slots));
-	this->planets.insert(std::make_unique<Planet>(glm::vec3(1000.0f, 0.0f, 0.0f), "Mars", 0.1f, 27.0f, MARS, slots));
-	this->planets.insert(std::make_unique<Planet>(glm::vec3(1800.0f, 0.0f, 0.0f), "Jupiter", 0.08f, 40.0f, JUPITER, slots));
+	this->planets.insert(createPlanet(glm::vec3(0.0f, 0.0f, 0.0f), "Sun", 0.0f, 60.0f, SUN, slots));
+	this->planets.insert(createPlanet(glm::vec3(200.0f, 0.0f, 0.0f), "Mercury", 0.5f, 20.0f, MERCURY, slots));
+	this->planets.insert(createPlanet(glm::vec3(440.0f, 0.0f, 0.0f), "Venus", 0.3f, 24.0f, VENUS, slots));
+	this->planets.insert(createPlanet(glm::vec3(700.0f, 0.0f, 0.0f), "Earth", 0.2f, 28.0f, EARTH, slots));
+	this->planets.insert(createPlanet(glm::vec3(1000.0f, 0.0f, 0.0f), "Mars", 0.1f, 27.0f, MARS, slots));
+	this->planets.insert(createPlanet(glm::vec3(1800.0f, 0.0f, 0.0f), "Jupiter", 0.08f, 40.0f, JUPITER, slots));
 }
 
 void Universe::doLogic() {

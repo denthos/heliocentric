@@ -20,6 +20,10 @@ std::unordered_map<UID, Slot*>& Planet::get_slots() {
 	return slots;
 }
 
+const std::unordered_map<UID, Slot*>& Planet::get_slots_const() const {
+	return slots;
+}
+
 Slot* Planet::get_slot(UID id) {
 	return slots[id];
 }

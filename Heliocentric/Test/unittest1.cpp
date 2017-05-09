@@ -89,7 +89,7 @@ namespace Test
             Assert::AreEqual(3, (int) mars.get_slots().size());
             Assert::IsFalse(mars.get_slots().empty());
             Assert::AreEqual(id-1, mars.get_slot(id-1)->getID());
-			Assert::IsNull(mars.get_slot(id - 1)->getCity());
+			Assert::IsFalse(mars.get_slot(id - 1)->hasCity());
         }
     };
 }

@@ -1,7 +1,10 @@
 #include "spherical_coordinate.h"
+#include <glm/gtc/constants.hpp>
+
+#define toRad(x) (x * (glm::pi<float>() / 180.0f))
 
 SphericalCoordinate::SphericalCoordinate(float theta, float phi) :
-	theta(theta), phi(phi) {}
+	theta(toRad(theta)), phi(toRad(phi)) {}
 
 
 float SphericalCoordinate::getTheta() const {

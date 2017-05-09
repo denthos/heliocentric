@@ -1,6 +1,7 @@
 #include "drawable_planet.h"
 
 #include "sphere_model.h"
+#include "drawable_slot.h"
 
 std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 	static std::unordered_map<PlanetType, DrawableData> drawable_data_map;
@@ -19,6 +20,23 @@ std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 DrawablePlanet::DrawablePlanet(const Planet & planet) : Planet(planet) {
 	this->toWorld = glm::scale(glm::translate(glm::mat4(1.0f), planet.get_position()), glm::vec3(get_radius()));
 	model = new SphereModel(getDataMap().at(planet.get_type()).texture);
+
+	/* Convert all the planet's slots to DrawableSlots */
+	auto& slots = this->get_slots();
+	for (auto slot_pair : slots) {
+		slots[slot_pair.first] = new DrawableSlot(*slot_pair.second, this);
+	}
+}
+
+void DrawablePlanet::draw(const Shader& shader, const Camera& camera) const {
+	Drawable::draw(shader, camera);
+
+	for (auto slot_pair : this->get_slots_const()) {
+		DrawableSlot* drawable_slot = static_cast<DrawableSlot*>(slot_pair.second);
+		if (drawable_slot) {
+			drawable_slot->draw(shader, camera);
+		}
+	}
 }
 
 DrawablePlanet::~DrawablePlanet() {
@@ -27,4 +45,11 @@ DrawablePlanet::~DrawablePlanet() {
 
 void DrawablePlanet::update() {
 	this->toWorld = glm::scale(glm::translate(glm::mat4(1.0f), get_position()), glm::vec3(get_radius()));
+
+	for (auto slot_pair : this->get_slots_const()) {
+		DrawableSlot* drawable_slot = static_cast<DrawableSlot*>(slot_pair.second);
+		if (drawable_slot) {
+			drawable_slot->update();
+		}
+	}
 }

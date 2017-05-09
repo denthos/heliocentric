@@ -1,9 +1,9 @@
 #include "slot.h"
 #include "planet.h"
 
-Slot::Slot(Planet* planet, SphericalCoordinate coord) : planet(planet), coordinate(coord) {}
+Slot::Slot(Planet* planet, SphericalCoordinate coord) : planet(planet), coordinate(coord), city(NULL) {}
 
-Slot::Slot(UID id, Planet* planet, SphericalCoordinate coord) : Identifiable(id), planet(planet), coordinate(coord) {}
+Slot::Slot(UID id, Planet* planet, SphericalCoordinate coord) : Identifiable(id), planet(planet), coordinate(coord), city(NULL) {}
 
 bool Slot::hasCity() const {
 	return (this->city != NULL);

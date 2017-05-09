@@ -13,4 +13,5 @@ public:
 	DrawablePlanet(const Planet & planet);
 	~DrawablePlanet();
 	virtual void update();
+	virtual void draw(const Shader& shader, const Camera& camera) const;
 };

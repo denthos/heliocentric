@@ -23,7 +23,7 @@ public:
 	bool hasCity() const;
 	City* getCity() const;
 
-private:
+protected:
 	//std::list<Resource> resources;
 
 	SphericalCoordinate coordinate;
