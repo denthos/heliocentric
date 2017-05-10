@@ -29,6 +29,8 @@ public:
 	bool hasCity() const;
 	City* getCity() const;
 
+	Planet* getPlanet() const;
+
 protected:
 	Resources::ResourceType resource_type;
 	float resource_deposit;

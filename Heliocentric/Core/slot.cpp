@@ -24,3 +24,7 @@ glm::vec3 Slot::get_absolute_position() const {
 SphericalCoordinate Slot::get_spherical_position() const {
 	return this->coordinate;
 }
+
+Planet* Slot::getPlanet() const {
+	return this->planet;
+}

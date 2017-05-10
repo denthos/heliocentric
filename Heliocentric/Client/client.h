@@ -79,10 +79,11 @@ private:
 	void createWindow(int width, int height);
 
 	void handleEscapeKey(int);
+	void handleCameraPanButtonDown(int);
 	void handleF1Key(int);
 	void handleF2Key(int);
 	void handleF3Key(int);
 	void handleF4Key(int);
-  void handleCameraPanButtonDown(int);
+	void handleF5Key(int);
 };
 

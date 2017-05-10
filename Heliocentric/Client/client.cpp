@@ -118,6 +118,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F5, std::bind(&Client::handleF5Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
 		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
 
@@ -317,6 +318,13 @@ void Client::handleF4Key(int key) {
 
 	UnitCommand command(unit_it->first, rand() % 1000, rand() % 1000, rand() % 1000);
 	this->channeled_send(&command);
+}
+
+
+void Client::handleF5Key(int key) {
+	/* we are going to create a city on the first slot.. */
+	auto slot_it = this->planets.begin()->second->get_slots().begin();
+	slot_it->second->attachCity(new DrawableCity(City(this->player.get(), 0, 0, 0, 0, 0, 0, slot_it->second)));
 }
 
 void Client::mouseButtonCallback(int button, int action, int mods) {
