@@ -40,8 +40,7 @@ class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 
 
 private:
-
-	Lib::LockedItem<std::pair<
+	Lib::Lock<std::pair<
 		std::unordered_map<UID, SunNet::ChanneledSocketConnection_p>,
 		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>>> connections;
 
@@ -50,14 +49,12 @@ private:
 	std::unordered_map<UID, std::unique_ptr<Player>> players;
 	std::unordered_map<UID, std::unique_ptr<GameObject>> game_objects;
 
-	Lib::LockedItem<std::queue<std::shared_ptr<GameObjectUpdate>>> object_updates;
-
 	struct UpdateToSend {
 		std::function<void(SunNet::ChanneledSocketConnection_p)> send_function;
 		std::vector<SunNet::ChanneledSocketConnection_p> intended_recipients;
 	};
 
-	Lib::LockedItem<std::queue<UpdateToSend>> updates_to_send;
+	Lib::Lock<std::queue<UpdateToSend>> updates_to_send;
 
 	template <typename TUpdate>
 	void sendUpdateToConnection(std::shared_ptr<TUpdate> update, SunNet::ChanneledSocketConnection_p connection) {
@@ -75,14 +72,14 @@ private:
 		}
 	}
 
-	template <typename TUpdate>
-	void makeUpdateToSend(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients) {
+	template <typename TUpdate, typename TQueue>
+	void makeUpdateAndInsertIntoQueue(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients, TQueue& queue) {
 		UpdateToSend sendable_update{
 			std::bind(&GameServer::sendUpdateToConnection<TUpdate>, this, update, std::placeholders::_1),
 			intended_recipients
 		};
 
-		this->updates_to_send.get_item().push(sendable_update);
+		queue.push(sendable_update);
 	}
 
 	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
@@ -92,15 +89,15 @@ private:
 
 	template <typename TUpdate>
 	void addUpdateToSendQueue(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {
-		std::lock_guard<std::mutex> guard(this->updates_to_send.get_lock());
-		this->makeUpdateToSend(update, intended_recipients);
+		auto updateQueue = Lib::key_acquire(this->updates_to_send);
+		this->makeUpdateAndInsertIntoQueue(update, intended_recipients, updateQueue.get());
 	}
 
 	template <typename Iter>
 	void addUpdateToSendQueue(Iter& begin, Iter& end, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {
-		std::lock_guard<std::mutex> guard(this->updates_to_send.get_lock());
+		auto updateQueue = Lib::key_acquire(this->updates_to_send);
 		for (auto& it = begin; it != end; ++it) {
-			this->makeUpdateToSend(*it, intended_recipients);
+			this->makeUpdateAndInsertIntoQueue(*it, intended_recipients, updateQueue.get());
 		}
 	}
 

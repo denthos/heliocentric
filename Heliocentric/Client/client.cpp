@@ -391,9 +391,14 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 		players[update->id] = std::make_shared<Player>(update->player_name, update->id);
 	}
 
-	LOG_DEBUG("Player gold amount before trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
+	if (this->player->getID() == update->id) {
+		LOG_DEBUG("Player gold amount before trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
+	}
 	update->apply(players[update->id].get());
-	LOG_DEBUG("Player gold amount after trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
+
+	if (this->player->getID() == update->id) {
+		LOG_DEBUG("Player gold amount after trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
+	}
 }
 
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {

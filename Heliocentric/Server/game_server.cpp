@@ -21,8 +21,8 @@ GameServer::~GameServer() {
 	Let's be a good citizen. When we are closing, let's _gracefully_ close
 	all the player connections ^^
 	*/
-	std::lock_guard<std::mutex> guard(connections.get_lock());
-	for (auto& connection : connections.get_item().first) {
+	auto connections = Lib::key_acquire(this->connections);
+	for (auto& connection : connections.get().first) {
 		connection.second.reset();
 	}
 }
@@ -30,12 +30,12 @@ GameServer::~GameServer() {
 void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) {
 	/* If a client wishes to disconnect, we just drop them entirely. */
 	LOG_DEBUG("Disconnecting client");
-	std::lock_guard<std::mutex> guard(connections.get_lock());
-	auto id_it = connections.get_item().second.find(client);
-	if (id_it != connections.get_item().second.end()) {
+	auto connections = Lib::key_acquire(this->connections);
+	auto id_it = connections.get().second.find(client);
+	if (id_it != connections.get().second.end()) {
 		players.erase(id_it->second);
-		connections.get_item().first.erase(id_it->second);
-		connections.get_item().second.erase(id_it);
+		connections.get().first.erase(id_it->second);
+		connections.get().second.erase(id_it);
 	}
 }
 
@@ -51,9 +51,9 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	std::unique_ptr<Player> player = std::make_unique<Player>("PLAYER_NAME");
 
 	{
-		std::lock_guard<std::mutex> guard(connections.get_lock());
-		connections.get_item().first[player->getID()] = client;
-		connections.get_item().second[client] = player->getID();
+		auto connections = Lib::key_acquire(this->connections);
+		connections.get().first[player->getID()] = client;
+		connections.get().second[client] = player->getID();
 	}
 
 	/* 
@@ -70,14 +70,14 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	players[player->getID()] = std::move(player);
 }
 
-Player* GameServer::extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p connection, bool retrying) {
+Player* GameServer::extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p sender, bool retrying) {
 	UID player_id;
 	{
 		/* First, let's extract the player id from the connection */
-		std::lock_guard<std::mutex> guard(this->connections.get_lock());
-		auto& player_id_it = this->connections.get_item().second.find(connection);
+		auto connections = Lib::key_acquire(this->connections);
+		auto& player_id_it = connections.get().second.find(sender);
 
-		if (player_id_it == this->connections.get_item().second.end()) {
+		if (player_id_it == connections.get().second.end()) {
 			if (retrying) {
 				/*
 				Okay. We've had this problem once and we tried to reconnect the user. Something is seriously
@@ -88,14 +88,16 @@ Player* GameServer::extractPlayerFromConnection(SunNet::ChanneledSocketConnectio
 				return NULL;
 			}
 
+			/* What the.. we received player info from a connection we don't know about? This is weird. */
+			LOG_WARN("Received player info from connection we haven't heard of before...");
 			/*
 			The player was not found. As a rudimentary solution, let's log the problem and
 			reconnect the connection, considering them a "new" player. We will then retry this
 			operation
 			*/
 			LOG_WARN("Could not find player for connection. Gracefully retrying...");
-			this->handle_client_connect(connection);
-			return this->extractPlayerFromConnection(connection, true);
+			this->handle_client_connect(sender);
+			return this->extractPlayerFromConnection(sender, true);
 		}
 
 		player_id = player_id_it->second;
@@ -117,9 +119,9 @@ Player* GameServer::extractPlayerFromConnection(SunNet::ChanneledSocketConnectio
 		WOAH THERE. We have a Connection->UID mapping for the player, but we don't know
 		about the UID. This is weird, but we are going to reconnect the user.
 		*/
-		this->handleClientDisconnect(connection);
-		this->handle_client_connect(connection);
-		return this->extractPlayerFromConnection(connection, true);
+		this->handleClientDisconnect(sender);
+		this->handle_client_connect(sender);
+		return this->extractPlayerFromConnection(sender, true);
 	}
 
 	LOG_DEBUG("Receivied valid communcation from player ", player_it->first);
@@ -166,10 +168,9 @@ void GameServer::performUpdates() {
 }
 
 void GameServer::sendUpdates() {
-	std::lock_guard<std::mutex> guard(this->updates_to_send.get_lock());
-	auto& update_queue = this->updates_to_send.get_item();
-	while (!update_queue.empty()) {
-		auto& update = update_queue.front();
+	auto update_queue = Lib::key_acquire(this->updates_to_send);
+	while (!update_queue.get().empty()) {
+		auto& update = update_queue.get().front();
 		{
 			/* 
 			If the update is intended to be sent to a particular person, send it to them.
@@ -181,14 +182,14 @@ void GameServer::sendUpdates() {
 				}
 			}
 			else {
-				std::lock_guard<std::mutex> guard(connections.get_lock());
-				for (auto& player_conn : connections.get_item().first) {
+				auto connections = Lib::key_acquire(this->connections);
+				for (auto& player_conn : connections.get().first) {
 					update.send_function(player_conn.second);
 				}
 			}
 		}
 
-		update_queue.pop();
+		update_queue.get().pop();
 	}
 }
 
@@ -224,8 +225,8 @@ void GameServer::end_game() {
 
 void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause) {
 	{
-		std::lock_guard<std::mutex>(this->connections.get_lock());
-		LOG_DEBUG("Game paused by connection ", this->connections.get_item().second[sender]);
+		auto connections = Lib::key_acquire(this->connections);
+		LOG_DEBUG("Game paused by connection ", connections.get().second[sender]);
 	}
 	this->game_paused = !this->game_paused;
 }
@@ -248,29 +249,29 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			LOG_DEBUG("Player command type: CMD_TRADE");
 
 			/* For now, let's just assume that the recipient is gonna accept this trade deal. */
-			UID sender_id;
+			Player* sender_player = this->extractPlayerFromConnection(sender);
 			SunNet::ChanneledSocketConnection_p recipient;
 			{
 				/* These operations need to be locked */
-				std::lock_guard<std::mutex> guard(this->connections.get_lock());
-				sender_id = (connections.get_item().second)[sender]; // Get UID of the sender
+				auto connections = Lib::key_acquire(this->connections);
 
-				if ((connections.get_item().first).find(command->trade_recipient) != (connections.get_item().first).end()) {
-					recipient = (connections.get_item().first)[command->trade_recipient];
-				}
-				else {
+				auto& recipient_iter = connections.get().first.find(command->trade_recipient);
+				if (recipient_iter == connections.get().first.end()) {
 					/* UID does not correspond to a player */
 					LOG_ERR("Invalid player UID.");
+					return;
 				}
+
+				recipient = recipient_iter->second;
 			}
 
-			std::shared_ptr<PlayerUpdate> seller_update = std::make_shared<PlayerUpdate>(sender_id,
+			std::shared_ptr<PlayerUpdate> seller_update = std::make_shared<PlayerUpdate>(sender_player->getID(),
 				command->trade_selling, -command->trade_sell_amount);
 			std::shared_ptr<PlayerUpdate> recipient_update = std::make_shared<PlayerUpdate>(command->trade_recipient,
 				command->trade_selling, command->trade_sell_amount);
 
-			this->addUpdateToSendQueue(seller_update, { sender });
-			this->addUpdateToSendQueue(recipient_update, { recipient });
+			this->addUpdateToSendQueue(seller_update);
+			this->addUpdateToSendQueue(recipient_update);
 			break;
 		}
 		default:
