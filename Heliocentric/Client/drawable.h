@@ -15,4 +15,5 @@ public:
 protected:
 	Model * model;
 	glm::mat4 toWorld;
+	glm::mat4 rotation;
 };

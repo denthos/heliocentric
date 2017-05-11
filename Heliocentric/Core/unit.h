@@ -76,6 +76,21 @@ public:
 	@return The destination of this unit.
 	*/
 	glm::vec3 set_destination(GameObject* object);
+	
+	/**
+	Sets the orientation of the given game object.
+	@param the new orientation of the game object.
+	*/
+	void set_orientation(glm::vec3 new_orient);
+	
+	/**
+	Gets the orientation of the given game object.
+	@return The orientation of this unit.
+	*/
+	glm::vec3 get_orientation();
+
+	void do_orient();
+
 
 	/**
 	Returns the maximum movement speed of this unit.
@@ -113,6 +128,7 @@ protected:
 	glm::vec3 do_move();
 
 	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
+	float delta_time_for_orient;
 
 	std::shared_ptr<UnitUpdate> update;
 	CommandType currentCommand = UNIT_IDLE;
@@ -123,4 +139,5 @@ protected:
 	virtual void handle_defeat(AttackableGameObject* opponent);
 	virtual void handle_victory(AttackableGameObject* opponent);
 	virtual void handle_counter(AttackableGameObject* opponent) {}
+	virtual void do_attack(AttackableGameObject * target);
 };

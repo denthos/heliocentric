@@ -1,7 +1,7 @@
 #include "unit_update.h"
 #include "logging.h"
 
-UnitUpdate::UnitUpdate(UID id, float x, float y, float z) : GameObjectUpdate::GameObjectUpdate(id, x, y, z), health (0) {}
+UnitUpdate::UnitUpdate(UID id, float x, float y, float z) : GameObjectUpdate::GameObjectUpdate(id, x, y, z), health (100) {}
 
 UnitUpdate::UnitUpdate(UID id, int heal, float x, float y, float z) : GameObjectUpdate::GameObjectUpdate(id, x, y, z), health(heal) {}
 
@@ -13,10 +13,5 @@ void UnitUpdate::apply(GameObject* obj) {
 		return;
 	}
 	unit->set_health(this->health);
+	unit->set_orientation(glm::vec3(this->orient_x, this->orient_y, this->orient_z));
 }
-/*
-void UnitUpdate::apply(Unit* obj) {
-	GameObjectUpdate::apply(obj);
-	Unit* unit = reinterpret_cast<Unit*>(obj);
-	glm::vec3 pos = obj->get_position();
-}*/
