@@ -16,9 +16,9 @@ class Shader
 private:
     
 
-	std::string read(const char *filename); //read shader file
+	std::string read(const char* filename); //read shader file
 
-	bool setup(std::string vertSource, std::string fragSource); //compile shaders
+	bool setup(std::string vertSource, std::string fragSource, std::string geoSource); //compile shaders
 
 protected:
     
@@ -28,7 +28,7 @@ protected:
 public:
     
 	Shader(){}
-	Shader(const char *vert, const char *frag); //constructor : takes in file names of shaders
+	Shader(const char* vert, const char* frag, const char* geo  = NULL); //constructor : takes in file names of shaders
 	~Shader(); //destructor
     
 	void bind() const; //when you want to use shader program

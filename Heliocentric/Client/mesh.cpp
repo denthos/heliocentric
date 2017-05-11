@@ -37,7 +37,21 @@ void Mesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & 
 
 	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), camera.position.x, camera.position.y, camera.position.z);
 
+
+	//TODO: bind lights -- naming convention for lights in shader, make UBO for light types. this should probably be moved made its own class or so
+	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.position"), 0.0f, 0.0f, 0.0f);
+	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.ambient"), 0.3f, 0.3f, 0.3f);
+	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.diffuse"), 0.5f, 0.5f, 0.5f);
+	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.specular"), 0.7f, 0.7f, 0.7f);
+	glUniform1f(glGetUniformLocation(shader.getPid(), "pointLight.quadratic"), 0.00030f);
+	glUniform1f(glGetUniformLocation(shader.getPid(), "pointLight.linear"), 0.0002f);
+	glUniform1f(glGetUniformLocation(shader.getPid(), "pointLight.constant"), 0.00050f);
+	
+	// Add time component to geometry shader in the form of a uniform
+	glUniform1f(glGetUniformLocation(shader.getPid(), "time"), glfwGetTime() - creationTime);
+
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &toWorld[0][0]);
+
 
 	//bind material
 	glUniformBlockBinding(shaderID, glGetUniformBlockIndex(shaderID, MTL_UNIFORM), 1);
@@ -93,6 +107,10 @@ BoundingBox Mesh::getBoundingBox() const {
 
 void Mesh::createMesh()
 {
+
+	//TODO remove afterwards
+	creationTime = glfwGetTime();
+
 	genMesh();
 
 	//set up buffers and specify vertex shader

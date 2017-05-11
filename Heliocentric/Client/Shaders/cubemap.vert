@@ -15,5 +15,6 @@ void main()
     view_no_translate[3][1] = 0.0; 
     view_no_translate[3][2] = 0.0; 
     gl_Position = projection * view_no_translate * model * vec4(position, 1.0f);
+
     TexCoord = position;
 }

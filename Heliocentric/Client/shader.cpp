@@ -7,17 +7,22 @@
 
 GLuint Shader::currentlyBoundShaderID = 0x0;
 
-Shader::Shader(const char *vert, const char *frag)
+Shader::Shader(const char* vert, const char* frag, const char* geo)
 {
     
     //Read in the vertex and fragment shaders
     //We must delete these after we are finished compiling the shaders
-    std::string vv = read(vert);
-    std::string vf = read(frag);
+
+	std::string vv = read(vert);
+	std::string vf = read(frag);
+	std::string vg = "";
+
+	if (geo) {
+		vg = read(geo);
+	}
         
     //Setup the shader
-    setup(vv, vf);
-
+	setup(vv, vf, vg);
 
 }
 
@@ -60,7 +65,7 @@ std::string Shader::read(const char *filename)
     return shaderSource.str();
 }
 
-bool Shader::setup(std::string vertSource, std::string fragSource)
+bool Shader::setup(std::string vertSource, std::string fragSource, std::string geoSource)
 {
     /* Based on https://www.khronos.org/opengl/wiki/Example/GLSL_Full_Compile_Linking */
 
@@ -118,7 +123,7 @@ bool Shader::setup(std::string vertSource, std::string fragSource)
         //The maxLength includes the NULL character
         std::vector<GLchar> infoLog(maxLength);
         glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
-
+      
         //We don't need the shader anymore.
         glDeleteShader(fragmentShader);
         //Either of them. Don't leak shaders.
@@ -131,6 +136,43 @@ bool Shader::setup(std::string vertSource, std::string fragSource)
         LOG_ERR("Failed to compile fragment shader");
         return false;
     }
+  
+    GLuint geometryShader;
+	  if (geoSource.length()) {
+		    //Create an empty geometry shader handle
+		    geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+
+		    //Send the geometry shader source code to GL
+		    //Note that std::string's .c_str is NULL character terminated.
+		    source = (const GLchar *)geoSource.c_str();
+		    glShaderSource(geometryShader, 1, &source, 0);
+
+        //Compile the geometry shader
+        glCompileShader(geometryShader);
+
+        glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &isCompiled);
+        if (isCompiled == GL_FALSE)
+        {
+          GLint maxLength = 0;
+          glGetShaderiv(geometryShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+          //The maxLength includes the NULL character
+          std::vector<GLchar> infoLog(maxLength);
+          glGetShaderInfoLog(geometryShader, maxLength, &maxLength, &infoLog[0]);
+
+          //We don't need the shader anymore.
+          glDeleteShader(geometryShader);
+          glDeleteShader(fragmentShader);
+          glDeleteShader(vertexShader);
+
+          //Dump the infolog
+          fprintf(stderr, "%s\n", &infoLog[0]);
+
+          //Give error message and return
+          fprintf(stderr, "Failed to compile geometry shader.\n");
+          return false;
+        }
+	  }
 
     //Vertex and fragment shaders are successfully compiled.
     //Now time to link them together into a program.
@@ -139,6 +181,9 @@ bool Shader::setup(std::string vertSource, std::string fragSource)
 
     //Attach our shaders to our program
     glAttachShader(pid, vertexShader);
+    if (geoSource.length()) {
+      glAttachShader(pid, geometryShader);
+    }
     glAttachShader(pid, fragmentShader);
 
     //Link our program
@@ -161,21 +206,27 @@ bool Shader::setup(std::string vertSource, std::string fragSource)
         //Don't leak shaders either.
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
+        if (geoSource.length()) {
+          glDeleteShader(geometryShader);
+        }
 
         //Dump the infolog
-        LOG_ERR(&infoLog[0]);
+        fprintf(stderr, "%s\n", &infoLog[0]);
 
         //Give error message and return
-        LOG_ERR("Failed to link shaders");
+        fprintf(stderr, "Failed to link shaders.\n");
         return false;
-    }
+      }
 
-    //Always detach shaders after a successful link.
-    glDetachShader(pid, vertexShader);
-    glDetachShader(pid, fragmentShader);
+      //Always detach shaders after a successful link.
+      glDetachShader(pid, vertexShader);
+      glDetachShader(pid, fragmentShader);
+      if (geoSource.length()) {
+        glDetachShader(pid, geometryShader);
+      }
 
+	return true;
 
-    return true;
 }
 
 

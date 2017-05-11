@@ -11,6 +11,11 @@
 
 
 
+#include "particle_system.h"
+#include "thruster_emitter.h"
+#include "laser_emitter.h"
+
+
 #include "drawable_planet.h"
 #include "drawable_unit.h"
 #include "skybox_mesh.h"
@@ -21,6 +26,7 @@
 #include "orbit.h"
 #include "model.h"
 #include "logging.h"
+
 
 #include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
@@ -34,10 +40,13 @@
 #define CUBEMAP_FRAG_SHADER "Shaders/cubemap.frag"
 #define TEXTURE_VERT_SHADER "Shaders/simple_texture.vert"
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
+#define DIFFUSE_FRAG_SHADER "Shaders/diffuse_shader.frag"
 
 #define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
-//skybox texture files
+Model rocket;
+ParticleSystem* particles;
+
 #define SKYBOX_FRONT "Textures/Skybox/front.png" 
 #define SKYBOX_BACK "Textures/Skybox/back.png"
 #define SKYBOX_TOP "Textures/Skybox/top.png"
@@ -45,14 +54,22 @@
 #define SKYBOX_LEFT "Textures/Skybox/left.png"
 #define SKYBOX_RIGHT "Textures/Skybox/right.png"
 
+
 SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
 Shader* cubemapShader;
+
+Shader* diffuseShader;
+Shader* particleShader;
+
+
+
 Model* spaceship;
 //don't forget to clean up afterwards
 
 GLuint defaultShader;
+
 
 std::pair<double, double> lastMousePos;
 bool leftMouseDown = false;
@@ -93,6 +110,12 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
+	diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
+
+	rocket = Model(ROCKET_MODEL);
+
+	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter());
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
 
@@ -186,7 +209,6 @@ void Client::createWindow(int width, int height) {
 	resizeCallback(width, height);
 
 	GLFWCallbackHandler::add(window, this);
-
 }
 
 void Client::display() {
@@ -216,7 +238,10 @@ void Client::display() {
 	octree.update();
 	octree.draw(*textureShader, *camera);
 
+	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
+	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
 	
+
 
 	glfwSwapBuffers(window);
 
@@ -224,7 +249,11 @@ void Client::display() {
 }
 
 void Client::update() {
+
+	particles->Update(*camera);
+	
 	this->keyboard_handler.callKeyboardHandlers();
+
 }
 
 void Client::errorCallback(int error, const char * description) {

@@ -23,6 +23,7 @@ class Mesh
 {
 public:
 
+
 	virtual void update();
 
 	virtual void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld); //draws mesh
@@ -39,6 +40,8 @@ public:
 
 	//TODO set material functions
 	//TODO add Texture
+	float creationTime; //TODO this is temporary so i can test geoShader. remove later
+	
 
 protected:
 	//vertex array, vertex buffer, uniform buffer

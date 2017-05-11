@@ -64,6 +64,21 @@
     <ClInclude Include="vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="skybox_mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particle_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particle_emitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thruster_emitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="laser_emitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="glfw_callback_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -139,6 +154,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="transformation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="skybox_mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="particle_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="particle_emitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="thruster_emitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="laser_emitter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="octree.cpp">
