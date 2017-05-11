@@ -101,6 +101,8 @@ public:
 	*/
 	int get_health();
 
+	void set_health(int heal);
+
 	/**
 	Subtract damage from this unit's health. Returns unit's health after taking 
 	damage. Unit is dead if remaining health becomes less than or equal to zero.

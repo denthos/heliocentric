@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+#include "logging.h"
+
 /**
 A "static" class that should never be instantiated. All methods within this
 class should be public and static.
@@ -18,9 +20,13 @@ namespace Lib {
 	*/
 	void assertTrue(bool expression, std::string message);
 
-	/**
-	Debug function that prints the message sent as a parameter to std::cerr.
-	@param message The message that is to be printed.
-	*/
-	void debug(std::string message);
+	template <class T, class U>
+	bool assertNotEqual(const T& unexpected, const U& actual, std::string message) {
+		if (unexpected == actual) {
+			LOG_ERR(message);
+			return false;
+		}
+
+		return true;
+	}
 };

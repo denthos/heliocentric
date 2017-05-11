@@ -5,13 +5,13 @@
 
 Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
 	AttackableGameObject(pos, owner, att, def, range, heal) {
-	this->update = std::make_shared<UnitUpdate>(this->getID(), pos.x, pos.y, pos.z);
+	this->update = std::make_shared<UnitUpdate>(this->getID(), this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
 }
 
 Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
 	AttackableGameObject(id, pos, owner, att, def, range, heal) {
-	this->update = std::make_shared<UnitUpdate>(id, pos.x, pos.y, pos.z);
+	this->update = std::make_shared<UnitUpdate>(id, this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
 }
 
@@ -25,6 +25,10 @@ Unit::CommandType Unit::do_logic() {
 	case UNIT_MOVE:
 		do_move();
 		break;
+	case UNIT_DIE:
+		break;
+	case UNIT_HOLDER:
+		break;
 	default:
 		LOG_ERR("Invalid command type.");
 	}
@@ -34,10 +38,11 @@ Unit::CommandType Unit::do_logic() {
 
 std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->id = this->getID();
+	this->update->health = this->get_health();
 	this->update->x = this->position.x;
 	this->update->y = this->position.y;
 	this->update->z = this->position.z;
-	//LOG_DEBUG("Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
+	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
 	return this->update;
 };
 
@@ -100,8 +105,10 @@ void Unit::handle_out_of_range(AttackableGameObject * opponent)
 void Unit::handle_defeat(AttackableGameObject * opponent)
 {
 	// Tell Player you have died.
-	player->add_to_destroy(this);
-	player = nullptr;
+	//player->add_to_destroy(this);
+	//player = nullptr;
+	this->set_command(Unit::UNIT_DIE);
+	LOG_DEBUG("Unit " + std::to_string(this->getID()) + " set to UNIT_DIE.");
 }
 
 void Unit::handle_victory(AttackableGameObject * opponent)

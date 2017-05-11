@@ -28,6 +28,7 @@
 #include <string>
 #include <unordered_map>
 #include "keyboard_handler.h"
+#include "locked_item.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:	
@@ -76,6 +77,8 @@ private:
 
 	std::shared_ptr<Player> player;
 
+	Lib::Lock<std::queue<std::function<void()>>> update_queue;
+
 	void createWindow(int width, int height);
 
 	void handleEscapeKey(int);
@@ -85,5 +88,6 @@ private:
 	void handleF3Key(int);
 	void handleF4Key(int);
 	void handleF5Key(int);
+	void handleF6Key(int);
 };
 

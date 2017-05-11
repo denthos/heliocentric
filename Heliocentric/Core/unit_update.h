@@ -12,6 +12,9 @@ public:
 	@param y y-axis of the new position of the unit.
 	@param z z-axis of the new position of the unit.
 	*/
+	int health;
 	UnitUpdate(UID, float, float, float);
+	UnitUpdate(UID, int, float, float, float);
 	void apply(GameObject* obj);
+	//void apply(Unit* obj);
 };

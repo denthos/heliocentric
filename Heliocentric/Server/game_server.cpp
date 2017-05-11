@@ -286,6 +286,7 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	switch (command->command_type) {
 		case UnitCommand::CMD_ATTACK:
 			LOG_DEBUG("Unit command type: CMD_ATTACK");
+			unit_manager.do_attack(command.get()->initiator, command.get()->target);
 			break;
 		case UnitCommand::CMD_MOVE:
 			LOG_DEBUG("Unit command type: CMD_MOVE");

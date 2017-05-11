@@ -236,6 +236,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F5, std::bind(&Client::handleF5Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
 		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
 
@@ -316,6 +317,7 @@ void Client::display() {
 	camera->calculateViewFrustum();
 
 	octree.clear();
+
 	for (auto it = planets.begin(); it != planets.end(); ++it) {
 		octree.insert((*it).second.get());
 	}
@@ -399,6 +401,11 @@ void Client::update() {
 	particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
+	auto& update_queue = Lib::key_acquire(this->update_queue);
+	while (!update_queue.get().empty()) {
+		update_queue.get().back()();
+		update_queue.get().pop();
+	}
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -478,12 +485,13 @@ void Client::handleF2Key(int key) {
 
 void Client::handleF3Key(int key) {
 
-	PlayerCommand command(rand() % 1000, rand() % 1000, rand() % 1000);
+	PlayerCommand command(rand() % 3000, rand() % 3000, rand() % 3000);
 
 	this->channeled_send(&command);
 }
 
 void Client::handleF4Key(int key) {
+
 	auto unit_it = units.begin();
 	if (units.size() == 0) {
 		return;
@@ -500,6 +508,37 @@ void Client::handleF5Key(int key) {
 	auto slot_it = this->planets.begin()->second->get_slots().begin();
 	slot_it->second->attachCity(new DrawableCity(City(this->player.get(), 0, 0, 0, 0, 0, 0, slot_it->second)));
 }
+
+void Client::handleF6Key(int key) {
+	UID attacker, enemy;
+	bool found_attacker = false;
+	bool found_enemy = false;
+	for (auto iter = units.begin(); iter != units.end(); ++iter) {
+		if (iter->second->get_player()->getID() == player->getID()) {
+			if (!found_attacker) {
+				attacker = iter->second->getID();
+				found_attacker = true;
+				LOG_DEBUG("Selected your unit with id " + std::to_string(attacker));
+			}
+		}
+		else {
+			if (!found_enemy) {
+				enemy = iter->second->getID();
+				found_enemy = true;
+				LOG_DEBUG("Selected enemy unit with id " + std::to_string(enemy));
+			}
+		}
+		if (found_attacker && found_enemy) {
+			LOG_DEBUG("Selected your unit with id " + std::to_string(attacker) + " to attack enemy with id " + std::to_string(enemy));
+			UnitCommand command(attacker, enemy);
+			this->channeled_send(&command);
+			return;
+		}
+	}
+
+	LOG_ERR("Failed to find a unit to attack.");
+}
+
 
 void Client::mouseButtonCallback(int button, int action, int mods) {
 	if (action == GLFW_PRESS) {
@@ -598,6 +637,18 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	//LOG_DEBUG("Unit update received");
 	update->apply(units[update->id].get());
 	units[update->id]->update();
+
+	/* 
+	Handle unit death. We don't want to edit the units map in another thread,
+	so let's pop it in the main thread's queue
+	*/
+	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
+	if (units[update->id]->get_health() <= 0) {
+		auto& update_queue = Lib::key_acquire(this->update_queue);
+		update_queue.get().push([update, this]() {
+			units.erase(update->id);
+		});
+	}
 }
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {

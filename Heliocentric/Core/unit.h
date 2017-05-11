@@ -18,7 +18,7 @@ public:
 
 	friend UnitUpdate;
 
-	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE };
+	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE, UNIT_HOLDER, UNIT_DIE };
 
 	/**
 	Unit constructor without specifying UID. Used on server end.
