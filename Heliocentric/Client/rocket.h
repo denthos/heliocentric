@@ -25,7 +25,7 @@ private:
 	glm::mat4 rot_mat = glm::mat4(1.0f);
 	glm::vec3 position = glm::vec3(0.0f); //TODO remove
 
-	float turn_start = 0.0f; //turn animation start time;
+	float start = 0.0f; //turn animation start time;
 
 	
 	
