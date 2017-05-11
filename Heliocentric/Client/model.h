@@ -17,6 +17,7 @@ public:
 	Model() {}
 	Model(GLchar* file);
 
+
 	void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld);
 	void update();
 	BoundingBox getBoundingBox();

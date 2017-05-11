@@ -14,7 +14,6 @@ void Model::draw(const Shader & shader, const Camera & camera, const glm::mat4 &
 	}
 }
 
-
 void Model::update() {
 	for (GLuint i = 0; i < meshes.size(); i++) {
 		meshes[i].update();

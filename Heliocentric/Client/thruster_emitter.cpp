@@ -23,7 +23,9 @@ void ThrusterEmitter::spawn(Particle & particle)
 
 
 	particle.pos = sVec * radius;
+
 	particle.size = 1.3f; //todo: randomize
+
 	particle.color = glm::vec4(rRed, rGreen, rBlue, rAlpha);
 	particle.life = 1.0f; //TODO randomize
 	particle.velocity = sVec * 5.0f;

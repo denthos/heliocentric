@@ -1,5 +1,6 @@
 #pragma once
 #include "glm\glm.hpp"
+
 #include "glm\gtx\spline.hpp"
 #include "GL\glew.h"
 
@@ -17,6 +18,7 @@ struct Particle {
 	//acceleration;
 	//glm::vec3 force;
 	//float mass; , momentum, angle; 
+
 
 	//true if particle is further from camera
 	bool operator < (Particle &p);

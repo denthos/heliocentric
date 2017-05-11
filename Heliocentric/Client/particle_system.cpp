@@ -1,7 +1,5 @@
 #include "particle_system.h"
 #include "client.h"
-
-
 #define DEFAULT_SPAWN_RATE  20
 
 ParticleSystem::ParticleSystem(float spawn_rate, int spawns_per_emission, ParticleEmitter* emitter)
@@ -18,6 +16,7 @@ ParticleSystem::ParticleSystem(float spawn_rate, int spawns_per_emission, Partic
 	genParticleBuffers();
 
 	for (int i = 0; i < max_particles; i++) {
+
 		particles[i] =(Particle());
 		
 	}
@@ -26,11 +25,13 @@ ParticleSystem::ParticleSystem(float spawn_rate, int spawns_per_emission, Partic
 	spawn(findLastUsed());
 	particle_count++;
 	creationTime = currTime = glfwGetTime();
+
 }
 
 ParticleSystem::~ParticleSystem()
 {
 }
+
 
 
 void ParticleSystem::Update(const Camera &camera)
@@ -45,7 +46,6 @@ void ParticleSystem::Update(const Camera &camera)
 		
 
 		creationTime = glfwGetTime();
-		
 	}
 
 	//simulate particles
@@ -161,13 +161,11 @@ void ParticleSystem::updateParticle(Particle &particle, const Camera &camera)
 
 		if (particle.isAlive()) { //check to see if particle is still alive after shortening life
 			emitter->simulate(particle, deltaTime);
-
 			particle.camDist = pow(glm::length(particle.pos - camera.position), 2.0f);
 		}
 		else {
 			particle.camDist = -1.0f;
 			particle_count--;
-		
 		}
 	}
 }
@@ -200,7 +198,6 @@ void ParticleSystem::spawn(int spawnIndex)
 
 void ParticleSystem::sortParticles()
 {
-	
 	std::sort(std::begin(particles), std::end(particles));
 }
 
@@ -214,9 +211,6 @@ bool Particle::isAlive()
 	return life > 0.0f;
 }
 
-
-
 Particle::Particle() : pos(0.0f), velocity(0.0f), color(1.0f), life(0.0f), size(1.0f)
 {
-
 }

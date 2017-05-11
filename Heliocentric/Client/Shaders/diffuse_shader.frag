@@ -23,10 +23,13 @@ struct PointLight {
 in vec3 Normal;
 in vec3 FragPos;
 
-out vec4 color;
+
+layout (location = 0) out vec4 color;
+layout (location = 1) out vec4 buffer1_color;
 
 uniform vec3 viewPos;
 uniform PointLight pointLight;
+
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
@@ -56,4 +59,7 @@ void main()
 
 	vec3 result = calcPointLight(pointLight, norm, FragPos, viewDir);
 	color = vec4(result, 1.0f);
+
+  buffer1_color = vec4(vec3(0.0), 1.0);
+
 }

@@ -9,13 +9,10 @@
 #include <soil.h>
 #include <GL/glut.h>
 
-
-
+#include "quad_mesh.h"
 #include "particle_system.h"
 #include "thruster_emitter.h"
 #include "laser_emitter.h"
-
-
 #include "drawable_planet.h"
 #include "drawable_unit.h"
 #include "skybox_mesh.h"
@@ -26,8 +23,6 @@
 #include "orbit.h"
 #include "model.h"
 #include "logging.h"
-
-
 #include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
@@ -44,7 +39,20 @@
 
 #define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
+//skybox texture files
+#define SKYBOX_FRONT "Textures/Skybox/Front_MauveSpaceBox.png"
+#define SKYBOX_BACK "Textures/Skybox/Back_MauveSpaceBox.png"
+#define SKYBOX_TOP "Textures/Skybox/Up_MauveSpaceBox.png"
+#define SKYBOX_BOTTOM "Textures/Skybox/Down_MauveSpaceBox.png"
+#define SKYBOX_LEFT "Textures/Skybox/Left_MauveSpaceBox.png"
+#define SKYBOX_RIGHT "Textures/Skybox/Right_MauveSpaceBox.png"
+
+#define COLOR_BUFFERS 2
+#define REGULAR_BUFFER 0
+#define BRIGHTNESS_BUFFER 1
+
 Model rocket;
+QuadMesh* quad; //texture sampler
 ParticleSystem* particles;
 
 #define SKYBOX_FRONT "Textures/Skybox/front.png" 
@@ -55,21 +63,29 @@ ParticleSystem* particles;
 #define SKYBOX_RIGHT "Textures/Skybox/right.png"
 
 
+
 SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
 Shader* cubemapShader;
-
+Shader * quadShader;
+Shader * bloomShader;
+Shader * blurShader;
 Shader* diffuseShader;
 Shader* particleShader;
 
-
+GLuint FBO; //frame buffer for offscreen rendering
+			// frame buffers for two pass gaussian blur
+GLuint gaussianFBO[COLOR_BUFFERS];
+GLuint gaussian_color_buff[COLOR_BUFFERS];
 
 Model* spaceship;
 //don't forget to clean up afterwards
 
-GLuint defaultShader;
 
+
+//multiple render targets to specify more than one frag shader output
+GLuint color_buff[COLOR_BUFFERS]; //2 color buffers to attach to frame buffer: 1 for regular scene, one for bright objects
 
 std::pair<double, double> lastMousePos;
 bool leftMouseDown = false;
@@ -101,6 +117,81 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_TEXTURE_2D);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+  
+  ////////////////////////////////////////////////////
+	//set up buffers for rendering
+
+	//generate and bind frame buffer for scene rendering
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+	//store rendering operations as texture image to be used in shaders
+	//set up a 2D texture attachment for each color buffer
+	glGenTextures(COLOR_BUFFERS, color_buff);
+	for (GLuint i = 0; i < COLOR_BUFFERS; i++) {
+
+		glBindTexture(GL_TEXTURE_2D, color_buff[i]); //select which texture we're working with
+		//allocate memory, but don't fill it, 
+		//internal format allows floating point values outside 0.0-1.0
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL); //generate texture the same size as our window
+
+		//choose wrapping options: clamp texture at the edges
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		//select type of minification and magnification filter
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+
+		// attach texture to framebuffer by specifying color attachment
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, color_buff[i], 0);
+	}
+
+	//tell opengl we're rendering to multiple colorbuffers
+	GLuint color_attachments[COLOR_BUFFERS] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(COLOR_BUFFERS, color_attachments);
+
+	GLuint RBO; //render buffer object attachment for frame buffer
+	glGenRenderbuffers(1, &RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+
+	//make sure opengl is able to do depth testing
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
+	//make sure rendering operations have visual impact on main window by making
+	//default frame buffer active again
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	//set up gaussian blur buffers
+	glGenFramebuffers(COLOR_BUFFERS, gaussianFBO);
+	glGenTextures(COLOR_BUFFERS, gaussian_color_buff);
+
+
+	for (GLuint i = 0; i < COLOR_BUFFERS; i++) {
+		glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[i]);
+
+		//create textures to write rendering to
+		glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+
+		//set minification and magnification filters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		//set wrap functions
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		
+		//attach texture to frame buffer
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gaussian_color_buff[i], 0);
+		
+	}
+
+	///////////////////////////////////////////////////////////////
+	quad = new QuadMesh();
 
 	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height);
 	octree.enableViewFrustumCulling(&camera->viewFrustum);
@@ -112,6 +203,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
+  quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
+	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
+	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
 	rocket = Model(ROCKET_MODEL);
 
@@ -212,6 +306,9 @@ void Client::createWindow(int width, int height) {
 }
 
 void Client::display() {
+  //first pass: render the scene as usual with the bloom framebuffer as the active frame buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -236,12 +333,62 @@ void Client::display() {
 	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
 
 	octree.update();
-	octree.draw(*textureShader, *camera);
+	octree.draw(*bloomShader, *camera);
 
 	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
 	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
-	
+  
+	// blur the things that glow
+	int blurs = 50; //TODO init to number of blur iterations
+	bool blurX = true;
 
+	blurShader->bind();
+
+	//fill one of the gaussian frame buffers with the blurred bright extraction
+	glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
+	glBindTexture(GL_TEXTURE_2D, color_buff[BRIGHTNESS_BUFFER]);
+	glUniform1i(glGetUniformLocation(blurShader->getPid(), "blurX"), blurX);
+
+	quad->Draw();
+	blurX = !blurX;
+
+	//blur the image
+	for (int i = 0; i < blurs; i++) { 
+		
+		//bind appropriate frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
+		//bind appropriate texture to blur (the one opposite to the current frame buffer you're writing to)
+		glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
+
+		blurX = !blurX; //switch between blur directions
+
+		//draw texture
+		quad->Draw();
+	
+	}
+	
+	blurShader->unbind();
+
+	//return to the default frame buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//draw the quad 
+	quadShader->bind();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, color_buff[REGULAR_BUFFER]);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
+	
+	glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
+	glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
+	glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
+	glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 0.5f);
+	quad->Draw();
+
+	quadShader->unbind();
 
 	glfwSwapBuffers(window);
 
@@ -249,11 +396,9 @@ void Client::display() {
 }
 
 void Client::update() {
-
 	particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
-
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -411,7 +556,6 @@ void Client::mouseCursorCallback(double x, double y) {
 void Client::mouseWheelCallback(double x, double y) {
 	camera->position = glm::vec3(glm::translate(glm::mat4(1.0f), camera->position * (float)y * -0.05f) * glm::vec4(camera->position, 1.0f));
 }
-
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
 	LOG_DEBUG("Received update for player with id: ", update->id);

@@ -14,11 +14,10 @@ public:
 
 	void Update(const Camera &camera);
 	void draw(const Shader &shader, const Camera &camera, const glm::mat4 &toWorld);
-	//Texture texture = Texture("Textures/fire.png");
-
 	glm::mat4 world_mat;
 
 private:
+
 	int spawns_per_emission;
 	ParticleEmitter* emitter;
 	//force
@@ -35,7 +34,9 @@ private:
 	GLuint VAO, VBO;
 
 	void genParticleBuffers(); //set up the buffers we need to keep track of particle info
+
 	void updateParticle(Particle &particle, const Camera & camera); //perform particle physics
+
 	
 	int findLastUsed();
 	void spawn(int spawnIndex);

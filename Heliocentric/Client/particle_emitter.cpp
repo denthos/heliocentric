@@ -33,12 +33,11 @@ void ParticleEmitter::simulate(Particle & particle, float deltaTime)
 {
 	float time = 1 - particle.life; //used for interpolation purposes
 
-	//particle.velocity *= 2.1f; 
+
 	particle.pos += particle.velocity * deltaTime;
 	particle.size *= 0.99;
 
 	//update color
 	particle.color = glm::mix(glm::vec4(1.0f, 0.25f * time, 0.05f, 0.25f), particle.color, particle.life);
-
 
 }
