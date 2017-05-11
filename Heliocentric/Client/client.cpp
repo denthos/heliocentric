@@ -97,6 +97,8 @@ bool middleMouseDown = false;
 #define ORBITAL_CAMERA 3
 unsigned char selectedControlScheme = FREE_CAMERA;
 
+GameObject * selectedObject;
+
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
 	int width = config.get<int>("ScreenWidth");
@@ -330,12 +332,10 @@ void Client::display() {
 	for (auto it = slots.begin(); it != slots.end(); ++it) {
 		octree.insert((*it).second.get());
 	}
+	octree.update();
 
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
-	//octree.viewFrustumCull(ViewFrustum()); // TODO: get view frustum from camera
-
-	octree.update();
-	octree.draw(*bloomShader, *camera);
+	octree.draw(*textureShader, *camera);
 
 	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
 	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
@@ -541,10 +541,10 @@ void Client::handleF6Key(int key) {
 
 
 void Client::mouseButtonCallback(int button, int action, int mods) {
+	double x, y;
+	glfwGetCursorPos(window, &x, &y);
+	lastMousePos = std::make_pair(x, y);
 	if (action == GLFW_PRESS) {
-		double x, y;
-		glfwGetCursorPos(window, &x, &y);
-		lastMousePos = std::make_pair(x, y);
 		switch (button) {
 		case(GLFW_MOUSE_BUTTON_LEFT):
 			leftMouseDown = true;
@@ -560,9 +560,17 @@ void Client::mouseButtonCallback(int button, int action, int mods) {
 		}
 	}
 	else if (action == GLFW_RELEASE) {
+		GameObject * selection;
 		switch (button) {
 		case(GLFW_MOUSE_BUTTON_LEFT):
 			leftMouseDown = false;
+			camera->calculateViewMatrix();
+			selection = dynamic_cast<GameObject *>(octree.intersect(camera->projectRay((int)x, (int)y)));
+			if (selection) {
+				selectedObject = selection;
+				LOG_INFO("Selected game object with UID <", selectedObject->getID(), ">");
+			}
+			
 			break;
 		case(GLFW_MOUSE_BUTTON_RIGHT):
 			rightMouseDown = false;

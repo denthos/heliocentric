@@ -22,6 +22,8 @@ public:
 	void viewFrustumCull(ViewFrustum frustum);
 	void enableViewFrustumCulling(const ViewFrustum * frustum);
 	void disableViewFrustumCulling();
+	Drawable * intersect(const Ray &);
+	bool intersect(const Ray &, Collision &, Drawable *&) const;
 
 protected:
 	static float MIN_VOLUME;

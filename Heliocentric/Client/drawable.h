@@ -10,6 +10,7 @@ public:
 	virtual void draw(const Shader &, const Camera &) const;
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;
+	virtual bool intersect(const Ray &, Collision &) const;
 
 protected:
 	Model * model;

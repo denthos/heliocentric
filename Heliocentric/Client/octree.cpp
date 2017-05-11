@@ -6,8 +6,9 @@
 #include <queue>
 #include <vector>
 
-#define DEFAULT_BOUNDING_BOX_MIN glm::vec3(-10000.0f)
-#define DEFAULT_BOUNDING_BOX_MAX glm::vec3( 10000.0f)
+// We don't use -FLT_MAX and FLT_MAX here to avoid hitting inf values in ray intersection
+#define DEFAULT_BOUNDING_BOX_MIN glm::vec3(-1000000000000000.0f)
+#define DEFAULT_BOUNDING_BOX_MAX glm::vec3( 1000000000000000.0f)
 #define DEFAULT_BOUNDING_BOX BoundingBox(DEFAULT_BOUNDING_BOX_MIN, DEFAULT_BOUNDING_BOX_MAX)
 
 float Octree::MIN_VOLUME = 1.0f;
@@ -40,7 +41,7 @@ void Octree::insert(Drawable * object) {
 		objects.insert(object);
 	}
 	else if (viewFrustum->containsOrIntersects(object->getBoundingBox())) {
-			objects.insert(object);
+		objects.insert(object);
 	}
 }
 
@@ -53,7 +54,6 @@ void Octree::clear() {
 }
 
 void Octree::draw(const Shader & shader, const Camera & camera) {
-	update();
 	drawNode(shader, camera);
 }
 
@@ -96,6 +96,37 @@ void Octree::enableViewFrustumCulling(const ViewFrustum * frustum) {
 
 void Octree::disableViewFrustumCulling() {
 	shouldCull = false;
+}
+
+Drawable * Octree::intersect(const Ray & ray) {
+	Drawable * intersection = NULL;
+	this->intersect(ray, Collision(), intersection);
+	return intersection;
+}
+
+bool Octree::intersect(const Ray & ray, Collision & collision, Drawable *& drawable) const {
+	bool success = false;
+	if (region.intersect(ray)) {
+		// check children
+		if (this->hasChildren) {
+			for (int i = 0; i < 8; ++i) {
+				if (children[i]) {
+					if (children[i]->intersect(ray, collision, drawable)) {
+						success = true;
+					}
+				}
+			}
+		}
+
+		// check objects
+		for (auto & object : objects) {
+			if (object->intersect(ray, collision)) {
+				drawable = object;
+				success = true;
+			}
+		}
+	}
+	return success;
 }
 
 void Octree::update() {

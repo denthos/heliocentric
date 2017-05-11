@@ -6,6 +6,7 @@
 Model::Model(GLchar * file)
 {
 	load(file);
+	calculateBoundingBox();
 }
 
 void Model::draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld) {
@@ -50,11 +51,6 @@ void Model::processNode(aiNode * node, const aiScene * scene)
 
 	for (GLuint i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
-	}
-
-	boundingBox = BoundingBox(glm::vec3(-1000000000.0f), glm::vec3(1000000000.0f));
-	for (unsigned int i = 0; i < meshes.size(); ++i) {
-		boundingBox.expand(meshes[i].getBoundingBox());
 	}
 }
 
@@ -158,4 +154,11 @@ std::vector<const Texture*> Model::loadMaterialTextures(aiMaterial * mat, aiText
 	}
 
 	return textures;
+}
+
+void Model::calculateBoundingBox() {
+	boundingBox = BoundingBox(glm::vec3(FLT_MAX), glm::vec3(-FLT_MAX));
+	for (unsigned int i = 0; i < meshes.size(); ++i) {
+		boundingBox.expand(meshes[i].getBoundingBox());
+	}
 }

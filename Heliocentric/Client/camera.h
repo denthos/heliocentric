@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ray.h"
 #include "view_frustum.h"
 #include <glm\vec3.hpp>
 #include <glm\mat4x4.hpp>
@@ -22,5 +23,7 @@ public:
 
 	void calculateInfinitePerspectiveMatrix();
 	void calculateViewFrustum();
+
+	Ray projectRay(int x, int y) const;
 
 };

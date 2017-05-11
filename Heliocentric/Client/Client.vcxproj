@@ -201,6 +201,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="bounding_box.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="quad_mesh.h" />
     <ClInclude Include="laser_emitter.h" />
     <ClInclude Include="particle_emitter.h" />
@@ -211,6 +212,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="drawable.h" />
     <ClInclude Include="drawable_data.h" />
     <ClInclude Include="drawable_unit.h" />
+    <ClInclude Include="ray.h" />
     <ClInclude Include="skybox_mesh.h" />
     <ClInclude Include="file_mesh.h" />
     <ClInclude Include="glfw_callback_handler.h" />

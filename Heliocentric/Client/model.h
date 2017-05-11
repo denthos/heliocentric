@@ -25,6 +25,7 @@ protected:
 	BoundingBox boundingBox;
 
 	std::vector<Mesh> meshes; //meshes in the model
+	void calculateBoundingBox();
 private:
 	std::string directory; //folder that model files belong in
 	void load(std::string file); //load the model file info

@@ -1,5 +1,6 @@
 #include "camera.h"
 
+#include "logging.h"
 #include <glm\gtc\matrix_transform.hpp>
 
 #define toRad (glm::pi<float>() / 180.0f)
@@ -72,3 +73,11 @@ void Camera::calculateViewFrustum() {
 	viewFrustum.planes[RIGHT_PLANE] = Plane(nearCenter + (x * nearWidth), normal);
 }
 
+Ray Camera::projectRay(int mousex, int mousey) const {
+	float x = (float)mousex;
+	float y = (float)height - (float)mousey;
+	glm::vec4 viewport(0.0f, 0.0f, (float)width, (float)height);
+	glm::vec3 v0 = glm::unProject(glm::vec3(x, y, 0.0f), view, perspective, viewport);
+	glm::vec3 v1 = glm::unProject(glm::vec3(x, y, 1.0f), view, perspective, viewport);
+	return Ray(position, v1 - v0);
+}
