@@ -4,13 +4,13 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
-	AttackableGameObject(pos, owner, att, def, range, heal) {
+	AttackableGameObject(pos, owner, att, def, range, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
 	this->update = std::make_shared<UnitUpdate>(this->getID(), this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
 }
 
 Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
-	AttackableGameObject(id, pos, owner, att, def, range, heal) {
+	AttackableGameObject(id, pos, owner, att, def, range, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
 	this->update = std::make_shared<UnitUpdate>(id, this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
 }

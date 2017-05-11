@@ -118,7 +118,7 @@ protected:
 	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
 	AttackableGameObject* target;
-
+	glm::vec3 orientation;
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);
 	virtual void handle_victory(AttackableGameObject* opponent);
