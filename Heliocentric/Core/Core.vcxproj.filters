@@ -142,7 +142,6 @@
     </ClInclude>
     <ClInclude Include="spherical_coordinate.h">
       <Filter>Header Files</Filter>
->>>>>>> master
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
