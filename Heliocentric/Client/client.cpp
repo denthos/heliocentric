@@ -55,14 +55,6 @@ Model rocket;
 QuadMesh* quad; //texture sampler
 ParticleSystem* particles;
 
-#define SKYBOX_FRONT "Textures/Skybox/front.png" 
-#define SKYBOX_BACK "Textures/Skybox/back.png"
-#define SKYBOX_TOP "Textures/Skybox/top.png"
-#define SKYBOX_BOTTOM "Textures/Skybox/bottom.png"
-#define SKYBOX_LEFT "Textures/Skybox/left.png"
-#define SKYBOX_RIGHT "Textures/Skybox/right.png"
-
-
 
 SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
@@ -74,6 +66,7 @@ Shader * blurShader;
 Shader* diffuseShader;
 Shader* particleShader;
 
+GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
 			// frame buffers for two pass gaussian blur
 GLuint gaussianFBO[COLOR_BUFFERS];
@@ -154,7 +147,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	GLuint color_attachments[COLOR_BUFFERS] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	glDrawBuffers(COLOR_BUFFERS, color_attachments);
 
-	GLuint RBO; //render buffer object attachment for frame buffer
+	//render buffer object attachment for frame buffer
 	glGenRenderbuffers(1, &RBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
 
@@ -205,7 +198,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
-  quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
+	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
@@ -336,10 +329,10 @@ void Client::display() {
 
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 	octree.draw(*textureShader, *camera);
-
+	
 	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
 	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
-  
+	
 	// blur the things that glow
 	int blurs = 50; //TODO init to number of blur iterations
 	bool blurX = true;
@@ -387,7 +380,7 @@ void Client::display() {
 	glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
 	glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
 	glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
-	glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 0.5f);
+	glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
 	quad->Draw();
 
 	quadShader->unbind();
@@ -413,11 +406,32 @@ void Client::errorCallback(int error, const char * description) {
 }
 
 void Client::resizeCallback(int width, int height) {
+	// resize the camera
 	if (camera) {
 		camera->width = width;
 		camera->height = height;
+		camera->aspectRatio = (float)width / (float)height;
 		camera->calculatePerspectiveMatrix();
 	}
+
+	// resize our buffers
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	for (GLuint i = 0; i < COLOR_BUFFERS; i++) {
+		glBindTexture(GL_TEXTURE_2D, color_buff[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+	}
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	for (GLuint i = 0; i < COLOR_BUFFERS; i++) {
+		glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[i]);
+		glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+	}
+
+	// unbind
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glViewport(0, 0, width, height);
 }
