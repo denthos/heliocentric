@@ -26,6 +26,7 @@
 #include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
+#include "settle_city_command.h"
 #include "unit_command.h"
 #include "trade_deal.h"
 
@@ -210,6 +211,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	for (auto& planet : this->universe.get_planets()) {
 		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
+		for (auto& slot : planets[planet->getID()]->get_slots_const()) {
+			slots.insert(std::make_pair(slot.first, static_cast<DrawableSlot*>(slot.second)));
+		}
 	}
 
 	// LOAD MODEL, IMPORTANT
@@ -224,6 +228,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
@@ -323,7 +328,7 @@ void Client::display() {
 		octree.insert((*it).second.get());
 	}
 	for (auto it = slots.begin(); it != slots.end(); ++it) {
-		octree.insert((*it).second.get());
+		octree.insert((*it).second);
 	}
 	octree.update();
 
@@ -394,6 +399,7 @@ void Client::update() {
 	particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
+
 	auto& update_queue = Lib::key_acquire(this->update_queue);
 	while (!update_queue.get().empty()) {
 		update_queue.get().back()();
@@ -520,7 +526,8 @@ void Client::handleF4Key(int key) {
 void Client::handleF5Key(int key) {
 	/* we are going to create a city on the first slot.. */
 	auto slot_it = this->planets.begin()->second->get_slots().begin();
-	slot_it->second->attachCity(new DrawableCity(City(this->player.get(), 0, 0, 0, 0, 0, 0, slot_it->second)));
+	SettleCityCommand settle_command(slot_it->first);
+	this->channeled_send(&settle_command);
 }
 
 void Client::handleF6Key(int key) {
@@ -642,6 +649,23 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), update->att, update->def, update->range, update->health),
 		spaceship
 	);
+}
+
+
+void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {
+	LOG_DEBUG("City creation update received");
+	auto& player_iter = players.find(update->player_id);
+	Lib::assertTrue(player_iter != players.end(), "Invalid player ID");
+
+	auto& slot_iter = slots.find(update->slot_id);
+	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
+
+	auto& update_queue = Lib::key_acquire(this->update_queue);
+	std::function<void()> createCityFunc = [slot_iter, update, player_iter]() {
+		slot_iter->second->attachCity(new DrawableCity(City(update->city_id, player_iter->second.get(), 0, 0, 0, 0, 0, 0, slot_iter->second)));
+	};
+
+	update_queue.get().push(createCityFunc);
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {

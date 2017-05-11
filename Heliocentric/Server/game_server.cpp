@@ -5,11 +5,18 @@
 #include "unit_creation_update.h"
 #include "unit_update.h"
 #include "game_server.h"
-
+#include "city.h"
 #include "player_id_confirmation.h"
+#include "city_creation_update.h"
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
+
+	for (auto& planet_iter : this->universe.get_planets()) {
+		for (auto& slot_iter : planet_iter->get_slots_const()) {
+			this->slots.insert(std::make_pair(slot_iter.first, slot_iter.second));
+		}
+	}
 
 	game_running = true;
 	this->tick_duration = tick_duration;
@@ -231,6 +238,27 @@ void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std
 	this->game_paused = !this->game_paused;
 }
 
+void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SettleCityCommand> command) {
+	LOG_DEBUG("Received settle city command");
+
+	Player* owning_player = this->extractPlayerFromConnection(sender);
+
+	/* Create the new city */
+	auto& slot_iter = this->slots.find(command->initiator);
+	if (slot_iter == this->slots.end()) {
+		LOG_ERR("Slot not found");
+		return;
+	}
+
+	// TODO: Create the city from the player's current technologies
+	City* new_city = new City(owning_player, 0, 0, 0, 0, 0, 0, slot_iter->second);
+	slot_iter->second->attachCity(new_city);
+
+	/* Bundle and send the update */
+	auto city_creation_update = std::make_shared<CityCreationUpdate>(owning_player->getID(), slot_iter->first, new_city->getID());
+	this->addUpdateToSendQueue(city_creation_update);
+}
+
 void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> command) {
 	LOG_DEBUG("Received a player command.");
 
@@ -319,5 +347,6 @@ void GameServer::subscribeToChannels() {
 	this->subscribe<DebugPause>(std::bind(&GameServer::handleGamePause, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerCommand>(std::bind(&GameServer::handlePlayerCommand, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitCommand>(std::bind(&GameServer::handleUnitCommand, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SettleCityCommand>(std::bind(&GameServer::handleSettleCityCommand, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerClientToServerTransfer>(std::bind(&GameServer::handleReceivePlayerClientToServerTransfer, this, std::placeholders::_1, std::placeholders::_2));
 }

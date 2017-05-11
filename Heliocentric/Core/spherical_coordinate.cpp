@@ -22,3 +22,4 @@ glm::vec3 SphericalCoordinate::toCartesian(glm::vec3 origin, float radius) const
 
 	return origin + glm::vec3(x, y, z);
 }
+

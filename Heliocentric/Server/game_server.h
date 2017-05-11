@@ -22,6 +22,7 @@
 #include "debug_pause.h"
 #include "player_command.h"
 #include "unit_command.h"
+#include "settle_city_command.h"
 
 #include "trade_deal.h"
 
@@ -46,7 +47,9 @@ private:
 
 	Universe universe;
 	UnitManager unit_manager;
+
 	std::unordered_map<UID, std::unique_ptr<Player>> players;
+	std::unordered_map<UID, Slot*> slots;
 	std::unordered_map<UID, std::unique_ptr<GameObject>> game_objects;
 
 	struct UpdateToSend {
@@ -111,6 +114,7 @@ private:
 
 	Player* extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p, bool retry=false);
 	void handleReceivePlayerClientToServerTransfer(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerClientToServerTransfer>);
+	void handleSettleCityCommand(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SettleCityCommand>);
 
 protected:
 	/**** Handlers for ChanneledServer ****/

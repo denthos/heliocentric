@@ -28,6 +28,8 @@
 #include <string>
 #include <unordered_map>
 #include "keyboard_handler.h"
+#include "city_creation_update.h"
+
 #include "locked_item.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
@@ -54,8 +56,8 @@ public:
 	void unitUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitUpdate>);
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);
-	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
 	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
+	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 
 protected:
 	/**** Handlers for ChanneledClient ****/
@@ -72,12 +74,12 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawablePlanet>> planets;
 	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
-	std::unordered_map<UID, std::unique_ptr<DrawableSlot>> slots;
+	std::unordered_map<UID, DrawableSlot*> slots;
 	Octree octree;
 
-	std::shared_ptr<Player> player;
-
 	Lib::Lock<std::queue<std::function<void()>>> update_queue;
+
+	std::shared_ptr<Player> player;
 
 	void createWindow(int width, int height);
 

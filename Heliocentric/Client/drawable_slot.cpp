@@ -10,7 +10,7 @@ DrawableSlot::DrawableSlot(const Slot& slot, DrawablePlanet* planet) : Slot(slot
 }
 
 void DrawableSlot::update() {
-	if (this->city) {
+	if (this->hasCity()) {
 		DrawableCity* drawable_city = dynamic_cast<DrawableCity*>(this->city);
 		if (drawable_city) {
 			drawable_city->update();
@@ -22,7 +22,7 @@ void DrawableSlot::update() {
 }
 
 void DrawableSlot::draw(const Shader& shader, const Camera& camera) const {
-	if (this->city) {
+	if (this->hasCity()) {
 		DrawableCity* drawable_city = dynamic_cast<DrawableCity*>(this->city);
 		if (drawable_city) {
 			drawable_city->draw(shader, camera);
