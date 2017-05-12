@@ -5,7 +5,7 @@
 
 DrawableSlot::DrawableSlot(const Slot& slot, DrawablePlanet* planet) : Slot(slot) {
 	this->planet = planet;
-	this->model = new SphereModel(Texture::getTexture("Textures/sun.jpg"));
+	this->model = new SphereModel(Texture::getInstance("Textures/sun.jpg"));
 	this->toWorld = glm::translate(glm::mat4(1.0f), get_absolute_position());
 }
 

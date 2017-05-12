@@ -48,6 +48,7 @@
     <ClInclude Include="game_object_update.h" />
     <ClInclude Include="settle_city_command.h" />
     <ClInclude Include="resources.h" />
+    <ClInclude Include="singleton.h" />
     <ClInclude Include="trade_deal.h" />
     <ClInclude Include="spherical_coordinate.h" />
     <ClInclude Include="unit_command.h" />

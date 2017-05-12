@@ -3,7 +3,7 @@
 #include "glm/ext.hpp"
 #include "glm/gtx/string_cast.hpp"
 
-Model::Model(GLchar * file)
+Model::Model(std::string file)
 {
 	load(file);
 	calculateBoundingBox();
@@ -150,7 +150,7 @@ std::vector<const Texture*> Model::loadMaterialTextures(aiMaterial * mat, aiText
 		mat->GetTexture(type, i, &str);
 		std::string fp = directory + "/" + std::string(str.C_Str());
 		
-		textures.push_back(Texture::getTexture(fp, typeName));
+		textures.push_back(Texture::getInstance(fp, typeName));
 	}
 
 	return textures;

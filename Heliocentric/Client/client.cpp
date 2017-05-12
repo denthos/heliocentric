@@ -52,7 +52,6 @@
 #define REGULAR_BUFFER 0
 #define BRIGHTNESS_BUFFER 1
 
-Model rocket;
 QuadMesh* quad; //texture sampler
 ParticleSystem* particles;
 
@@ -73,7 +72,8 @@ GLuint FBO; //frame buffer for offscreen rendering
 GLuint gaussianFBO[COLOR_BUFFERS];
 GLuint gaussian_color_buff[COLOR_BUFFERS];
 
-Model* spaceship;
+Model * spaceship;
+Model * rocket;
 //don't forget to clean up afterwards
 
 
@@ -203,8 +203,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
-	rocket = Model(ROCKET_MODEL);
-
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter());
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
@@ -217,7 +215,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	}
 
 	// LOAD MODEL, IMPORTANT
-	spaceship = new Model(ROCKET_MODEL);
+	spaceship = Model::getInstance(ROCKET_MODEL);
+	rocket = Model::getInstance(ROCKET_MODEL);
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
