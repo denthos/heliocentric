@@ -202,7 +202,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="collision.h" />
-    <ClInclude Include="quad_mesh.h" />
+    <ClInclude Include="quad.h" />
     <ClInclude Include="laser_emitter.h" />
     <ClInclude Include="particle_emitter.h" />
     <ClInclude Include="particle_system.h" />
@@ -212,6 +212,8 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="drawable.h" />
     <ClInclude Include="drawable_data.h" />
     <ClInclude Include="drawable_unit.h" />
+    <ClInclude Include="mesh_geometry.h" />
+    <ClInclude Include="skybox_geometry.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="skybox_mesh.h" />
     <ClInclude Include="file_mesh.h" />
@@ -223,6 +225,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="plane.h" />
     <ClInclude Include="drawable_planet.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="sphere_geometry.h" />
     <ClInclude Include="sphere_mesh.h" />
     <ClInclude Include="sphere_model.h" />
     <ClInclude Include="texture.h" />
@@ -235,7 +238,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClCompile Include="bounding_box.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
-    <ClCompile Include="quad_mesh.cpp" />
+    <ClCompile Include="quad.cpp" />
     <ClCompile Include="laser_emitter.cpp" />
     <ClCompile Include="particle_emitter.cpp" />
     <ClCompile Include="particle_system.cpp" />
@@ -245,6 +248,8 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClCompile Include="drawable.cpp" />
     <ClCompile Include="drawable_data.cpp" />
     <ClCompile Include="drawable_unit.cpp" />
+    <ClCompile Include="mesh_geometry.cpp" />
+    <ClCompile Include="skybox_geometry.cpp" />
     <ClCompile Include="skybox_mesh.cpp" />
     <ClCompile Include="file_mesh.cpp" />
     <ClCompile Include="glfw_callback_handler.cpp" />
@@ -255,6 +260,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClCompile Include="orbit.cpp" />
     <ClCompile Include="drawable_planet.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="sphere_geometry.cpp" />
     <ClCompile Include="sphere_mesh.cpp" />
     <ClCompile Include="sphere_model.cpp" />
     <ClCompile Include="texture.cpp" />

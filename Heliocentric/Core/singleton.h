@@ -36,6 +36,7 @@ public:
 
 template <typename TItem>
 class Singleton {
+public:
 	static TItem* getInstance() {
 		static TItem item;
 		return &item;

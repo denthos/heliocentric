@@ -56,8 +56,7 @@ void Model::processNode(aiNode * node, const aiScene * scene)
 
 Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 {
-	std::vector<Vertex> vertices;
-	std::vector<GLuint> indices;
+	MeshGeometry* geom = new MeshGeometry();
 	std::vector<const Texture*> textures;
 	
 	Material mtl;
@@ -84,7 +83,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 
 		
 
-		vertices.push_back(vertex);
+		geom->vertices.push_back(vertex);
 	}
 
 	//get indices
@@ -92,7 +91,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 
 		aiFace face = mesh->mFaces[i];
 		for (GLuint j = 0; j < face.mNumIndices; j++) {
-			indices.push_back(face.mIndices[j]);
+			geom->indices.push_back(face.mIndices[j]);
 		}
 	}
 
@@ -134,7 +133,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		
 	}
 
-	return FileMesh(vertices, indices, textures, mtl);
+	return FileMesh(geom, textures, mtl);
 }
 
 std::vector<const Texture*> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)

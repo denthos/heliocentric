@@ -9,7 +9,7 @@
 #include <soil.h>
 #include <GL/glut.h>
 
-#include "quad_mesh.h"
+#include "quad.h"
 #include "particle_system.h"
 #include "thruster_emitter.h"
 #include "laser_emitter.h"
@@ -52,7 +52,7 @@
 #define REGULAR_BUFFER 0
 #define BRIGHTNESS_BUFFER 1
 
-QuadMesh* quad; //texture sampler
+Quad * quad; //texture sampler
 ParticleSystem* particles;
 
 
@@ -187,7 +187,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	}
 
 	///////////////////////////////////////////////////////////////
-	quad = new QuadMesh();
+	quad = new Quad();
 
 	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height);
 	octree.enableViewFrustumCulling(&camera->viewFrustum);
@@ -205,7 +205,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter());
 
-	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
+	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
 	for (auto& planet : this->universe.get_planets()) {
 		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
@@ -348,7 +348,7 @@ void Client::display() {
 	glBindTexture(GL_TEXTURE_2D, color_buff[BRIGHTNESS_BUFFER]);
 	glUniform1i(glGetUniformLocation(blurShader->getPid(), "blurX"), blurX);
 
-	quad->Draw();
+	quad->draw();
 	blurX = !blurX;
 
 	//blur the image
@@ -362,8 +362,7 @@ void Client::display() {
 		blurX = !blurX; //switch between blur directions
 
 		//draw texture
-		quad->Draw();
-	
+		quad->draw();
 	}
 	
 	blurShader->unbind();
@@ -385,7 +384,7 @@ void Client::display() {
 	glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
 	glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
 	glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
-	quad->Draw();
+	quad->draw();
 
 	quadShader->unbind();
 
