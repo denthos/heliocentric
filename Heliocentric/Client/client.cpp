@@ -499,7 +499,7 @@ void Client::handleF2Key(int key) {
 
 void Client::handleF3Key(int key) {
 
-	PlayerCommand command(rand() % 3000, rand() % 3000, rand() % 3000);
+	PlayerCommand command(rand() % 1000, rand() % 1000, rand() % 1000);
 
 	this->channeled_send(&command);
 }
