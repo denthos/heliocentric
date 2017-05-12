@@ -110,7 +110,7 @@ void Unit::do_orient() {
 	// Orient towards destination
 	glm::vec3 ideal_orientation = glm::normalize(destination - position);
 	glm::vec3 delta_orientation = glm::mix(orientation, ideal_orientation, delta_time_for_orient);
-	orientation = delta_orientation;
+	orientation = glm::normalize(delta_orientation);
 	LOG_DEBUG("Unit with ID: " + std::to_string(this->getID()) + " is orienting: ");
 	LOG_DEBUG("Ideal Orientation is " + std::to_string(ideal_orientation.x) + " " + std::to_string(ideal_orientation.y) + " " + std::to_string(ideal_orientation.z));
 	LOG_DEBUG("New Orientation is " + std::to_string(orientation.x) + " " + std::to_string(orientation.y) + " " + std::to_string(orientation.z));

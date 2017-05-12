@@ -19,7 +19,7 @@ void DrawableUnit::update() {
 	xaxis = glm::normalize(xaxis);
 	glm::vec3 yaxis = glm::cross(orientation, xaxis);
 	yaxis = glm::normalize(yaxis);
-
+	
 	rotation[0][0] = xaxis.x;
 	rotation[0][1] = yaxis.x;
 	rotation[0][2] = orientation.x;
@@ -31,6 +31,7 @@ void DrawableUnit::update() {
 	rotation[2][0] = xaxis.z;
 	rotation[2][1] = yaxis.z;
 	rotation[2][2] = orientation.z;
+	
 
 	this->toWorld = glm::translate(get_position()) * rotation * scale_mat;
 }
