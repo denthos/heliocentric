@@ -1,7 +1,6 @@
 #pragma once
 
 #include "mesh_geometry.h"
-#include "singleton.h"
 #include <assimp\scene.h>
 
 class AssimpGeometry : public MeshGeometry {
