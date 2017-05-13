@@ -24,7 +24,7 @@ ParticleSystem::ParticleSystem(float spawn_rate, int spawns_per_emission, Partic
 	//create first particle
 	spawn(findLastUsed());
 	particle_count++;
-	creationTime = currTime = glfwGetTime();
+	creationTime = currTime = (float)glfwGetTime();
 
 }
 
@@ -45,7 +45,7 @@ void ParticleSystem::Update(const Camera &camera)
 		}
 		
 
-		creationTime = glfwGetTime();
+		creationTime = (float)glfwGetTime();
 	}
 
 	//simulate particles
@@ -151,8 +151,8 @@ void ParticleSystem::genParticleBuffers()
 void ParticleSystem::updateParticle(Particle &particle, const Camera &camera)
 {
 	
-	float deltaTime = 0.007; // glfwGetTime() - currTime;//TODO set this to clock time instead of hardcoding
-	currTime = glfwGetTime();
+	float deltaTime = 0.007f; // glfwGetTime() - currTime;//TODO set this to clock time instead of hardcoding
+	currTime = (float)glfwGetTime();
 
 	if (particle.isAlive()) {
 		

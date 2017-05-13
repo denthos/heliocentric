@@ -9,14 +9,12 @@
 class MeshGeometry {
 public:
 
-	virtual void generateGeometry() {}
+	virtual void generateGeometry(std::vector<Vertex> & vertices, std::vector<GLuint> & indices) = 0;
 
 	std::atomic_bool geometry_created = false;
 	virtual void createGeometry();
 
-	std::vector<GLuint> indices;
-	std::vector<Vertex> vertices;
-
 	GLuint VAO, VBO, EBO;
+	GLsizei numIndices;
 	BoundingBox boundingBox;
 };

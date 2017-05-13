@@ -3,5 +3,5 @@
 
 class SkyboxMeshGeometry : public MeshGeometry {
 
-	void generateGeometry();
+	virtual void generateGeometry(std::vector<Vertex> & vertices, std::vector<GLuint> & indices);
 };

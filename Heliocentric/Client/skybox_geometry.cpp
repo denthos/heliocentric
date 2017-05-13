@@ -1,6 +1,6 @@
 #include "skybox_geometry.h"
 
-void SkyboxMeshGeometry::generateGeometry() {
+void SkyboxMeshGeometry::generateGeometry(std::vector<Vertex> & vertices, std::vector<GLuint> & indices) {
 	indices = { //order of vertices
 		0,1,2, //back (direction user is facing initially)
 		2,3,0,

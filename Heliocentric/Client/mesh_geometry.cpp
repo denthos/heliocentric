@@ -6,7 +6,10 @@ void MeshGeometry::createGeometry() {
 		return;
 	}
 
-	generateGeometry();
+	std::vector<Vertex> vertices;
+	std::vector<GLuint> indices;
+
+	generateGeometry(vertices, indices);
 
 	//generate vertex arrays and buffers
 	glGenVertexArrays(1, &VAO);
@@ -23,6 +26,8 @@ void MeshGeometry::createGeometry() {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices.at(0), GL_STATIC_DRAW);
+
+	this->numIndices = (GLsizei)indices.size();
 
 	//vertex positions
 	glEnableVertexAttribArray(0);

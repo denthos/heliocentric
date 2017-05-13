@@ -190,9 +190,10 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	quad = new Quad();
 
 	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height);
-	octree.enableViewFrustumCulling(&camera->viewFrustum);
 
 	resizeCallback(width, height);
+
+	octree.enableViewFrustumCulling(&camera->viewFrustum);
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
@@ -299,8 +300,6 @@ void Client::createWindow(int width, int height) {
 		return;
 	}
 #endif
-
-	resizeCallback(width, height);
 
 	GLFWCallbackHandler::add(window, this);
 }
@@ -502,8 +501,7 @@ void Client::handleF2Key(int key) {
 }
 
 void Client::handleF3Key(int key) {
-
-	PlayerCommand command(rand() % 3000, rand() % 3000, rand() % 3000);
+	PlayerCommand command((float)(rand() % 3000), (float)(rand() % 3000), (float)(rand() % 3000));
 
 	this->channeled_send(&command);
 }
@@ -515,8 +513,7 @@ void Client::handleF4Key(int key) {
 		return;
 	}
 	std::advance(unit_it, rand() % units.size());
-
-	UnitCommand command(unit_it->first, rand() % 1000, rand() % 1000, rand() % 1000);
+	UnitCommand command(unit_it->first, (float)(rand() % 1000), (float)(rand() % 1000), (float)(rand() % 1000));
 	this->channeled_send(&command);
 }
 

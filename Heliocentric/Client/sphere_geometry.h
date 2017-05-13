@@ -12,5 +12,5 @@ private:
 	SphereMeshGeometry();
 
 public:
-	void generateGeometry();
+	virtual void generateGeometry(std::vector<Vertex> & vertices, std::vector<GLuint> & indices);
 };

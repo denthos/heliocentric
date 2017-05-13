@@ -2,6 +2,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/ext.hpp"
 #include "glm/gtx/string_cast.hpp"
+#include "assimp_geometry.h"
 
 Model::Model(std::string file)
 {
@@ -56,44 +57,9 @@ void Model::processNode(aiNode * node, const aiScene * scene)
 
 Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 {
-	MeshGeometry* geom = new MeshGeometry();
 	std::vector<const Texture*> textures;
 	
 	Material mtl;
-	
-	for (GLuint i = 0; i < mesh->mNumVertices; i++) {
-		Vertex vertex;
-
-		//get position
-		aiVector3D pos = mesh->mVertices[i];
-		vertex.pos = glm::vec3(pos.x, pos.y, pos.z);
-
-
-		//get normals
-	    aiVector3D norm = mesh->mNormals[i];
-		vertex.norm = glm::vec3(norm.x, norm.y, norm.z);
-
-		//get texture coordinates
-		if (mesh->mTextureCoords[0]){
-			aiVector3D tex = mesh->mTextureCoords[0][i];
-			vertex.tex_coords = glm::vec2(tex.x, tex.y);
-	
-		}
-		else { vertex.tex_coords = glm::vec2(0.0f, 0.0f); }
-
-		
-
-		geom->vertices.push_back(vertex);
-	}
-
-	//get indices
-	for (GLuint i = 0; i < mesh->mNumFaces; i++) {
-
-		aiFace face = mesh->mFaces[i];
-		for (GLuint j = 0; j < face.mNumIndices; j++) {
-			geom->indices.push_back(face.mIndices[j]);
-		}
-	}
 
 	//get texture material
 	if (mesh->mMaterialIndex >= 0) {
@@ -133,7 +99,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		
 	}
 
-	return FileMesh(geom, textures, mtl);
+	return FileMesh(new AssimpGeometry(mesh), textures, mtl);
 }
 
 std::vector<const Texture*> Model::loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)

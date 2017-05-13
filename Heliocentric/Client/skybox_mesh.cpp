@@ -72,7 +72,7 @@ void SkyboxMesh::draw(const Shader & shader, const Camera & camera, const glm::m
 	glBindVertexArray(geometry->VAO);
 
 	//draw
-	glDrawElements(GL_TRIANGLES, geometry->indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, geometry->numIndices, GL_UNSIGNED_INT, 0);
 
 	//reset
 	glBindVertexArray(0);

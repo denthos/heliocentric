@@ -5,7 +5,7 @@ SphereMeshGeometry::SphereMeshGeometry() : SphereMeshGeometry(24, 48) {}
 SphereMeshGeometry::SphereMeshGeometry(int rings, int sectors) :
 	rings(rings), sectors(sectors) {}
 
-void SphereMeshGeometry::generateGeometry() {
+void SphereMeshGeometry::generateGeometry(std::vector<Vertex> & vertices, std::vector<GLuint> & indices) {
 	//generate data for sphere mesh data buffers
 	float const R = 1.0f / (float)(rings - 1); //what fraction of the sphere each ring division is
 	float const S = 1.0f / (float)(sectors - 1);

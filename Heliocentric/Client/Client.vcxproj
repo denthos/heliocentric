@@ -198,6 +198,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <None Include="Shaders\simple_texture.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assimp_geometry.h" />
     <ClInclude Include="bounding_box.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
@@ -235,6 +236,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="view_frustum.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="assimp_geometry.cpp" />
     <ClCompile Include="bounding_box.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
