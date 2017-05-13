@@ -2,9 +2,11 @@
 
 #include <atomic>
 
+#define INVALID_ID 0
+
 typedef unsigned int UID;
 
-static std::atomic<UID> _uuid_counter = 0;
+static std::atomic<UID> _uuid_counter = 1;
 
 class Identifiable {
 public:
