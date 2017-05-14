@@ -22,9 +22,10 @@
 #include "debug_pause.h"
 #include "player_command.h"
 #include "unit_command.h"
+#include "trade_command.h"
 #include "settle_city_command.h"
 
-#include "trade_deal.h"
+#include "trade_data.h"
 
 #include "player_client_to_server_xfer.h"
 
@@ -86,9 +87,10 @@ private:
 	}
 
 	void handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause);
-	void handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> creation_command);
-	void handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> creation_command);
-	void handleTradeDeal(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeDeal> trade_deal);
+	void handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> command);
+	void handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitCommand> command);
+	void handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeCommand> command);
+	void handleTradeData(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> trade_deal);
 
 	template <typename TUpdate>
 	void addUpdateToSendQueue(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {

@@ -14,6 +14,7 @@
 #include "debug_pause.h"
 #include "player_command.h"
 #include "unit_command.h"
+#include "trade_command.h"
 #include "settle_city_command.h"
 
 #include "trade_deal.h"
@@ -33,6 +34,8 @@ void initializeChannels() {
 	channels::addNewChannel<DebugPause>();
 	channels::addNewChannel<PlayerCommand>();
 	channels::addNewChannel<UnitCommand>();
-	channels::addNewChannel<SettleCityCommand>();
-	channels::addNewChannel<TradeDeal>();
+	channels::addNewChannel<TradeCommand>();
+  channels::addNewChannel<SettleCityCommand>();
+
+	channels::addNewChannel<TradeData>();
 }

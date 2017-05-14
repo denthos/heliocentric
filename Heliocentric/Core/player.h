@@ -1,6 +1,8 @@
 #pragma once
 #include "identifiable.h"
 #include "resources.h"
+#include "trade_deal.h"
+#include <queue>
 #include <unordered_map>
 #include <vector>
 #include <typeinfo>
@@ -25,16 +27,27 @@ public:
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
 	void pop();                               // Pop all objects queued for destroy
 
-	float get_resource_amount(Resources::ResourceType);
+	float get_resource_amount(Resources::Type);
 
 	std::unordered_map<unsigned int, GameObject*> get_units();   // return list of owned units
 	GameObject* get_unit(UID id);
-	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects;
+
+	void receive_trade_deal(std::shared_ptr<TradeDeal>); // Add newly received trade deal to pending list
+	UID trade_deal_accept(); // TEMPORARY: Accept the first trade deal in pending deals map
+	UID trade_deal_decline(); // TEMPORARY: Decline the first trade deal in pending deals map
+	void trade_deal_accept(UID); // Accept the specified trade deal and move it to active trade deals if applies
+	void trade_deal_decline(UID); // Decline the specified trade deal
+
+	std::shared_ptr<TradeDeal> get_trade_deal(UID); // Return a trade deal by UID
+
+	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects; // TODO: move to private
 
 private:
 	std::string name;
 	std::vector<GameObject*> objects_to_destroy;
-	std::unordered_map<Resources::ResourceType, float> owned_resources; // Stores the amount of each type of resources the player owns
+	std::unordered_map<Resources::Type, float> owned_resources; // Stores the amount of each type of resources the player owns
+	// std::queue<std::shared_ptr<TradeDeal>> active_trade_deals; // All active trade deals that involves this player, not implemented yet
+	std::unordered_map<UID, std::shared_ptr<TradeDeal>> pending_trade_deals; // All pending trade deals waiting to be accepted or declined
 
 	void initialize(); // Called by both constructors to initialize player.
 };

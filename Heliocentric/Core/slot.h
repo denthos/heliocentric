@@ -29,7 +29,7 @@ public:
 
 
 protected:
-	Resources::ResourceType resource_type;
+	Resources::Type resource_type;
 	float resource_deposit;
 	SphericalCoordinate coordinate;
 	Planet* planet;

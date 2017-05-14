@@ -143,6 +143,12 @@
     <ClInclude Include="spherical_coordinate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="trade_command.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="trade_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="singleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -249,6 +255,12 @@
     </ClCompile>
     <ClCompile Include="trade_deal.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="trade_command.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="trade_data.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

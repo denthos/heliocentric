@@ -2,6 +2,8 @@
 #include "unit.h"
 #include "planet.h"
 #include "city.h"
+#include "lib.h"
+#include "logging.h"
 #include <iostream>
 #include <string>
 
@@ -62,7 +64,62 @@ GameObject* Player::get_unit(UID id) {
 	return owned_objects[std::type_index(typeid(Unit))][id];
 }
 
-float Player::get_resource_amount(Resources::ResourceType resource_type) {
+float Player::get_resource_amount(Resources::Type resource_type) {
 	/* Assuming the parameter is a valid resource type, because it really should be. */
 	return owned_resources[resource_type];
+}
+
+void Player::receive_trade_deal(std::shared_ptr<TradeDeal> deal) {
+	pending_trade_deals[deal->getID()] = deal;
+}
+
+UID Player::trade_deal_accept() {
+	auto it = pending_trade_deals.begin();
+	if (it == pending_trade_deals.end()) {
+		LOG_ERR("No pending trade deal");
+		return 0;
+	}
+
+	UID deal_id = it->first;
+	trade_deal_accept(deal_id);
+	return deal_id;
+}
+
+UID Player::trade_deal_decline() {
+	auto it = pending_trade_deals.begin();
+	if (it == pending_trade_deals.end()) {
+		LOG_ERR("No pending trade deal");
+		return 0;
+	}
+
+	UID deal_id = it->first;
+	trade_deal_decline(deal_id);
+	return deal_id;
+}
+
+void Player::trade_deal_accept(UID id) {
+	if (pending_trade_deals.find(id) == pending_trade_deals.end()) {
+		LOG_ERR("Invalid trade deal ID");
+		return;
+	}
+
+	pending_trade_deals.erase(id); // remove deal from pending list
+}
+
+void Player::trade_deal_decline(UID id) {
+	if (pending_trade_deals.find(id) == pending_trade_deals.end()) {
+		LOG_ERR("Invalid trade deal ID");
+		return;
+	}
+
+	pending_trade_deals.erase(id); // remove deal from pending list
+}
+
+std::shared_ptr<TradeDeal> Player::get_trade_deal(UID id) {
+	if (pending_trade_deals.find(id) == pending_trade_deals.end()) {
+		LOG_ERR("Invalid trade deal ID");
+		return nullptr;
+	}
+
+	return pending_trade_deals[id];
 }

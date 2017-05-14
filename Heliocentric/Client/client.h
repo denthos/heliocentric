@@ -31,6 +31,8 @@
 #include "city_creation_update.h"
 
 #include "locked_item.h"
+#include "trade_data.h"
+#include "trade_deal.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:	
@@ -57,6 +59,7 @@ public:
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);
 	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
+	void tradeDataHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TradeData>);
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 
 protected:
@@ -77,6 +80,9 @@ private:
 	std::unordered_map<UID, DrawableSlot*> slots;
 	Octree octree;
 
+	std::shared_ptr<Player> player;
+
+	/* Updates to be performed that are graphics related. All graphics work need to be done in main thread. */
 	Lib::Lock<std::queue<std::function<void()>>> update_queue;
 
 	std::shared_ptr<Player> player;
@@ -91,5 +97,7 @@ private:
 	void handleF4Key(int);
 	void handleF5Key(int);
 	void handleF6Key(int);
+	void handleF11Key(int);
+	void handleF12Key(int);
 };
 
