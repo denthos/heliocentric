@@ -1,6 +1,6 @@
 #include "drawable.h"
 
-Drawable::Drawable() : toWorld(glm::mat4(1.0f)), rotation(glm::mat4(1.0f)) {
+Drawable::Drawable() : toWorld(glm::mat4(1.0f)) {
 
 }
 

@@ -5,7 +5,7 @@
 #pragma once
 #include "lib.h"
 #include "attackable_game_object.h"
-
+#include <glm\glm.hpp>
 #include <memory>
 
 class UnitUpdate;
@@ -91,6 +91,14 @@ public:
 
 	void do_orient();
 
+	void set_rotation(glm::mat4 rot_mat) {
+		this->rotation = rot_mat;
+	};
+
+	glm::mat4 get_rotation() {
+		return this->rotation;
+	};
+
 
 	/**
 	Returns the maximum movement speed of this unit.
@@ -135,6 +143,7 @@ protected:
 	glm::vec3 destination;
 	AttackableGameObject* target;
 	glm::vec3 orientation;
+	glm::mat4 rotation;
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);
 	virtual void handle_victory(AttackableGameObject* opponent);

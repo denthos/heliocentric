@@ -47,6 +47,7 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->orient_x = this->orientation.x;
 	this->update->orient_y = this->orientation.y;
 	this->update->orient_z = this->orientation.z;
+	this->update->rot_mat = this->rotation;
 	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
 	LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
 	return this->update;
@@ -108,9 +109,34 @@ glm::vec3 Unit::do_move() {
 
 void Unit::do_orient() {
 	// Orient towards destination
+	if ((destination - position) == glm::vec3(0.0)) {
+		delta_time_for_orient = 0.0f;
+
+		return;
+	
+	}
 	glm::vec3 ideal_orientation = glm::normalize(destination - position);
 	glm::vec3 delta_orientation = glm::mix(orientation, ideal_orientation, delta_time_for_orient);
 	orientation = glm::normalize(delta_orientation);
+
+	glm::vec3 up(0.0f, 1.0f, 0.0f);
+	glm::vec3 xaxis = glm::cross(up, orientation);
+	xaxis = glm::normalize(xaxis);
+	glm::vec3 yaxis = glm::cross(orientation, xaxis);
+	yaxis = glm::normalize(yaxis);
+
+	rotation[0][0] = xaxis.x;
+	rotation[0][1] = yaxis.x;
+	rotation[0][2] = orientation.x;
+
+	rotation[1][0] = xaxis.y;
+	rotation[1][1] = yaxis.y;
+	rotation[1][2] = orientation.y;
+
+	rotation[2][0] = xaxis.z;
+	rotation[2][1] = yaxis.z;
+	rotation[2][2] = orientation.z;
+
 	LOG_DEBUG("Unit with ID: " + std::to_string(this->getID()) + " is orienting: ");
 	LOG_DEBUG("Ideal Orientation is " + std::to_string(ideal_orientation.x) + " " + std::to_string(ideal_orientation.y) + " " + std::to_string(ideal_orientation.z));
 	LOG_DEBUG("New Orientation is " + std::to_string(orientation.x) + " " + std::to_string(orientation.y) + " " + std::to_string(orientation.z));

@@ -2,6 +2,7 @@
 
 #include "game_object_update.h"
 #include "unit.h"
+#include <glm\glm.hpp>
 
 class UnitUpdate : public GameObjectUpdate {
 public:
@@ -19,6 +20,7 @@ public:
 	float orient_x;
 	float orient_y;
 	float orient_z;
+	glm::mat4 rot_mat;
 	UnitUpdate(UID, float, float, float);
 	UnitUpdate(UID, int, float, float, float);
 	void apply(GameObject* obj);
