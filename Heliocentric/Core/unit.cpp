@@ -2,6 +2,7 @@
 #include "logging.h"
 #include "unit_update.h"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm\gtx\quaternion.hpp"
 
 Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
 	AttackableGameObject(pos, owner, att, def, range, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
@@ -116,26 +117,31 @@ void Unit::do_orient() {
 	
 	}
 	glm::vec3 ideal_orientation = glm::normalize(destination - position);
-	glm::vec3 delta_orientation = glm::mix(orientation, ideal_orientation, delta_time_for_orient);
-	orientation = glm::normalize(delta_orientation);
 
-	glm::vec3 up(0.0f, 1.0f, 0.0f);
-	glm::vec3 xaxis = glm::cross(up, orientation);
-	xaxis = glm::normalize(xaxis);
-	glm::vec3 yaxis = glm::cross(orientation, xaxis);
-	yaxis = glm::normalize(yaxis);
 
-	rotation[0][0] = xaxis.x;
-	rotation[0][1] = yaxis.x;
-	rotation[0][2] = orientation.x;
+	float cosine = glm::dot(orientation, ideal_orientation);
+	cosine = glm::clamp(cosine, -1.0f, 1.0f);
 
-	rotation[1][0] = xaxis.y;
-	rotation[1][1] = yaxis.y;
-	rotation[1][2] = orientation.y;
+	glm::vec3 axis = glm::cross(orientation, ideal_orientation);
 
-	rotation[2][0] = xaxis.z;
-	rotation[2][1] = yaxis.z;
-	rotation[2][2] = orientation.z;
+	axis = glm::normalize(axis);
+
+
+	float rotAngle = glm::degrees(glm::acos(cosine));
+	glm::mat4 lookAt = glm::rotate(glm::mat4(1.0f), rotAngle, axis);
+	glm::quat toRotQuat = glm::quat_cast((lookAt)); //the final rotation quaternion
+
+
+
+													//for smooth rotation
+	glm::quat rotQuat = glm::slerp(glm::quat_cast(rotation), toRotQuat, delta_time_for_orient);
+
+	//convert back to matrix, save and apply
+	rotation = glm::mat4_cast(rotQuat);
+	orientation = rotQuat * orientation;
+
+
+
 
 	LOG_DEBUG("Unit with ID: " + std::to_string(this->getID()) + " is orienting: ");
 	LOG_DEBUG("Ideal Orientation is " + std::to_string(ideal_orientation.x) + " " + std::to_string(ideal_orientation.y) + " " + std::to_string(ideal_orientation.z));
