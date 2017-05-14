@@ -3,9 +3,10 @@
 #include "sphere_mesh.h"
 #include "sphere_model.h"
 #include <glm/gtx/transform.hpp>
-DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship) : Unit(unit) {
+DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship, ParticleSystem* laser) : Unit(unit) {
 	this->toWorld = glm::translate(unit.get_position()) * glm::scale(glm::vec3(0.3f));
 	model = spaceship;
+	this->laser = laser;
 }
 
 DrawableUnit::~DrawableUnit() {
@@ -18,4 +19,10 @@ void DrawableUnit::update() {
 	
 
 	this->toWorld = glm::translate(get_position()) * get_rotation() * scale_mat;
+}
+
+void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
+	model->draw(shader, camera, toWorld);
+	laser->Update(camera);
+	laser->draw(camera, toWorld);
 }

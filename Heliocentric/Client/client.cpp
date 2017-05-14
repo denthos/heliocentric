@@ -204,7 +204,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	rocket = Model(ROCKET_MODEL);
 
-	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter());
+	particles = new ParticleSystem( 3.5f, 1, new LaserEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
 
@@ -640,7 +640,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
 	units[update->id] = std::make_unique<DrawableUnit>(
 		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), update->att, update->def, update->range, update->health),
-		spaceship
+		spaceship, particles
 	);
 }
 

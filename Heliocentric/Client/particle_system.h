@@ -4,19 +4,20 @@
 #include "texture.h"
 #include "particle_emitter.h"
 #include "camera.h"
-
+#include "shader.h"
 #define MAX_PARTICLES 10000
 
 class ParticleSystem {
 public:
-	ParticleSystem(float spawn_rate, int spawns_per_emission, ParticleEmitter* emitter); //init fields
+	ParticleSystem(float spawn_rate, int spawns_per_emission, ParticleEmitter* emitter, Shader* shader); //init fields
 	~ParticleSystem();
 
 	void Update(const Camera &camera);
-	void draw(const Shader &shader, const Camera &camera, const glm::mat4 &toWorld);
+	void draw(const Camera &camera, const glm::mat4 &toWorld);
 	glm::mat4 world_mat;
 
 private:
+	Shader * shader;
 
 	int spawns_per_emission;
 	ParticleEmitter* emitter;
