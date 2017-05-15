@@ -29,6 +29,7 @@ layout (location = 1) out vec4 buffer1_color;
 
 uniform vec3 viewPos;
 uniform PointLight pointLight;
+uniform float time;
 
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
@@ -53,6 +54,23 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 }
 
 vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
+    vec3 lerpColor = m_diffuse;
+    float stop1 = 0.7;
+
+    vec3 red = vec3(1.0,0.0,0.0);
+    vec3 black = vec3(0.0);
+    vec3 toColor;
+
+    float factor = (sin(time) + 1.0f) / 2.0f;
+
+    if(factor <= stop1){toColor = red;}
+    else{
+        lerpColor = red;
+        toColor = black;
+    }
+
+    lerpColor = (1-factor) * lerpColor + (factor) * toColor;
+    
     vec3 lightDir = normalize(-fragPos);
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0f);
@@ -61,10 +79,10 @@ vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), m_shininess);
     // Combine results
     vec3 ambient = vec3(0.0f);
-    vec3 diffuse = diff * m_diffuse;
+    vec3 diffuse = diff * lerpColor;
     vec3 specular = spec * vec3(0.5f);// * m_specular;
 	specular = clamp(specular, 0.0f, 1.0f);
-    return (ambient + diffuse + specular)* m_diffuse;
+    return (ambient + diffuse + specular)* lerpColor;
 }
 
 void main()
