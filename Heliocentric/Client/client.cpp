@@ -51,7 +51,7 @@
 #define REGULAR_BUFFER 0
 #define BRIGHTNESS_BUFFER 1
 
-Model rocket;
+
 QuadMesh* quad; //texture sampler
 ParticleSystem* laser_particles;
 ParticleSystem* explosion_particles;
@@ -203,7 +203,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
-	rocket = Model(ROCKET_MODEL);
+	
 
 	laser_particles = new ParticleSystem( 3.5f, 1, new LaserEmitter(), particleShader);
 	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
@@ -332,7 +332,7 @@ void Client::display() {
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 	octree.draw(*textureShader, *camera);
 	
-	rocket.draw(*unitShader, *camera, glm::mat4(1.0f));
+
 	
 	// blur the things that glow
 	int blurs = 50; //TODO init to number of blur iterations
@@ -641,7 +641,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
 	units[update->id] = std::make_unique<DrawableUnit>(
 		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), update->att, update->def, update->range, update->health),
-		spaceship, unitShader, laser_particles
+		spaceship, unitShader, laser_particles, explosion_particles
 	);
 }
 
@@ -670,6 +670,7 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		auto& update_queue = Lib::key_acquire(this->update_queue);
 		update_queue.get().push([update, this]() {
 			units.erase(update->id);
+			
 		});
 	}
 }

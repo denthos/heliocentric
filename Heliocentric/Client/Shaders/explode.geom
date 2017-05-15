@@ -11,10 +11,14 @@ out vec3 Normal;
 out vec3 FragPos;
 
 uniform float time;
+uniform bool explode_on;
 
 vec4 explode(vec4 position, vec3 normal)
 {
     float magnitude = 52.0f;
+    if(!explode_on){
+        return position;
+    }
     vec3 direction = normal * ((sin(time) + 1.0f) / 2.0f) * magnitude; 
     return position + vec4(direction, 0.0f);
 }

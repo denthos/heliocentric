@@ -126,6 +126,16 @@ public:
 	**/
 	void set_command(CommandType command);
 
+	//whether or not to shoot lasers
+	void set_laser_shooting(bool shoot);
+
+	bool get_laser_shooting();
+
+	//explode animation when dying
+	void set_explode(bool explode);
+
+	bool get_explode();
+
 
 protected:
 
@@ -134,6 +144,9 @@ protected:
 	@return Current position of this unit.
 	*/
 	glm::vec3 do_move();
+
+	bool shoot_laser = false;
+	bool explode = false;
 
 	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
 	float delta_time_for_orient;

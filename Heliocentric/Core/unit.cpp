@@ -49,6 +49,8 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->orient_y = this->orientation.y;
 	this->update->orient_z = this->orientation.z;
 	this->update->rot_mat = this->rotation;
+	this->update->shoot_laser = this->shoot_laser;
+	this->update->explode = this->explode;
 	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
 	LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
 	return this->update;
@@ -94,6 +96,21 @@ void Unit::set_command(CommandType command) {
 	currentCommand = command;
 }
 
+void Unit::set_laser_shooting(bool shoot) {
+	this->shoot_laser = shoot;
+}
+
+bool Unit::get_laser_shooting() {
+	return this->shoot_laser;
+}
+
+void Unit::set_explode(bool explode) {
+	this->explode = explode;
+}
+
+bool Unit::get_explode() {
+	return this->explode;
+}
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
@@ -182,6 +199,7 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 void Unit::do_attack(AttackableGameObject* target) {
 	float distance = glm::distance(this->position, target->get_position());
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
+	set_laser_shooting(true);
 	if (distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) {
 		AttackableGameObject::do_attack(target);
 		return;

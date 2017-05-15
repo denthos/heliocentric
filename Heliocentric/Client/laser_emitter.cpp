@@ -6,7 +6,7 @@ void LaserEmitter::spawn(Particle & particle)
 	particle.size = 1.0f; //todo: randomize
 	particle.color = glm::vec4(1.0f, 0.2f, 0.0f, 0.05f);
 	particle.life = 15.0f; //TODO randomize
-	particle.velocity = glm::vec3(0.0f , 0.0f, 200.0f);
+	particle.velocity = glm::vec3(0.0f , 0.0f, 500.0f);
 }
 
 void LaserEmitter::simulate(Particle & particle, float deltaTime)

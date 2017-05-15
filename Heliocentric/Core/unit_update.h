@@ -21,6 +21,10 @@ public:
 	float orient_y;
 	float orient_z;
 	glm::mat4 rot_mat;
+
+	bool shoot_laser;
+	bool explode;
+
 	UnitUpdate(UID, float, float, float);
 	UnitUpdate(UID, int, float, float, float);
 	void apply(GameObject* obj);
