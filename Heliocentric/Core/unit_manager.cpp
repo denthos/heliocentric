@@ -13,7 +13,10 @@ void UnitManager::doLogic() {
 	while (active_unit != active_units.end()) {
 		Unit::CommandType command = active_unit->second->do_logic();
 
-		if (command == Unit::UNIT_IDLE) {
+		if (command == Unit::UNIT_IDLE) 
+		{
+			active_unit->second->set_laser_shooting(false);
+			this->unit_updates.insert(active_unit->second->make_update());
 			idle_units.insert(std::make_pair(active_unit->first, std::move(active_unit->second)));
 			active_unit = active_units.erase(active_unit);
 		} 

@@ -27,9 +27,6 @@ DrawableUnit::~DrawableUnit() {
 
 void DrawableUnit::update() {
 	glm::mat4 scale_mat = glm::scale(glm::vec3(0.3f));
-	
-	
-
 	this->toWorld = glm::translate(get_position()) * get_rotation() * scale_mat;
 }
 

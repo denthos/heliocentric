@@ -49,10 +49,11 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->orient_y = this->orientation.y;
 	this->update->orient_z = this->orientation.z;
 	this->update->rot_mat = this->rotation;
-	this->update->shoot_laser = this->shoot_laser;
+	this->update->shoot_laser = this->get_laser_shooting();
 	this->update->explode = this->explode;
 	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
-	LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
+	//LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
+	LOG_DEBUG("Unit shoot laser is set to " + std::to_string(this->update->shoot_laser));
 	return this->update;
 };
 
@@ -193,26 +194,17 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 {
 	// Go back to idle if unit was attacking
 	currentCommand = (currentCommand == UNIT_ATTACK) ? UNIT_IDLE : currentCommand;
-	
+	this->set_laser_shooting(false);
 	// TODO: Gain experience (?)
 }
 
 void Unit::do_attack(AttackableGameObject* target) {
 	float distance = glm::distance(this->position, target->get_position());
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
-	
-	if (target->get_health() <= 50) {
-		set_laser_shooting(false);
-		LOG_DEBUG("LASER OFF is " + std::to_string(target->get_health()) + std::to_string(this->shoot_laser));
-	}
-	else {
-		set_laser_shooting(true);
-		LOG_DEBUG("LASER ON is " + std::to_string(target->get_health()));
-	}
+
 	if (distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) {
 		AttackableGameObject::do_attack(target);
-		
-		
+		set_laser_shooting(true);
 		return;
 	}
 	if (dot_product >= 1.05f || dot_product <= 0.95f) {
