@@ -65,6 +65,7 @@ vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
 
     if(factor <= stop1){toColor = red;}
     else{
+        lerpColor = red;
         toColor = black;
     }
 
