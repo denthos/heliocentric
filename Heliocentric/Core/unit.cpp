@@ -202,11 +202,11 @@ void Unit::do_attack(AttackableGameObject* target) {
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
 	
 	if (target->get_health() <= 50) {
-		set_laser_shooting(false);
-		LOG_DEBUG("LASER OFF is " + std::to_string(target->get_health()) + std::to_string(this->shoot_laser));
+		this->set_laser_shooting(false);
+		LOG_DEBUG("LASER OFF is " + std::to_string(target->get_health()) + "status" + std::to_string(this->shoot_laser));
 	}
 	else {
-		set_laser_shooting(true);
+		this->set_laser_shooting(true);
 		LOG_DEBUG("LASER ON is " + std::to_string(target->get_health()));
 	}
 	if (distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) {
