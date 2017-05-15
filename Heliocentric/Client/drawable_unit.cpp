@@ -34,7 +34,7 @@ void DrawableUnit::update() {
 }
 
 void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
-	
+	/*
 	if (true) {//always true for now
 		unitShader->bind();
 		glUniform1i(glGetUniformLocation(unitShader->getPid(), "explode_on"), true);
@@ -42,7 +42,7 @@ void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 		explosion->Update(camera);
 		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
 	
-	}
+	}*/
 
 	model->draw(*unitShader, camera, toWorld);
 

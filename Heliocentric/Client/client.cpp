@@ -205,7 +205,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	
 
-	laser_particles = new ParticleSystem( 3.5f, 1, new LaserEmitter(), particleShader);
+	laser_particles = new ParticleSystem( 0.5f, 1, new LaserEmitter(), particleShader);
 	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);

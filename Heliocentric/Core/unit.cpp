@@ -186,6 +186,7 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 	//player = nullptr;
 	this->set_command(Unit::UNIT_DIE);
 	LOG_DEBUG("Unit " + std::to_string(this->getID()) + " set to UNIT_DIE.");
+	
 }
 
 void Unit::handle_victory(AttackableGameObject * opponent)
@@ -199,9 +200,19 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 void Unit::do_attack(AttackableGameObject* target) {
 	float distance = glm::distance(this->position, target->get_position());
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
-	set_laser_shooting(true);
+	
+	if (target->get_health() <= 50) {
+		set_laser_shooting(false);
+		LOG_DEBUG("LASER OFF is " + std::to_string(target->get_health()) + std::to_string(this->shoot_laser));
+	}
+	else {
+		set_laser_shooting(true);
+		LOG_DEBUG("LASER ON is " + std::to_string(target->get_health()));
+	}
 	if (distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) {
 		AttackableGameObject::do_attack(target);
+		
+		
 		return;
 	}
 	if (dot_product >= 1.05f || dot_product <= 0.95f) {

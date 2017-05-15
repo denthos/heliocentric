@@ -25,7 +25,9 @@ void UnitManager::doLogic() {
 		else {
 			this->unit_updates.insert(active_unit->second->make_update());
 			active_unit++;
+
 		}
+
 	}
 }
 
