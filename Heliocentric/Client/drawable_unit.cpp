@@ -3,10 +3,21 @@
 #include "sphere_mesh.h"
 #include "sphere_model.h"
 #include <glm/gtx/transform.hpp>
-DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship, ParticleSystem* laser) : Unit(unit) {
+DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship, Shader* unitShader, ParticleSystem* laser) : Unit(unit) {
 	this->toWorld = glm::translate(unit.get_position()) * glm::scale(glm::vec3(0.3f));
 	model = spaceship;
 	this->laser = laser;
+
+	//calculate the shooting offset
+	BoundingBox bbox = getBoundingBox();
+	glm::vec3 b_max = bbox.max;
+	glm::vec3 b_min = bbox.min;
+	float z_center = (b_max.z + b_min.z) / 2.0f;
+	shooting_offset = glm::vec3(0.0f, 60.0f, b_max.z - z_center);
+
+	this->unitShader = unitShader;
+	
+
 }
 
 DrawableUnit::~DrawableUnit() {
@@ -22,7 +33,9 @@ void DrawableUnit::update() {
 }
 
 void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
-	model->draw(shader, camera, toWorld);
-	laser->Update(camera);
-	laser->draw(camera, toWorld);
+
+	model->draw(*unitShader, camera, toWorld);
+
+	laser->Update(camera); //probably should go in update function but i need access to the camera somehow...
+	laser->draw(camera, glm::translate(toWorld, shooting_offset));
 }

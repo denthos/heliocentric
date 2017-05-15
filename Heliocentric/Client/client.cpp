@@ -53,7 +53,8 @@
 
 Model rocket;
 QuadMesh* quad; //texture sampler
-ParticleSystem* particles;
+ParticleSystem* laser_particles;
+ParticleSystem* explosion_particles;
 
 
 SkyboxMesh* skybox;
@@ -63,7 +64,7 @@ Shader* cubemapShader;
 Shader * quadShader;
 Shader * bloomShader;
 Shader * blurShader;
-Shader* diffuseShader;
+Shader* unitShader;
 Shader* particleShader;
 
 GLuint RBO;
@@ -196,7 +197,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
-	diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
@@ -204,7 +205,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	rocket = Model(ROCKET_MODEL);
 
-	particles = new ParticleSystem( 3.5f, 1, new LaserEmitter(), particleShader);
+	laser_particles = new ParticleSystem( 3.5f, 1, new LaserEmitter(), particleShader);
+	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
 
@@ -330,8 +332,7 @@ void Client::display() {
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 	octree.draw(*textureShader, *camera);
 	
-	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
-	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
+	rocket.draw(*unitShader, *camera, glm::mat4(1.0f));
 	
 	// blur the things that glow
 	int blurs = 50; //TODO init to number of blur iterations
@@ -391,7 +392,7 @@ void Client::display() {
 }
 
 void Client::update() {
-	particles->Update(*camera);
+	
 	
 	this->keyboard_handler.callKeyboardHandlers();
 	auto& update_queue = Lib::key_acquire(this->update_queue);
@@ -640,7 +641,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
 	units[update->id] = std::make_unique<DrawableUnit>(
 		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), update->att, update->def, update->range, update->health),
-		spaceship, particles
+		spaceship, unitShader, laser_particles
 	);
 }
 
