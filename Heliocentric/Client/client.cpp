@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <soil.h>
-#include <GL/glut.h>
+#include <glad\glad.h>
 
 #include "free_camera.h"
 #include "orbital_camera.h"
@@ -18,7 +18,6 @@
 #include "drawable_planet.h"
 #include "drawable_unit.h"
 #include "skybox_mesh.h"
-#include "glfw_callback_handler.h"
 #include "game_channels.h"
 #include "sphere_mesh.h"
 #include "transformation.h"
@@ -58,6 +57,8 @@
 
 #define CAMERA_SWITCH_KEY "CameraSwitch"
 
+std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
+
 Quad * quad; //texture sampler
 ParticleSystem* particles;
 
@@ -93,20 +94,20 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
+	gui = new GUI(window);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		LOG_ERR("Failed to initialize OpenGL context");
+	}
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
 	glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
-
-	glShadeModel(GL_SMOOTH);
-
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_NORMALIZE);
 	glEnable(GL_TEXTURE_2D);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
   
-  ////////////////////////////////////////////////////
+	////////////////////////////////////////////////////
 	//set up buffers for rendering
 
 	//generate and bind frame buffer for scene rendering
@@ -179,10 +180,13 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	}
 
 	///////////////////////////////////////////////////////////////
-	quad = new Quad();
+	quad = new Quad(); 
+	
 
 	cameras.push_back(new FreeCamera(keyboard_handler, mouse_handler));
 	cameras.push_back(new OrbitalCamera(keyboard_handler, mouse_handler, selection));
+
+	init = true;
 
 	resizeCallback(width, height);
 
@@ -262,7 +266,7 @@ Client::~Client() {
 	cities.clear();
 	slots.clear();
 
-	GLFWCallbackHandler::remove(window, this);
+	glfwEntry.erase(window);
 }
 
 bool Client::isRunning() {
@@ -295,15 +299,54 @@ void Client::createWindow(int width, int height) {
 
 	glfwGetFramebufferSize(window, &width, &height);
 
-	GLenum glewErr = glewInit();
-#ifndef __APPLE__
-	if (glewErr != GLEW_OK) {
-		LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
-		return;
-	}
-#endif
+	glfwEntry[window] = this;
 
-	GLFWCallbackHandler::add(window, this);
+	glfwSetErrorCallback(
+		[](int error, const char * description) {
+			Client::errorCallback(error, description);
+		}
+	);
+
+	glfwSetFramebufferSizeCallback(window,
+		[](GLFWwindow * window, int width, int height) {
+			glfwEntry[window]->resizeCallback(width, height);
+		}
+	);
+
+	glfwSetKeyCallback(window,
+		[](GLFWwindow * window, int key, int scancode, int action, int mods) {
+			glfwEntry[window]->keyCallback(key, scancode, action, mods);
+		}
+	);
+
+	glfwSetCharCallback(window,
+		[](GLFWwindow * window, unsigned int codepoint) {
+			glfwEntry[window]->gui->charCallbackEvent(codepoint);
+		}
+	);
+
+	glfwSetDropCallback(window,
+		[](GLFWwindow * window, int count, const char **filenames) {
+			glfwEntry[window]->gui->dropCallbackEvent(count, filenames);
+		}
+	);
+
+	glfwSetMouseButtonCallback(window,
+		[](GLFWwindow * window, int button, int action, int mods) {
+			glfwEntry[window]->mouseButtonCallback(button, action, mods);
+		}
+	);
+
+	glfwSetCursorPosCallback(window,
+		[](GLFWwindow * window, double x, double y) {
+			glfwEntry[window]->mouseCursorCallback(x, y);
+		}
+	);
+	glfwSetScrollCallback(window,
+		[](GLFWwindow * window, double x, double y) {
+			glfwEntry[window]->scrollWheelCallback(x, y);
+		}
+	);
 }
 
 void Client::display() {
@@ -390,6 +433,9 @@ void Client::display() {
 
 	quadShader->unbind();
 
+	// draw the UI
+	gui->drawWidgets();
+
 	glfwSwapBuffers(window);
 
 	glfwPollEvents();
@@ -415,6 +461,7 @@ void Client::errorCallback(int error, const char * description) {
 }
 
 void Client::resizeCallback(int width, int height) {
+	if (!init) return;
 	// resize the camera
 	for (auto camera : cameras) {
 		camera->width = width;
@@ -444,6 +491,33 @@ void Client::resizeCallback(int width, int height) {
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glViewport(0, 0, width, height);
+
+	if (gui) {
+		gui->resizeCallbackEvent(width, height);
+	}
+}
+
+void Client::keyCallback(int key, int scancode, int action, int mods) {
+	if (!gui->keyCallbackEvent(key, scancode, action, mods))
+		keyboard_handler.keyCallback(key, scancode, action, mods);
+}
+
+void Client::mouseButtonCallback(int button, int action, int mods) {
+	if (!gui->mouseButtonCallbackEvent(button, action, mods)) {
+		mouse_handler.mouseButtonCallback(button, action, mods);
+	}
+}
+
+void Client::mouseCursorCallback(double x, double y) {
+	if (!gui->cursorPosCallbackEvent(x, y)) {
+		mouse_handler.mouseCursorCallback(x, y);
+	}
+}
+
+void Client::scrollWheelCallback(double x, double y) {
+	if (!gui->scrollCallbackEvent(x, y)) {
+		mouse_handler.mouseWheelCallback(x, y);
+	}
 }
 
 void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
@@ -452,6 +526,7 @@ void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position)
 	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
 	if (selected) {
 		selection.push_back(selected);
+		gui->updateSelection(selected);
 		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
 	}
 }

@@ -22,7 +22,8 @@
 #include "tcp_socket_connection.hpp"
 #include "universe.h"
 #include "unit_manager.h"
-#include <GL\glew.h>
+#include "gui.h"
+#include <glad\glad.h>
 #include <GLFW/glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
 #include <string>
@@ -35,20 +36,18 @@
 #include "trade_deal.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
-public:	
+public:
+	static std::unordered_map<GLFWwindow *, Client *> glfwEntry;
+
 	Client();
 	~Client(); // free all memory here
 
 	Universe universe;
 	UnitManager unit_manager;
-	KeyboardHandler keyboard_handler;
-	MouseHandler mouse_handler;
 
 	bool isRunning();
 	void display();
 	void update();
-	void errorCallback(int error, const char * description);
-	void resizeCallback(int width, int height);
 
 	void mouseClickHandler(MouseButton, ScreenPosition);
 	
@@ -69,10 +68,15 @@ protected:
 
 private:
 	GLFWwindow * window;
+	GUI * gui;
 	unsigned int selectedCamera;
 	std::vector<Camera *> cameras;
 	std::vector<GameObject *> selection;
 	std::string windowTitle;
+	bool init = false;
+
+	KeyboardHandler keyboard_handler;
+	MouseHandler mouse_handler;
 
 	std::unordered_map<UID, std::shared_ptr<Player>> players;
 	std::unordered_map<UID, std::unique_ptr<DrawablePlanet>> planets;
@@ -87,6 +91,14 @@ private:
 	Lib::Lock<std::queue<std::function<void()>>> update_queue;
 
 	void createWindow(int width, int height);
+
+	// glfw callbacks
+	static void errorCallback(int error, const char * description);
+	void resizeCallback(int width, int height);
+	void keyCallback(int key, int scancode, int action, int mods);
+	void mouseButtonCallback(int button, int action, int mods);
+	void mouseCursorCallback(double x, double y);
+	void scrollWheelCallback(double x, double y);
 
 	void handleCameraSwitch(int);
 	void handleEscapeKey(int);

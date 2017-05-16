@@ -79,9 +79,6 @@
     <ClInclude Include="laser_emitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="glfw_callback_handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="octree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -157,6 +154,9 @@
     <ClInclude Include="assimp_geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
@@ -208,9 +208,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="skybox_mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="glfw_callback_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="keyboard_handler.cpp">
@@ -265,6 +262,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="assimp_geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\packages\nanogui\ext\glad\src\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="orbital_camera.cpp">

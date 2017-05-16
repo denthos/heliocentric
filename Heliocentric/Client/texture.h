@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "GL\glew.h"
+#include <glad\glad.h>
 #include "soil.h"
 
 #include <assimp\scene.h> //ai textures
