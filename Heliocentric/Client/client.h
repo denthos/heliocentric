@@ -69,7 +69,8 @@ protected:
 
 private:
 	GLFWwindow * window;
-	Camera * camera;
+	unsigned int selectedCamera;
+	std::vector<Camera *> cameras;
 	std::vector<GameObject *> selection;
 	std::string windowTitle;
 
@@ -87,6 +88,7 @@ private:
 
 	void createWindow(int width, int height);
 
+	void handleCameraSwitch(int);
 	void handleEscapeKey(int);
 	void handleF1Key(int);
 	void handleF2Key(int);

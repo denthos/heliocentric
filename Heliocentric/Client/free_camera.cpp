@@ -1,6 +1,5 @@
 #include "free_camera.h"
 
-#include <GLFW\glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
 
 #define FORWARD_KEY "ForwardKey"
@@ -9,6 +8,12 @@
 #define RIGHT_KEY "RightKey"
 #define UP_KEY "UpKey"
 #define DOWN_KEY "DownKey"
+#define RESET_KEY "ResetKey"
+
+#define DEFAULT_POSITION glm::vec3(0.0f, 0.0f, 1000.0f)
+#define DEFAULT_TARGET glm::vec3(0.0f, 0.0f, 0.0f)
+#define DEFAULT_UP glm::vec3(0.0f, 1.0f, 0.0f)
+
 #define CAMERA_SPEED "CameraSpeed"
 #define CAMERA_SENSITIVITY "CameraSensitivity"
 #define INVERT_Y_AXIS "InvertYAxis"
@@ -57,6 +62,13 @@ void FreeCamera::handleKeyInput(int key) {
 		position -= translation;
 		target -= translation;
 	}
+	else if (key == resetKey) {
+		position = DEFAULT_POSITION;
+		target = DEFAULT_TARGET;
+		up = DEFAULT_UP;
+		yaw = -90.0f;
+		pitch = 0.0f;
+	}
 }
 
 void FreeCamera::loadSettings(KeyboardHandler & keyboardHandler, Lib::INIParser & config) {
@@ -68,8 +80,9 @@ void FreeCamera::loadSettings(KeyboardHandler & keyboardHandler, Lib::INIParser 
 	rightKey = (int)config.get<char>(RIGHT_KEY);
 	upKey = (int)config.get<char>(UP_KEY);
 	downKey = (int)config.get<char>(DOWN_KEY);
+	resetKey = (int)config.get<char>(RESET_KEY);
 
-	keyboardHandler.registerKeyDownHandler({ forwardKey, backwardKey, leftKey, rightKey, upKey, downKey }, std::bind(&FreeCamera::handleKeyInput, this, std::placeholders::_1));
+	keyboardHandler.registerKeyDownHandler({ forwardKey, backwardKey, leftKey, rightKey, upKey, downKey, resetKey }, std::bind(&FreeCamera::handleKeyInput, this, std::placeholders::_1));
 
 	// load other settings
 	this->speed = config.get<float>(CAMERA_SPEED);

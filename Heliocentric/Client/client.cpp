@@ -10,6 +10,7 @@
 #include <GL/glut.h>
 
 #include "free_camera.h"
+#include "orbital_camera.h"
 #include "quad.h"
 #include "particle_system.h"
 #include "thruster_emitter.h"
@@ -53,6 +54,8 @@
 #define COLOR_BUFFERS 2
 #define REGULAR_BUFFER 0
 #define BRIGHTNESS_BUFFER 1
+
+#define CAMERA_SWITCH_KEY "CameraSwitch"
 
 Quad * quad; //texture sampler
 ParticleSystem* particles;
@@ -177,13 +180,12 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	///////////////////////////////////////////////////////////////
 	quad = new Quad();
 
-	camera = new FreeCamera(keyboard_handler, mouse_handler);
-
-	octree.enableViewFrustumCulling(&camera->viewFrustum);
+	cameras.push_back(new FreeCamera(keyboard_handler, mouse_handler));
+	cameras.push_back(new OrbitalCamera(keyboard_handler, mouse_handler, selection));
 
 	resizeCallback(width, height);
 
-	octree.enableViewFrustumCulling(&camera->viewFrustum);
+	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
@@ -221,6 +223,10 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
+	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
+	if (cameraSwitchKey >= 97 && cameraSwitchKey <= 122) cameraSwitchKey -= 32;
+
+	this->keyboard_handler.registerKeyPressHandler(cameraSwitchKey, std::bind(&Client::handleCameraSwitch, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
@@ -306,9 +312,9 @@ void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	camera->update();
-	camera->calculateViewMatrix();
-	camera->calculateViewFrustum();
+	cameras[selectedCamera]->update();
+	cameras[selectedCamera]->calculateViewMatrix();
+	cameras[selectedCamera]->calculateViewFrustum();
 
 	octree.clear();
 
@@ -326,14 +332,14 @@ void Client::display() {
 	}
 	octree.update();
 
-	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
-	octree.draw(*textureShader, *camera);
+	skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+	octree.draw(*textureShader, *cameras[selectedCamera]);
 	
 	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
 	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
 	
 	// blur the things that glow
-	int blurs = 50; //TODO init to number of blur iterations
+	int blurs = 5; //TODO init to number of blur iterations
 	bool blurX = true;
 
 	blurShader->bind();
@@ -389,7 +395,10 @@ void Client::display() {
 }
 
 void Client::update() {
-	particles->Update(*camera);
+
+	cameras[selectedCamera]->update();
+
+	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
 
@@ -406,7 +415,7 @@ void Client::errorCallback(int error, const char * description) {
 
 void Client::resizeCallback(int width, int height) {
 	// resize the camera
-	if (camera) {
+	for (auto camera : cameras) {
 		camera->width = width;
 		camera->height = height;
 		camera->aspectRatio = (float)width / (float)height;
@@ -438,12 +447,18 @@ void Client::resizeCallback(int width, int height) {
 
 void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
 	selection.clear();
-	camera->calculateViewMatrix();
-	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(camera->projectRay(position)));
+	cameras[selectedCamera]->calculateViewMatrix();
+	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
 	if (selected) {
 		selection.push_back(selected);
 		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
 	}
+}
+
+void Client::handleCameraSwitch(int key) {
+	selectedCamera++;
+	if (selectedCamera >= cameras.size()) selectedCamera = 0;
+	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 }
 
 void Client::handleEscapeKey(int key) {

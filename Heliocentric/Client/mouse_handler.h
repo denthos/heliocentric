@@ -4,6 +4,9 @@
 #include "mouse_button_status.h"
 #include <functional>
 
+// this include isn't actually required here, but we want anything that
+//   gets our new define to also have all of the regular key definitions
+#include "GLFW\glfw3.h"
 #define GLFW_MOD_NONE 0
 
 typedef std::pair<int, int> MouseButton;

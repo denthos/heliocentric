@@ -20,27 +20,30 @@ void Camera::loadSettings(Lib::INIParser & config) {
 
 }
 
-void Camera::calculateViewMatrix() {
+glm::mat4 Camera::calculateViewMatrix() {
 	view = glm::lookAt(position, target, up);
+	return view;
 }
 
-void Camera::calculatePerspectiveMatrix() {
+glm::mat4 Camera::calculatePerspectiveMatrix() {
 
 	if (height > 0) {
 		aspectRatio = (float)width / (float)height;
 		perspective = glm::perspective((float)fov, aspectRatio, nearDist, farDist);
 	}
+	return perspective;
 }
 
-void Camera::calculateInfinitePerspectiveMatrix()
+glm::mat4 Camera::calculateInfinitePerspectiveMatrix()
 {
 	if (height > 0) {
 		infinite_perspective = glm::infinitePerspective((float)fov, aspectRatio, nearDist);
 	}
+	return infinite_perspective;
 }
 
 
-void Camera::calculateViewFrustum() {
+ViewFrustum Camera::calculateViewFrustum() {
 	float tang = glm::tan(toRad * fov);
 	float nearHeight = tang * nearDist;
 	float nearWidth = nearHeight * aspectRatio;
@@ -75,6 +78,8 @@ void Camera::calculateViewFrustum() {
 	aux = glm::normalize((nearCenter + (x * nearWidth)) - this->position);
 	normal = glm::cross(y, aux);
 	viewFrustum.planes[RIGHT_PLANE] = Plane(nearCenter + (x * nearWidth), normal);
+
+	return viewFrustum;
 }
 
 Ray Camera::projectRay(std::pair<float, float> screenPosition) const {

@@ -11,7 +11,7 @@ public:
 	virtual void update();
 	virtual void loadSettings(KeyboardHandler &, Lib::INIParser & config = Lib::INIParser::getInstance());
 private:
-	int forwardKey, backwardKey, leftKey, rightKey, upKey, downKey;
+	int forwardKey, backwardKey, leftKey, rightKey, upKey, downKey, resetKey;
 	float speed, sensitivity, invertYAxis;
 	float yaw, pitch;
 	void handleKeyInput(int);
