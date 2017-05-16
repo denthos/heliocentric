@@ -117,8 +117,7 @@ void Player::trade_deal_decline(UID id) {
 
 std::shared_ptr<TradeDeal> Player::get_trade_deal(UID id) {
 	if (pending_trade_deals.find(id) == pending_trade_deals.end()) {
-		LOG_ERR("Invalid trade deal ID");
-		return nullptr;
+		throw BadUIDException();
 	}
 
 	return pending_trade_deals[id];

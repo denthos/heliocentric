@@ -331,9 +331,12 @@ void GameServer::handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, 
 
 	/* It's called "recipient" because it's the recipient of this deal, even though its connection is named "sender". */
 	Player* recipient = this->extractPlayerFromConnection(sender);
-	std::shared_ptr<TradeDeal> trade_deal = recipient->get_trade_deal(command->initiator);
-	if (trade_deal == nullptr) {
-		return;
+	std::shared_ptr<TradeDeal> trade_deal;
+	try {
+		trade_deal = recipient->get_trade_deal(command->initiator);
+	}
+	catch (Identifiable::BadUIDException e) {
+		LOG_ERR("Invalid trade deal ID");
 	}
 
 	switch (command->command_type) {
