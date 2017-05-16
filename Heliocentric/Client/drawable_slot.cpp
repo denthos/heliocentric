@@ -3,10 +3,12 @@
 #include "drawable_city.h"
 #include "sphere_model.h"
 
+#include <glm/gtx/transform.hpp>
+
 DrawableSlot::DrawableSlot(const Slot& slot, DrawablePlanet* planet) : Slot(slot) {
 	this->planet = planet;
-	this->model = new SphereModel(Texture::getInstance("Textures/sun.jpg"));
-	this->toWorld = glm::translate(glm::mat4(1.0f), get_absolute_position());
+	this->model = Model::getInstance("Models/donut.obj");
+	this->toWorld = glm::translate(get_absolute_position()) *  get_spherical_position().getRotationMatrix() * glm::scale(glm::vec3(planet->get_radius() / 10.0f));
 }
 
 void DrawableSlot::update() {
@@ -17,7 +19,7 @@ void DrawableSlot::update() {
 		}
 	}
 	else {
-		this->toWorld = glm::translate(glm::mat4(1.0f), get_absolute_position());
+		this->toWorld = glm::translate(get_absolute_position()) *  get_spherical_position().getRotationMatrix() * glm::scale(glm::vec3(planet->get_radius() / 10.0f));
 	}
 }
 

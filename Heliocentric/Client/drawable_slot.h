@@ -7,6 +7,7 @@ class DrawablePlanet;
 class DrawableCity;
 
 class DrawableSlot : public Slot, public Drawable {
+
 public:
 	DrawableSlot(const Slot&, DrawablePlanet* planet);
 	virtual void update();
