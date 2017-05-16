@@ -152,6 +152,12 @@
     <ClInclude Include="singleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="attack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="instant_laser_attack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -261,6 +267,9 @@
     </ClCompile>
     <ClCompile Include="trade_data.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="attack.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

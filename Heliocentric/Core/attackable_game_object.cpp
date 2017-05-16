@@ -3,21 +3,16 @@
 #include <glm\gtc\matrix_transform.hpp>
 
 
-AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, int att, int def, int range, int heal) : 
-	GameObject(position, player), combatAttack(att), combatDefense(def), combatRange(range), health(heal) {};
+AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
+	GameObject(position, player),  attack(*attack), combatDefense(def),  health(heal) {};
 
 
-AttackableGameObject::AttackableGameObject(UID id, glm::vec3 position, Player* player, int att, int def, int range, int heal) : 
-	GameObject(id, position, player), combatAttack(att), combatDefense(def), combatRange(range), health(heal) {};
+AttackableGameObject::AttackableGameObject(UID id, glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
+	GameObject(id, position, player), attack(*attack), combatDefense(def), health(heal) {};
 
 
-int AttackableGameObject::get_combat_attack() {
-	return this->combatAttack;
-}
-
-int AttackableGameObject::set_combat_attack(int combatAttack) {
-	this->combatAttack = combatAttack;
-	return this->combatAttack;
+Attack& AttackableGameObject::getAttack() {
+	return this->attack;
 }
 
 int AttackableGameObject::get_combat_defense() {
@@ -27,15 +22,6 @@ int AttackableGameObject::get_combat_defense() {
 int AttackableGameObject::set_combat_defense(int combatDefense) {
 	this->combatDefense = combatDefense;
 	return this->combatDefense;
-}
-
-int AttackableGameObject::get_combat_range() {
-	return this->combatRange;
-}
-
-int AttackableGameObject::set_combat_range(int combatRange) {
-	this->combatRange = combatRange;
-	return this->combatRange;
 }
 
 int AttackableGameObject::get_health() {
@@ -65,10 +51,10 @@ void AttackableGameObject::do_attack(AttackableGameObject * target)
 	LOG_DEBUG("Target position is " + std::to_string(target->get_position().x) + " " + std::to_string(target->get_position().y) + " " + std::to_string(target->get_position().z));
 	LOG_DEBUG("Distance between attacker and target is " + std::to_string(glm::distance(this->position, target->get_position())));
 
-	if (glm::distance(this->position, target->get_position()) <= (float) this->combatRange) {
-		// Target is within range.
+	if (glm::distance(this->position, target->get_position()) <= (float) this->attack.getRange()) {
 
-		target->take_damage(this->get_combat_attack());
+		// Target is within range.
+		this->attack.doAttack(target);
 
 		if (target->health <= 0) {
 			target->handle_defeat(this);

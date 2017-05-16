@@ -2,7 +2,7 @@
 #include "CppUnitTest.h"
 #include "unit.h"
 #include "glm/gtc/matrix_transform.hpp"
-
+#include "instant_laser_attack.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -12,7 +12,7 @@ namespace Test
 	class TestUnit : public Unit {
 
 	public:
-		TestUnit(UID id, glm::vec3 position) : Unit(id, position, NULL, 1, 1, 200, 100) {
+		TestUnit(UID id, glm::vec3 position) : Unit(id, position, NULL, new InstantLaserAttack(), 100, 100) {
 			this->movement_speed = 200;
 		}
 

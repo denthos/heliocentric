@@ -5,15 +5,15 @@
 #pragma once
 #include "lib.h"
 #include "game_object.h"
+#include "attack.h"
 
 /**
 An abstract class that defines an attackable game object.
 */
 class AttackableGameObject : public GameObject {
 protected:
-	int combatAttack;
+	Attack attack;
 	int combatDefense;
-	int combatRange; // An attackable game object can attack its target only when target is in this range.
 	int health;
 
 
@@ -51,16 +51,16 @@ public:
 	/**
 	Creates an attackable 
 	*/
-	AttackableGameObject(glm::vec3 position, Player* player, int att, int def, int range, int heal);
+	AttackableGameObject(glm::vec3 position, Player* player, Attack* attack, int def, int heal);
 
 
-	AttackableGameObject(UID id, glm::vec3 position, Player* player, int att, int def, int range, int heal);
+	AttackableGameObject(UID id, glm::vec3 position, Player* player, Attack* attack, int def, int heal);
 
 	/**
 	Returns the attack strength of this object.
 	@return The attack strength of this object.
 	*/
-	int get_combat_attack();
+	Attack& getAttack();
 
 	/**
 	Sets the attack strength of this object.

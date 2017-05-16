@@ -32,6 +32,7 @@
 #include "unit_command.h"
 #include "trade_command.h"
 #include "trade_deal.h"
+#include "instant_laser_attack.h"
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -594,7 +595,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	LOG_DEBUG("Unit creation update received");
 	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
 	units[update->id] = std::make_unique<DrawableUnit>(
-		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), update->att, update->def, update->range, update->health),
+		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), new InstantLaserAttack(), update->def, update->health),
 		spaceship
 	);
 }
@@ -609,7 +610,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 
 	auto& update_queue = Lib::key_acquire(this->update_queue);
 	std::function<void()> createCityFunc = [slot_iter, update, player_iter]() {
-		slot_iter->second->attachCity(new DrawableCity(City(update->city_id, player_iter->second.get(), 0, 0, 0, 0, 0, 0, slot_iter->second)));
+		slot_iter->second->attachCity(new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second)));
 	};
 
 	update_queue.get().push(createCityFunc);

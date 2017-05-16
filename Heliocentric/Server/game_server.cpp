@@ -8,6 +8,7 @@
 #include "city.h"
 #include "player_id_confirmation.h"
 #include "city_creation_update.h"
+#include "instant_laser_attack.h"
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
@@ -251,7 +252,7 @@ void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sen
 	}
 
 	// TODO: Create the city from the player's current technologies
-	City* new_city = new City(owning_player, 0, 0, 0, 0, 0, 0, slot_iter->second);
+	City* new_city = new City(owning_player, new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second);
 	slot_iter->second->attachCity(new_city);
 
 	/* Bundle and send the update */

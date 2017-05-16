@@ -30,7 +30,7 @@ public:
 	@param heal Health stat of this unit.
   @param movement_speed Movement speed of this unit.
 	*/
-	Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
+	Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed = 1.0f);
 
 	/**
 	Unit constructor with a specified UID. Essentially creates a "copy" of this
@@ -44,7 +44,7 @@ public:
 	@param heal Health stat of this unit.
   @param movement_speed Movement speed of this unit.
 	*/
-	Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed = 1.0f);
+	Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed = 1.0f);
   
 	/** 
 	Perform logic based on command. Called continuously by server to update current state 
