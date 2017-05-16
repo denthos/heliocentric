@@ -14,6 +14,7 @@ private:
 	int forwardKey, backwardKey, leftKey, rightKey, upKey, downKey, resetKey;
 	float speed, sensitivity, invertYAxis;
 	float yaw, pitch;
+
 	void handleKeyInput(int);
 	void handleCursorInput(const MouseButtonMap &, ScreenPosition, ScreenPosition);
 	void handleWheelInput(ScreenPosition);

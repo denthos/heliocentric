@@ -185,6 +185,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	cameras.push_back(new FreeCamera(keyboard_handler, mouse_handler));
 	cameras.push_back(new OrbitalCamera(keyboard_handler, mouse_handler, selection));
+	cameras[selectedCamera]->setActive(true);
 
 	init = true;
 
@@ -532,9 +533,11 @@ void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position)
 }
 
 void Client::handleCameraSwitch(int key) {
+	cameras[selectedCamera]->setActive(false);
 	selectedCamera++;
 	if (selectedCamera >= cameras.size()) selectedCamera = 0;
 	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
+	cameras[selectedCamera]->setActive(true);
 }
 
 void Client::handleEscapeKey(int key) {

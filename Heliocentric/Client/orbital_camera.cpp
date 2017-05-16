@@ -15,6 +15,7 @@ OrbitalCamera::OrbitalCamera(KeyboardHandler & keyboardHandler, MouseHandler & m
 }
 
 void OrbitalCamera::update() {
+	if (!active) return;
 	if (selection.size() == 1) {
 		glm::vec3 oldTarget = this->target;
 		this->target = selection[0]->get_position();
@@ -33,6 +34,7 @@ void OrbitalCamera::loadSettings(KeyboardHandler & keyboardHandler, Lib::INIPars
 }
 
 void OrbitalCamera::handleCursorInput(const MouseButtonMap & mouseButtons, ScreenPosition currPosition, ScreenPosition lastPosition) {
+	if (!active) return;
 	if (mouseButtons.at(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE)).down) {
 		glm::vec3 camFocus = position - target;
 		glm::vec3 right = glm::cross(up, glm::normalize(camFocus));
@@ -45,11 +47,13 @@ void OrbitalCamera::handleCursorInput(const MouseButtonMap & mouseButtons, Scree
 }
 
 void OrbitalCamera::handleWheelInput(ScreenPosition input) {
+	if (!active) return;
 	glm::vec3 translate = (target - position) * this->speed * input.second * 0.01f;
 	this->position += translate;
 }
 
 void OrbitalCamera::handleReset(int key) {
+	if (!active) return;
 	if (key == resetKey) {
 		this->target = glm::vec3(0.0f);
 		this->position = glm::vec3(0.0f, 0.0f, 250.0f);

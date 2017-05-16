@@ -30,6 +30,7 @@ void FreeCamera::update() {
 }
 
 void FreeCamera::handleKeyInput(int key) {
+	if (!active) return;
 	// can't use member variables in switch statements
 	//   so we use a long if chain
 	if (key == forwardKey) {
@@ -91,6 +92,7 @@ void FreeCamera::loadSettings(KeyboardHandler & keyboardHandler, Lib::INIParser 
 }
 
 void FreeCamera::handleCursorInput(const MouseButtonMap & mouseButtons, ScreenPosition currPosition, ScreenPosition lastPosition) {
+	if (!active) return;
 	if (mouseButtons.at(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE)).down) {
 		float xoffset = (currPosition.first - lastPosition.first) * sensitivity;
 		float yoffset = (currPosition.second - lastPosition.second) * sensitivity * invertYAxis;
@@ -113,6 +115,7 @@ void FreeCamera::handleCursorInput(const MouseButtonMap & mouseButtons, ScreenPo
 }
 
 void FreeCamera::handleWheelInput(ScreenPosition input) {
+	if (!active) return;
 	fov -= input.second * sensitivity;
 	if (fov <= 44.5f)
 		fov = 44.5f;

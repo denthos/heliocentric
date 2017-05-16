@@ -9,8 +9,8 @@ Camera::Camera() : Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 
 
 }
 
-Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, float nearDist, float farDist, int width, int height) :
-	position(position), target(target), up(up), fov(fov), nearDist(nearDist), farDist(farDist), width(width), height(height) {
+Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, float nearDist, float farDist, int width, int height, bool active) :
+	position(position), target(target), up(up), fov(fov), nearDist(nearDist), farDist(farDist), width(width), height(height), active(active) {
 	calculateViewMatrix();
 	calculatePerspectiveMatrix();
 	calculateInfinitePerspectiveMatrix();
@@ -80,6 +80,10 @@ ViewFrustum Camera::calculateViewFrustum() {
 	viewFrustum.planes[RIGHT_PLANE] = Plane(nearCenter + (x * nearWidth), normal);
 
 	return viewFrustum;
+}
+
+void Camera::setActive(bool b) {
+	active = b;
 }
 
 Ray Camera::projectRay(std::pair<float, float> screenPosition) const {
