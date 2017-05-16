@@ -31,7 +31,7 @@ void DrawableUnit::update() {
 }
 
 void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
-	
+	laser->Update(camera); //probably should go in update function but i need access to the camera somehow...
 	if (false) {//always true for now
 		unitShader->bind();
 		glUniform1i(glGetUniformLocation(unitShader->getPid(), "explode_on"), true);
@@ -44,7 +44,7 @@ void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 	model->draw(*unitShader, camera, toWorld);
 
 	if(this->shoot_laser){
-		laser->Update(camera); //probably should go in update function but i need access to the camera somehow...
+		
 		laser->draw(camera, glm::translate(toWorld, shooting_offset));
 	}
 	
