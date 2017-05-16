@@ -35,7 +35,7 @@ void DrawableUnit::update() {
 
 void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 	
-	if (true) {//always true for now
+	if (false) {//always true for now
 		unitShader->bind();
 		glUniform1i(glGetUniformLocation(unitShader->getPid(), "explode_on"), true);
 

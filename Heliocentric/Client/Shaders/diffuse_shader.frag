@@ -30,6 +30,7 @@ layout (location = 1) out vec4 buffer1_color;
 uniform vec3 viewPos;
 uniform PointLight pointLight;
 uniform float time;
+uniform bool explode_on;
 
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
@@ -55,6 +56,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
 vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lerpColor = m_diffuse;
+    if(explode_on){
     float stop1 = 0.7;
 
     vec3 red = vec3(1.0,0.0,0.0);
@@ -70,7 +72,7 @@ vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
     }
 
     lerpColor = (1-factor) * lerpColor + (factor) * toColor;
-    
+    }
     vec3 lightDir = normalize(-fragPos);
     // Diffuse shading
     float diff = max(dot(normal, lightDir), 0.0f);
