@@ -139,6 +139,18 @@
     <ClInclude Include="ray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="orbital_camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="free_camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mouse_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mouse_button_status.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="quad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -233,6 +245,12 @@
     </ClCompile>
     <ClCompile Include="drawable_city.cpp">
       <Filter>Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="free_camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mouse_handler.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mesh_geometry.cpp">
       <Filter>Source Files</Filter>

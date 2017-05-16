@@ -28,8 +28,8 @@
 #include <string>
 #include <unordered_map>
 #include "keyboard_handler.h"
+#include "mouse_handler.h"
 #include "city_creation_update.h"
-
 #include "locked_item.h"
 #include "trade_data.h"
 #include "trade_deal.h"
@@ -42,16 +42,15 @@ public:
 	Universe universe;
 	UnitManager unit_manager;
 	KeyboardHandler keyboard_handler;
+	MouseHandler mouse_handler;
 
 	bool isRunning();
 	void display();
 	void update();
 	void errorCallback(int error, const char * description);
 	void resizeCallback(int width, int height);
-	void keyCallback(int key, int scancode, int action, int mods);
-	void mouseButtonCallback(int button, int action, int mods);
-	void mouseCursorCallback(double x, double y);
-	void mouseWheelCallback(double x, double y);
+
+	void mouseClickHandler(MouseButton, ScreenPosition);
 	
 	void playerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerUpdate>);
 	void unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitCreationUpdate>);
@@ -71,6 +70,7 @@ protected:
 private:
 	GLFWwindow * window;
 	Camera * camera;
+	std::vector<GameObject *> selection;
 	std::string windowTitle;
 
 	std::unordered_map<UID, std::shared_ptr<Player>> players;
@@ -85,12 +85,9 @@ private:
 	/* Updates to be performed that are graphics related. All graphics work need to be done in main thread. */
 	Lib::Lock<std::queue<std::function<void()>>> update_queue;
 
-	std::shared_ptr<Player> player;
-
 	void createWindow(int width, int height);
 
 	void handleEscapeKey(int);
-	void handleCameraPanButtonDown(int);
 	void handleF1Key(int);
 	void handleF2Key(int);
 	void handleF3Key(int);

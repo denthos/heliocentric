@@ -9,6 +9,7 @@
 #include <soil.h>
 #include <GL/glut.h>
 
+#include "free_camera.h"
 #include "quad.h"
 #include "particle_system.h"
 #include "thruster_emitter.h"
@@ -77,22 +78,8 @@ Model * spaceship;
 Model * rocket;
 //don't forget to clean up afterwards
 
-
-
 //multiple render targets to specify more than one frag shader output
 GLuint color_buff[COLOR_BUFFERS]; //2 color buffers to attach to frame buffer: 1 for regular scene, one for bright objects
-
-std::pair<double, double> lastMousePos;
-bool leftMouseDown = false;
-bool rightMouseDown = false;
-bool middleMouseDown = false;
-
-#define FREE_CAMERA 1
-#define FREE_CAMERA_2 2
-#define ORBITAL_CAMERA 3
-unsigned char selectedControlScheme = FREE_CAMERA;
-
-GameObject * selectedObject;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
@@ -190,7 +177,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	///////////////////////////////////////////////////////////////
 	quad = new Quad();
 
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height);
+	camera = new FreeCamera(keyboard_handler, mouse_handler);
+
+	octree.enableViewFrustumCulling(&camera->viewFrustum);
 
 	resizeCallback(width, height);
 
@@ -241,8 +230,10 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
-		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
+
+	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
+		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
+
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -315,6 +306,7 @@ void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	camera->update();
 	camera->calculateViewMatrix();
 	camera->calculateViewFrustum();
 
@@ -419,6 +411,7 @@ void Client::resizeCallback(int width, int height) {
 		camera->height = height;
 		camera->aspectRatio = (float)width / (float)height;
 		camera->calculatePerspectiveMatrix();
+		camera->calculateInfinitePerspectiveMatrix();
 	}
 
 	// resize our buffers
@@ -443,31 +436,13 @@ void Client::resizeCallback(int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-void Client::keyCallback(int key, int scancode, int action, int mods) {
-	if (action == GLFW_PRESS) {
-		this->keyboard_handler.setKeyDown(key);
-	}
-	else if (action == GLFW_RELEASE) {
-		this->keyboard_handler.setKeyUp(key);
-	}
-}
-
-void Client::handleCameraPanButtonDown(int key) {
-	/* We are going to attempt to move the camera! */
-	auto speed = 1.0f;
-	switch (key) {
-	case GLFW_KEY_W:
-		camera->position += speed * glm::vec3(0.0f, 0.0f, -1.0f);
-		break;
-	case GLFW_KEY_S:
-		camera->position -= speed * glm::vec3(0.0f, 0.0f, -1.0f);
-		break;
-	case GLFW_KEY_D:
-		camera->position += glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
-		break;
-	case GLFW_KEY_A:
-		camera->position -= glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
-		break;
+void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	selection.clear();
+	camera->calculateViewMatrix();
+	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(camera->projectRay(position)));
+	if (selected) {
+		selection.push_back(selected);
+		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
 	}
 }
 
@@ -583,70 +558,6 @@ void Client::handleF12Key(int key) {
 	this->channeled_send(&command);
 }
 
-void Client::mouseButtonCallback(int button, int action, int mods) {
-	double x, y;
-	glfwGetCursorPos(window, &x, &y);
-	lastMousePos = std::make_pair(x, y);
-	if (action == GLFW_PRESS) {
-		switch (button) {
-		case(GLFW_MOUSE_BUTTON_LEFT):
-			leftMouseDown = true;
-			break;
-		case(GLFW_MOUSE_BUTTON_RIGHT):
-			rightMouseDown = true;
-			break;
-		case(GLFW_MOUSE_BUTTON_MIDDLE):
-			middleMouseDown = true;
-			break;
-		default:
-			return;
-		}
-	}
-	else if (action == GLFW_RELEASE) {
-		GameObject * selection;
-		switch (button) {
-		case(GLFW_MOUSE_BUTTON_LEFT):
-			leftMouseDown = false;
-			camera->calculateViewMatrix();
-			selection = dynamic_cast<GameObject *>(octree.intersect(camera->projectRay((int)x, (int)y)));
-			if (selection) {
-				selectedObject = selection;
-				LOG_INFO("Selected game object with UID <", selectedObject->getID(), ">");
-			}
-			
-			break;
-		case(GLFW_MOUSE_BUTTON_RIGHT):
-			rightMouseDown = false;
-			break;
-		case(GLFW_MOUSE_BUTTON_MIDDLE):
-			middleMouseDown = false;
-			break;
-		default:
-			return;
-		}
-	}
-}
-
-void Client::mouseCursorCallback(double x, double y) {
-	if (rightMouseDown) {
-		float angle;
-		// Perform horizontal (y-axis) rotation
-		angle = (float)(lastMousePos.first - x) / 100.0f;
-		camera->position = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camera->position, 1.0f));
-		camera->up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camera->up, 1.0f));
-		//Now rotate vertically based on current orientation
-		angle = (float)(y - lastMousePos.second) / 100.0f;
-		glm::vec3 axis = glm::cross((camera->position - camera->target), camera->up);
-		camera->position = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camera->position, 1.0f));
-		camera->up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camera->up, 1.0f));
-		lastMousePos = std::make_pair(x, y);
-	}
-}
-
-void Client::mouseWheelCallback(double x, double y) {
-	camera->position = glm::vec3(glm::translate(glm::mat4(1.0f), camera->position * (float)y * -0.05f) * glm::vec4(camera->position, 1.0f));
-}
-
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
 	LOG_DEBUG("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
@@ -687,17 +598,6 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	};
 
 	update_queue.get().push(createCityFunc);
-}
-
-void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
-	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
-	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
-	this->player = std::make_shared<Player>(player_name, update->id);
-	players[update->id] = this->player;
-
-	PlayerClientToServerTransfer info_transfer(player_name);
-
-	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {

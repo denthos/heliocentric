@@ -1,5 +1,16 @@
 #include "keyboard_handler.h"
 
+#include <GLFW\glfw3.h>
+
+void KeyboardHandler::keyCallback(int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		setKeyDown(key);
+	}
+	else if (action == GLFW_RELEASE) {
+		setKeyUp(key);
+	}
+}
+
 void KeyboardHandler::callHandler(KeyHandlerMap& handlers, int key) {
 	auto& handler_it = handlers.find(key);
 	if (handler_it != handlers.end()) {

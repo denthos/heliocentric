@@ -12,19 +12,19 @@ void resizeCallback(GLFWwindow * window, int width, int height) {
 }
 void keyCallback(GLFWwindow * window, int key, int scancode, int action, int mods) {
 	if (GLFWCallbackHandler::clients[window])
-		GLFWCallbackHandler::clients[window]->keyCallback(key, scancode, action, mods);
+		GLFWCallbackHandler::clients[window]->keyboard_handler.keyCallback(key, scancode, action, mods);
 }
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods) {
 	if (GLFWCallbackHandler::clients[window])
-		GLFWCallbackHandler::clients[window]->mouseButtonCallback(button, action, mods);
+		GLFWCallbackHandler::clients[window]->mouse_handler.mouseButtonCallback(button, action, mods);
 }
 void mouseCursorCallback(GLFWwindow * window, double x, double y) {
 	if (GLFWCallbackHandler::clients[window])
-		GLFWCallbackHandler::clients[window]->mouseCursorCallback(x, y);
+		GLFWCallbackHandler::clients[window]->mouse_handler.mouseCursorCallback(x, y);
 }
 void mouseWheelCallback(GLFWwindow * window, double x, double y) {
 	if (GLFWCallbackHandler::clients[window])
-		GLFWCallbackHandler::clients[window]->mouseWheelCallback(x, y);
+		GLFWCallbackHandler::clients[window]->mouse_handler.mouseWheelCallback(x, y);
 }
 void GLFWCallbackHandler::add(GLFWwindow * window, Client * client) {
 	glfwSetErrorCallback(errorCallback);

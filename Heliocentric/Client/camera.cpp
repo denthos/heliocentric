@@ -5,7 +5,7 @@
 
 #define toRad (glm::pi<float>() / 180.0f)
 
-Camera::Camera() {
+Camera::Camera() : Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height) {
 
 }
 
@@ -14,6 +14,10 @@ Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, fl
 	calculateViewMatrix();
 	calculatePerspectiveMatrix();
 	calculateInfinitePerspectiveMatrix();
+}
+
+void Camera::loadSettings(Lib::INIParser & config) {
+
 }
 
 void Camera::calculateViewMatrix() {
@@ -73,9 +77,13 @@ void Camera::calculateViewFrustum() {
 	viewFrustum.planes[RIGHT_PLANE] = Plane(nearCenter + (x * nearWidth), normal);
 }
 
-Ray Camera::projectRay(int mousex, int mousey) const {
-	float x = (float)mousex;
-	float y = (float)height - (float)mousey;
+Ray Camera::projectRay(std::pair<float, float> screenPosition) const {
+	return this->projectRay(screenPosition.first, screenPosition.second);
+}
+
+Ray Camera::projectRay(float mousex, float mousey) const {
+	float x = mousex;
+	float y = (float)height - mousey;
 	glm::vec4 viewport(0.0f, 0.0f, (float)width, (float)height);
 	glm::vec3 v0 = glm::unProject(glm::vec3(x, y, 0.0f), view, perspective, viewport);
 	glm::vec3 v1 = glm::unProject(glm::vec3(x, y, 1.0f), view, perspective, viewport);
