@@ -116,7 +116,8 @@ public:
 	Performs combat logic for attackable game objects. For implementing interesting 
 	combat logic, the handle_* hooks are available for subclasses to override. 
 	@param The target to attack.
+	@return Whether or not target is a legal -- e.g., a nullptr is an illegal target.
 	*/
-	void do_attack(AttackableGameObject* target);
+	bool do_attack(AttackableGameObject* target);
 };
 

@@ -1,18 +1,23 @@
 #include "unit.h"
 #include "logging.h"
 #include "unit_update.h"
+#include "unit_manager.h"
 #include "glm/gtc/matrix_transform.hpp"
 
 Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
 	AttackableGameObject(pos, owner, attack, def, heal) {
 	this->update = std::make_shared<UnitUpdate>(this->getID(), this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
+	this->manager = nullptr;
+	this->target = nullptr;
 }
 
 Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
 	AttackableGameObject(id, pos, owner, attack, def, heal) {
 	this->update = std::make_shared<UnitUpdate>(id, this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
+	this->manager = nullptr;
+	this->target = nullptr;
 }
 
 Unit::CommandType Unit::do_logic() {
@@ -20,14 +25,14 @@ Unit::CommandType Unit::do_logic() {
 	case UNIT_IDLE:
 		break;
 	case UNIT_ATTACK:
-		do_attack(this->target);
+		if (!do_attack(this->target)) {
+			currentCommand = UNIT_IDLE;
+		}
 		break;
 	case UNIT_MOVE:
 		do_move();
 		break;
 	case UNIT_DIE:
-		break;
-	case UNIT_HOLDER:
 		break;
 	default:
 		LOG_ERR("Invalid command type.");
@@ -76,7 +81,11 @@ void Unit::set_combat_target(AttackableGameObject* target) {
 }
 
 void Unit::set_command(CommandType command) {
-	currentCommand = command;
+
+	if (currentCommand != UNIT_DIE)
+	{
+		currentCommand = command;
+	}
 }
 
 
@@ -85,6 +94,7 @@ glm::vec3 Unit::do_move() {
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));
 		position += glm::normalize(destination - position) * speed;
+		send_update_to_manager(make_update());
 	}
 	else {
 		// Reaced destination
@@ -107,6 +117,7 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 	// Tell Player you have died.
 	//player->add_to_destroy(this);
 	//player = nullptr;
+	send_update_to_manager(make_update());
 	this->set_command(Unit::UNIT_DIE);
 	LOG_DEBUG("Unit " + std::to_string(this->getID()) + " set to UNIT_DIE.");
 }
@@ -119,3 +130,19 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 	// TODO: Gain experience (?)
 }
 
+void Unit::handle_counter(AttackableGameObject* opponent) {
+	// Unit has been attacked, notify 
+	send_update_to_manager(make_update());
+}
+
+
+void Unit::set_manager(UnitManager* manager) {
+	this->manager = manager;
+}
+
+
+void Unit::send_update_to_manager(std::shared_ptr<UnitUpdate>& update) {
+	if (this->manager != nullptr) {
+		this->manager->register_update(update);
+	}
+}

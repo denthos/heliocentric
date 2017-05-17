@@ -22,4 +22,7 @@ public:
 	void do_move(UID id, float x, float y, float z);
 	void do_attack(UID attacker_id, UID enemy_id);
 	std::unordered_set<std::shared_ptr<UnitUpdate>>& get_updates();
+
+	bool set_active(UID id);
+	void register_update(std::shared_ptr<UnitUpdate>& update);
 };
