@@ -65,6 +65,7 @@ Shader * quadShader;
 Shader * bloomShader;
 Shader * blurShader;
 Shader* unitShader;
+Shader* unitDeathShader;
 Shader* particleShader;
 
 GLuint RBO;
@@ -197,7 +198,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
-	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER);
+	unitDeathShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
@@ -668,6 +670,7 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->get_health() <= 0) {
 		units[update->id]->is_exploding = true;
+		units[update->id]->bind_shader(unitDeathShader);
 		/*auto& update_queue = Lib::key_acquire(this->update_queue);
 		update_queue.get().push([update, this]() {
 			units.erase(update->id);
