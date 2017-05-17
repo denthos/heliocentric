@@ -13,10 +13,12 @@ public:
 	~DrawableUnit();
 	virtual void update();
 	virtual void draw(const Shader & shader, const Camera & camera) const;
+	bool is_exploding;
 
 private:
 	ParticleSystem* laser;
 	ParticleSystem* explosion;
 	Shader* unitShader;
 	glm::vec3 shooting_offset; //offset from center to laser origin
+	int explosion_counter;
 };

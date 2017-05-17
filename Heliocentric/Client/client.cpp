@@ -667,11 +667,11 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	*/
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->get_health() <= 0) {
-		auto& update_queue = Lib::key_acquire(this->update_queue);
+		units[update->id]->is_exploding = true;
+		/*auto& update_queue = Lib::key_acquire(this->update_queue);
 		update_queue.get().push([update, this]() {
 			units.erase(update->id);
-			
-		});
+		});*/
 	}
 }
 

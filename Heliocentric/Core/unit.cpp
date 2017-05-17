@@ -201,10 +201,10 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 void Unit::do_attack(AttackableGameObject* target) {
 	float distance = glm::distance(this->position, target->get_position());
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
+	set_laser_shooting(true);
 
 	if (distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) {
 		AttackableGameObject::do_attack(target);
-		set_laser_shooting(true);
 		return;
 	}
 	if (dot_product >= 1.05f || dot_product <= 0.95f) {

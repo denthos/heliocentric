@@ -15,7 +15,7 @@ DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship, Shader* unitShad
 	glm::vec3 b_min = bbox.min;
 	float z_center = (b_max.z + b_min.z) / 2.0f;
 	shooting_offset = glm::vec3(0.0f, 60.0f, b_max.z - z_center);
-
+	explosion_counter = 0;
 	this->unitShader = unitShader;
 	
 
@@ -28,17 +28,22 @@ DrawableUnit::~DrawableUnit() {
 void DrawableUnit::update() {
 	glm::mat4 scale_mat = glm::scale(glm::vec3(0.3f));
 	this->toWorld = glm::translate(get_position()) * get_rotation() * scale_mat;
+	if (explosion_counter != 100 && is_exploding == true) {
+		explosion_counter += 1;
+	}
+	else if (is_exploding == true) {
+		explosion_counter = 0;
+		is_exploding = false;
+	}
 }
 
 void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
-	
-	if (true) {//always true for now
+	if (is_exploding) {
 		unitShader->bind();
 		glUniform1i(glGetUniformLocation(unitShader->getPid(), "explode_on"), true);
 
 		explosion->Update(camera);
 		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
-	
 	}
 
 	model->draw(*unitShader, camera, toWorld);
