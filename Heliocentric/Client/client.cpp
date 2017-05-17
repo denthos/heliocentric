@@ -333,7 +333,24 @@ void Client::display() {
 
 	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 	octree.draw(*textureShader, *camera);
-	
+
+
+	// Deal with dead objects.
+	auto& dead_it = dead_objects.begin();
+	while (dead_it != dead_objects.end()) {
+		dead_it->second->update();
+		if (dead_it->second->do_animation(*textureShader, *camera)) {
+			UID id = dead_it->first;
+			dead_it++;
+			auto& update_queue = Lib::key_acquire(this->update_queue);
+			update_queue.get().push([id, this]() {
+				dead_objects.erase(id);;
+			});
+		}
+		else {
+			dead_it++;
+		}
+	}
 
 	
 	// blur the things that glow
@@ -671,10 +688,11 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	if (units[update->id]->get_health() <= 0) {
 		units[update->id]->is_exploding = true;
 		units[update->id]->bind_shader(unitDeathShader);
-		/*auto& update_queue = Lib::key_acquire(this->update_queue);
+		auto& update_queue = Lib::key_acquire(this->update_queue);
 		update_queue.get().push([update, this]() {
+			dead_objects.insert(std::make_pair(update->id, std::move(units[update->id])));
 			units.erase(update->id);
-		});*/
+		});
 	}
 }
 

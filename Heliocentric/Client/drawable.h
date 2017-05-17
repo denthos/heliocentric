@@ -11,6 +11,7 @@ public:
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;
 	virtual bool intersect(const Ray &, Collision &) const;
+	virtual bool do_animation(const Shader &, const Camera &) { return true; }
 
 protected:
 	Model * model;

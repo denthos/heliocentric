@@ -73,6 +73,7 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
 	std::unordered_map<UID, std::unique_ptr<DrawableSlot>> slots;
+	std::unordered_map<UID, std::unique_ptr<Drawable>> dead_objects;
 	Octree octree;
 
 	std::shared_ptr<Player> player;

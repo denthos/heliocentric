@@ -15,6 +15,7 @@ public:
 	virtual void draw(const Shader & shader, const Camera & camera) const;
 	bool is_exploding;
 	void bind_shader(Shader* shader);
+	virtual bool do_animation(const Shader & shader, const Camera & camera) const;
 
 private:
 	ParticleSystem* laser;

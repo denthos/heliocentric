@@ -58,3 +58,9 @@ void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 void DrawableUnit::bind_shader(Shader* shader) {
 	this->unitShader = shader;
 }
+
+
+bool DrawableUnit::do_animation(const Shader & shader, const Camera & camera) const {
+	draw(shader, camera);
+	return true;
+}
