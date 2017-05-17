@@ -717,6 +717,17 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	update_queue.get().push(createCityFunc);
 }
 
+void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
+	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
+	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
+	this->player = std::make_shared<Player>(player_name, update->id);
+	players[update->id] = this->player;
+
+	PlayerClientToServerTransfer info_transfer(player_name);
+
+	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
+}
+
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	//LOG_DEBUG("Unit update received");
 	update->apply(units[update->id].get());
