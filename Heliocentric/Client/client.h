@@ -108,6 +108,7 @@ private:
 	void handleF4Key(int);
 	void handleF5Key(int);
 	void handleF6Key(int);
+	void handleF10Key(int);
 	void handleF11Key(int);
 	void handleF12Key(int);
 };

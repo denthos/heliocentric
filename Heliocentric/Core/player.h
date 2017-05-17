@@ -38,6 +38,7 @@ public:
 	void trade_deal_accept(UID); // Accept the specified trade deal and move it to active trade deals if applies
 	void trade_deal_decline(UID); // Decline the specified trade deal
 
+	std::shared_ptr<TradeDeal> get_trade_deal(); // TEMPORARY: Return the first trade deal in map
 	std::shared_ptr<TradeDeal> get_trade_deal(UID); // Return a trade deal by UID
 
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects; // TODO: move to private

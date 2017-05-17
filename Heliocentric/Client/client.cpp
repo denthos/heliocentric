@@ -240,6 +240,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F5, std::bind(&Client::handleF5Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
 
@@ -569,7 +570,6 @@ void Client::handleF2Key(int key) {
 	}
 
 	TradeData deal(this->player->getID(), recipient, Resources::GOLD, 10);
-
 	this->channeled_send(&deal);
 }
 
@@ -628,11 +628,34 @@ void Client::handleF6Key(int key) {
 	LOG_ERR("Failed to find a unit to attack.");
 }
 
+void Client::handleF10Key(int key) {
+	// Counter offer a trade deal giving for free what the original seller wanted to give -- yeah I know these guys are crazy.
+	std::shared_ptr<TradeDeal> trade_deal;
+	try {
+		/* Get the first trade deal from player's pending list */
+		trade_deal = player->get_trade_deal();
+	}
+	catch (Identifiable::BadUIDException e) {
+		LOG_ERR("No pending trade deal found");
+		return;
+	}
+
+	if (this->player->getID() != trade_deal->get_recipient()) {
+		LOG_ERR("Player has a deal that wasn't sent to this player -- weird!");
+		return;
+	}
+
+	/* Start a counter-offer based on the found trade deal */
+	/* TODO: Maybe there's a better way to make "modifying" a deal easier */
+	TradeData deal(trade_deal->get_recipient(), trade_deal->get_sender(), trade_deal->get_sell_type(), trade_deal->get_sell_amount() * 2);
+	this->channeled_send(&deal);
+}
+
 void Client::handleF11Key(int key) {
 	// Accept the first trade deal in player's pending map
 	UID deal_id = player->trade_deal_accept();
 	if (deal_id == 0) {
-		LOG_ERR("No trade deal to accept");
+		LOG_ERR("No pending trade deal found");
 		return;
 	}
 
@@ -644,7 +667,7 @@ void Client::handleF12Key(int key) {
 	// Decline the first trade deal in player's pending map
 	UID deal_id = player->trade_deal_decline();
 	if (deal_id == 0) {
-		LOG_ERR("No trade deal to decline");
+		LOG_ERR("No pending trade deal found");
 		return;
 	}
 
@@ -719,17 +742,6 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
 	update->apply(planets[update->id].get());
 	planets[update->id]->update();
-}
-
-void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
-	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
-	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
-	this->player = std::make_shared<Player>(player_name, update->id);
-	players[update->id] = this->player;
-
-	PlayerClientToServerTransfer info_transfer(player_name);
-
-	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
 }
 
 void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> deal) {
