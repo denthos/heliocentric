@@ -57,7 +57,7 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->shoot_laser = this->get_laser_shooting();
 	this->update->explode = this->explode;
 	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
-	//LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
+	LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
 	LOG_DEBUG("Unit shoot laser is set to " + std::to_string(this->update->shoot_laser));
 	return this->update;
 };
