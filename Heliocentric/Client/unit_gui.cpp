@@ -38,6 +38,7 @@ UnitGUI::UnitGUI(GLFWwindow * window) : GUI(window)
 	healthbar->setValue(1.0f);
 	
 	
+	
 
 	//close button
 	close_widget = new Widget(userDisplay);
@@ -63,7 +64,7 @@ void UnitGUI::updateSelection(GameObject * selected)
 	if (unit) {
 		Attack unit_attack = unit->getAttack();
 		attack_strength->setValue(unit_attack.getDamage());
-		//attack_range->setValue(unit->get_combat_range()); causes compile error
+		attack_range->setValue(unit_attack.getRange()); 
 		combat_defense_strength->setValue(unit->get_combat_defense());
 		health_stat->setCaption( std::to_string(unit->get_health())+"%");
 		healthbar->setValue((float)(unit->get_health())/100.0f);
