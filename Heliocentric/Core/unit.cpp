@@ -154,17 +154,20 @@ void Unit::do_orient() {
 
 
 	float rotAngle = glm::degrees(glm::acos(cosine));
-	glm::mat4 lookAt = glm::rotate(glm::mat4(1.0f), rotAngle, axis);
+	glm::mat4 lookAt = glm::rotate(rotation, rotAngle, axis);
 	glm::quat toRotQuat = glm::quat_cast((lookAt)); //the final rotation quaternion
 
 
-
 													//for smooth rotation
-	glm::quat rotQuat = glm::slerp(glm::quat_cast(rotation), toRotQuat, delta_time_for_orient);
+	//glm::quat rotQuat = glm::slerp(glm::quat_cast(rotation), toRotQuat, delta_time_for_orient);
+	//glm::quat rotQuat = toRotQuat;
 
 	//convert back to matrix, save and apply
-	rotation = glm::mat4_cast(rotQuat);
-	orientation = rotQuat * orientation;
+	//rotation = glm::mat4_cast(rotQuat);
+	rotation = lookAt;
+	//orientation = rotQuat * orientation;
+	//orientation = glm::normalize(orientation);
+	orientation = ideal_orientation;
 
 
 
