@@ -4,14 +4,11 @@
 using namespace nanogui;
 class GUI : public Screen {
 public:
-	GUI(GLFWwindow *);
+	GUI(GLFWwindow *); 
+	~GUI();
 	void updateSelection(GameObject * selected);
-	UnitGUI* unit_gui;
 
-protected:
-	
 private:
-	
-	
+	UnitGUI* unit_gui;
 
 };

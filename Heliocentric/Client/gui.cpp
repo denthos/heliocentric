@@ -7,6 +7,11 @@ GUI::GUI(GLFWwindow * window) : Screen() {
 	this->performLayout();
 }
 
+GUI::~GUI()
+{
+	delete unit_gui;
+}
+
 void GUI::updateSelection(GameObject * selected) {
 	//update unit ui display
 	AttackableGameObject* unit = dynamic_cast<AttackableGameObject*>(selected);

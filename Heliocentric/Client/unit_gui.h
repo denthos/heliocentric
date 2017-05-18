@@ -14,8 +14,6 @@ public:
 	void hide();
 	bool isHidden();
 private:
-	detail::FormWidget<int> * uidDisplay;
-
 	Widget* close_widget;
 	Button* close_button;
 

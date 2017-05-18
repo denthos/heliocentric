@@ -54,6 +54,28 @@ UnitGUI::UnitGUI(Widget* parent, const std::string &title) : Window(parent, titl
 	
 }UnitGUI::~UnitGUI()
 {
+	//delete close_widget;
+	delete close_button;
+
+	//delete info_widget;
+	
+	delete combat_defense_label;
+	delete combat_defense_strength;
+
+	//attack
+	delete attack_label;
+	delete attack_strength;
+	delete attack_range_label;
+	delete attack_range;
+
+	//health
+	delete health_label;
+	delete health_stat;
+	delete healthbar;
+
+	//playername
+	delete player_label;
+	delete player_name;
 }
 
 void UnitGUI::updateSelection(GameObject * selected)
