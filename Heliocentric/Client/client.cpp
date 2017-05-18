@@ -94,7 +94,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	unit_gui = new UnitGUI(window);
+	gui = new GUI(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -323,13 +323,13 @@ void Client::createWindow(int width, int height) {
 	glfwSetCharCallback(window,
 		[](GLFWwindow * window, unsigned int codepoint) {
 
-			glfwEntry[window]->unit_gui->charCallbackEvent(codepoint);
+			glfwEntry[window]->gui->charCallbackEvent(codepoint);
 		}
 	);
 
 	glfwSetDropCallback(window,
 		[](GLFWwindow * window, int count, const char **filenames) {
-			glfwEntry[window]->unit_gui->dropCallbackEvent(count, filenames);
+			glfwEntry[window]->gui->dropCallbackEvent(count, filenames);
 		}
 	);
 
@@ -436,9 +436,8 @@ void Client::display() {
 	quadShader->unbind();
 
 	// draw the UI
-	if (!unit_gui->isHidden()) {
-		unit_gui->drawWidgets();
-	}
+	gui->drawWidgets();
+
 	
 	
 
@@ -498,30 +497,30 @@ void Client::resizeCallback(int width, int height) {
 
 	glViewport(0, 0, width, height);
 
-	if (unit_gui) {
-		unit_gui->resizeCallbackEvent(width, height);
+	if (gui) {
+		gui->resizeCallbackEvent(width, height);
 	}
 }
 
 void Client::keyCallback(int key, int scancode, int action, int mods) {
-	if (!unit_gui->keyCallbackEvent(key, scancode, action, mods))
+	if (!gui->keyCallbackEvent(key, scancode, action, mods))
 		keyboard_handler.keyCallback(key, scancode, action, mods);
 }
 
 void Client::mouseButtonCallback(int button, int action, int mods) {
-	if (!unit_gui->mouseButtonCallbackEvent(button, action, mods)) {
+	if (!gui->mouseButtonCallbackEvent(button, action, mods)) {
 		mouse_handler.mouseButtonCallback(button, action, mods);
 	}
 }
 
 void Client::mouseCursorCallback(double x, double y) {
-	if (!unit_gui->cursorPosCallbackEvent(x, y)) {
+	if (!gui->cursorPosCallbackEvent(x, y)) {
 		mouse_handler.mouseCursorCallback(x, y);
 	}
 }
 
 void Client::scrollWheelCallback(double x, double y) {
-	if (!unit_gui->scrollCallbackEvent(x, y)) {
+	if (!gui->scrollCallbackEvent(x, y)) {
 		mouse_handler.mouseWheelCallback(x, y);
 	}
 }
@@ -532,10 +531,7 @@ void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position)
 	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
 	if (selected) {
 		selection.push_back(selected);
-		if (dynamic_cast<AttackableGameObject *> (selected)) {
-			unit_gui->updateSelection(selected);
-			unit_gui->show();
-		}
+		gui->updateSelection(selected);
 		
 		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
 	}

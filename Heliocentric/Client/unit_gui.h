@@ -1,12 +1,18 @@
 
 #pragma once
-#include "gui.h"
+#include "gui_utilities.h"
 #include "attackable_game_object.h"
-class UnitGUI : public GUI {
+using namespace nanogui;
+
+class UnitGUI : public Window {
 public:
-	UnitGUI(GLFWwindow *);
+	UnitGUI(Widget* parent, const std::string &title);
 	~UnitGUI();
 	virtual void updateSelection(GameObject * selected);
+
+	void show();
+	void hide();
+	bool isHidden();
 private:
 	detail::FormWidget<int> * uidDisplay;
 
@@ -32,5 +38,7 @@ private:
 	//playername
 	Label* player_label;
 	Label* player_name;
+
+	bool hidden;
 
 };

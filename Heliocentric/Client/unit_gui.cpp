@@ -1,14 +1,14 @@
 #include "unit_gui.h"
 
-UnitGUI::UnitGUI(GLFWwindow * window) : GUI(window)
+UnitGUI::UnitGUI(Widget* parent, const std::string &title) : Window(parent, title)
 {
 
-	userDisplay = gui->addWindow(Eigen::Vector2i(10, 10), "Unit Stats");
+	this->setPosition(Vector2i(10 ,10));
 
-	userDisplay->setLayout(new GroupLayout());
+	setLayout(new GroupLayout());
 
 	//unit info
-	info_widget = new Widget(userDisplay);
+	info_widget = new Widget(this);
 	info_widget->setLayout(new GridLayout(Orientation::Horizontal, 2, Alignment::Fill, 0, 0));
 
 	//player
@@ -34,25 +34,24 @@ UnitGUI::UnitGUI(GLFWwindow * window) : GUI(window)
 	health_stat = new Label(info_widget, "100%");
 
 
-	healthbar = new ProgressBar(userDisplay);
+	healthbar = new ProgressBar(this);
 	healthbar->setValue(1.0f);
 	
 	
 	
 
 	//close button
-	close_widget = new Widget(userDisplay);
+	close_widget = new Widget(this);
 	close_widget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 0, 0));
 
 	close_button = new Button(close_widget, "close");
 	close_button->setCallback([&] {
 		this->hide();
-		hidden = true;
 	});
 
 
-	hidden = true;
-	this->performLayout();
+	hide();
+	
 }UnitGUI::~UnitGUI()
 {
 }
@@ -71,4 +70,21 @@ void UnitGUI::updateSelection(GameObject * selected)
 		player_name->setCaption(unit->get_player()->get_name());
 
 	}
+}
+
+void UnitGUI::show()
+{
+	setVisible(true);
+	hidden = false;
+}
+
+void UnitGUI::hide()
+{
+	setVisible(false);
+	hidden = true;
+}
+
+bool UnitGUI::isHidden()
+{
+	return hidden;
 }

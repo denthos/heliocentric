@@ -211,6 +211,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="collision.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="free_camera.h" />
+    <ClInclude Include="gui_utilities.h" />
     <ClInclude Include="mouse_button_status.h" />
     <ClInclude Include="mouse_handler.h" />
     <ClInclude Include="orbital_camera.h" />

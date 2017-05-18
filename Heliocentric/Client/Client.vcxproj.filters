@@ -160,6 +160,9 @@
     <ClInclude Include="unit_gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="gui_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
