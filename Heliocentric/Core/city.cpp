@@ -21,6 +21,6 @@ Slot* City::get_slot() {
 	return slot;
 }
 
-glm::vec3 City::get_position() {
+glm::vec3 City::get_position() const {
 	return slot->get_position();
 }

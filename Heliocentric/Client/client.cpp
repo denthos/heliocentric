@@ -1,13 +1,12 @@
 #include "client.h"
 
-#include <glm/glm.hpp>
+#include <glad\glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
 #include <stdio.h>
 #include <stdlib.h>
 #include <soil.h>
-#include <glad\glad.h>
 
 #include "free_camera.h"
 #include "orbital_camera.h"
@@ -32,6 +31,7 @@
 #include "trade_command.h"
 #include "trade_deal.h"
 #include "instant_laser_attack.h"
+#include "selectable.h"
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -238,7 +238,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F5, std::bind(&Client::handleF5Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
@@ -522,14 +521,27 @@ void Client::scrollWheelCallback(double x, double y) {
 	}
 }
 
-void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+void Client::setSelection(std::vector<GameObject*> new_selection) {
+	/* Deselect everything on the GUI */
+	gui->unselectSelection(this, selection);
+	
+	/* Clear the selection */
 	selection.clear();
+
+	/* Apply the new selection */
+	selection = new_selection;
+
+	/* Update the GUI */
+	gui->selectSelection(this, selection);
+}
+
+
+void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	/* Select a new thing */
 	cameras[selectedCamera]->calculateViewMatrix();
 	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
 	if (selected) {
-		selection.push_back(selected);
-		gui->updateSelection(selected);
-		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
+		setSelection({ selected });
 	}
 }
 
@@ -591,19 +603,7 @@ void Client::handleF4Key(int key) {
 }
 
 
-void Client::handleF5Key(int key) {
-	/* we are going to create a city on the selected slot... */
-	if (this->selection.size() <= 0 || this->selection.size() > 1) {
-		LOG_DEBUG("Cannot settle when nothing is selected...");
-		return;
-	}
-
-	Slot* slot = dynamic_cast<Slot*>(this->selection[0]);
-	if (!slot) {
-		LOG_DEBUG("Cannot settle when thing selected is not a slot");
-		return;
-	}
-
+void Client::createCityForSlot(DrawableSlot* slot) {
 	SettleCityCommand settle_command(slot->getID());
 	this->channeled_send(&settle_command);
 }
@@ -720,8 +720,14 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
 
 	auto& update_queue = Lib::key_acquire(this->update_queue);
-	std::function<void()> createCityFunc = [slot_iter, update, player_iter]() {
-		slot_iter->second->attachCity(new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second)));
+	std::function<void()> createCityFunc = [slot_iter, update, player_iter, this]() {
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second));
+		slot_iter->second->attachCity(newCity);
+		cities.insert(std::make_pair(newCity->getID(), newCity));
+
+		if (newCity->get_player()->getID() == player->getID()) {
+			setSelection({ newCity });
+		}
 	};
 
 	update_queue.get().push(createCityFunc);

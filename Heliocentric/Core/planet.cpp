@@ -1,4 +1,3 @@
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "planet.h"
@@ -13,6 +12,10 @@ Planet::Planet(glm::vec3 position, std::string planet_name, float orbit_speed, f
 Planet::Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*> map) :
 	GameObject(id, position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius), type(type) {
   this->update = std::make_shared<PlanetUpdate>(id, position.x, position.y, position.z);
+}
+
+std::string Planet::getName() const {
+	return name;
 }
 
 

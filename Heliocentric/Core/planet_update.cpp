@@ -6,6 +6,4 @@ PlanetUpdate::PlanetUpdate(UID id, float x, float y, float z) : GameObjectUpdate
 
 void PlanetUpdate::apply(GameObject* obj) {
 	GameObjectUpdate::apply(obj);
-
-	Planet* planet = reinterpret_cast<Planet*>(obj);
 }
