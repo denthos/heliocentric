@@ -32,6 +32,12 @@
     <None Include="Shaders\simple_texture.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="bounding_box.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="bounding_box.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="client.h">

@@ -196,6 +196,8 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="bounding_box.frag" />
+    <None Include="bounding_box.vert" />
     <None Include="Client_config.ini" />
     <None Include="packages.config" />
     <None Include="Shaders\shader.frag" />
