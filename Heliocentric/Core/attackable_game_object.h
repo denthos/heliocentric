@@ -62,12 +62,6 @@ public:
 	*/
 	Attack& getAttack();
 
-	/**
-	Sets the attack strength of this object.
-	@param combatAttack The attack strength of this object.
-	@return The new attack strength of this object.
-	*/
-	int set_combat_attack(int combatAttack);
 
 	/**
 	Returns the defense strength of this object.
@@ -81,19 +75,6 @@ public:
 	@return The new defense strength of this object.
 	*/
 	int set_combat_defense(int combatDefense);
-
-	/**
-	Returns the combat range of this object.
-	@return The combat range of this object.
-	*/
-	int get_combat_range();
-
-	/**
-	Sets the combat range of this object.
-	@param combatRange The combat range of this object.
-	@return The new combat range of this object.
-	*/
-	int set_combat_range(int combatRange);
 
 	/**
 	Returns current health of this object.
