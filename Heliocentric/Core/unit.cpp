@@ -88,6 +88,11 @@ void Unit::set_command(CommandType command) {
 	}
 }
 
+int Unit::get_command() {
+
+	return currentCommand;
+}
+
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.

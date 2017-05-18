@@ -741,10 +741,13 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	//LOG_DEBUG("Unit update received");
-	//JESSICA DO COLLISION STUFF HERE
+
+	//check if the unit should be doing collision detection
+	//becareful what if it dies and pointer is inaccessible in update?
 	Unit* unit = units[update->id].get();
-	glm::vec3 pos = unit->get_position();
-	glm::vec3 dest = unit->get_destination();
+	if (unit->get_command() == Unit::UNIT_MOVE) { //unit is moving
+		toDetectCollisions.push(unit);
+	}
 
 	update->apply(units[update->id].get());
 	units[update->id]->update();

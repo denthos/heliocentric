@@ -89,6 +89,7 @@ private:
 
 	/* Updates to be performed that are graphics related. All graphics work need to be done in main thread. */
 	Lib::Lock<std::queue<std::function<void()>>> update_queue;
+	std::queue<Unit*> toDetectCollisions;
 
 	void createWindow(int width, int height);
 
