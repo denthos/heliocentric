@@ -12,6 +12,8 @@ public:
 	virtual BoundingBox getBoundingBox() const;
 	virtual bool intersect(const Ray &, Collision &) const;
 
+	const glm::mat4& getToWorld() const;
+
 protected:
 	Model * model;
 	glm::mat4 toWorld;

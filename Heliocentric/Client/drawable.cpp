@@ -35,3 +35,7 @@ bool Drawable::intersect(const Ray & ray, Collision & collision) const {
 	}
 	return false;
 }
+
+const glm::mat4& Drawable::getToWorld() const {
+	return this->toWorld;
+}
