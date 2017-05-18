@@ -24,6 +24,15 @@ class GUI : public Screen {
 public:
 	GUI(GLFWwindow *);
 	void updateSelection(GameObject * selected);
+	void show();
+	void hide();
+	bool isHidden();
+
+protected:
+	ref<Window> userDisplay;
+	FormHelper * gui;
+	bool hidden;
 private:
+	
 	detail::FormWidget<int> * uidDisplay;
 };

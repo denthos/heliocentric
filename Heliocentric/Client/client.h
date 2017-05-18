@@ -23,6 +23,7 @@
 #include "universe.h"
 #include "unit_manager.h"
 #include "gui.h"
+#include "unit_gui.h"
 #include <glad\glad.h>
 #include <GLFW/glfw3.h>
 #include <glm\gtc\matrix_transform.hpp>
@@ -69,6 +70,7 @@ protected:
 private:
 	GLFWwindow * window;
 	GUI * gui;
+	UnitGUI * unit_gui;
 	unsigned int selectedCamera;
 	std::vector<Camera *> cameras;
 	std::vector<GameObject *> selection;

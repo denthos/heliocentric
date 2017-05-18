@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <soil.h>
-#include <glad\glad.h>
+
 
 #include "free_camera.h"
 #include "orbital_camera.h"
@@ -94,7 +94,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window);
+	unit_gui = new UnitGUI(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -322,13 +322,14 @@ void Client::createWindow(int width, int height) {
 
 	glfwSetCharCallback(window,
 		[](GLFWwindow * window, unsigned int codepoint) {
-			glfwEntry[window]->gui->charCallbackEvent(codepoint);
+
+			glfwEntry[window]->unit_gui->charCallbackEvent(codepoint);
 		}
 	);
 
 	glfwSetDropCallback(window,
 		[](GLFWwindow * window, int count, const char **filenames) {
-			glfwEntry[window]->gui->dropCallbackEvent(count, filenames);
+			glfwEntry[window]->unit_gui->dropCallbackEvent(count, filenames);
 		}
 	);
 
@@ -384,7 +385,7 @@ void Client::display() {
 	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
 	
 	// blur the things that glow
-	int blurs = 5; //TODO init to number of blur iterations
+	int blurs = 1; //TODO init to number of blur iterations
 	bool blurX = true;
 
 	blurShader->bind();
@@ -435,7 +436,11 @@ void Client::display() {
 	quadShader->unbind();
 
 	// draw the UI
-	gui->drawWidgets();
+	if (!unit_gui->isHidden()) {
+		unit_gui->drawWidgets();
+	}
+	
+	
 
 	glfwSwapBuffers(window);
 
@@ -493,30 +498,30 @@ void Client::resizeCallback(int width, int height) {
 
 	glViewport(0, 0, width, height);
 
-	if (gui) {
-		gui->resizeCallbackEvent(width, height);
+	if (unit_gui) {
+		unit_gui->resizeCallbackEvent(width, height);
 	}
 }
 
 void Client::keyCallback(int key, int scancode, int action, int mods) {
-	if (!gui->keyCallbackEvent(key, scancode, action, mods))
+	if (!unit_gui->keyCallbackEvent(key, scancode, action, mods))
 		keyboard_handler.keyCallback(key, scancode, action, mods);
 }
 
 void Client::mouseButtonCallback(int button, int action, int mods) {
-	if (!gui->mouseButtonCallbackEvent(button, action, mods)) {
+	if (!unit_gui->mouseButtonCallbackEvent(button, action, mods)) {
 		mouse_handler.mouseButtonCallback(button, action, mods);
 	}
 }
 
 void Client::mouseCursorCallback(double x, double y) {
-	if (!gui->cursorPosCallbackEvent(x, y)) {
+	if (!unit_gui->cursorPosCallbackEvent(x, y)) {
 		mouse_handler.mouseCursorCallback(x, y);
 	}
 }
 
 void Client::scrollWheelCallback(double x, double y) {
-	if (!gui->scrollCallbackEvent(x, y)) {
+	if (!unit_gui->scrollCallbackEvent(x, y)) {
 		mouse_handler.mouseWheelCallback(x, y);
 	}
 }
@@ -527,7 +532,11 @@ void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position)
 	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
 	if (selected) {
 		selection.push_back(selected);
-		gui->updateSelection(selected);
+		if (dynamic_cast<AttackableGameObject *> (selected)) {
+			unit_gui->updateSelection(selected);
+			unit_gui->show();
+		}
+		
 		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
 	}
 }
@@ -574,7 +583,7 @@ void Client::handleF2Key(int key) {
 }
 
 void Client::handleF3Key(int key) {
-	PlayerCommand command((float)(rand() % 3000), (float)(rand() % 3000), (float)(rand() % 3000));
+	PlayerCommand command((float)(rand() % 1000), (float)(rand() % 1000), (float)(rand() % 1000));
 
 	this->channeled_send(&command);
 }
