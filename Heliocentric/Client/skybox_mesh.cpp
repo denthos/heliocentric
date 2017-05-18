@@ -1,5 +1,4 @@
 #include "skybox_mesh.h"
-#include "client.h"
 #define PROJECTION_UNIFORM "projection"
 #define VIEW_UNIFORM "view"
 #define MTL_UNIFORM "material"

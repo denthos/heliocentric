@@ -1,9 +1,6 @@
 #pragma once
-#include <assimp\postprocess.h>
 #include "shader.h"
 #include "vertex.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
 #include "camera.h"
 #include "bounding_box.h"
@@ -11,7 +8,6 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 
 //the material properties for a mesh
 struct Material {

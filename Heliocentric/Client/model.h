@@ -1,17 +1,10 @@
 #pragma once
 
-
-#include <assimp\Importer.hpp>
-#include <assimp\scene.h>
-#include <assimp\postprocess.h>
-
-#include <soil.h>
 #include "file_mesh.h"
 #include "camera.h"
 #include "singleton.h"
 
 #include <string>
-#include <iostream>
 
 class Model : public KeyedSingleton<Model, std::string> {
 

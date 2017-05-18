@@ -1,8 +1,7 @@
-#include "model.h"
 #define GLM_ENABLE_EXPERIMENTAL
-#include "glm/ext.hpp"
-#include "glm/gtx/string_cast.hpp"
+#include "model.h"
 #include "assimp_geometry.h"
+#include <assimp\Importer.hpp>
 
 Model::Model(std::string file)
 {
