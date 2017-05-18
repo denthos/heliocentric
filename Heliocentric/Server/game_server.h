@@ -7,6 +7,7 @@
 #include <ctime>
 #include <initializer_list>
 
+#include "game_session.h"
 #include "logging.h"
 #include "player.h"
 #include "identifiable.h"
@@ -110,9 +111,13 @@ private:
 	void performUpdates();
 	void sendUpdates();
 
+	/* Checks victory condition every server tick */
+	void checkVictory();
+
+	GameSession* game; // Keeps track of all information about current game settings. Deconstructed after game ends.
 	std::atomic<bool> game_paused;
 	std::atomic<bool> game_running;
-	int tick_duration;
+	int tick_duration; // Duration of each tick in ms.
 
 	Player* extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p, bool retry=false);
 	void handleReceivePlayerClientToServerTransfer(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerClientToServerTransfer>);

@@ -23,6 +23,11 @@ public:
 
 	std::string get_name();
 	void set_name(std::string new_name);
+
+	float get_player_score();
+	void increase_player_score(float);
+	void decrease_player_score(float);
+
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
 	void pop();                               // Pop all objects queued for destroy
@@ -45,6 +50,7 @@ public:
 
 private:
 	std::string name;
+	float player_score;
 	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, float> owned_resources; // Stores the amount of each type of resources the player owns
 	// std::queue<std::shared_ptr<TradeDeal>> active_trade_deals; // All active trade deals that involves this player, not implemented yet

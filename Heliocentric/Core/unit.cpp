@@ -128,6 +128,7 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 	currentCommand = (currentCommand == UNIT_ATTACK) ? UNIT_IDLE : currentCommand;
 	
 	// TODO: Gain experience (?)
+	player->increase_player_score(opponent->getAttack().getDamage());
 }
 
 void Unit::handle_counter(AttackableGameObject* opponent) {

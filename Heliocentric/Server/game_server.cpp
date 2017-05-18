@@ -11,6 +11,8 @@
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
 
+	this->game = new GameSession();
+
 	for (auto& planet_iter : this->universe.get_planets()) {
 		for (auto& slot_iter : planet_iter->get_slots_const()) {
 			this->slots.insert(std::make_pair(slot_iter.first, slot_iter.second));
@@ -199,6 +201,40 @@ void GameServer::sendUpdates() {
 	}
 }
 
+void GameServer::checkVictory() {
+	/* The order of these conditions determines priority of victory conditions. */
+	if (game->domination_victory) {
+		return;
+	}
+
+	if (game->science_victory) {
+		return;
+	}
+
+	if (game->economic_victory) {
+		return;
+	}
+
+	if (game->time_victory) {
+		if (game->time_limit_reached()) {
+			game->game_end = true;
+
+			/* Player with the highest player score wins. */
+			float highest_score = 0.0f;
+			UID winner_candidate;
+			for (auto& it : players) {
+				if (it.second->get_player_score() > highest_score) {
+					highest_score = it.second->get_player_score();
+					winner_candidate = it.second->getID();
+				}
+			}
+
+			LOG_INFO("Player with UID ", winner_candidate, " has won the game!");
+			return;
+		}
+	}
+}
+
 
 void GameServer::run() {
 	this->open();
@@ -210,9 +246,12 @@ void GameServer::run() {
 	while (game_running) {
 		tick_start_time = std::clock();
 
+		game->increment_time(tick_duration);
+
 		// Add server logic
 		performUpdates();
 		sendUpdates();
+		checkVictory();
 
 		tick_elapsed_time = std::clock() - tick_start_time;
 		if (tick_elapsed_time > tick_duration) {
