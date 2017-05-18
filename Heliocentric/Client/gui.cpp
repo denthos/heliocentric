@@ -21,15 +21,15 @@ GUI::~GUI()
 	delete unit_gui;
 }
 
-void GUI::updateSelection(GameObject * selected) {
-	//update unit ui display
-	AttackableGameObject* unit = dynamic_cast<AttackableGameObject*>(selected);
-	if (unit) {
-		unit_gui->updateSelection(selected);
-		unit_gui->show();
-	}
+
+void GUI::showUnitUI(AttackableGameObject* unit) {
+	this->unit_gui->updateSelection(unit);
+	this->unit_gui->show();
 }
 
+void GUI::hideUnitUI() {
+	this->unit_gui->hide();
+}
 
 void GUI::createUidDisplay() {
 	int ivar = 0;
@@ -67,7 +67,6 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 
 		uidDisplay->setValue(single_object->getID());
 	}
-
 }
 
 void GUI::displaySlotUI(Slot* slot, std::function<void()> createCityCallback) {

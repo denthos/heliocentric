@@ -16,13 +16,16 @@ public:
 
 	void displaySlotUI(Slot* slot, std::function<void()> createCityCallback);
 	void hideSlotUI();
+
+	void showUnitUI(AttackableGameObject* unit);
+	void hideUnitUI();
+
 private:
 	UnitGUI* unit_gui;
 	FormHelper* formHelper;
 
 	void createUidDisplay();
 	void createSlotDisplay();
-
 
 	ref<Window> uidWindow;
 	detail::FormWidget<int> * uidDisplay;
