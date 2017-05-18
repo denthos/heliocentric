@@ -28,7 +28,7 @@ DrawableUnit::~DrawableUnit() {
 void DrawableUnit::update() {
 	glm::mat4 scale_mat = glm::scale(glm::vec3(0.3f));
 	this->toWorld = glm::translate(get_position()) * get_rotation() * scale_mat;
-	if (explosion_counter != 100 && is_exploding == true) {
+	if (explosion_counter < 50 && is_exploding == true) {
 		explosion_counter += 1;
 	}
 	else if (is_exploding == true) {
@@ -39,6 +39,7 @@ void DrawableUnit::update() {
 
 void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 	if (is_exploding) {
+		LOG_DEBUG("Explosion counter is " + std::to_string(explosion_counter) + ", bool is " + std::to_string(is_exploding));
 		unitShader->bind();
 		glUniform1i(glGetUniformLocation(unitShader->getPid(), "explode_on"), true);
 
@@ -52,7 +53,6 @@ void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 		laser->Update(camera); //probably should go in update function but i need access to the camera somehow...
 		laser->draw(camera, glm::translate(toWorld, shooting_offset));
 	}
-	
 }
 
 void DrawableUnit::bind_shader(Shader* shader) {
@@ -62,5 +62,6 @@ void DrawableUnit::bind_shader(Shader* shader) {
 
 bool DrawableUnit::do_animation(const Shader & shader, const Camera & camera) const {
 	draw(shader, camera);
-	return true;
+	LOG_DEBUG("In do animation, !exploding is " + std::to_string(!is_exploding));
+	return !is_exploding;
 }

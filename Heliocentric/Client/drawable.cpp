@@ -4,6 +4,8 @@ Drawable::Drawable() : toWorld(glm::mat4(1.0f)) {
 
 }
 
+Drawable::~Drawable() {}
+
 void Drawable::draw(const Shader & shader, const Camera & camera) const {
 	model->draw(shader, camera, toWorld);
 }

@@ -7,11 +7,12 @@
 class Drawable {
 public:
 	Drawable();
+	virtual ~Drawable();
 	virtual void draw(const Shader &, const Camera &) const;
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;
 	virtual bool intersect(const Ray &, Collision &) const;
-	virtual bool do_animation(const Shader &, const Camera &) { return true; }
+	virtual bool do_animation(const Shader &, const Camera &) const { return true; }
 
 protected:
 	Model * model;

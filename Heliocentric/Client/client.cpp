@@ -339,8 +339,9 @@ void Client::display() {
 	auto& dead_it = dead_objects.begin();
 	while (dead_it != dead_objects.end()) {
 		dead_it->second->update();
-		if (dead_it->second->do_animation(*textureShader, *camera)) {
+		if (dead_it->second->do_animation(*textureShader, *camera) == true) {
 			UID id = dead_it->first;
+			LOG_DEBUG("Deleting unit with id " + std::to_string(id));
 			dead_it++;
 			auto& update_queue = Lib::key_acquire(this->update_queue);
 			update_queue.get().push([id, this]() {

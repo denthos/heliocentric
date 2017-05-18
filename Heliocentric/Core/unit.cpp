@@ -130,9 +130,7 @@ void Unit::do_orient() {
 	// Orient towards destination
 	if ((destination - position) == glm::vec3(0.0)) {
 		delta_time_for_orient = 0.0f;
-
 		return;
-	
 	}
 	glm::vec3 ideal_orientation = glm::normalize(destination - position);
 
@@ -203,7 +201,7 @@ void Unit::do_attack(AttackableGameObject* target) {
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
 	set_laser_shooting(true);
 
-	if (distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) {
+	if ((distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) || distance == 0.0f) {
 		AttackableGameObject::do_attack(target);
 		return;
 	}
