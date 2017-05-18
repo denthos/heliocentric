@@ -592,9 +592,19 @@ void Client::handleF4Key(int key) {
 
 
 void Client::handleF5Key(int key) {
-	/* we are going to create a city on the first slot.. */
-	auto slot_it = this->planets.begin()->second->get_slots().begin();
-	SettleCityCommand settle_command(slot_it->first);
+	/* we are going to create a city on the selected slot... */
+	if (this->selection.size() <= 0 || this->selection.size() > 1) {
+		LOG_DEBUG("Cannot settle when nothing is selected...");
+		return;
+	}
+
+	Slot* slot = dynamic_cast<Slot*>(this->selection[0]);
+	if (!slot) {
+		LOG_DEBUG("Cannot settle when thing selected is not a slot");
+		return;
+	}
+
+	SettleCityCommand settle_command(slot->getID());
 	this->channeled_send(&settle_command);
 }
 
