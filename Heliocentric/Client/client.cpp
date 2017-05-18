@@ -7,16 +7,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <soil.h>
-#include <GL/glut.h>
+#include <glad\glad.h>
 
-#include "quad_mesh.h"
+#include "free_camera.h"
+#include "orbital_camera.h"
+#include "quad.h"
 #include "particle_system.h"
 #include "thruster_emitter.h"
 #include "laser_emitter.h"
 #include "drawable_planet.h"
 #include "drawable_unit.h"
 #include "skybox_mesh.h"
-#include "glfw_callback_handler.h"
 #include "game_channels.h"
 #include "sphere_mesh.h"
 #include "transformation.h"
@@ -26,8 +27,11 @@
 #include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
+#include "settle_city_command.h"
 #include "unit_command.h"
+#include "trade_command.h"
 #include "trade_deal.h"
+#include "instant_laser_attack.h"
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -51,8 +55,11 @@
 #define REGULAR_BUFFER 0
 #define BRIGHTNESS_BUFFER 1
 
+#define CAMERA_SWITCH_KEY "CameraSwitch"
 
-QuadMesh* quad; //texture sampler
+std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
+
+Quad * quad; //texture sampler
 ParticleSystem* laser_particles;
 ParticleSystem* explosion_particles;
 
@@ -74,25 +81,12 @@ GLuint FBO; //frame buffer for offscreen rendering
 GLuint gaussianFBO[COLOR_BUFFERS];
 GLuint gaussian_color_buff[COLOR_BUFFERS];
 
-Model* spaceship;
+Model * spaceship;
+Model * rocket;
 //don't forget to clean up afterwards
-
-
 
 //multiple render targets to specify more than one frag shader output
 GLuint color_buff[COLOR_BUFFERS]; //2 color buffers to attach to frame buffer: 1 for regular scene, one for bright objects
-
-std::pair<double, double> lastMousePos;
-bool leftMouseDown = false;
-bool rightMouseDown = false;
-bool middleMouseDown = false;
-
-#define FREE_CAMERA 1
-#define FREE_CAMERA_2 2
-#define ORBITAL_CAMERA 3
-unsigned char selectedControlScheme = FREE_CAMERA;
-
-GameObject * selectedObject;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
@@ -102,20 +96,20 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
+	gui = new GUI(window);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		LOG_ERR("Failed to initialize OpenGL context");
+	}
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
 	glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
-
-	glShadeModel(GL_SMOOTH);
-
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_NORMALIZE);
 	glEnable(GL_TEXTURE_2D);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
   
-  ////////////////////////////////////////////////////
+	////////////////////////////////////////////////////
 	//set up buffers for rendering
 
 	//generate and bind frame buffer for scene rendering
@@ -188,12 +182,18 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	}
 
 	///////////////////////////////////////////////////////////////
-	quad = new QuadMesh();
+	quad = new Quad(); 
+	
 
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height);
-	octree.enableViewFrustumCulling(&camera->viewFrustum);
+	cameras.push_back(new FreeCamera(keyboard_handler, mouse_handler));
+	cameras.push_back(new OrbitalCamera(keyboard_handler, mouse_handler, selection));
+	cameras[selectedCamera]->setActive(true);
+
+	init = true;
 
 	resizeCallback(width, height);
+
+	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
@@ -210,14 +210,18 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	laser_particles = new ParticleSystem( 0.5f, 1, new LaserEmitter(), particleShader);
 	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
-	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT);
+	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
 	for (auto& planet : this->universe.get_planets()) {
 		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
+		for (auto& slot : planets[planet->getID()]->get_slots_const()) {
+			slots.insert(std::make_pair(slot.first, static_cast<DrawableSlot*>(slot.second)));
+		}
 	}
 
 	// LOAD MODEL, IMPORTANT
-	spaceship = new Model(ROCKET_MODEL);
+	spaceship = Model::getInstance(ROCKET_MODEL);
+	rocket = Model::getInstance(ROCKET_MODEL);
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -228,7 +232,13 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
+	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
+	if (cameraSwitchKey >= 97 && cameraSwitchKey <= 122) cameraSwitchKey -= 32;
+
+	this->keyboard_handler.registerKeyPressHandler(cameraSwitchKey, std::bind(&Client::handleCameraSwitch, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
@@ -236,8 +246,13 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F5, std::bind(&Client::handleF5Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyDownHandler({ GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D },
-		std::bind(&Client::handleCameraPanButtonDown, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
+
+	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
+		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
+
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -259,7 +274,7 @@ Client::~Client() {
 	cities.clear();
 	slots.clear();
 
-	GLFWCallbackHandler::remove(window, this);
+	glfwEntry.erase(window);
 }
 
 bool Client::isRunning() {
@@ -292,17 +307,54 @@ void Client::createWindow(int width, int height) {
 
 	glfwGetFramebufferSize(window, &width, &height);
 
-	GLenum glewErr = glewInit();
-#ifndef __APPLE__
-	if (glewErr != GLEW_OK) {
-		LOG_ERR("Glew failed to initialize: ", glewGetErrorString(glewErr));
-		return;
-	}
-#endif
+	glfwEntry[window] = this;
 
-	resizeCallback(width, height);
+	glfwSetErrorCallback(
+		[](int error, const char * description) {
+			Client::errorCallback(error, description);
+		}
+	);
 
-	GLFWCallbackHandler::add(window, this);
+	glfwSetFramebufferSizeCallback(window,
+		[](GLFWwindow * window, int width, int height) {
+			glfwEntry[window]->resizeCallback(width, height);
+		}
+	);
+
+	glfwSetKeyCallback(window,
+		[](GLFWwindow * window, int key, int scancode, int action, int mods) {
+			glfwEntry[window]->keyCallback(key, scancode, action, mods);
+		}
+	);
+
+	glfwSetCharCallback(window,
+		[](GLFWwindow * window, unsigned int codepoint) {
+			glfwEntry[window]->gui->charCallbackEvent(codepoint);
+		}
+	);
+
+	glfwSetDropCallback(window,
+		[](GLFWwindow * window, int count, const char **filenames) {
+			glfwEntry[window]->gui->dropCallbackEvent(count, filenames);
+		}
+	);
+
+	glfwSetMouseButtonCallback(window,
+		[](GLFWwindow * window, int button, int action, int mods) {
+			glfwEntry[window]->mouseButtonCallback(button, action, mods);
+		}
+	);
+
+	glfwSetCursorPosCallback(window,
+		[](GLFWwindow * window, double x, double y) {
+			glfwEntry[window]->mouseCursorCallback(x, y);
+		}
+	);
+	glfwSetScrollCallback(window,
+		[](GLFWwindow * window, double x, double y) {
+			glfwEntry[window]->scrollWheelCallback(x, y);
+		}
+	);
 }
 
 void Client::display() {
@@ -312,8 +364,9 @@ void Client::display() {
 	// Clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	camera->calculateViewMatrix();
-	camera->calculateViewFrustum();
+	cameras[selectedCamera]->update();
+	cameras[selectedCamera]->calculateViewMatrix();
+	cameras[selectedCamera]->calculateViewFrustum();
 
 	octree.clear();
 
@@ -327,19 +380,19 @@ void Client::display() {
 		octree.insert((*it).second.get());
 	}
 	for (auto it = slots.begin(); it != slots.end(); ++it) {
-		octree.insert((*it).second.get());
+		octree.insert((*it).second);
 	}
 	octree.update();
 
-	skybox->draw(*cubemapShader, *camera, glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
-	octree.draw(*textureShader, *camera);
+	skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+	octree.draw(*textureShader, *cameras[selectedCamera]);
 
 
 	// Deal with dead objects.
 	auto& dead_it = dead_objects.begin();
 	while (dead_it != dead_objects.end()) {
 		dead_it->second->update();
-		if (dead_it->second->do_animation(*textureShader, *camera) == true) {
+		if (dead_it->second->do_animation(*textureShader, *cameras[selectedCamera]) == true) {
 			UID id = dead_it->first;
 			LOG_DEBUG("Deleting unit with id " + std::to_string(id));
 			dead_it++;
@@ -365,7 +418,7 @@ void Client::display() {
 	glBindTexture(GL_TEXTURE_2D, color_buff[BRIGHTNESS_BUFFER]);
 	glUniform1i(glGetUniformLocation(blurShader->getPid(), "blurX"), blurX);
 
-	quad->Draw();
+	quad->draw();
 	blurX = !blurX;
 
 	//blur the image
@@ -379,8 +432,7 @@ void Client::display() {
 		blurX = !blurX; //switch between blur directions
 
 		//draw texture
-		quad->Draw();
-	
+		quad->draw();
 	}
 	
 	blurShader->unbind();
@@ -402,9 +454,12 @@ void Client::display() {
 	glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
 	glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
 	glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
-	quad->Draw();
+	quad->draw();
 
 	quadShader->unbind();
+
+	// draw the UI
+	gui->drawWidgets();
 
 	glfwSwapBuffers(window);
 
@@ -412,9 +467,13 @@ void Client::display() {
 }
 
 void Client::update() {
-	
+
+	cameras[selectedCamera]->update();
+
+	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
+
 	auto& update_queue = Lib::key_acquire(this->update_queue);
 	while (!update_queue.get().empty()) {
 		update_queue.get().back()();
@@ -427,12 +486,14 @@ void Client::errorCallback(int error, const char * description) {
 }
 
 void Client::resizeCallback(int width, int height) {
+	if (!init) return;
 	// resize the camera
-	if (camera) {
+	for (auto camera : cameras) {
 		camera->width = width;
 		camera->height = height;
 		camera->aspectRatio = (float)width / (float)height;
 		camera->calculatePerspectiveMatrix();
+		camera->calculateInfinitePerspectiveMatrix();
 	}
 
 	// resize our buffers
@@ -455,34 +516,52 @@ void Client::resizeCallback(int width, int height) {
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glViewport(0, 0, width, height);
+
+	if (gui) {
+		gui->resizeCallbackEvent(width, height);
+	}
 }
 
 void Client::keyCallback(int key, int scancode, int action, int mods) {
-	if (action == GLFW_PRESS) {
-		this->keyboard_handler.setKeyDown(key);
-	}
-	else if (action == GLFW_RELEASE) {
-		this->keyboard_handler.setKeyUp(key);
+	if (!gui->keyCallbackEvent(key, scancode, action, mods))
+		keyboard_handler.keyCallback(key, scancode, action, mods);
+}
+
+void Client::mouseButtonCallback(int button, int action, int mods) {
+	if (!gui->mouseButtonCallbackEvent(button, action, mods)) {
+		mouse_handler.mouseButtonCallback(button, action, mods);
 	}
 }
 
-void Client::handleCameraPanButtonDown(int key) {
-	/* We are going to attempt to move the camera! */
-	auto speed = 1.0f;
-	switch (key) {
-	case GLFW_KEY_W:
-		camera->position += speed * glm::vec3(0.0f, 0.0f, -1.0f);
-		break;
-	case GLFW_KEY_S:
-		camera->position -= speed * glm::vec3(0.0f, 0.0f, -1.0f);
-		break;
-	case GLFW_KEY_D:
-		camera->position += glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
-		break;
-	case GLFW_KEY_A:
-		camera->position -= glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, -1.0f), camera->up)) * speed;
-		break;
+void Client::mouseCursorCallback(double x, double y) {
+	if (!gui->cursorPosCallbackEvent(x, y)) {
+		mouse_handler.mouseCursorCallback(x, y);
 	}
+}
+
+void Client::scrollWheelCallback(double x, double y) {
+	if (!gui->scrollCallbackEvent(x, y)) {
+		mouse_handler.mouseWheelCallback(x, y);
+	}
+}
+
+void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	selection.clear();
+	cameras[selectedCamera]->calculateViewMatrix();
+	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
+	if (selected) {
+		selection.push_back(selected);
+		gui->updateSelection(selected);
+		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
+	}
+}
+
+void Client::handleCameraSwitch(int key) {
+	cameras[selectedCamera]->setActive(false);
+	selectedCamera++;
+	if (selectedCamera >= cameras.size()) selectedCamera = 0;
+	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
+	cameras[selectedCamera]->setActive(true);
 }
 
 void Client::handleEscapeKey(int key) {
@@ -513,14 +592,13 @@ void Client::handleF2Key(int key) {
 		return;
 	}
 
-	PlayerCommand deal(recipient, Resources::GOLD, 10);
-
+	TradeData deal(this->player->getID(), recipient, Resources::GOLD, 10);
 	this->channeled_send(&deal);
 }
 
 void Client::handleF3Key(int key) {
 
-	PlayerCommand command(rand() % 1000, rand() % 1000, rand() % 1000);
+	PlayerCommand command(rand() % 2000, rand() % 2000, rand() % 2000);
 
 	this->channeled_send(&command);
 }
@@ -532,16 +610,26 @@ void Client::handleF4Key(int key) {
 		return;
 	}
 	std::advance(unit_it, rand() % units.size());
-
-	UnitCommand command(unit_it->first, rand() % 1000, rand() % 1000, rand() % 1000);
+	UnitCommand command(unit_it->first, (float)(rand() % 1000), (float)(rand() % 1000), (float)(rand() % 1000));
 	this->channeled_send(&command);
 }
 
 
 void Client::handleF5Key(int key) {
-	/* we are going to create a city on the first slot.. */
-	auto slot_it = this->planets.begin()->second->get_slots().begin();
-	slot_it->second->attachCity(new DrawableCity(City(this->player.get(), 0, 0, 0, 0, 0, 0, slot_it->second)));
+	/* we are going to create a city on the selected slot... */
+	if (this->selection.size() <= 0 || this->selection.size() > 1) {
+		LOG_DEBUG("Cannot settle when nothing is selected...");
+		return;
+	}
+
+	Slot* slot = dynamic_cast<Slot*>(this->selection[0]);
+	if (!slot) {
+		LOG_DEBUG("Cannot settle when thing selected is not a slot");
+		return;
+	}
+
+	SettleCityCommand settle_command(slot->getID());
+	this->channeled_send(&settle_command);
 }
 
 void Client::handleF6Key(int key) {
@@ -574,69 +662,51 @@ void Client::handleF6Key(int key) {
 	LOG_ERR("Failed to find a unit to attack.");
 }
 
+void Client::handleF10Key(int key) {
+	// Counter offer a trade deal giving for free what the original seller wanted to give -- yeah I know these guys are crazy.
+	std::shared_ptr<TradeDeal> trade_deal;
+	try {
+		/* Get the first trade deal from player's pending list */
+		trade_deal = player->get_trade_deal();
+	}
+	catch (Identifiable::BadUIDException e) {
+		LOG_ERR("No pending trade deal found");
+		return;
+	}
 
-void Client::mouseButtonCallback(int button, int action, int mods) {
-	double x, y;
-	glfwGetCursorPos(window, &x, &y);
-	lastMousePos = std::make_pair(x, y);
-	if (action == GLFW_PRESS) {
-		switch (button) {
-		case(GLFW_MOUSE_BUTTON_LEFT):
-			leftMouseDown = true;
-			break;
-		case(GLFW_MOUSE_BUTTON_RIGHT):
-			rightMouseDown = true;
-			break;
-		case(GLFW_MOUSE_BUTTON_MIDDLE):
-			middleMouseDown = true;
-			break;
-		default:
-			return;
-		}
+	if (this->player->getID() != trade_deal->get_recipient()) {
+		LOG_ERR("Player has a deal that wasn't sent to this player -- weird!");
+		return;
 	}
-	else if (action == GLFW_RELEASE) {
-		GameObject * selection;
-		switch (button) {
-		case(GLFW_MOUSE_BUTTON_LEFT):
-			leftMouseDown = false;
-			camera->calculateViewMatrix();
-			selection = dynamic_cast<GameObject *>(octree.intersect(camera->projectRay((int)x, (int)y)));
-			if (selection) {
-				selectedObject = selection;
-				LOG_INFO("Selected game object with UID <", selectedObject->getID(), ">");
-			}
-			
-			break;
-		case(GLFW_MOUSE_BUTTON_RIGHT):
-			rightMouseDown = false;
-			break;
-		case(GLFW_MOUSE_BUTTON_MIDDLE):
-			middleMouseDown = false;
-			break;
-		default:
-			return;
-		}
-	}
+
+	/* Start a counter-offer based on the found trade deal */
+	/* TODO: Maybe there's a better way to make "modifying" a deal easier */
+	TradeData deal(trade_deal->get_recipient(), trade_deal->get_sender(), trade_deal->get_sell_type(), trade_deal->get_sell_amount() * 2);
+	this->channeled_send(&deal);
 }
 
-void Client::mouseCursorCallback(double x, double y) {
-	if (rightMouseDown) {
-		float angle;
-		// Perform horizontal (y-axis) rotation
-		angle = (float)(lastMousePos.first - x) / 100.0f;
-		camera->position = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camera->position, 1.0f));
-		camera->up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(camera->up, 1.0f));
-		//Now rotate vertically based on current orientation
-		angle = (float)(y - lastMousePos.second) / 100.0f;
-		glm::vec3 axis = glm::cross((camera->position - camera->target), camera->up);
-		camera->position = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camera->position, 1.0f));
-		camera->up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(camera->up, 1.0f));
-		lastMousePos = std::make_pair(x, y);
+void Client::handleF11Key(int key) {
+	// Accept the first trade deal in player's pending map
+	UID deal_id = player->trade_deal_accept();
+	if (deal_id == 0) {
+		LOG_ERR("No pending trade deal found");
+		return;
 	}
+
+	TradeCommand command(deal_id, true);
+	this->channeled_send(&command);
 }
 
-void Client::mouseWheelCallback(double x, double y) {
-	camera->position = glm::vec3(glm::translate(glm::mat4(1.0f), camera->position * (float)y * -0.05f) * glm::vec4(camera->position, 1.0f));
+void Client::handleF12Key(int key) {
+	// Decline the first trade deal in player's pending map
+	UID deal_id = player->trade_deal_decline();
+	if (deal_id == 0) {
+		LOG_ERR("No pending trade deal found");
+		return;
+	}
+
+	TradeCommand command(deal_id, false);
+	this->channeled_send(&command);
 }
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
@@ -660,9 +730,25 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	LOG_DEBUG("Unit creation update received");
 	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
 	units[update->id] = std::make_unique<DrawableUnit>(
-		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), update->att, update->def, update->range, update->health),
+		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), new InstantLaserAttack(), update->def, update->range, update->health),
 		spaceship, unitShader, laser_particles, explosion_particles
 	);
+}
+
+void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {
+	LOG_DEBUG("City creation update received");
+	auto& player_iter = players.find(update->player_id);
+	Lib::assertTrue(player_iter != players.end(), "Invalid player ID");
+
+	auto& slot_iter = slots.find(update->slot_id);
+	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
+
+	auto& update_queue = Lib::key_acquire(this->update_queue);
+	std::function<void()> createCityFunc = [slot_iter, update, player_iter]() {
+		slot_iter->second->attachCity(new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second)));
+	};
+
+	update_queue.get().push(createCityFunc);
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
@@ -704,6 +790,21 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
 	update->apply(planets[update->id].get());
 	planets[update->id]->update();
+}
+
+void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> deal) {
+	LOG_DEBUG("Received a trade deal");
+	Lib::assertTrue(players.find(deal->sender) != players.end() && players.find(deal->recipient) != players.end(), "Invalid player ID");
+
+	if (this->player->getID() == deal->sender) {
+		LOG_DEBUG("I am the sender of this trade deal");
+		// For now, we don't have to do anything if this player sent this trade deal.
+	}
+	else {
+		LOG_DEBUG("I am the receiver of this trade deal");
+		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
+		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
+	}
 }
 
 void Client::handle_client_disconnect() {

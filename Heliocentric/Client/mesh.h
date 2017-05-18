@@ -1,16 +1,13 @@
 #pragma once
-#include <assimp\postprocess.h>
 #include "shader.h"
 #include "vertex.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
 #include "camera.h"
 #include "bounding_box.h"
+#include "mesh_geometry.h"
 
 #include <string>
 #include <vector>
-#include <memory>
 
 //the material properties for a mesh
 struct Material {
@@ -22,20 +19,19 @@ struct Material {
 class Mesh
 {
 public:
+	Mesh(MeshGeometry* geometry);
 
 
 
 	virtual void update();
-
-
 	virtual void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld); //draws mesh
-
+	virtual void render();
 	virtual void setTexture(const Texture* texture);
 	
 	BoundingBox getBoundingBox() const;
 
-	std::vector<GLuint> mesh_indices;
-	std::vector<Vertex> mesh_vertices; //mesh vertices and their info
+	MeshGeometry* geometry;
+
 	std::vector<const Texture*> mesh_textures;
 
 	Material mtl; //mesh material
@@ -47,9 +43,7 @@ public:
 
 protected:
 	//vertex array, vertex buffer, uniform buffer
-	GLuint VAO, VBO, EBO, UBO;
-	BoundingBox boundingBox;
+	GLuint UBO;
 
 	void createMesh(); //opengl binding of mesh data
-	virtual void genMesh();
 };

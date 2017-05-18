@@ -2,7 +2,7 @@
 #include "CppUnitTest.h"
 #include "unit.h"
 #include "glm/gtc/matrix_transform.hpp"
-
+#include "instant_laser_attack.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -12,7 +12,7 @@ namespace Test
 	class TestUnit : public Unit {
 
 	public:
-		TestUnit(UID id, glm::vec3 position) : Unit(id, position, NULL, 1, 1, 200, 100) {
+		TestUnit(UID id, glm::vec3 position) : Unit(id, position, NULL, new InstantLaserAttack(), 100, 100) {
 			this->movement_speed = 200;
 		}
 
@@ -22,6 +22,10 @@ namespace Test
 
 		bool is_in_idle_mode() {
 			return this->currentCommand == Unit::UNIT_IDLE;
+		}
+
+		bool is_dead() {
+			return this->currentCommand == Unit::UNIT_DIE;
 		}
 	};
 
@@ -116,7 +120,7 @@ namespace Test
 
 			// Check  dthat unit_2 is dead and unit_1 is still alive
 			Assert::IsTrue(unit_1->is_in_idle_mode());
-			Assert::IsNull(unit_2->get_player());
+			Assert::IsTrue(unit_2->is_dead());
 		}
 
 

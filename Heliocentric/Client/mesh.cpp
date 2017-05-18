@@ -13,6 +13,9 @@
 #include "camera.h"
 #include "logging.h"
 
+Mesh::Mesh(MeshGeometry* geom) : geometry(geom) {
+
+}
 
 void Mesh::update() {
 
@@ -36,19 +39,9 @@ void Mesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, VIEW_UNIFORM), 1, GL_FALSE, &camera.view[0][0]);
 
 	glUniform3f(glGetUniformLocation(shaderID, VIEWPOS_UNIFORM), camera.position.x, camera.position.y, camera.position.z);
-
-
-	//TODO: bind lights -- naming convention for lights in shader, make UBO for light types. this should probably be moved made its own class or so
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.position"), 0.0f, 0.0f, 0.0f);
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.ambient"), 0.3f, 0.3f, 0.3f);
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.diffuse"), 0.5f, 0.5f, 0.5f);
-	glUniform3f(glGetUniformLocation(shader.getPid(), "pointLight.specular"), 0.7f, 0.7f, 0.7f);
-	glUniform1f(glGetUniformLocation(shader.getPid(), "pointLight.quadratic"), 0.00030f);
-	glUniform1f(glGetUniformLocation(shader.getPid(), "pointLight.linear"), 0.0002f);
-	glUniform1f(glGetUniformLocation(shader.getPid(), "pointLight.constant"), 0.00050f);
 	
 	// Add time component to geometry shader in the form of a uniform
-	glUniform1f(glGetUniformLocation(shader.getPid(), "time"), glfwGetTime() - creationTime);
+	glUniform1f(glGetUniformLocation(shader.getPid(), "time"), (float)glfwGetTime() - creationTime);
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, MODEL_UNIFORM), 1, GL_FALSE, &toWorld[0][0]);
 
@@ -71,14 +64,7 @@ glActiveTexture(GL_TEXTURE0 + i);
 	}
 
 
-
-	//bind vao 
-	glBindVertexArray(VAO);
-
-	//draw
-	glDrawElements(GL_TRIANGLES, (GLsizei)mesh_indices.size(), GL_UNSIGNED_INT, 0);
-
-	glBindVertexArray(0);
+	render();
 
 	//reset everything
 	for (GLuint i = 0; i < mesh_textures.size(); i++)
@@ -102,74 +88,28 @@ void Mesh::setTexture(const Texture* texture) {
 }
 
 BoundingBox Mesh::getBoundingBox() const {
-	return boundingBox;
+	return geometry->boundingBox;
 }
 
 void Mesh::createMesh()
 {
+	/* Create the geometry */
+	geometry->createGeometry();
 
-	//TODO remove afterwards
-	creationTime = glfwGetTime();
-
-	genMesh();
-
-	//set up buffers and specify vertex shader
-
-	//generate vertex arrays and buffers
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	/* Do material stuff */
 	glGenBuffers(1, &UBO);
-
-	//bind values to array and buffers
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, mesh_vertices.size() * sizeof(Vertex), &mesh_vertices.at(0), GL_STATIC_DRAW);
-
-
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_indices.size() * sizeof(GLuint), &mesh_indices.at(0), GL_STATIC_DRAW);
-
-	//vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
-
-	//vertex normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, norm));
-
-	//vertex texture coordinates
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, tex_coords));
-
 
 	//vertex  material
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(Material), (GLvoid*)&mtl, GL_STATIC_DRAW);
-
-	//Report any errors
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		LOG_ERR("Error while creating mesh!");
-	}
-
-	//unbind buffers
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	// create bounding box around vertices
-	boundingBox.min = glm::vec3(100000000.0f);
-	boundingBox.max = glm::vec3(-100000000.0f);
-	for (unsigned int i = 0; i < mesh_vertices.size(); ++i) {
-		boundingBox.expand(mesh_vertices[i].pos);
-	}
 }
 
-void Mesh::genMesh() {
+void Mesh::render() {
+	//bind vao 
+	glBindVertexArray(geometry->VAO);
 
+	//draw
+	glDrawElements(GL_TRIANGLES, geometry->numIndices, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
 }

@@ -20,6 +20,6 @@ public:
 	@param player_name Name of the player to be updated.
 	*/
 	PlayerUpdate(UID, const char*);
-	PlayerUpdate(UID, Resources::ResourceType, int);
+	PlayerUpdate(UID, Resources::Type, int);
 	void apply(Player* player);
 };

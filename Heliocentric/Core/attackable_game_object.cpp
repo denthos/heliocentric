@@ -3,21 +3,17 @@
 #include <glm\gtc\matrix_transform.hpp>
 
 
-AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, int att, int def, int range, int heal) : 
-	GameObject(position, player), combatAttack(att), combatDefense(def), combatRange(range), health(heal) {};
+
+AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
+	GameObject(position, player),  attack(*attack), combatDefense(def),  health(heal) {};
 
 
-AttackableGameObject::AttackableGameObject(UID id, glm::vec3 position, Player* player, int att, int def, int range, int heal) : 
-	GameObject(id, position, player), combatAttack(att), combatDefense(def), combatRange(range), health(heal) {};
+AttackableGameObject::AttackableGameObject(UID id, glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
+	GameObject(id, position, player), attack(*attack), combatDefense(def), health(heal) {};
 
 
-int AttackableGameObject::get_combat_attack() {
-	return this->combatAttack;
-}
-
-int AttackableGameObject::set_combat_attack(int combatAttack) {
-	this->combatAttack = combatAttack;
-	return this->combatAttack;
+Attack& AttackableGameObject::getAttack() {
+	return this->attack;
 }
 
 int AttackableGameObject::get_combat_defense() {
@@ -27,15 +23,6 @@ int AttackableGameObject::get_combat_defense() {
 int AttackableGameObject::set_combat_defense(int combatDefense) {
 	this->combatDefense = combatDefense;
 	return this->combatDefense;
-}
-
-int AttackableGameObject::get_combat_range() {
-	return this->combatRange;
-}
-
-int AttackableGameObject::set_combat_range(int combatRange) {
-	this->combatRange = combatRange;
-	return this->combatRange;
 }
 
 int AttackableGameObject::get_health() {
@@ -53,11 +40,19 @@ int AttackableGameObject::take_damage(int damage) {
 	return this->health;
 }
 
-void AttackableGameObject::do_attack(AttackableGameObject * target)
-{	
-	if (target == this || target->player == this->player) {
+bool AttackableGameObject::do_attack(AttackableGameObject * target)
+{
+	if (target == nullptr) {
+		LOG_ERR("target is null.");
+		return false;
+	}
+	else if (target == this || target->player == this->player) {
 		LOG_ERR("Cannot attack same player.");
-		return;
+		return false;
+	}
+	else if (target->get_health() <= 0) {
+		LOG_ERR("Cannot attack a dead unit.");
+		return false;
 	}
 
 	bool target_is_dead = false, this_is_dead = false;
@@ -65,10 +60,10 @@ void AttackableGameObject::do_attack(AttackableGameObject * target)
 	LOG_DEBUG("Target position is " + std::to_string(target->get_position().x) + " " + std::to_string(target->get_position().y) + " " + std::to_string(target->get_position().z));
 	LOG_DEBUG("Distance between attacker and target is " + std::to_string(glm::distance(this->position, target->get_position())));
 
-	if (glm::distance(this->position, target->get_position()) <= (float) this->combatRange) {
-		// Target is within range.
+	if (glm::distance(this->position, target->get_position()) <= (float) this->attack.getRange()) {
 
-		target->take_damage(this->get_combat_attack());
+		// Target is within range.
+		this->attack.doAttack(target);
 
 		if (target->health <= 0) {
 			target->handle_defeat(this);
@@ -95,5 +90,7 @@ void AttackableGameObject::do_attack(AttackableGameObject * target)
 		this->handle_out_of_range(target);
 		LOG_DEBUG("Target " + std::to_string(target->getID()) + " is out of range, moving towards " + std::to_string(target->get_position().x) + " " + std::to_string(target->get_position().y) + " " + std::to_string(target->get_position().z));
 	}
+
+	return true;
 
 }

@@ -5,7 +5,7 @@ PlayerUpdate::PlayerUpdate(UID id, const char* player_name) : id(id) {
 	this->gold_change = 0; // With current scheme, unitialized gold change will cause client to update player's gold deposit whenever an update is received
 }
 
-PlayerUpdate::PlayerUpdate(UID id, Resources::ResourceType resource_type, int amount) : id(id) {
+PlayerUpdate::PlayerUpdate(UID id, Resources::Type resource_type, int amount) : id(id) {
 	switch (resource_type) {
 		case Resources::GOLD: {
 			this->gold_change = amount;

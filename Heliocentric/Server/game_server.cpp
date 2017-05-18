@@ -1,15 +1,21 @@
 #include <functional>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "unit_creation_update.h"
 #include "unit_update.h"
 #include "game_server.h"
-
+#include "city.h"
 #include "player_id_confirmation.h"
+#include "city_creation_update.h"
+#include "instant_laser_attack.h"
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
+
+	for (auto& planet_iter : this->universe.get_planets()) {
+		for (auto& slot_iter : planet_iter->get_slots_const()) {
+			this->slots.insert(std::make_pair(slot_iter.first, slot_iter.second));
+		}
+	}
 
 	game_running = true;
 	this->tick_duration = tick_duration;
@@ -231,6 +237,27 @@ void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std
 	this->game_paused = !this->game_paused;
 }
 
+void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SettleCityCommand> command) {
+	LOG_DEBUG("Received settle city command");
+
+	Player* owning_player = this->extractPlayerFromConnection(sender);
+
+	/* Create the new city */
+	auto& slot_iter = this->slots.find(command->initiator);
+	if (slot_iter == this->slots.end()) {
+		LOG_ERR("Slot not found");
+		return;
+	}
+
+	// TODO: Create the city from the player's current technologies
+	City* new_city = new City(owning_player, new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second);
+	slot_iter->second->attachCity(new_city);
+
+	/* Bundle and send the update */
+	auto city_creation_update = std::make_shared<CityCreationUpdate>(owning_player->getID(), slot_iter->first, new_city->getID());
+	this->addUpdateToSendQueue(city_creation_update);
+}
+
 void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> command) {
 	LOG_DEBUG("Received a player command.");
 
@@ -298,26 +325,79 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	}
 }
 
-void GameServer::handleTradeDeal(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeDeal> trade_deal) {
-	LOG_DEBUG("Received a trade deal.");
+void GameServer::handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeCommand> command) {
+	LOG_DEBUG("Received a trade command.");
 
-	if (trade_deal->isAccepted()) {
-		/* Trade deal accepted */
-		if (players.find(trade_deal->recipient) == players.end()) {
-			/* If UID does not correspond to a player */
-			LOG_ERR("Invalid player UID.");
-		}
+	/* It's called "recipient" because it's the recipient of this deal, even though its connection is named "sender". */
+	Player* recipient = this->extractPlayerFromConnection(sender);
+	std::shared_ptr<TradeDeal> trade_deal;
+	try {
+		trade_deal = recipient->get_trade_deal(command->initiator);
 	}
-	else {
-		/* Trade deal declined */
+	catch (Identifiable::BadUIDException e) {
+		LOG_ERR("Invalid trade deal ID");
+	}
 
+	switch (command->command_type) {
+		case TradeCommand::CMD_TRADE_ACCEPT: {
+			recipient->trade_deal_accept(command->initiator);
+
+			std::shared_ptr<PlayerUpdate> sender_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
+				trade_deal->get_sell_type(), trade_deal->get_sell_amount() * (-1));
+			std::shared_ptr<PlayerUpdate> recipient_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
+				trade_deal->get_sell_type(), trade_deal->get_sell_amount());
+
+			/* Player updates need to be sent to all clients, obviously. */
+			this->addUpdateToSendQueue(sender_update);
+			this->addUpdateToSendQueue(recipient_update);
+			
+			break;
+		}
+		case TradeCommand::CMD_TRADE_DECLINE: {
+			recipient->trade_deal_decline(command->initiator);
+
+			// TODO: Let sender know that his proposal was denied QAQ
+
+			break;
+		}
+		default:
+			LOG_ERR("Invalid trade command.");
+	}
+}
+
+void GameServer::handleTradeData(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> deal) {
+	LOG_DEBUG("Received a trade data.");
+
+	if (players.find(deal->sender) == players.end() || players.find(deal->recipient) == players.end()) {
+		LOG_ERR("Invalid player ID");
+		return;
+	}
+
+	/* If receives a pending trade deal, change the ID of the other player to sender, and sent it to its recipient. */
+	if (deal->trade_status == TradeData::PENDING) {
+		/* Create the corresponding TradeDeal from TradeData */
+		std::shared_ptr<TradeDeal> trade_deal = std::make_shared<TradeDeal>(deal);
+		deal->trade_deal_id = trade_deal->getID(); // Assign the TradeDeal's ID
+
+		/* Put the TradeDeal to recipient's pending deals */
+		players[deal->recipient]->receive_trade_deal(trade_deal);
+		
+		auto connections = Lib::key_acquire(this->connections);
+		SunNet::ChanneledSocketConnection_p recipient = (connections.get().first)[deal->recipient]; // find recipient by ID
+
+		/* Send this deal to both sender and recipient. Sender thus knows about the trade deal's ID. */
+		this->addUpdateToSendQueue(deal, { sender, recipient });
 	}
 }
 
 void GameServer::subscribeToChannels() {
 	/* Subscribe to important channels */
 	this->subscribe<DebugPause>(std::bind(&GameServer::handleGamePause, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlayerClientToServerTransfer>(std::bind(&GameServer::handleReceivePlayerClientToServerTransfer, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerCommand>(std::bind(&GameServer::handlePlayerCommand, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitCommand>(std::bind(&GameServer::handleUnitCommand, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<TradeCommand>(std::bind(&GameServer::handleTradeCommand, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<TradeData>(std::bind(&GameServer::handleTradeData, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SettleCityCommand>(std::bind(&GameServer::handleSettleCityCommand, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerClientToServerTransfer>(std::bind(&GameServer::handleReceivePlayerClientToServerTransfer, this, std::placeholders::_1, std::placeholders::_2));
 }

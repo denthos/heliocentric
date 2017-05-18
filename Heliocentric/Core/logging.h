@@ -43,7 +43,16 @@ namespace Lib {
 
 	template <typename... TLogItems>
 	void LogFunc(int level, const char* file, int line, const TLogItems&... args) {
-		int log_level = INIParser::getInstance().get<int>("loglevel");
+		int log_level;
+		
+		// Hacky way to get logging to work for tests.
+		try {
+			log_level = INIParser::getInstance().get<int>("loglevel");
+		}
+		catch (std::exception) {
+			log_level = COMPILE_TIME_LOG_LEVEL;
+		}
+
 		if (level < log_level) {
 			return;
 		}

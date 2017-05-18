@@ -17,11 +17,15 @@ private:
 	template <typename ... PlanetArgs>
 	std::unique_ptr<Planet> createPlanet(PlanetArgs... args) {
 		auto planet = std::make_unique<Planet>(args...);
-		Slot* left_slot = new Slot(planet.get(), SphericalCoordinate(0, 90));
-		Slot* right_slot = new Slot(planet.get(), SphericalCoordinate(180, 90));
 
+		Slot* left_slot = new Slot(planet.get(), SphericalCoordinate(90, 0));
 		planet->get_slots().insert(std::make_pair(left_slot->getID(), left_slot));
+
+		Slot* right_slot = new Slot(planet.get(), SphericalCoordinate(90, 180));
 		planet->get_slots().insert(std::make_pair(right_slot->getID(), right_slot));
+
+		Slot* really_right_slot = new Slot(planet.get(), SphericalCoordinate(45, 135));
+		planet->get_slots().insert(std::make_pair(really_right_slot->getID(), really_right_slot));
 
 		return planet;
 	}

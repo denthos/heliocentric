@@ -1,11 +1,11 @@
 #pragma once
 #include "mesh.h"
+#include "skybox_geometry.h"
 
-class SkyboxMesh :public Mesh {
+class SkyboxMesh : public Mesh {
 public:
-	SkyboxMesh(const char* right, const char* left, const char* up, const char* down, const char* back, const char* front);
+	SkyboxMesh(const char* right, const char* left, const char* up, const char* down, const char* back, const char* front, SkyboxMeshGeometry* geom);
 
-	~SkyboxMesh();
 	virtual void draw(const Shader &shader, const Camera & camera, const glm::mat4 & toWorld);
 
 
@@ -14,6 +14,5 @@ private:
 	GLuint skyboxTextureID;
 
 	GLuint loadCubemap();
-	void genMesh(); //generates data to be used in mesh
 };
 

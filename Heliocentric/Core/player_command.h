@@ -23,7 +23,7 @@ public:
 	float create_location_z;
 
 	UID trade_recipient;
-	Resources::ResourceType trade_selling;
+	Resources::Type trade_selling;
 	int trade_sell_amount;
 
 	/* TODO: Include things like */
@@ -41,5 +41,5 @@ public:
 	*/
 	PlayerCommand(float, float, float);
 
-	PlayerCommand(UID, Resources::ResourceType, int);
+	PlayerCommand(UID, Resources::Type, int);
 };

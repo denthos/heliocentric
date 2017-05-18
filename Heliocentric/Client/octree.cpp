@@ -106,6 +106,7 @@ Drawable * Octree::intersect(const Ray & ray) {
 
 bool Octree::intersect(const Ray & ray, Collision & collision, Drawable *& drawable) const {
 	bool success = false;
+
 	if (region.intersect(ray)) {
 		// check children
 		if (this->hasChildren) {
@@ -126,6 +127,7 @@ bool Octree::intersect(const Ray & ray, Collision & collision, Drawable *& drawa
 			}
 		}
 	}
+
 	return success;
 }
 

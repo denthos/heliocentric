@@ -14,6 +14,8 @@ public:
 	virtual bool intersect(const Ray &, Collision &) const;
 	virtual bool do_animation(const Shader &, const Camera &) const { return true; }
 
+	const glm::mat4& getToWorld() const;
+
 protected:
 	Model * model;
 	glm::mat4 toWorld;

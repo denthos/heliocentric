@@ -125,6 +125,15 @@
     <ClInclude Include="unit_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="spherical_coordinate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="settle_city_command.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="city_creation_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
     <ClInclude Include="resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -132,6 +141,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="spherical_coordinate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="trade_command.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="trade_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="singleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="attack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="instant_laser_attack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -226,10 +250,25 @@
     <ClCompile Include="unit_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="spherical_coordinate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="settle_city_command.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="city_creation_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
     <ClCompile Include="trade_deal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="spherical_coordinate.cpp">
+    <ClCompile Include="trade_command.cpp">
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="trade_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="attack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

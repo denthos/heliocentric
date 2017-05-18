@@ -50,6 +50,12 @@ namespace Lib {
 		}
 
 		template<>
+		char get(std::string key) {
+			char val = this->get(key)[0];
+			return val >= 97 && val <= 122 ? val - 32 : val;
+		}
+
+		template<>
 		float get(std::string key) {
 			std::string value = this->get(key);
 			return (float)std::atof(value.c_str());

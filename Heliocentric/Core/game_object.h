@@ -32,7 +32,7 @@ public:
 	Returns the player who owns this game object.
 	@return The owner of this game object.
 	*/
-	Player* get_player() const;
+	virtual Player* get_player() const;
 
 	/* *
 	Assign player while no constructor is doing so.

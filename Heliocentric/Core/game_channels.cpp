@@ -7,12 +7,15 @@
 #include "player_update.h"
 #include "planet_update.h"
 #include "city_update.h"
+#include "city_creation_update.h"
 
 #include "player_id_confirmation.h"
 #include "player_client_to_server_xfer.h"
 #include "debug_pause.h"
 #include "player_command.h"
 #include "unit_command.h"
+#include "trade_command.h"
+#include "settle_city_command.h"
 
 #include "trade_deal.h"
 
@@ -24,12 +27,15 @@ void initializeChannels() {
 	channels::addNewChannel<PlayerUpdate>();
 	channels::addNewChannel<PlanetUpdate>();
 	channels::addNewChannel<CityUpdate>();
+	channels::addNewChannel<CityCreationUpdate>();
 
 	channels::addNewChannel<PlayerIDConfirmation>();
 	channels::addNewChannel<PlayerClientToServerTransfer>();
 	channels::addNewChannel<DebugPause>();
 	channels::addNewChannel<PlayerCommand>();
 	channels::addNewChannel<UnitCommand>();
+	channels::addNewChannel<TradeCommand>();
+  channels::addNewChannel<SettleCityCommand>();
 
-	channels::addNewChannel<TradeDeal>();
+	channels::addNewChannel<TradeData>();
 }

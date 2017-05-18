@@ -1,5 +1,13 @@
-#include <GL\glew.h>
-#include <GL\GL.h>
+#ifdef _WIN32
+	#define APIENTRY __stdcall
+#endif
+
+#include <glad\glad.h>
+
+#ifdef _WINDOWS_
+	#error windows.h was included
+#endif
+
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <unordered_map>
@@ -15,7 +23,6 @@ int main() {
 #ifdef GL_SHADING_LANGUAGE_VERSION
 	LOG_DEBUG("Supported GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
-	LOG_DEBUG("Glew version: ", glewGetString(GLEW_VERSION));
 	LOG_DEBUG("Renderer: ", glGetString(GL_RENDERER));
 
 	// Set up callback functions

@@ -2,7 +2,7 @@
 #include "glm\glm.hpp"
 
 #include "glm\gtx\spline.hpp"
-#include "GL\glew.h"
+#include <glad\glad.h>
 
 struct Particle {
 	glm::vec3 pos, 

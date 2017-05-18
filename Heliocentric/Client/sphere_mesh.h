@@ -1,29 +1,11 @@
 #pragma once
 
 #include "mesh.h"
+#include "sphere_geometry.h"
 
 
-
-class SphereMesh :public Mesh{
+class SphereMesh : public Mesh{
 public:
-	SphereMesh();
-	SphereMesh(float radius, int rings, int sectors);
-
-	~SphereMesh();
-
-	static bool init;
-
-private:
-
-	
-	unsigned int numIndices;
-
-	float radius;
-	int rings, sectors;
-
-	virtual void genMesh(); //generates data to be used in mesh
-
-
-
+	SphereMesh(SphereMeshGeometry* geom);
 };
 

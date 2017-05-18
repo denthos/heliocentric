@@ -5,38 +5,45 @@
 
 #define toRad (glm::pi<float>() / 180.0f)
 
-Camera::Camera() {
+Camera::Camera() : Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 45.0f, 1.0f, 10000000.0f, width, height) {
 
 }
 
-Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, float nearDist, float farDist, int width, int height) :
-	position(position), target(target), up(up), fov(fov), nearDist(nearDist), farDist(farDist), width(width), height(height) {
+Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, float nearDist, float farDist, int width, int height, bool active) :
+	position(position), target(target), up(up), fov(fov), nearDist(nearDist), farDist(farDist), width(width), height(height), active(active) {
 	calculateViewMatrix();
 	calculatePerspectiveMatrix();
 	calculateInfinitePerspectiveMatrix();
 }
 
-void Camera::calculateViewMatrix() {
-	view = glm::lookAt(position, target, up);
+void Camera::loadSettings(Lib::INIParser & config) {
+
 }
 
-void Camera::calculatePerspectiveMatrix() {
+glm::mat4 Camera::calculateViewMatrix() {
+	view = glm::lookAt(position, target, up);
+	return view;
+}
+
+glm::mat4 Camera::calculatePerspectiveMatrix() {
 
 	if (height > 0) {
 		aspectRatio = (float)width / (float)height;
 		perspective = glm::perspective((float)fov, aspectRatio, nearDist, farDist);
 	}
+	return perspective;
 }
 
-void Camera::calculateInfinitePerspectiveMatrix()
+glm::mat4 Camera::calculateInfinitePerspectiveMatrix()
 {
 	if (height > 0) {
 		infinite_perspective = glm::infinitePerspective((float)fov, aspectRatio, nearDist);
 	}
+	return infinite_perspective;
 }
 
 
-void Camera::calculateViewFrustum() {
+ViewFrustum Camera::calculateViewFrustum() {
 	float tang = glm::tan(toRad * fov);
 	float nearHeight = tang * nearDist;
 	float nearWidth = nearHeight * aspectRatio;
@@ -71,11 +78,21 @@ void Camera::calculateViewFrustum() {
 	aux = glm::normalize((nearCenter + (x * nearWidth)) - this->position);
 	normal = glm::cross(y, aux);
 	viewFrustum.planes[RIGHT_PLANE] = Plane(nearCenter + (x * nearWidth), normal);
+
+	return viewFrustum;
 }
 
-Ray Camera::projectRay(int mousex, int mousey) const {
-	float x = (float)mousex;
-	float y = (float)height - (float)mousey;
+void Camera::setActive(bool b) {
+	active = b;
+}
+
+Ray Camera::projectRay(std::pair<float, float> screenPosition) const {
+	return this->projectRay(screenPosition.first, screenPosition.second);
+}
+
+Ray Camera::projectRay(float mousex, float mousey) const {
+	float x = mousex;
+	float y = (float)height - mousey;
 	glm::vec4 viewport(0.0f, 0.0f, (float)width, (float)height);
 	glm::vec3 v0 = glm::unProject(glm::vec3(x, y, 0.0f), view, perspective, viewport);
 	glm::vec3 v1 = glm::unProject(glm::vec3(x, y, 1.0f), view, perspective, viewport);

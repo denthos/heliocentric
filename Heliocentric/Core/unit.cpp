@@ -1,21 +1,26 @@
 #include "unit.h"
 #include "logging.h"
 #include "unit_update.h"
+#include "unit_manager.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm\gtx\quaternion.hpp"
 
-Unit::Unit(glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
-	AttackableGameObject(pos, owner, att, def, range, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
+Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
+	AttackableGameObject(pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
 	this->update = std::make_shared<UnitUpdate>(this->getID(), this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
+	this->manager = nullptr;
+	this->target = nullptr;
 	this->delta_time_for_orient = 0.0f;
 }
 
-Unit::Unit(UID id, glm::vec3 pos, Player* owner, int att, int def, int range, int heal, float movement_speed) :
-	AttackableGameObject(id, pos, owner, att, def, range, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
+	AttackableGameObject(id, pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
 	this->update = std::make_shared<UnitUpdate>(id, this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
 	this->delta_time_for_orient = 0.0f;
+	this->manager = nullptr;
+	this->target = nullptr;
 }
 
 Unit::CommandType Unit::do_logic() {
@@ -23,14 +28,14 @@ Unit::CommandType Unit::do_logic() {
 	case UNIT_IDLE:
 		break;
 	case UNIT_ATTACK:
-		do_attack(this->target);
+		if (!do_attack(this->target)) {
+			currentCommand = UNIT_IDLE;
+		}
 		break;
 	case UNIT_MOVE:
 		do_move();
 		break;
 	case UNIT_DIE:
-		break;
-	case UNIT_HOLDER:
 		break;
 	default:
 		LOG_ERR("Invalid command type.");
@@ -94,7 +99,11 @@ void Unit::set_combat_target(AttackableGameObject* target) {
 }
 
 void Unit::set_command(CommandType command) {
-	currentCommand = command;
+
+	if (currentCommand != UNIT_DIE)
+	{
+		currentCommand = command;
+	}
 }
 
 void Unit::set_laser_shooting(bool shoot) {
@@ -118,6 +127,7 @@ glm::vec3 Unit::do_move() {
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));
 		position += glm::normalize(destination - position) * speed;
+		send_update_to_manager(make_update());
 	}
 	else {
 		// Reached destination
@@ -183,6 +193,7 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 	// Tell Player you have died.
 	//player->add_to_destroy(this);
 	//player = nullptr;
+	send_update_to_manager(make_update());
 	this->set_command(Unit::UNIT_DIE);
 	LOG_DEBUG("Unit " + std::to_string(this->getID()) + " set to UNIT_DIE.");
 	
@@ -196,21 +207,37 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 	// TODO: Gain experience (?)
 }
 
-void Unit::do_attack(AttackableGameObject* target) {
+bool Unit::do_attack(AttackableGameObject* target) {
 	float distance = glm::distance(this->position, target->get_position());
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
 	set_laser_shooting(true);
 
-	if ((distance <= (float) this->combatRange && (dot_product < 1.05f && dot_product > 0.95f)) || distance == 0.0f) {
-		AttackableGameObject::do_attack(target);
-		return;
+	if ((distance <= (float) this->attack.getRange() && (dot_product < 1.05f && dot_product > 0.95f)) || distance == 0.0f) {
+		return AttackableGameObject::do_attack(target);
 	}
 	if (dot_product >= 1.05f || dot_product <= 0.95f) {
 		LOG_DEBUG("dot product is " + std::to_string(dot_product));
 		do_orient();
 	}
-	if (distance > (float) this->combatRange) {
+	if (distance > (float) this->attack.getRange()) {
 		handle_out_of_range(target);
 	}
+	return true;
 }
 
+void Unit::handle_counter(AttackableGameObject* opponent) {
+	// Unit has been attacked, notify 
+	send_update_to_manager(make_update());
+}
+
+
+void Unit::set_manager(UnitManager* manager) {
+	this->manager = manager;
+}
+
+
+void Unit::send_update_to_manager(std::shared_ptr<UnitUpdate>& update) {
+	if (this->manager != nullptr) {
+		this->manager->register_update(update);
+	}
+}

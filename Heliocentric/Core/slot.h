@@ -1,12 +1,8 @@
 #pragma once
 
 #include "game_object.h"
-#include "player.h"
-#include "resources.h"
-#include "identifiable.h"
 #include "spherical_coordinate.h"
-#include <vector>
-#include <iostream>
+#include "resources.h"
 
 
 class SlotUpdate;
@@ -15,15 +11,17 @@ class Planet;
 class City;
 
 
-class Slot : public Identifiable {
+class Slot : public GameObject {
 public:
 	friend SlotUpdate;
 
 	Slot(Planet* planet, SphericalCoordinate coord);
 	Slot(UID id, Planet* planet, SphericalCoordinate coord);
 
-	glm::vec3 get_absolute_position() const;
+	glm::vec3 get_position() const;
 	SphericalCoordinate get_spherical_position() const;
+
+	Player* get_player() const;
 
 	void attachCity(City* city);
 	bool hasCity() const;
@@ -31,8 +29,9 @@ public:
 
 	Planet* getPlanet() const;
 
+
 protected:
-	Resources::ResourceType resource_type;
+	Resources::Type resource_type;
 	float resource_deposit;
 	SphericalCoordinate coordinate;
 	Planet* planet;

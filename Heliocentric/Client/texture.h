@@ -1,27 +1,20 @@
 #pragma once
 
 
-#include "GL\glew.h"
+#include <glad\glad.h>
 #include "soil.h"
 
 #include <assimp\scene.h> //ai textures
 #include <assimp\postprocess.h>
-#include <unordered_map>
 
-class Texture  {
+#include "singleton.h"
+
+
+class Texture  : public KeyedSingleton<Texture, std::string> {
+
+	friend class KeyedSingleton<Texture, std::string>;
+
 public:
-	template <typename ... TConstructorArgs>
-	static const Texture* getTexture(std::string filename, TConstructorArgs... args) {
-		static std::unordered_map<std::string, Texture> textures;
-		auto& texture_it = textures.find(filename);
-
-		if (texture_it == textures.end()) {
-			textures.insert(std::make_pair(filename, Texture(filename, args...)));
-		}
-
-		return &(textures.at(filename));
-	}
-
 	GLuint id;
 	std::string type; //either diffuse or specular
 
