@@ -226,6 +226,7 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
     <ClInclude Include="drawable_data.h" />
     <ClInclude Include="drawable_unit.h" />
     <ClInclude Include="mesh_geometry.h" />
+    <ClInclude Include="selectable.h" />
     <ClInclude Include="skybox_geometry.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="skybox_mesh.h" />

@@ -163,6 +163,9 @@
     <ClInclude Include="gui_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="selectable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">

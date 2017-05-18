@@ -2,7 +2,6 @@
 
 #include "model.h"
 #include "bounding_box.h"
-#include <memory>
 
 class Drawable {
 public:
@@ -11,6 +10,8 @@ public:
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;
 	virtual bool intersect(const Ray &, Collision &) const;
+
+	const glm::mat4& getToWorld() const;
 
 protected:
 	Model * model;

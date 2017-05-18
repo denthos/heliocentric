@@ -1,6 +1,4 @@
 #include <functional>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "unit_creation_update.h"
 #include "unit_update.h"

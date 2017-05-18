@@ -1,13 +1,12 @@
 #include "client.h"
 
-#include <glm/glm.hpp>
+#include <glad\glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
 #include <stdio.h>
 #include <stdlib.h>
 #include <soil.h>
-
 
 #include "free_camera.h"
 #include "orbital_camera.h"
@@ -32,6 +31,7 @@
 #include "trade_command.h"
 #include "trade_deal.h"
 #include "instant_laser_attack.h"
+#include "selectable.h"
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -238,8 +238,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F5, std::bind(&Client::handleF5Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
 
@@ -525,15 +525,27 @@ void Client::scrollWheelCallback(double x, double y) {
 	}
 }
 
-void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+void Client::setSelection(std::vector<GameObject*> new_selection) {
+	/* Deselect everything on the GUI */
+	gui->unselectSelection(this, selection);
+	
+	/* Clear the selection */
 	selection.clear();
+
+	/* Apply the new selection */
+	selection = new_selection;
+
+	/* Update the GUI */
+	gui->selectSelection(this, selection);
+}
+
+
+void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	/* Select a new thing */
 	cameras[selectedCamera]->calculateViewMatrix();
 	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
 	if (selected) {
-		selection.push_back(selected);
-		gui->updateSelection(selected);
-		
-		LOG_INFO("Selected game object with UID <", selected->getID(), ">");
+		setSelection({ selected });
 	}
 }
 
@@ -574,7 +586,6 @@ void Client::handleF2Key(int key) {
 	}
 
 	TradeData deal(this->player->getID(), recipient, Resources::GOLD, 10);
-
 	this->channeled_send(&deal);
 }
 
@@ -596,10 +607,8 @@ void Client::handleF4Key(int key) {
 }
 
 
-void Client::handleF5Key(int key) {
-	/* we are going to create a city on the first slot.. */
-	auto slot_it = this->planets.begin()->second->get_slots().begin();
-	SettleCityCommand settle_command(slot_it->first);
+void Client::createCityForSlot(DrawableSlot* slot) {
+	SettleCityCommand settle_command(slot->getID());
 	this->channeled_send(&settle_command);
 }
 
@@ -633,11 +642,34 @@ void Client::handleF6Key(int key) {
 	LOG_ERR("Failed to find a unit to attack.");
 }
 
+void Client::handleF10Key(int key) {
+	// Counter offer a trade deal giving for free what the original seller wanted to give -- yeah I know these guys are crazy.
+	std::shared_ptr<TradeDeal> trade_deal;
+	try {
+		/* Get the first trade deal from player's pending list */
+		trade_deal = player->get_trade_deal();
+	}
+	catch (Identifiable::BadUIDException e) {
+		LOG_ERR("No pending trade deal found");
+		return;
+	}
+
+	if (this->player->getID() != trade_deal->get_recipient()) {
+		LOG_ERR("Player has a deal that wasn't sent to this player -- weird!");
+		return;
+	}
+
+	/* Start a counter-offer based on the found trade deal */
+	/* TODO: Maybe there's a better way to make "modifying" a deal easier */
+	TradeData deal(trade_deal->get_recipient(), trade_deal->get_sender(), trade_deal->get_sell_type(), trade_deal->get_sell_amount() * 2);
+	this->channeled_send(&deal);
+}
+
 void Client::handleF11Key(int key) {
 	// Accept the first trade deal in player's pending map
 	UID deal_id = player->trade_deal_accept();
 	if (deal_id == 0) {
-		LOG_ERR("No trade deal to accept");
+		LOG_ERR("No pending trade deal found");
 		return;
 	}
 
@@ -649,7 +681,7 @@ void Client::handleF12Key(int key) {
 	// Decline the first trade deal in player's pending map
 	UID deal_id = player->trade_deal_decline();
 	if (deal_id == 0) {
-		LOG_ERR("No trade deal to decline");
+		LOG_ERR("No pending trade deal found");
 		return;
 	}
 
@@ -692,11 +724,28 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
 
 	auto& update_queue = Lib::key_acquire(this->update_queue);
-	std::function<void()> createCityFunc = [slot_iter, update, player_iter]() {
-		slot_iter->second->attachCity(new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second)));
+	std::function<void()> createCityFunc = [slot_iter, update, player_iter, this]() {
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second));
+		slot_iter->second->attachCity(newCity);
+		cities.insert(std::make_pair(newCity->getID(), newCity));
+
+		if (newCity->get_player()->getID() == player->getID()) {
+			setSelection({ newCity });
+		}
 	};
 
 	update_queue.get().push(createCityFunc);
+}
+
+void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
+	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
+	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
+	this->player = std::make_shared<Player>(player_name, update->id);
+	players[update->id] = this->player;
+
+	PlayerClientToServerTransfer info_transfer(player_name);
+
+	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
 }
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
@@ -724,17 +773,6 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
 	update->apply(planets[update->id].get());
 	planets[update->id]->update();
-}
-
-void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
-	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
-	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
-	this->player = std::make_shared<Player>(player_name, update->id);
-	players[update->id] = this->player;
-
-	PlayerClientToServerTransfer info_transfer(player_name);
-
-	sender->channeled_send<PlayerClientToServerTransfer>(&info_transfer);
 }
 
 void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> deal) {

@@ -29,17 +29,6 @@ DrawablePlanet::DrawablePlanet(const Planet & planet) : Planet(planet) {
 	}
 }
 
-void DrawablePlanet::draw(const Shader& shader, const Camera& camera) const {
-	Drawable::draw(shader, camera);
-
-	for (auto slot_pair : this->get_slots_const()) {
-		DrawableSlot* drawable_slot = static_cast<DrawableSlot*>(slot_pair.second);
-		if (drawable_slot) {
-			drawable_slot->draw(shader, camera);
-		}
-	}
-}
-
 DrawablePlanet::~DrawablePlanet() {
 
 }

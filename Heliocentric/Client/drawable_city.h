@@ -2,8 +2,14 @@
 
 #include "city.h"
 #include "drawable.h"
+#include "selectable.h"
 
-class DrawableCity : public City, public Drawable {
+class DrawableSlot;
+
+class DrawableCity : public City, public Drawable, public Selectable {
+private:
+	DrawableSlot* drawable_slot;
+
 public:
 	DrawableCity(const City&);
 	virtual void update();

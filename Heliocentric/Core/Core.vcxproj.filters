@@ -266,7 +266,7 @@
       <Filter>Commands</Filter>
     </ClCompile>
     <ClCompile Include="trade_data.cpp">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="attack.cpp">
       <Filter>Source Files</Filter>

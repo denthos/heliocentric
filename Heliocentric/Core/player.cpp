@@ -115,6 +115,16 @@ void Player::trade_deal_decline(UID id) {
 	pending_trade_deals.erase(id); // remove deal from pending list
 }
 
+std::shared_ptr<TradeDeal> Player::get_trade_deal() {
+	auto it = pending_trade_deals.begin();
+	if (it == pending_trade_deals.end()) {
+		/* Just do this for now even though it's not really a bad UID */
+		throw BadUIDException();
+	}
+
+	return it->second;
+}
+
 std::shared_ptr<TradeDeal> Player::get_trade_deal(UID id) {
 	if (pending_trade_deals.find(id) == pending_trade_deals.end()) {
 		throw BadUIDException();

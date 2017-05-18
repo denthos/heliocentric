@@ -34,6 +34,7 @@
 #include "locked_item.h"
 #include "trade_data.h"
 #include "trade_deal.h"
+#include "selectable.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -59,6 +60,11 @@ public:
 	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
 	void tradeDataHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TradeData>);
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
+
+
+	void createCityForSlot(DrawableSlot*);
+
+	void setSelection(std::vector<GameObject*>);
 
 protected:
 	/**** Handlers for ChanneledClient ****/
@@ -106,8 +112,8 @@ private:
 	void handleF2Key(int);
 	void handleF3Key(int);
 	void handleF4Key(int);
-	void handleF5Key(int);
 	void handleF6Key(int);
+	void handleF10Key(int);
 	void handleF11Key(int);
 	void handleF12Key(int);
 };

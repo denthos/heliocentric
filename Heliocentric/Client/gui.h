@@ -2,13 +2,31 @@
 #include "gui_utilities.h"
 #include "unit_gui.h"
 using namespace nanogui;
+
+class Slot;
+class Client;
+
 class GUI : public Screen {
 public:
-	GUI(GLFWwindow *); 
+	GUI(GLFWwindow *);
 	~GUI();
-	void updateSelection(GameObject * selected);
 
+	void unselectSelection(Client*, std::vector<GameObject*>& old_selection);
+	void selectSelection(Client*, std::vector<GameObject*>& old_selection);
+
+	void displaySlotUI(Slot* slot, std::function<void()> createCityCallback);
+	void hideSlotUI();
 private:
 	UnitGUI* unit_gui;
+	FormHelper* formHelper;
 
+	void createUidDisplay();
+	void createSlotDisplay();
+
+
+	ref<Window> uidWindow;
+	detail::FormWidget<int> * uidDisplay;
+
+	ref<Window> slotWindow;
+	Button* slotButton;
 };

@@ -62,12 +62,6 @@ public:
 	*/
 	Attack& getAttack();
 
-	/**
-	Sets the attack strength of this object.
-	@param combatAttack The attack strength of this object.
-	@return The new attack strength of this object.
-	*/
-	int set_combat_attack(int combatAttack);
 
 	/**
 	Returns the defense strength of this object.
@@ -81,19 +75,6 @@ public:
 	@return The new defense strength of this object.
 	*/
 	int set_combat_defense(int combatDefense);
-
-	/**
-	Returns the combat range of this object.
-	@return The combat range of this object.
-	*/
-	int get_combat_range();
-
-	/**
-	Sets the combat range of this object.
-	@param combatRange The combat range of this object.
-	@return The new combat range of this object.
-	*/
-	int set_combat_range(int combatRange);
 
 	/**
 	Returns current health of this object.
@@ -116,7 +97,8 @@ public:
 	Performs combat logic for attackable game objects. For implementing interesting 
 	combat logic, the handle_* hooks are available for subclasses to override. 
 	@param The target to attack.
+	@return Whether or not target is a legal -- e.g., a nullptr is an illegal target.
 	*/
-	void do_attack(AttackableGameObject* target);
+	bool do_attack(AttackableGameObject* target);
 };
 

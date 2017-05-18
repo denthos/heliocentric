@@ -23,6 +23,10 @@ namespace Test
 		bool is_in_idle_mode() {
 			return this->currentCommand == Unit::UNIT_IDLE;
 		}
+
+		bool is_dead() {
+			return this->currentCommand == Unit::UNIT_DIE;
+		}
 	};
 
 	TEST_CLASS(UnitAttackTest)
@@ -116,7 +120,7 @@ namespace Test
 
 			// Check  dthat unit_2 is dead and unit_1 is still alive
 			Assert::IsTrue(unit_1->is_in_idle_mode());
-			Assert::IsNull(unit_2->get_player());
+			Assert::IsTrue(unit_2->is_dead());
 		}
 
 

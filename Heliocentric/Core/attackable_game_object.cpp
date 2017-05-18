@@ -3,6 +3,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 
 
+
 AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
 	GameObject(position, player),  attack(*attack), combatDefense(def),  health(heal) {};
 
@@ -39,11 +40,19 @@ int AttackableGameObject::take_damage(int damage) {
 	return this->health;
 }
 
-void AttackableGameObject::do_attack(AttackableGameObject * target)
-{	
-	if (target == this || target->player == this->player) {
+bool AttackableGameObject::do_attack(AttackableGameObject * target)
+{
+	if (target == nullptr) {
+		LOG_ERR("target is null.");
+		return false;
+	}
+	else if (target == this || target->player == this->player) {
 		LOG_ERR("Cannot attack same player.");
-		return;
+		return false;
+	}
+	else if (target->get_health() <= 0) {
+		LOG_ERR("Cannot attack a dead unit.");
+		return false;
 	}
 
 	bool target_is_dead = false, this_is_dead = false;
@@ -81,5 +90,7 @@ void AttackableGameObject::do_attack(AttackableGameObject * target)
 		this->handle_out_of_range(target);
 		LOG_DEBUG("Target " + std::to_string(target->getID()) + " is out of range, moving towards " + std::to_string(target->get_position().x) + " " + std::to_string(target->get_position().y) + " " + std::to_string(target->get_position().z));
 	}
+
+	return true;
 
 }

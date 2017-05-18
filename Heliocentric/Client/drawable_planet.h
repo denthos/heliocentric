@@ -5,13 +5,13 @@
 #include "planet_update.h"
 #include "planet_types.h"
 #include "drawable_data.h"
+#include "selectable.h"
 
-class DrawablePlanet : public Planet, public Drawable {
+class DrawablePlanet : public Planet, public Drawable, public Selectable {
 public:
 	static std::unordered_map<PlanetType, DrawableData>& getDataMap();
 
 	DrawablePlanet(const Planet & planet);
 	~DrawablePlanet();
 	virtual void update();
-	virtual void draw(const Shader& shader, const Camera& camera) const;
 };

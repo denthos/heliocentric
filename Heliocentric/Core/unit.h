@@ -9,6 +9,7 @@
 #include <memory>
 
 class UnitUpdate;
+class UnitManager;
 
 /**
 An abstract class that defines a base unit.
@@ -18,7 +19,7 @@ public:
 
 	friend UnitUpdate;
 
-	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE, UNIT_HOLDER, UNIT_DIE };
+	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE, UNIT_DIE };
 
 	/**
 	Unit constructor without specifying UID. Used on server end.
@@ -28,7 +29,7 @@ public:
 	@param def Defense stat of this unit.
 	@param range Range stat of this unit.
 	@param heal Health stat of this unit.
-  @param movement_speed Movement speed of this unit.
+	@param movement_speed Movement speed of this unit.
 	*/
 	Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed = 1.0f);
 
@@ -42,7 +43,7 @@ public:
 	@param def Defense stat of this unit.
 	@param range Range stat of this unit.
 	@param heal Health stat of this unit.
-  @param movement_speed Movement speed of this unit.
+	@param movement_speed Movement speed of this unit.
 	*/
 	Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed = 1.0f);
   
@@ -104,6 +105,12 @@ public:
 	void set_command(CommandType command);
 
 
+	/**
+	Sets the unit's UnitManager.
+	**/
+	void set_manager(UnitManager* manager);
+
+
 protected:
 
 	/**
@@ -117,10 +124,15 @@ protected:
 	std::shared_ptr<UnitUpdate> update;
 	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
-	AttackableGameObject* target;
 
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);
 	virtual void handle_victory(AttackableGameObject* opponent);
-	virtual void handle_counter(AttackableGameObject* opponent) {}
+	virtual void handle_counter(AttackableGameObject* opponent);
+
+	void send_update_to_manager(std::shared_ptr<UnitUpdate>& update);
+
+	// TODO: Change these to smart pointers.
+	AttackableGameObject* target;
+	UnitManager* manager;
 };

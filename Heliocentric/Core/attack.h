@@ -1,6 +1,5 @@
 #pragma once
 #include <ctime>
-#include <glm/glm.hpp>
 
 /**
 A class for defining a certain attack.
