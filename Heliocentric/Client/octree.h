@@ -35,6 +35,7 @@ protected:
 	bool hasChildren = false;
 	const ViewFrustum * viewFrustum;
 	bool shouldCull = false;
+	bool cull = false;
 
 	void drawNode(const Shader & shader, const Camera & camera);
 };

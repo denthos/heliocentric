@@ -363,6 +363,7 @@ void Client::display() {
 	cameras[selectedCamera]->calculateViewFrustum();
 
 	octree.clear();
+	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 
 	for (auto it = planets.begin(); it != planets.end(); ++it) {
 		octree.insert((*it).second.get());
@@ -740,8 +741,14 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	//LOG_DEBUG("Unit update received");
+	//JESSICA DO COLLISION STUFF HERE
+	Unit* unit = units[update->id].get();
+	glm::vec3 pos = unit->get_position();
+	glm::vec3 dest = unit->get_destination();
+
 	update->apply(units[update->id].get());
 	units[update->id]->update();
+	
 
 	/* 
 	Handle unit death. We don't want to edit the units map in another thread,

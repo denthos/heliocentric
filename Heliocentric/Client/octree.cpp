@@ -14,7 +14,7 @@
 float Octree::MIN_VOLUME = 1.0f;
 
 Octree::Octree() : Octree(DEFAULT_BOUNDING_BOX) {
-
+	
 }
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) : Octree(BoundingBox(min, max)) {
@@ -58,6 +58,9 @@ void Octree::draw(const Shader & shader, const Camera & camera) {
 }
 
 void Octree::drawNode(const Shader & shader, const Camera & camera) {
+	if (cull) {
+		return;
+	}
 	// Draw this nodes objects
 	for (auto it = objects.begin(); it != objects.end(); ++it) {
 		(*it)->draw(shader, camera);
@@ -78,8 +81,8 @@ void Octree::viewFrustumCull(ViewFrustum frustum) {
 	for (int i = 0; i < 8; ++i) {
 		if (children[i]) {
 			if (!viewFrustum->containsOrIntersects(children[i]->region)) {
-				delete(children[i]);
-				children[i] = NULL;
+				
+				children[i]->cull = true;
 			}
 			else {
 				hasChildren = true;
