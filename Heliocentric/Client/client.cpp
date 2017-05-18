@@ -355,7 +355,7 @@ void Client::display() {
 
 	
 	// blur the things that glow
-	int blurs = 50; //TODO init to number of blur iterations
+	int blurs = 5; //TODO init to number of blur iterations
 	bool blurX = true;
 
 	blurShader->bind();
