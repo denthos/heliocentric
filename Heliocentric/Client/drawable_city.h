@@ -13,4 +13,6 @@ private:
 public:
 	DrawableCity(const City&);
 	virtual void update();
+	void select(GUI* gui, Client* client);
+	void unselect(GUI* gui, Client* client);
 };

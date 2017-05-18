@@ -2,6 +2,7 @@
 #include "slot.h"
 #include "planet.h"
 #include "selectable.h"
+#include "city.h"
 
 GUI::GUI(GLFWwindow * window) : Screen() {
 	this->initialize(window, false);
@@ -10,6 +11,7 @@ GUI::GUI(GLFWwindow * window) : Screen() {
 
 	this->createUidDisplay();
 	this->createSlotDisplay();
+	this->createCityDisplay();
 
 	this->setVisible(true);
 	this->performLayout();
@@ -52,6 +54,13 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 
 		uidDisplay->setValue(single_object->getID());
 	}
+}
+
+void GUI::createCityDisplay() {
+	cityWindow = formHelper->addWindow(Eigen::Vector2i(100, 20), "Selected City");
+	createUnitButton = formHelper->addButton("Create Unit", []() {});
+
+	cityWindow->setVisible(false);
 
 }
 
@@ -68,4 +77,16 @@ void GUI::displaySlotUI(Slot* slot, std::function<void()> createCityCallback) {
 
 void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
+}
+
+void GUI::displayCityUI(City* city, std::function<void()> unitCreateCallback) {
+	cityWindow->setTitle(city->get_slot()->getPlanet()->getName());
+	createUnitButton->setCallback(unitCreateCallback);
+
+	cityWindow->center();
+	cityWindow->setVisible(true);
+}
+
+void GUI::hideCityUI() {
+	cityWindow->setVisible(false);
 }

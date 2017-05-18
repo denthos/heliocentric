@@ -22,6 +22,7 @@ using namespace nanogui;
 
 class Slot;
 class Client;
+class City;
 
 class GUI : public Screen {
 public:
@@ -32,12 +33,16 @@ public:
 
 	void displaySlotUI(Slot* slot, std::function<void()> createCityCallback);
 	void hideSlotUI();
+
+	void displayCityUI(City* city, std::function<void()> createUnitCallback);
+	void hideCityUI();
 private:
 
 	FormHelper* formHelper;
 
 	void createUidDisplay();
 	void createSlotDisplay();
+	void createCityDisplay();
 
 
 	ref<Window> uidWindow;
@@ -45,4 +50,7 @@ private:
 
 	ref<Window> slotWindow;
 	Button* slotButton;
+
+	ref<Window> cityWindow;
+	Button* createUnitButton;
 };

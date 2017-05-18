@@ -65,6 +65,7 @@ public:
 	void createCityForSlot(DrawableSlot*);
 
 	void setSelection(std::vector<GameObject*>);
+	void createUnitFromCity(DrawableCity* city);
 
 protected:
 	/**** Handlers for ChanneledClient ****/
@@ -110,11 +111,11 @@ private:
 	void handleEscapeKey(int);
 	void handleF1Key(int);
 	void handleF2Key(int);
-	void handleF3Key(int);
 	void handleF4Key(int);
 	void handleF6Key(int);
 	void handleF10Key(int);
 	void handleF11Key(int);
 	void handleF12Key(int);
+
 };
 
