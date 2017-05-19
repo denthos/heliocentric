@@ -100,5 +100,6 @@ public:
 	@return Whether or not target is a legal -- e.g., a nullptr is an illegal target.
 	*/
 	virtual bool do_attack(AttackableGameObject* target);
-};
 
+	bool is_dead();
+};

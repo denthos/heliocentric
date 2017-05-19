@@ -143,7 +143,6 @@ public:
 
 	bool get_explode();
 
-
 protected:
 
 	/**

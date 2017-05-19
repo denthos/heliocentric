@@ -50,7 +50,7 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 		LOG_ERR("Cannot attack same player.");
 		return false;
 	}
-	else if (target->get_health() <= 0) {
+	else if (target->is_dead()) {
 		LOG_ERR("Cannot attack a dead unit.");
 		return false;
 	}
@@ -65,7 +65,7 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 		// Target is within range.
 		this->attack.doAttack(target);
 
-		if (target->health <= 0) {
+		if (target->is_dead()) {
 			target->handle_defeat(this);
 			target_is_dead = true;
 			LOG_DEBUG("Enemy is dead.");
@@ -75,7 +75,7 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 			LOG_DEBUG("Enemy is countering.");
 		}
 
-		if (this->health <= 0) {
+		if (this->is_dead()) {
 			this->handle_defeat(target);
 			this_is_dead = true;
 			LOG_DEBUG("Player spaceship is dead.");
@@ -92,5 +92,10 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 	}
 
 	return true;
+}
 
+bool AttackableGameObject::is_dead() {
+	if (this->get_health() <= 0)
+		return true;
+	return false;
 }

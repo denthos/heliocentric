@@ -772,7 +772,7 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	so let's pop it in the main thread's queue
 	*/
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
-	if (units[update->id]->get_health() <= 0) {
+	if (units[update->id].get()->is_dead()) {
 		units[update->id]->is_exploding = true;
 		units[update->id]->bind_shader(unitDeathShader);
 		auto& update_queue = Lib::key_acquire(this->update_queue);

@@ -7,4 +7,11 @@ namespace Lib {
 			LOG_ERR(message);
 		}
 	}
+
+	bool floatCompare(float a, float b, float threshold) {
+		if ((a - b) <= threshold)
+			return true;
+		return false;
+	}
+
 }

@@ -215,10 +215,10 @@ bool Unit::do_attack(AttackableGameObject* target) {
 	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
 	set_laser_shooting(true);
 
-	if ((distance <= (float) this->attack.getRange() && (dot_product < 1.05f && dot_product > 0.95f)) || distance == 0.0f) {
+	if ((distance <= (float) this->attack.getRange() && Lib::floatCompare(dot_product, 1.0f)) || distance == 0.0f) {
 		return AttackableGameObject::do_attack(target);
 	}
-	if (dot_product >= 1.05f || dot_product <= 0.95f) {
+	if (!Lib::floatCompare(dot_product, 1.0f)) {
 		LOG_DEBUG("dot product is " + std::to_string(dot_product));
 		do_orient();
 	}
