@@ -16,7 +16,7 @@ private:
 	int time_limit; // Time limit in days/seconds.
 	float time_elapsed; // Elapsed time in seconds.
 
-	bool game_end;
+	bool game_running;
 	UID winner;
 
 	// Enabled victory conditions

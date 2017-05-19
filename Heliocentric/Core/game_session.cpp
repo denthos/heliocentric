@@ -1,6 +1,6 @@
 #include "game_session.h"
 
-GameSession::GameSession() : time_limit(300), time_elapsed(0), game_end(false), winner(INVALID_ID), time_victory(true),
+GameSession::GameSession() : time_limit(900), time_elapsed(0), game_running(true), winner(INVALID_ID), time_victory(true),
 domination_victory(false), economic_victory(false), science_victory(false) {
 
 }

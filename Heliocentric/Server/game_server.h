@@ -115,8 +115,8 @@ private:
 	void checkVictory();
 
 	GameSession* game; // Keeps track of all information about current game settings. Deconstructed after game ends.
-	std::atomic<bool> game_paused;
-	std::atomic<bool> game_running;
+	std::atomic<bool> server_paused;
+	std::atomic<bool> server_running;
 	int tick_duration; // Duration of each tick in ms.
 
 	Player* extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p, bool retry=false);
@@ -145,5 +145,5 @@ public:
 	~GameServer();
 
 	void run();
-	void end_game();
+	void shut_down();
 };

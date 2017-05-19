@@ -9,7 +9,7 @@
 #include "instant_laser_attack.h"
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
-	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
+	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), server_paused(false) {
 
 	this->game = new GameSession();
 
@@ -19,7 +19,7 @@ GameServer::GameServer(int tick_duration, std::string port, int listen_queue, in
 		}
 	}
 
-	game_running = true;
+	server_running = true;
 	this->tick_duration = tick_duration;
 	this->subscribeToChannels();
 }
@@ -162,7 +162,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 }
 
 void GameServer::performUpdates() {
-	if (this->game_paused) {
+	if (this->server_paused) {
 		return;
 	}
 
@@ -217,16 +217,21 @@ void GameServer::checkVictory() {
 
 	if (game->time_victory) {
 		if (game->time_limit_reached()) {
-			game->game_end = true;
+			game->game_running = false;
 
 			/* Player with the highest player score wins. */
 			float highest_score = 0.0f;
-			UID winner_candidate;
+			UID winner_candidate = INVALID_ID;
 			for (auto& it : players) {
 				if (it.second->get_player_score() > highest_score) {
 					highest_score = it.second->get_player_score();
 					winner_candidate = it.second->getID();
 				}
+			}
+
+			if (winner_candidate == INVALID_ID) {
+				LOG_DEBUG("No player connected. No one wins.");
+				return;
 			}
 
 			LOG_INFO("Player with UID ", winner_candidate, " has won the game!");
@@ -243,7 +248,12 @@ void GameServer::run() {
 	std::clock_t tick_start_time;
 	std::clock_t tick_elapsed_time;
 
-	while (game_running) {
+	while (server_running) {
+		/* Temporary solution to stop server from terminating after game ends */
+		if (!game->game_running) {
+			continue;
+		}
+
 		tick_start_time = std::clock();
 
 		game->increment_time(tick_duration);
@@ -263,8 +273,8 @@ void GameServer::run() {
 	LOG_DEBUG("Server exited safely");
 }
 
-void GameServer::end_game() {
-	game_running = false;
+void GameServer::shut_down() {
+	server_running = false;
 	this->close();
 }
 
@@ -273,7 +283,7 @@ void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std
 		auto connections = Lib::key_acquire(this->connections);
 		LOG_DEBUG("Game paused by connection ", connections.get().second[sender]);
 	}
-	this->game_paused = !this->game_paused;
+	this->server_paused = !this->server_paused;
 }
 
 void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SettleCityCommand> command) {
