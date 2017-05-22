@@ -107,10 +107,12 @@ glm::vec3 Unit::do_move() {
 		//calculate the avoidance fore
 		position += glm::normalize(destination - position) * speed;
 		send_update_to_manager(make_update());
+		moving = true;
 	}
 	else {
 		// Reaced destination
 		currentCommand = UNIT_IDLE;
+		moving = false;
 	}
 	return position;
 }
