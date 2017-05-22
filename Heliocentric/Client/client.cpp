@@ -448,7 +448,64 @@ void Client::update() {
 
 	cameras[selectedCamera]->update();
 
-	//particles->Update(*camera);
+
+	//////////////////////////////////
+	glm::vec3 lookAhead_origin, unit_direction;
+	UID unit_id;
+	BoundingBox unit_bbox;
+	glm::vec3 unit_max, unit_min;
+
+	auto& collision_detection_queue = Lib::key_acquire(this->collision_detection_queue);
+	while (!collision_detection_queue.get().empty()) {
+		LOG_DEBUG("detecting collisions");
+		//find the closest item to each object
+		//from front of bounding box to destination
+		unit_id = collision_detection_queue.get().back();
+		collision_detection_queue.get().pop();
+
+		auto& unit_it = units.find(unit_id);
+		if (unit_it == units.end()) {
+			continue;
+		}
+		unit_direction = units[unit_id]->get_destination() - units[unit_id]->get_position();
+		unit_bbox = units[unit_id]->getBoundingBox();
+		unit_max = unit_bbox.max;
+		unit_min = unit_bbox.min;
+		float mid_y = (unit_max.y + unit_min.y) / 2.0f;
+		float mid_x = (unit_max.x + unit_min.x) / 2.0f;
+
+		lookAhead_origin = glm::vec3(mid_x, mid_y, unit_max.z);
+
+
+		Ray lookAhead = Ray(lookAhead_origin, unit_direction);
+		Drawable* closestDrawable = octree.intersect(lookAhead);
+
+		if (!closestDrawable) {
+			LOG_DEBUG("nothing to collide with");
+			continue;
+		}
+
+		//it's not the target, and it's close to the unit
+		glm::vec3 closestDrawable_pos = glm::vec3(closestDrawable->getToWorld()[3]);
+		float closestDrawable_Dist = glm::distance(closestDrawable_pos, lookAhead_origin);
+		//print pos before
+		LOG_DEBUG("pos before: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
+		//
+		if (closestDrawable_pos != units[unit_id]->get_destination() && closestDrawable_Dist < 50.0f) {
+			LOG_DEBUG("avoiding collisions");
+			//calculate the avoidance force
+			glm::vec3 avoidance_force = glm::normalize(lookAhead_origin - closestDrawable_pos)* 3.0f;
+
+			//units[unit_id]->update_position(units[unit_id]->get_position() + avoidance_force);
+			//print pos after
+			LOG_DEBUG("pos after: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
+
+		}
+
+
+	}///////////////////////////////////
+
+
 	
 	this->keyboard_handler.callKeyboardHandlers();
 
@@ -575,7 +632,8 @@ void Client::handleF2Key(int key) {
 }
 
 void Client::handleF3Key(int key) {
-	PlayerCommand command((float)(rand() % 3000), (float)(rand() % 3000), (float)(rand() % 3000));
+	srand(glfwGetTime());
+	PlayerCommand command((float)(rand() % 2000-1000), (float)(rand() % 2000-1000), (float)(rand() % 2000 - 1000));
 
 	this->channeled_send(&command);
 }
@@ -741,10 +799,20 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	//LOG_DEBUG("Unit update received");
-	//JESSICA DO COLLISION STUFF HERE
+	
 	Unit* unit = units[update->id].get();
-	glm::vec3 pos = unit->get_position();
-	glm::vec3 dest = unit->get_destination();
+	//LOG_DEBUG("unit command is " + std::to_string(unit->get_command()));
+	if (unit->isMoving()) { //unit is moving
+		LOG_DEBUG("unit with id:" + std::to_string(update->id) + "is moving");
+		auto& collision_detection_queue = Lib::key_acquire(this->collision_detection_queue);
+		collision_detection_queue.get().push(update->id);
+	}
+	else {
+		LOG_DEBUG("unit with id:" + std::to_string(update->id) + "is NOT moving");
+	}
+	
+
+
 
 	update->apply(units[update->id].get());
 	units[update->id]->update();

@@ -110,7 +110,7 @@ public:
 	**/
 	void set_manager(UnitManager* manager);
 
-
+	bool isMoving();
 protected:
 
 	/**
@@ -135,4 +135,5 @@ protected:
 	// TODO: Change these to smart pointers.
 	AttackableGameObject* target;
 	UnitManager* manager;
+	bool moving = false;
 };

@@ -88,6 +88,9 @@ void Unit::set_command(CommandType command) {
 	}
 }
 
+bool Unit::isMoving() { 
+	return moving; 
+}
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
@@ -102,9 +105,11 @@ glm::vec3 Unit::do_move() {
 		//calculate the avoidance fore
 		position += glm::normalize(destination - position) * speed;
 		send_update_to_manager(make_update());
+		moving = true;
 	}
 	else {
 		// Reaced destination
+		moving = false;
 		currentCommand = UNIT_IDLE;
 	}
 	return position;
