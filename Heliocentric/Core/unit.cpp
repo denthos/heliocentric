@@ -2,11 +2,18 @@
 #include "logging.h"
 #include "unit_update.h"
 #include "unit_manager.h"
-#include "glm/gtc/matrix_transform.hpp"
+//#include "glm/gtc/matrix_transform.hpp"
+#include <glm/gtx/transform.hpp>
 #include "glm\gtx\quaternion.hpp"
 
+Unit::Unit(glm::vec3 pos) : AttackableGameObject(pos), orientation(glm::vec3(0.0f, 0.0f, 1.0f)), rotation(glm::mat4(1.0f)) {
+	this->manager = nullptr;
+	this->target = nullptr;
+	this->delta_time_for_orient = 0.0f;
+}
+
 Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
-	AttackableGameObject(pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
+	AttackableGameObject(pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)), rotation(glm::mat4(1.0f)) {
 	this->update = std::make_shared<UnitUpdate>(this->getID(), this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
 	this->manager = nullptr;
@@ -15,7 +22,7 @@ Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, floa
 }
 
 Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
-	AttackableGameObject(id, pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
+	AttackableGameObject(id, pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)), rotation(glm::mat4(1.0f)) {
 	this->update = std::make_shared<UnitUpdate>(id, this->get_health(), pos.x, pos.y, pos.z);
 	this->movement_speed = movement_speed;
 	this->delta_time_for_orient = 0.0f;
@@ -56,9 +63,9 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->rot_mat = this->rotation;
 	this->update->shoot_laser = this->get_laser_shooting();
 	this->update->explode = this->explode;
-	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
-	LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
-	LOG_DEBUG("Unit shoot laser is set to " + std::to_string(this->update->shoot_laser));
+	//LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
+	//LOG_DEBUG("Orientation is " + std::to_string(this->update->orient_x) + " " + std::to_string(this->update->orient_y) + " " + std::to_string(this->update->orient_z));
+	//LOG_DEBUG("Unit shoot laser is set to " + std::to_string(this->update->shoot_laser));
 	return this->update;
 };
 
@@ -137,49 +144,50 @@ glm::vec3 Unit::do_move() {
 }
 
 void Unit::do_orient() {
+	glm::vec3 ideal_orientation = destination - position;
+	ideal_orientation.y = 0.0f;
+	ideal_orientation = glm::normalize(ideal_orientation);
+
 	// Orient towards destination
-	if ((destination - position) == glm::vec3(0.0)) {
+	if (ideal_orientation == glm::vec3(0.0)) {
 		delta_time_for_orient = 0.0f;
 		return;
 	}
-	glm::vec3 ideal_orientation = glm::normalize(destination - position);
-
-
-	float cosine = glm::dot(orientation, ideal_orientation);
-	cosine = glm::clamp(cosine, -1.0f, 1.0f);
-
-	glm::vec3 axis = glm::cross(orientation, ideal_orientation);
-
-	axis = glm::normalize(axis);
-
-
-	float rotAngle = glm::degrees(glm::acos(cosine));
-	glm::mat4 lookAt = glm::rotate(rotation, rotAngle, axis);
-	glm::quat toRotQuat = glm::quat_cast((lookAt)); //the final rotation quaternion
-
-
-													//for smooth rotation
-	//glm::quat rotQuat = glm::slerp(glm::quat_cast(rotation), toRotQuat, delta_time_for_orient);
-	//glm::quat rotQuat = toRotQuat;
-
-	//convert back to matrix, save and apply
-	//rotation = glm::mat4_cast(rotQuat);
-	rotation = lookAt;
-	//orientation = rotQuat * orientation;
-	//orientation = glm::normalize(orientation);
-	orientation = ideal_orientation;
-
-
-
+	else if (delta_time_for_orient > 0.0f) {
+		glm::quat toRotQuat = glm::quat_cast((lookAt)); //the final rotation quaternion
+		glm::quat rotQuat = glm::slerp(glm::quat_cast(old_rotation), toRotQuat, delta_time_for_orient);
+		rotation = glm::mat4_cast(rotQuat);
+	}
+	else {
+		old_rotation = rotation;
+		LOG_DEBUG("Destination is " + std::to_string(destination.x) + " " + std::to_string(destination.y) + " " + std::to_string(destination.z));
+		LOG_DEBUG("Position is " + std::to_string(position.x) + " " + std::to_string(position.y) + " " + std::to_string(position.z));
+		LOG_DEBUG("Ideal orientation is " + std::to_string(ideal_orientation.x) + " " + std::to_string(ideal_orientation.y) + " " + std::to_string(ideal_orientation.z));
+		LOG_DEBUG("Current orientation is " + std::to_string(orientation.x) + " " + std::to_string(orientation.y) + " " + std::to_string(orientation.z));
+		float cosine = glm::clamp(glm::dot(orientation, ideal_orientation), -1.0f, 1.0f);
+		float rotAngle = glm::acos(cosine / (glm::length(orientation) * glm::length(ideal_orientation)));
+		glm::vec3 cross = glm::cross(orientation, ideal_orientation);
+		if (cross.y < 0) {
+			rotAngle = -rotAngle;
+		}
+		//LOG_DEBUG("dot product is " + std::to_string(glm4::dot(orientation, ideal_orientation)));
+		LOG_DEBUG("Cross product is " + std::to_string(cross.x) + " " + std::to_string(cross.y) + " " + std::to_string(cross.z));
+		LOG_DEBUG("Rotation angle in radian is " + std::to_string(rotAngle));
+		LOG_DEBUG("Rotation angle in degree is " + std::to_string(glm::degrees(rotAngle)));
+		lookAt = glm::rotate(rotation, rotAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glm::quat toRotQuat = glm::quat_cast((lookAt)); //the final rotation quaternion
+		//rotation = lookAt;
+	}
 
 	LOG_DEBUG("Unit with ID: " + std::to_string(this->getID()) + " is orienting: ");
-	LOG_DEBUG("Ideal Orientation is " + std::to_string(ideal_orientation.x) + " " + std::to_string(ideal_orientation.y) + " " + std::to_string(ideal_orientation.z));
-	LOG_DEBUG("New Orientation is " + std::to_string(orientation.x) + " " + std::to_string(orientation.y) + " " + std::to_string(orientation.z));
 	LOG_DEBUG("Delta time is " + std::to_string(delta_time_for_orient));
-	if (delta_time_for_orient >= 1.0f)
+	if (delta_time_for_orient >= 1.0f) {
 		delta_time_for_orient = 0.0f;
-	else
+		orientation = ideal_orientation;
+	}
+	else {
 		delta_time_for_orient += 0.1f;
+	}
 }
 
 void Unit::handle_out_of_range(AttackableGameObject * opponent)
@@ -212,14 +220,18 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 
 bool Unit::do_attack(AttackableGameObject* target) {
 	float distance = glm::distance(this->position, target->get_position());
-	float dot_product = glm::dot(glm::normalize(destination - position), glm::normalize(orientation));
-	set_laser_shooting(true);
+	glm::vec3 ideal_orient = destination - position;
+	ideal_orient.y = 0.0f;
+	ideal_orient = glm::normalize(ideal_orient);
+	float dot_product = glm::dot(ideal_orient, glm::normalize(orientation));
+	LOG_DEBUG("dot product is " + std::to_string(dot_product));
+
 
 	if ((distance <= (float) this->attack.getRange() && Lib::floatCompare(dot_product, 1.0f)) || distance == 0.0f) {
+		set_laser_shooting(true);
 		return AttackableGameObject::do_attack(target);
 	}
 	if (!Lib::floatCompare(dot_product, 1.0f)) {
-		LOG_DEBUG("dot product is " + std::to_string(dot_product));
 		do_orient();
 	}
 	if (distance > (float) this->attack.getRange()) {

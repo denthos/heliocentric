@@ -29,6 +29,6 @@ namespace Lib {
 
 		return true;
 	}
-	bool floatCompare(float a, float b, float threshold = 0.5);
+	bool floatCompare(float a, float b, float threshold = 0.05);
 
 };

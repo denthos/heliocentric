@@ -2,7 +2,7 @@
 #include "logging.h"
 #include <glm\gtc\matrix_transform.hpp>
 
-
+AttackableGameObject::AttackableGameObject(glm::vec3 position) : GameObject(position, NULL) {}
 
 AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
 	GameObject(position, player),  attack(*attack), combatDefense(def),  health(heal) {};
@@ -56,9 +56,9 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 	}
 
 	bool target_is_dead = false, this_is_dead = false;
-	LOG_DEBUG("Attacker position is " + std::to_string(this->get_position().x) + " " + std::to_string(this->get_position().y) + " " + std::to_string(this->get_position().z));
-	LOG_DEBUG("Target position is " + std::to_string(target->get_position().x) + " " + std::to_string(target->get_position().y) + " " + std::to_string(target->get_position().z));
-	LOG_DEBUG("Distance between attacker and target is " + std::to_string(glm::distance(this->position, target->get_position())));
+	//LOG_DEBUG("Attacker position is " + std::to_string(this->get_position().x) + " " + std::to_string(this->get_position().y) + " " + std::to_string(this->get_position().z));
+	//LOG_DEBUG("Target position is " + std::to_string(target->get_position().x) + " " + std::to_string(target->get_position().y) + " " + std::to_string(target->get_position().z));
+	//LOG_DEBUG("Distance between attacker and target is " + std::to_string(glm::distance(this->position, target->get_position())));
 
 	if (glm::distance(this->position, target->get_position()) <= (float) this->attack.getRange()) {
 

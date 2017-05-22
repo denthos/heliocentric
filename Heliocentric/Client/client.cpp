@@ -223,6 +223,21 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	spaceship = Model::getInstance(ROCKET_MODEL);
 	rocket = Model::getInstance(ROCKET_MODEL);
 
+	/*UID id1 = 101;
+	UID id2 = 102;
+	glm::vec3 location(glm::vec3(500.0f, 0.0f, 700.0f));
+	glm::vec3 des(glm::vec3(700.0f, 0.0f, 500.0f));
+	units[id1] = std::make_unique<DrawableUnit>(
+		Unit(location),
+		spaceship, unitShader, laser_particles, explosion_particles
+		);
+	units[id2] = std::make_unique<DrawableUnit>(
+		Unit(des),
+		spaceship, unitShader, laser_particles, explosion_particles
+		);
+	units[id1]->set_destination(des);
+	units[id1]->do_orient();
+	units[id1]->update();*/
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
 

@@ -20,7 +20,7 @@ public:
 	friend UnitUpdate;
 
 	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE, UNIT_DIE };
-
+	Unit::Unit(glm::vec3 pos);
 	/**
 	Unit constructor without specifying UID. Used on server end.
 	@param pos Position of the unit.
@@ -162,6 +162,8 @@ protected:
 	glm::vec3 destination;
 	glm::vec3 orientation;
 	glm::mat4 rotation;
+	glm::mat4 lookAt;
+	glm::mat4 old_rotation;
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);
 	virtual void handle_victory(AttackableGameObject* opponent);

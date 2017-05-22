@@ -9,7 +9,7 @@ namespace Lib {
 	}
 
 	bool floatCompare(float a, float b, float threshold) {
-		if ((a - b) <= threshold)
+		if (std::abs(a - b) <= threshold)
 			return true;
 		return false;
 	}

@@ -74,7 +74,7 @@ bool UnitManager::set_active(UID id) {
 	}
 	else {
 		// Move idle unit to active list.
-		LOG_DEBUG("Inserting Unit with id " + std::to_string(id) + " to active list");
+		//LOG_DEBUG("Inserting Unit with id " + std::to_string(id) + " to active list");
 		active_units.insert(std::make_pair(id, std::move(it->second)));
 		idle_units.erase(id);
 	}

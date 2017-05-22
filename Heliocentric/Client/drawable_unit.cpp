@@ -39,7 +39,6 @@ void DrawableUnit::update() {
 
 void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 	if (is_exploding) {
-		LOG_DEBUG("Explosion counter is " + std::to_string(explosion_counter) + ", bool is " + std::to_string(is_exploding));
 		unitShader->bind();
 		glUniform1i(glGetUniformLocation(unitShader->getPid(), "explode_on"), true);
 
@@ -62,6 +61,5 @@ void DrawableUnit::bind_shader(Shader* shader) {
 
 bool DrawableUnit::do_animation(const Shader & shader, const Camera & camera) const {
 	draw(shader, camera);
-	LOG_DEBUG("In do animation, !exploding is " + std::to_string(!is_exploding));
 	return !is_exploding;
 }

@@ -47,7 +47,7 @@ protected:
 
 public:
 
-
+	AttackableGameObject(glm::vec3 position);
 	/**
 	Creates an attackable 
 	*/
