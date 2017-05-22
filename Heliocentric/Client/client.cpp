@@ -447,9 +447,7 @@ void Client::display() {
 void Client::update() {
 
 	cameras[selectedCamera]->update();
-
-	//////////////////////////////////////////////////////////////
-	/*glm::vec3 lookAhead_origin, unit_direction;
+	glm::vec3 lookAhead_origin, unit_direction;
 	UID unit_id;
 	BoundingBox unit_bbox;
 	glm::vec3 unit_max, unit_min;
@@ -488,23 +486,22 @@ void Client::update() {
 		glm::vec3 closestDrawable_pos = glm::vec3(closestDrawable->getToWorld()[3]);
 		float closestDrawable_Dist = glm::distance(closestDrawable_pos, lookAhead_origin);
 		//print pos before
-		LOG_DEBUG("pos before: " + std::to_string(units[unit_id]->get_position().x) +std::to_string(units[unit_id]->get_position().y)  +std::to_string(units[unit_id]->get_position().z));
-		//closestDrawable_pos != units[unit_id]->get_destination() && 
-		if (closestDrawable_Dist < 50.0f) {
+		LOG_DEBUG("pos before: " + std::to_string(units[unit_id]->get_position().x));
+		//closestDrawable_pos != units[unit_id]->get_target()->get_position() &&
+		if ( closestDrawable_Dist < 50.0f) {
 			LOG_DEBUG("avoiding collisions");
 			//calculate the avoidance force
 			glm::vec3 avoidance_force = glm::normalize(lookAhead_origin - closestDrawable_pos)* 3.0f;
 
 			units[unit_id]->update_position(units[unit_id]->get_position() + avoidance_force);
 				//print pos after
-			LOG_DEBUG("pos after: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y)  +std::to_string(units[unit_id]->get_position().z));
+			LOG_DEBUG("pos after: " + std::to_string(units[unit_id]->get_position().x));
 		
 		}
 
 		LOG_DEBUG("nothing to avoid");
 	
-	}*/
-	///////////////////////////////////////////////////////////////
+	}
 	
 	this->keyboard_handler.callKeyboardHandlers();
 
@@ -631,7 +628,7 @@ void Client::handleF2Key(int key) {
 }
 
 void Client::handleF3Key(int key) {
-	PlayerCommand command((float)(rand() % 5000), (float)(rand() % 5000), (float)(rand() % 5000));
+	PlayerCommand command((float)(rand() % 500), (float)(rand() % 500), (float)(rand() % 500));
 
 	this->channeled_send(&command);
 }
@@ -643,7 +640,7 @@ void Client::handleF4Key(int key) {
 		return;
 	}
 	std::advance(unit_it, rand() % units.size());
-	UnitCommand command(unit_it->first, (float)(rand() % 1000 - 500), (float)(rand() % 1000 - 500), (float)(rand() % 1000 - 500));
+	UnitCommand command(unit_it->first, (float)(rand() % 1000), (float)(rand() % 1000), (float)(rand() % 1000));
 	this->channeled_send(&command);
 }
 
@@ -800,14 +797,14 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 
 	//check if the unit should be doing collision detection
 	//becareful what if it dies and pointer is inaccessible in update?
-	/*Unit* unit = units[update->id].get();
+	Unit* unit = units[update->id].get();
 	//LOG_DEBUG("unit command is " + std::to_string(unit->get_command()));
-	if (unit->isMoving()) { //unit is moving
+	//if (unit->get_command() == Unit::UNIT_MOVE) { //unit is moving
 		//LOG_DEBUG("unit is moving");
-		auto& collision_detection_queue = Lib::key_acquire(this->collision_detection_queue);
+	auto& collision_detection_queue = Lib::key_acquire(this->collision_detection_queue);
 		collision_detection_queue.get().push(update->id);
-	}
-	*/
+	//}
+	
 
 	update->apply(units[update->id].get());
 	units[update->id]->update();
