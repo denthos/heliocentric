@@ -43,6 +43,7 @@ private:
 	void createUidDisplay();
 	void createSlotDisplay();
 	void createCityDisplay();
+	void createTradeDisplay();
 
 
 	ref<Window> uidWindow;

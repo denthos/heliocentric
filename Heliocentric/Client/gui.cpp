@@ -12,6 +12,7 @@ GUI::GUI(GLFWwindow * window) : Screen() {
 	this->createUidDisplay();
 	this->createSlotDisplay();
 	this->createCityDisplay();
+	this->createTradeDisplay();
 
 	this->setVisible(true);
 	this->performLayout();
@@ -32,6 +33,11 @@ void GUI::createSlotDisplay() {
 	slotButton = formHelper->addButton("Establish City", []() {});
 	slotWindow->setVisible(false);
 
+}
+
+void GUI::createTradeDisplay() {
+	slotWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "Trade Deal");
+	slotButton = formHelper->addButton("Establish Trade", []() {});
 }
 
 void GUI::unselectSelection(Client* client, std::vector<GameObject*>& old_selection) {
