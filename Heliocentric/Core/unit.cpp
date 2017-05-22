@@ -47,6 +47,7 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->x = this->position.x;
 	this->update->y = this->position.y;
 	this->update->z = this->position.z;
+	//this->update->moving = this->moving;
 	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
 	return this->update;
 };
@@ -93,24 +94,28 @@ int Unit::get_command() {
 	return currentCommand;
 }
 
+bool Unit::isMoving() {
+	return moving;
+}
+
+void Unit::set_moving(bool moving) {
+	this->moving = moving;
+}
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));
-		//find the object closest to unit that is not the target or the unit itself
-		//should probably offset the see ahead vector to front of unit or write new method for this
-		//calculate see ahead vector
-		// see ahead = pos + norm(velocity) * max see ahead scale
-		//half the see ahead vector
-		//collision detection to see if either are inside bouding box
-		//calculate the avoidance fore
+
 		position += glm::normalize(destination - position) * speed;
+		moving = true;
 		send_update_to_manager(make_update());
+		
 	}
 	else {
 		// Reaced destination
 		currentCommand = UNIT_IDLE;
+		moving = false;
 	}
 	return position;
 }

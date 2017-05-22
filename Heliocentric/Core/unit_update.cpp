@@ -13,6 +13,8 @@ void UnitUpdate::apply(GameObject* obj) {
 		return;
 	}
 	unit->set_health(this->health);
+	//unit->set_moving(this->moving);
+	
 }
 /*
 void UnitUpdate::apply(Unit* obj) {

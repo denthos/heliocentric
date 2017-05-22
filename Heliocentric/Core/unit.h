@@ -99,6 +99,7 @@ public:
 	void set_combat_target(AttackableGameObject* target);
 
 
+
 	/**
 	Sets the command state of the unit
 	**/
@@ -109,6 +110,9 @@ public:
 	Sets the unit's UnitManager.
 	**/
 	void set_manager(UnitManager* manager);
+
+	bool isMoving();
+	void set_moving(bool moving);
 
 
 protected:
@@ -135,4 +139,6 @@ protected:
 	// TODO: Change these to smart pointers.
 	AttackableGameObject* target;
 	UnitManager* manager;
+
+	bool moving = false;
 };
