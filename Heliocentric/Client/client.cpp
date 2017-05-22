@@ -494,9 +494,9 @@ void Client::update() {
 		if (closestDrawable_pos != units[unit_id]->get_destination() && closestDrawable_Dist < 50.0f) {
 			LOG_DEBUG("avoiding collisions");
 			//calculate the avoidance force
-			glm::vec3 avoidance_force = glm::normalize(lookAhead_origin - closestDrawable_pos)* 3.0f;
+			glm::vec3 avoidance_force = glm::normalize(lookAhead_origin - closestDrawable_pos)* 30.0f;
 
-			//units[unit_id]->update_position(units[unit_id]->get_position() + avoidance_force);
+			units[unit_id]->update_position(units[unit_id]->get_position() + avoidance_force);
 			//print pos after
 			LOG_DEBUG("pos after: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
 
@@ -802,15 +802,15 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	
 	Unit* unit = units[update->id].get();
 	//LOG_DEBUG("unit command is " + std::to_string(unit->get_command()));
-	if (unit->isMoving()) { //unit is moving
+	//if (unit->isMoving()) { //unit is moving
 		LOG_DEBUG("unit with id:" + std::to_string(update->id) + "is moving");
 		auto& collision_detection_queue = Lib::key_acquire(this->collision_detection_queue);
 		collision_detection_queue.get().push(update->id);
-	}
+	/*}
 	else {
 		LOG_DEBUG("unit with id:" + std::to_string(update->id) + "is NOT moving");
 	}
-	
+	*/
 
 
 
