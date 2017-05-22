@@ -98,13 +98,7 @@ glm::vec3 Unit::do_move() {
 	// Move towards destination.
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));
-		//find the object closest to unit that is not the target or the unit itself
-		//should probably offset the see ahead vector to front of unit or write new method for this
-		//calculate see ahead vector
-		// see ahead = pos + norm(velocity) * max see ahead scale
-		//half the see ahead vector
-		//collision detection to see if either are inside bouding box
-		//calculate the avoidance fore
+
 		position += glm::normalize(destination - position) * speed;
 		send_update_to_manager(make_update());
 		moving = true;
