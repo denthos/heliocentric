@@ -91,6 +91,7 @@ void UnitManager::do_attack(UID attacker_id, UID enemy_id) {
 	auto& enemy_itr = active_units.find(enemy_id);
 	attacker_itr->second->set_combat_target(&(*(enemy_itr->second).get()));
 	attacker_itr->second->set_command(Unit::UNIT_ATTACK);
+	attacker_itr->second->set_laser_shooting(true);
 }
 
 

@@ -49,6 +49,7 @@ void DrawableUnit::draw(const Shader & shader, const Camera & camera) const {
 	model->draw(*unitShader, camera, toWorld);
 
 	if(this->shoot_laser){
+		LOG_DEBUG("Shooting laser.");
 		laser->Update(camera); //probably should go in update function but i need access to the camera somehow...
 		laser->draw(camera, glm::translate(toWorld, shooting_offset));
 	}

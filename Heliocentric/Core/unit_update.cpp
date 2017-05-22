@@ -13,8 +13,6 @@ void UnitUpdate::apply(GameObject* obj) {
 		return;
 	}
 	unit->set_health(this->health);
-	unit->set_orientation(glm::vec3(this->orient_x, this->orient_y, this->orient_z));
 	unit->set_rotation(this->rot_mat);
 	unit->set_laser_shooting(this->shoot_laser);
-	unit->set_explode(this->explode);
 }

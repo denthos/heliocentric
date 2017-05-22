@@ -135,13 +135,7 @@ public:
 	**/
 	void set_manager(UnitManager* manager);
 
-
 	bool get_laser_shooting();
-
-	//explode animation when dying
-	void set_explode(bool explode);
-
-	bool get_explode();
 
 protected:
 
@@ -152,18 +146,14 @@ protected:
 	glm::vec3 do_move();
 
 	bool shoot_laser = false;
-	bool explode = false;
 
 	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
-	float delta_time_for_orient;
 
 	std::shared_ptr<UnitUpdate> update;
 	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
 	glm::vec3 orientation;
 	glm::mat4 rotation;
-	glm::mat4 lookAt;
-	glm::mat4 old_rotation;
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);
 	virtual void handle_victory(AttackableGameObject* opponent);
