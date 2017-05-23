@@ -23,6 +23,7 @@ public:
 	Player* get_player() const;
 
 	void attachCity(City* city);
+	void detachCity();
 	bool hasCity() const;
 	City* getCity() const;
 

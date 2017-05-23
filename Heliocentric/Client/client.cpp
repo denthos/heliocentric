@@ -814,7 +814,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 
 	auto& update_queue = Lib::key_acquire(this->update_queue);
 	std::function<void()> createCityFunc = [slot_iter, update, player_iter, this]() {
-		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second, update->name));
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name));
 		slot_iter->second->attachCity(newCity);
 		player->acquire_object(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));

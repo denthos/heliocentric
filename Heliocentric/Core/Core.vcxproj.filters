@@ -286,6 +286,9 @@
     <ClCompile Include="attack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="city_manager.cpp">
+	    <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="tech_tree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
