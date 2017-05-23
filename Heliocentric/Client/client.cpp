@@ -600,7 +600,7 @@ void Client::mouseRightClickHandler(MouseButton mouseButton, ScreenPosition posi
 	}
 	else {
 		for (GameObject* single_selection : this->selection) {
-			if (single_selection->get_player()->getID() != this->player->getID()) {
+			if (!single_selection->has_player() || single_selection->get_player()->getID() != this->player->getID()) {
 				return;
 			}
 		}
