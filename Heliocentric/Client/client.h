@@ -62,7 +62,7 @@ public:
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 
 
-	void createCityForSlot(DrawableSlot*);
+	void createCityForSlot(DrawableSlot*, std::string);
 
 	void setSelection(std::vector<GameObject*>);
 	void createUnitFromCity(DrawableCity* city);

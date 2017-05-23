@@ -26,7 +26,7 @@ void DrawableSlot::update() {
 }
 
 void DrawableSlot::select(GUI* gui, Client* client) {
-	gui->displaySlotUI(this, std::bind(&Client::createCityForSlot, client, this));
+	gui->displaySlotUI(this, std::bind(&Client::createCityForSlot, client, this, std::placeholders::_1));
 }
 
 

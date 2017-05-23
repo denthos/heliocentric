@@ -29,6 +29,9 @@ void GUI::createUidDisplay() {
 void GUI::createSlotDisplay() {
 	slotWindow = formHelper->addWindow(Eigen::Vector2i(100, 20), "Selected Planet");
 
+	// TODO: Make this a max of 16 characters
+	cityNameDisplay = formHelper->addVariable("Name", cityName);
+
 	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
 		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
 		int rvar = 0;
@@ -69,10 +72,10 @@ void GUI::createCityDisplay() {
 
 }
 
-void GUI::displaySlotUI(Slot* slot, std::function<void()> createCityCallback) {
+void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityCallback) {
 	slotWindow->setTitle(slot->getPlanet()->getName());
 	slotButton->setCallback([createCityCallback, this]() {
-		createCityCallback();
+		createCityCallback(cityName);
 		slotWindow->setVisible(false);
 	});
 
@@ -91,7 +94,7 @@ void GUI::hideSlotUI() {
 }
 
 void GUI::displayCityUI(City* city, std::function<void()> unitCreateCallback) {
-	cityWindow->setTitle(city->get_slot()->getPlanet()->getName());
+	cityWindow->setTitle(city->getName());
 	createUnitButton->setCallback(unitCreateCallback);
 
 	cityWindow->center();

@@ -299,11 +299,11 @@ void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sen
 	}
 
 	// TODO: Create the city from the player's current technologies
-	City* new_city = new City(owning_player, new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second);
+	City* new_city = new City(owning_player, new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second, command->city_name);
 	slot_iter->second->attachCity(new_city);
 
 	/* Bundle and send the update */
-	auto city_creation_update = std::make_shared<CityCreationUpdate>(owning_player->getID(), slot_iter->first, new_city->getID());
+	auto city_creation_update = std::make_shared<CityCreationUpdate>(owning_player->getID(), slot_iter->first, new_city->getID(), command->city_name);
 	this->addUpdateToSendQueue(city_creation_update);
 }
 

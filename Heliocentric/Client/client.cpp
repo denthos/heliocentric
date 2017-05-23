@@ -602,8 +602,8 @@ void Client::handleF4Key(int key) {
 }
 
 
-void Client::createCityForSlot(DrawableSlot* slot) {
-	SettleCityCommand settle_command(slot->getID());
+void Client::createCityForSlot(DrawableSlot* slot, std::string city_name) {
+	SettleCityCommand settle_command(slot->getID(), city_name);
 	this->channeled_send(&settle_command);
 }
 
@@ -720,7 +720,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 
 	auto& update_queue = Lib::key_acquire(this->update_queue);
 	std::function<void()> createCityFunc = [slot_iter, update, player_iter, this]() {
-		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second));
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second, update->name));
 		slot_iter->second->attachCity(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));
 

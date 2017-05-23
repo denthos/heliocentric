@@ -33,7 +33,7 @@ public:
 	void unselectSelection(Client*, std::vector<GameObject*>& old_selection);
 	void selectSelection(Client*, std::vector<GameObject*>& old_selection);
 
-	void displaySlotUI(Slot* slot, std::function<void()> createCityCallback);
+	void displaySlotUI(Slot* slot, std::function<void(std::string)> createCityCallback);
 	void hideSlotUI();
 
 	void displayCityUI(City* city, std::function<void()> createUnitCallback);
@@ -52,6 +52,8 @@ private:
 
 	ref<Window> slotWindow;
 	Button* slotButton;
+	std::string cityName;
+	detail::FormWidget<std::string>* cityNameDisplay;
 
 	Widget* slotResourcesWidget;
 	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
