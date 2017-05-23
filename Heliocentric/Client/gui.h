@@ -36,6 +36,10 @@ public:
 
 	void displayCityUI(City* city, std::function<void()> createUnitCallback);
 	void hideCityUI();
+
+	void displayTradeUI();
+	void hideTradeUI();
+
 private:
 
 	FormHelper* formHelper;
@@ -54,4 +58,7 @@ private:
 
 	ref<Window> cityWindow;
 	Button* createUnitButton;
+
+	ref<Window> tradeWindow;
+	Button* createTradeButton;
 };

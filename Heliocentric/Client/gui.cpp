@@ -36,8 +36,14 @@ void GUI::createSlotDisplay() {
 }
 
 void GUI::createTradeDisplay() {
-	slotWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "Trade Deal");
-	slotButton = formHelper->addButton("Establish Trade", []() {});
+	tradeWindow = formHelper->addWindow(Eigen::Vector2i(500, 500), "Trade Deal");
+	createTradeButton = formHelper->addButton("Establish Trade", []() {});
+	//ComboBox* listOfPlayers = new ComboBox(tradeWindow, { "player 1", "player 2", "player 3" });
+	Widget* customizeTradeDeal = new Widget(tradeWindow);
+	formHelper->addWidget("Sample Widget", customizeTradeDeal);
+	customizeTradeDeal->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 20));
+	formHelper->addButton()
+	tradeWindow->setVisible(true);
 }
 
 void GUI::unselectSelection(Client* client, std::vector<GameObject*>& old_selection) {
@@ -80,6 +86,13 @@ void GUI::displaySlotUI(Slot* slot, std::function<void()> createCityCallback) {
 	slotWindow->center();
 	slotWindow->setVisible(true);
 }
+/*
+void GUI::displayTradeUI(Player* player, std::function<void()> createTrade) {
+	tradeWindow->setTitle("Trade deal with " + player->get_name());
+	createTradeButton->setCallback([createTrade, this]() {
+		createTrade();
+	});
+}*/
 
 void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
