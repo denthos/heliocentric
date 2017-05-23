@@ -216,6 +216,7 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClInclude Include="collision.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="free_camera.h" />
+    <ClInclude Include="gui_utilities.h" />
     <ClInclude Include="mouse_button_status.h" />
     <ClInclude Include="mouse_handler.h" />
     <ClInclude Include="orbital_camera.h" />
@@ -248,6 +249,7 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClInclude Include="texture.h" />
     <ClInclude Include="thruster_emitter.h" />
     <ClInclude Include="transformation.h" />
+    <ClInclude Include="unit_window.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="view_frustum.h" />
   </ItemGroup>
@@ -288,6 +290,7 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="thruster_emitter.cpp" />
     <ClCompile Include="transformation.cpp" />
+    <ClCompile Include="unit_window.cpp" />
     <ClCompile Include="view_frustum.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

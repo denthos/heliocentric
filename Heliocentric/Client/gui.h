@@ -1,5 +1,9 @@
 #pragma once
 
+#include "gui_utilities.h"
+#include "unit_window.h"
+
+
 #include "game_object.h"
 #include "resources.h"
 #include "player.h"
@@ -21,6 +25,7 @@
 	#endif
 #endif
 
+
 using namespace nanogui;
 
 class Slot;
@@ -29,7 +34,11 @@ class City;
 
 class GUI : public Screen {
 public:
+
+	
+
 	GUI(GLFWwindow *, int screenWidth, int screenHeight);
+	~GUI();
 
 	void update();
 
@@ -38,17 +47,23 @@ public:
 	void setPlayer(std::shared_ptr<Player>);
 	void setFPS(double);
 
+
 	void unselectSelection(Client*, std::vector<GameObject*>& old_selection);
 	void selectSelection(Client*, std::vector<GameObject*>& old_selection);
 
 	void displaySlotUI(Slot* slot, std::function<void(std::string)> createCityCallback);
 	void hideSlotUI();
 
+
 	void displayCityUI(City* city, std::function<void()> createUnitCallback);
 	void hideCityUI();
+
+	void showUnitUI(AttackableGameObject* unit);
+	void hideUnitUI();
+
 private:
 	int screenWidth, screenHeight;
-
+	UnitWindow* unit_window;
 	FormHelper* formHelper;
 
 	void createUidDisplay();
@@ -63,6 +78,7 @@ private:
 
 	ref<Window> slotWindow;
 	Button* slotButton;
+
 	std::string cityName = "Default CityName";
 	detail::FormWidget<std::string>* cityNameDisplay;
 
@@ -77,4 +93,5 @@ private:
 	std::pair<Resources::Type, Label *> resourceLabels[Resources::NUM_RESOURCES];
 	Label * fpsSpacer;
 	Label * fpsDisplay;
+
 };

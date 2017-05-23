@@ -14,6 +14,7 @@
 
 GUI::GUI(GLFWwindow * window, int screenWidth, int screenHeight) : Screen(), screenWidth(screenWidth), screenHeight(screenHeight) {
 	this->initialize(window, false);
+	unit_window = new UnitWindow((Screen*) this, "Unit Stats");
 
 	// load placeholder image
 	std::vector<std::pair<int, std::string>> placeholderL = loadImageDirectory(nvgContext(), "Images/Placeholder");
@@ -47,6 +48,22 @@ void GUI::update() {
 	}
 }
 
+
+GUI::~GUI()
+{
+	delete unit_window;
+}
+
+
+void GUI::showUnitUI(AttackableGameObject* unit) {
+	this->unit_window->updateSelection(unit);
+	this->unit_window->setVisible(true);
+}
+
+void GUI::hideUnitUI() {
+	this->unit_window->setVisible(false);
+}
+
 void GUI::setScreenSize(int width, int height) {
 	this->screenWidth = width;
 	this->screenHeight = height;
@@ -73,6 +90,7 @@ void GUI::setFPS(double fps) {
 	std::ostringstream oss;
 	oss << "FPS: " << (int)fps;
 	this->fpsDisplay->setCaption(oss.str());
+
 }
 
 void GUI::createUidDisplay() {
@@ -171,6 +189,7 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 
 		uidDisplay->setValue(single_object->getID());
 	}
+
 }
 
 void GUI::createCityDisplay() {
@@ -211,3 +230,4 @@ void GUI::displayCityUI(City* city, std::function<void()> unitCreateCallback) {
 void GUI::hideCityUI() {
 	cityWindow->setVisible(false);
 }
+

@@ -332,6 +332,7 @@ void Client::createWindow(int width, int height) {
 
 	glfwSetCharCallback(window,
 		[](GLFWwindow * window, unsigned int codepoint) {
+
 			glfwEntry[window]->gui->charCallbackEvent(codepoint);
 		}
 	);
@@ -393,6 +394,7 @@ void Client::display() {
 			newOctree->insert((*it).second);
 		}
 		newOctree->update();
+
 
 		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 
@@ -462,6 +464,7 @@ void Client::display() {
 
 	}
 
+
 	double currentTime = glfwGetTime();
 	frameCounter++;
 	if (currentTime - frameTimer >= 1.0) {
@@ -470,6 +473,7 @@ void Client::display() {
 		//frameTimer = currentTime;
 		frameTimer += 1.0;
 	}
+
 
 	glfwPollEvents();
 }
@@ -671,9 +675,11 @@ void Client::handleF2Key(int key) {
 	this->channeled_send(&deal);
 }
 
+
 void Client::createUnitFromCity(DrawableCity* city) {
 	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
 	PlayerCommand command(pos.x, pos.y, pos.z); 
+
 	this->channeled_send(&command);
 }
 
