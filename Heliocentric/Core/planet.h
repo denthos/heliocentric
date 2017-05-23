@@ -3,6 +3,7 @@
 #include "game_object.h"
 #include "slot.h"
 #include "planet_types.h"
+#include "resources.h"
 
 #include <vector>
 #include <string>
@@ -15,11 +16,12 @@ class Planet : public GameObject {
 public:
 	friend PlanetUpdate;
 
-	Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>);
-	Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>);
+	Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>, std::unordered_map<Resources::Type, int> resources);
+	Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*>, std::unordered_map<Resources::Type, int> resources);
 
 	std::unordered_map<UID, Slot*>& get_slots();
 	const std::unordered_map<UID, Slot*>& get_slots_const() const;
+	void distributeResourcesAmongstSlots();
 
 	void doLogic();
 	std::shared_ptr<PlanetUpdate> makeUpdate();
@@ -43,5 +45,9 @@ private:
 	std::shared_ptr<PlanetUpdate> update;
 
 	bool upgraded;          // true if all slots owned by one player
-	//private std::list<Resource> resources;
+
+	void initialize();
+
+	/* Resources that the planet has that will be randomly taken by its slots */
+	std::unordered_map<Resources::Type, int> resources;
 };

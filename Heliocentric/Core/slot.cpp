@@ -30,6 +30,20 @@ SphericalCoordinate Slot::get_spherical_position() const {
 	return this->coordinate;
 }
 
+void Slot::changeResourceCount(Resources::Type resource, int new_amount) {
+	this->resources[resource] = new_amount;
+}
+
+int Slot::getResourceCount(Resources::Type resource) const {
+	auto& resource_count_pair = this->resources.find(resource);
+	if (resource_count_pair == this->resources.end()) {
+		return 0;
+	}
+	else {
+		return resource_count_pair->second;
+	}
+}
+
 Planet* Slot::getPlanet() const {
 	return this->planet;
 }

@@ -4,14 +4,34 @@
 #include "planet_update.h"
 
 
-Planet::Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*> map) :
-	GameObject(position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius), type(type) {
-  this->update = std::make_shared<PlanetUpdate>(this->getID(), position.x, position.y, position.z);
+Planet::Planet(glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*> map, std::unordered_map<Resources::Type, int> resources) :
+	GameObject(position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius), type(type), resources(resources) {
+	initialize();
 }
 
-Planet::Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*> map) :
-	GameObject(id, position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius), type(type) {
-  this->update = std::make_shared<PlanetUpdate>(id, position.x, position.y, position.z);
+Planet::Planet(UID id, glm::vec3 position, std::string planet_name, float orbit_speed, float radius, PlanetType type, std::unordered_map<UID, Slot*> map, std::unordered_map<Resources::Type, int> resources) :
+	GameObject(id, position), name(planet_name), slots(map), orbit_speed(orbit_speed), radius(radius), type(type), resources(resources) {
+	initialize();
+}
+
+void Planet::initialize() {
+	this->update = std::make_shared<PlanetUpdate>(getID(), position.x, position.y, position.z);
+}
+
+void Planet::distributeResourcesAmongstSlots() {
+	/* Randomly distribute resources amongst slots. */
+	for (auto slot : slots) {
+
+		for (auto resource_pair : resources) {
+			int resource_amount = rand() % resource_pair.second;
+
+			if (resource_amount > 0) {
+				resources[resource_pair.first] -= resource_amount;
+				slot.second->changeResourceCount(resource_pair.first, resource_amount);
+			}
+		}
+
+	}
 }
 
 std::string Planet::getName() const {

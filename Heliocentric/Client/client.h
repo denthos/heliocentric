@@ -62,7 +62,7 @@ public:
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 
 
-	void createCityForSlot(DrawableSlot*);
+	void createCityForSlot(DrawableSlot*, std::string);
 
 	void setSelection(std::vector<GameObject*>);
 	void createUnitFromCity(DrawableCity* city);
@@ -81,6 +81,7 @@ private:
 	std::vector<GameObject *> selection;
 	std::string windowTitle;
 	bool init = false;
+	Octree * octree;
 
 	KeyboardHandler keyboard_handler;
 	MouseHandler mouse_handler;
@@ -90,7 +91,6 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
 	std::unordered_map<UID, DrawableSlot*> slots;
-	Octree octree;
 
 	std::shared_ptr<Player> player;
 
