@@ -53,6 +53,7 @@ public:
 	void update();
 
 	void mouseClickHandler(MouseButton, ScreenPosition);
+	void mouseRightClickHandler(MouseButton, ScreenPosition);
 	
 	void playerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerUpdate>);
 	void newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<NewPlayerInfoUpdate>);
@@ -90,6 +91,8 @@ private:
 	unsigned long lastFrame;
 	bool focused;
 	Octree * octree;
+
+	GameObject* getObjectAtCursorPosition(const ScreenPosition& position);
 
 	KeyboardHandler keyboard_handler;
 	MouseHandler mouse_handler;

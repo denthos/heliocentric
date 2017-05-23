@@ -39,6 +39,8 @@ public:
 	*/
 	void set_player(Player*);
 
+	bool has_player();
+
 	/**
 	Returns the current position of this game object.
 	@return The current position of this game object.

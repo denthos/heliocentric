@@ -248,6 +248,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE),
+		std::bind(&Client::mouseRightClickHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
@@ -573,12 +575,59 @@ void Client::setSelection(std::vector<GameObject*> new_selection) {
 }
 
 
-void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
-	/* Select a new thing */
+GameObject* Client::getObjectAtCursorPosition(const ScreenPosition& position) {
 	cameras[selectedCamera]->calculateViewMatrix();
-	GameObject * selected = dynamic_cast<GameObject *>(octree->intersect(cameras[selectedCamera]->projectRay(position)));
-	if (selected) {
-		setSelection({ selected });
+	return dynamic_cast<GameObject *>(octree->intersect(cameras[selectedCamera]->projectRay(position)));
+}
+
+
+void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	GameObject* selected_obj = getObjectAtCursorPosition(position);
+
+	if (selected_obj) {
+		setSelection({ selected_obj });
+	}
+}
+
+void Client::mouseRightClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	/* Right clicks are only useful if we currently have a selection and the selection is all ours */
+	if (this->selection.size() <= 0) {
+		return;
+	}
+	else {
+		for (GameObject* single_selection : this->selection) {
+			if (single_selection->get_player()->getID() != this->player->getID()) {
+				return;
+			}
+		}
+	}
+
+	GameObject* selected_obj = getObjectAtCursorPosition(position);
+	if (!selected_obj) {
+		return;
+	}
+
+	/* If the right clicked thing is not unit or it is owned by the current player, move */
+	glm::vec3 obj_position = selected_obj->get_position();
+	AttackableGameObject* selected_attackable = dynamic_cast<AttackableGameObject*>(selected_obj);
+
+	/* come to think of it this should probably all be done on the server.. */
+	if (!selected_obj->has_player() || selected_obj->get_player()->getID() == this->player->getID() || !selected_attackable) {
+		LOG_DEBUG("Moving selection to position <", obj_position.x, ",", obj_position.y, ",", obj_position.z, ">");
+
+		for (GameObject* single_selection : selection) {
+			UnitCommand move_command(single_selection->getID(), obj_position.x, obj_position.y, obj_position.z);
+			channeled_send(&move_command);
+		}
+	}
+	/* The right clicked thing is a unit and not owned by the current player */
+	else {
+		LOG_DEBUG("Selection attacking unit with ID ", selected_obj->getID());
+
+		for (GameObject* single_selection : selection) {
+			UnitCommand attack_command(single_selection->getID(), selected_obj->getID());
+			channeled_send(&attack_command);
+		}
 	}
 }
 
@@ -747,7 +796,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
 
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
-		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), update->def, update->health),
+		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), nullptr, update->def, update->health),
 		spaceship
 	);
 

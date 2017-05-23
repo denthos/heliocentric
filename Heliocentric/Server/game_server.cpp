@@ -36,6 +36,12 @@ GameServer::~GameServer() {
 	}
 }
 
+
+void GameServer::addFunctionToProcessQueue(std::function<void()> work) {
+	auto& process_queue = Lib::key_acquire(this->update_process_queue);
+	process_queue.get().push(work);
+}
+
 void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) {
 	/* If a client wishes to disconnect, we just drop them entirely. */
 	LOG_DEBUG("Disconnecting client");
@@ -167,12 +173,21 @@ void GameServer::performUpdates() {
 		return;
 	}
 
+	/* Perform queued updates */
+	{
+		auto& process_queue = Lib::key_acquire(this->update_process_queue);
+		while (!process_queue.get().empty()) {
+			process_queue.get().front()();
+			process_queue.get().pop();
+		}
+	}
+
 	/* First, update the universe */
 	this->universe.doLogic();
 	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
 
 	/* update the unit manager */
-	this->unit_manager.doLogic();
+	unit_manager.doLogic();
 	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
 
 	/* Give players resources based on their owned cities */
@@ -350,8 +365,10 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			Player* owner = this->extractPlayerFromConnection(sender);
 
-			std::shared_ptr<UnitCreationUpdate>update = unit_manager.add_unit(command, owner);
-			this->addUpdateToSendQueue(update);
+			this->addFunctionToProcessQueue([this, command, owner]() {
+				std::shared_ptr<UnitCreationUpdate> update = unit_manager.add_unit(command, owner);
+				this->addUpdateToSendQueue(update);
+			});
 			break;
 		}
 		case PlayerCommand::CMD_TRADE: {
@@ -395,12 +412,16 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	switch (command->command_type) {
 		case UnitCommand::CMD_ATTACK:
 			LOG_DEBUG("Unit command type: CMD_ATTACK");
-			unit_manager.do_attack(command.get()->initiator, command.get()->target);
+			this->addFunctionToProcessQueue([this, command]() {
+				unit_manager.do_attack(command.get()->initiator, command.get()->target);
+			});
 			break;
 		case UnitCommand::CMD_MOVE:
 			LOG_DEBUG("Unit command type: CMD_MOVE");
 			// TODO: Delegate to UnitManager
-			unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
+			this->addFunctionToProcessQueue([this, command]() {
+				unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
+			});
 			break;
 		default:
 			LOG_ERR("Invalid unit command.");

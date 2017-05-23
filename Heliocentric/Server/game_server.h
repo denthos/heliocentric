@@ -49,6 +49,7 @@ private:
 		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>>> connections;
 
 	Universe universe;
+
 	UnitManager unit_manager;
 
 	bool updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates);
@@ -63,7 +64,10 @@ private:
 		std::vector<SunNet::ChanneledSocketConnection_p> intended_recipients;
 	};
 
+
 	Lib::Lock<std::queue<UpdateToSend>> updates_to_send;
+	Lib::Lock<std::queue<std::function<void()>>> update_process_queue;
+	void addFunctionToProcessQueue(std::function<void()> work);
 
 	template <typename TUpdate>
 	void sendUpdateToConnection(std::shared_ptr<TUpdate> update, SunNet::ChanneledSocketConnection_p connection) {

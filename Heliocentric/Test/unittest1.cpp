@@ -4,6 +4,7 @@
 #include "unit.h"
 #include "planet.h"
 #include "instant_laser_attack.h"
+#include "unit_manager.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -19,11 +20,12 @@ namespace Test
         }
 
         TEST_METHOD(claim_a_unit_test) {
+			UnitManager manager;
 			UID playerID = 123;
             Player sylvia("Sylvia", playerID);
             UID id = 101;
 			Attack* att = new InstantLaserAttack();
-			Unit* battleShip = new Unit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, att, 0, 0);
+			Unit* battleShip = new Unit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, att, &manager, 0, 0);
 			Assert::AreEqual(4, (int)sylvia.owned_objects.size());
 			sylvia.acquire_object(battleShip);
             Assert::AreEqual(playerID, sylvia.getID());
