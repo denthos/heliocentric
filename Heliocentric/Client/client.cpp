@@ -94,7 +94,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window);
+	gui = new GUI(window, width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -188,6 +188,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	cameras[selectedCamera]->setActive(true);
 
 	init = true;
+	focused = true;
 
 	resizeCallback(width, height);
 
@@ -257,6 +258,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	catch (const SunNet::ConnectException&) {
 		LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
+
+	frameTimer = glfwGetTime();
+	frameCounter = 0;
 }
 
 Client::~Client() {
@@ -352,100 +356,118 @@ void Client::createWindow(int width, int height) {
 			glfwEntry[window]->scrollWheelCallback(x, y);
 		}
 	);
+	glfwSetWindowFocusCallback(window,
+		[](GLFWwindow * window, int focused) {
+			glfwEntry[window]->focusCallback(focused);
+		}
+	);
 }
 
 void Client::display() {
-  //first pass: render the scene as usual with the bloom framebuffer as the active frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	if (focused || frameCounter % 3 == 0) {
+		//first pass: render the scene as usual with the bloom framebuffer as the active frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-	// Clear buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Clear buffers
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	cameras[selectedCamera]->update();
-	cameras[selectedCamera]->calculateViewMatrix();
-	cameras[selectedCamera]->calculateViewFrustum();
+		cameras[selectedCamera]->update();
+		cameras[selectedCamera]->calculateViewMatrix();
+		cameras[selectedCamera]->calculateViewFrustum();
 
-	Octree * newOctree = new Octree();
-	newOctree->enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
+		Octree * newOctree = new Octree();
+		newOctree->enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 
-	for (auto it = planets.begin(); it != planets.end(); ++it) {
-		newOctree->insert((*it).second.get());
-	}
-	for (auto it = units.begin(); it != units.end(); ++it) {
-		newOctree->insert((*it).second.get());
-	}
-	for (auto it = cities.begin(); it != cities.end(); ++it) {
-		newOctree->insert((*it).second.get());
-	}
-	for (auto it = slots.begin(); it != slots.end(); ++it) {
-		newOctree->insert((*it).second);
-	}
-	newOctree->update();
+		for (auto it = planets.begin(); it != planets.end(); ++it) {
+			newOctree->insert((*it).second.get());
+		}
+		for (auto it = units.begin(); it != units.end(); ++it) {
+			newOctree->insert((*it).second.get());
+		}
+		for (auto it = cities.begin(); it != cities.end(); ++it) {
+			newOctree->insert((*it).second.get());
+		}
+		for (auto it = slots.begin(); it != slots.end(); ++it) {
+			newOctree->insert((*it).second);
+		}
+		newOctree->update();
 
-	skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
-	
-	Octree * delOctree = octree;
-	octree = newOctree;
-	octree->draw(*textureShader, *cameras[selectedCamera]);
-	delete delOctree;
-	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
-	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
-	
-	// blur the things that glow
-	int blurs = 5; //TODO init to number of blur iterations
-	bool blurX = true;
+		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 
-	blurShader->bind();
+		Octree * delOctree = octree;
+		octree = newOctree;
+		octree->draw(*textureShader, *cameras[selectedCamera]);
+		delete delOctree;
 
-	//fill one of the gaussian frame buffers with the blurred bright extraction
-	glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
-	glBindTexture(GL_TEXTURE_2D, color_buff[BRIGHTNESS_BUFFER]);
-	glUniform1i(glGetUniformLocation(blurShader->getPid(), "blurX"), blurX);
+		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
+		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
 
-	quad->draw();
-	blurX = !blurX;
+		// blur the things that glow
+		int blurs = 5; //TODO init to number of blur iterations
+		bool blurX = true;
 
-	//blur the image
-	for (int i = 0; i < blurs; i++) { 
-		
-		//bind appropriate frame buffer
+		blurShader->bind();
+
+		//fill one of the gaussian frame buffers with the blurred bright extraction
 		glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
-		//bind appropriate texture to blur (the one opposite to the current frame buffer you're writing to)
+		glBindTexture(GL_TEXTURE_2D, color_buff[BRIGHTNESS_BUFFER]);
+		glUniform1i(glGetUniformLocation(blurShader->getPid(), "blurX"), blurX);
+
+		quad->draw();
+		blurX = !blurX;
+
+		//blur the image
+		for (int i = 0; i < blurs; i++) {
+
+			//bind appropriate frame buffer
+			glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
+			//bind appropriate texture to blur (the one opposite to the current frame buffer you're writing to)
+			glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
+
+			blurX = !blurX; //switch between blur directions
+
+			//draw texture
+			quad->draw();
+		}
+
+		blurShader->unbind();
+
+		//return to the default frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//draw the quad 
+		quadShader->bind();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, color_buff[REGULAR_BUFFER]);
+
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
 
-		blurX = !blurX; //switch between blur directions
-
-		//draw texture
+		glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
+		glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
+		glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
+		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
 		quad->draw();
+
+		quadShader->unbind();
+
+		// draw the UI
+		gui->drawWidgets();
+
+		glfwSwapBuffers(window);
+
 	}
-	
-	blurShader->unbind();
 
-	//return to the default frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//draw the quad 
-	quadShader->bind();
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, color_buff[REGULAR_BUFFER]);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
-	
-	glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
-	glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
-	glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
-	glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
-	quad->draw();
-
-	quadShader->unbind();
-
-	// draw the UI
-	gui->drawWidgets();
-
-	glfwSwapBuffers(window);
+	double currentTime = glfwGetTime();
+	frameCounter++;
+	if (currentTime - frameTimer >= 1.0) {
+		gui->setFPS(1000.0 / (double)(frameCounter - lastFrame));
+		lastFrame = frameCounter;
+		//frameTimer = currentTime;
+		frameTimer += 1.0;
+	}
 
 	glfwPollEvents();
 }
@@ -453,6 +475,8 @@ void Client::display() {
 void Client::update() {
 
 	cameras[selectedCamera]->update();
+	
+	gui->update();
 
 	//particles->Update(*camera);
 	
@@ -503,6 +527,7 @@ void Client::resizeCallback(int width, int height) {
 
 	if (gui) {
 		gui->resizeCallbackEvent(width, height);
+		gui->setScreenSize(width, height);
 	}
 }
 
@@ -527,6 +552,10 @@ void Client::scrollWheelCallback(double x, double y) {
 	if (!gui->scrollCallbackEvent(x, y)) {
 		mouse_handler.mouseWheelCallback(x, y);
 	}
+}
+
+void Client::focusCallback(int focused) {
+	this->focused = focused ? true : false;
 }
 
 void Client::setSelection(std::vector<GameObject*> new_selection) {
@@ -754,6 +783,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
 	this->player = std::make_shared<Player>(player_name, update->id);
 	players[update->id] = this->player;
+	gui->setPlayer(this->player);
 
 	PlayerClientToServerTransfer info_transfer(player_name);
 

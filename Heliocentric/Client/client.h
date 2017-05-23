@@ -85,6 +85,10 @@ private:
 	std::vector<GameObject *> selection;
 	std::string windowTitle;
 	bool init = false;
+	double frameTimer;
+	unsigned long frameCounter;
+	unsigned long lastFrame;
+	bool focused;
 	Octree * octree;
 
 	KeyboardHandler keyboard_handler;
@@ -110,6 +114,7 @@ private:
 	void mouseButtonCallback(int button, int action, int mods);
 	void mouseCursorCallback(double x, double y);
 	void scrollWheelCallback(double x, double y);
+	void focusCallback(int focused);
 
 	void handleCameraSwitch(int);
 	void handleEscapeKey(int);

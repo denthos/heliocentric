@@ -124,7 +124,8 @@ xcopy /D /Y $(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration
 xcopy /I /D /E /Y Shaders\* $(OutDir)Shaders\
 xcopy /I /D /E /Y Textures\* $(OutDir)Textures\
 xcopy /I /D /E /Y Models\* $(OutDir)Models\
-</Command>
+xcopy /I /D /E /Y Images\* $(OutDir)Images\
+xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Copying game resource files</Message>
@@ -189,7 +190,9 @@ xcopy /I /D /E /Y Models\* $(OutDir)Models\
 xcopy /D /Y $(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration)\nanogui.dll $(OutDir)
 xcopy /I /D /E /Y Shaders\* $(OutDir)Shaders\
 xcopy /I /D /E /Y Textures\* $(OutDir)Textures\
-xcopy /I /D /E /Y Models\* $(OutDir)Models\</Command>
+xcopy /I /D /E /Y Models\* $(OutDir)Models\
+xcopy /I /D /E /Y Images\* $(OutDir)Images\
+xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Copying game resource files</Message>
