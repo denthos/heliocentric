@@ -46,9 +46,12 @@ void GUI::createSlotDisplay() {
 	slotWindow->setVisible(false);
 }
 
-void GUI::createTradeDisplay(Player* my_player, Player* trade_partner) {
+void GUI::createTradeDisplay() {
 	tradeWindow = formHelper->addWindow(Eigen::Vector2i(500, 500), "Trade Deal");
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
+}
+
+void GUI::customizeTrade(Player* my_player, Player* trade_partner) {
 	//ComboBox* listOfPlayers = new ComboBox(tradeWindow, { "player 1", "player 2", "player 3" });
 	formHelper->addGroup("Product to trade: ");
 	Resources::Type resource = Resources::FIRST;
