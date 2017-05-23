@@ -24,9 +24,7 @@ private:
 		Slot* right_slot = new Slot(planet.get(), SphericalCoordinate(90, 180));
 		planet->get_slots().insert(std::make_pair(right_slot->getID(), right_slot));
 
-		Slot* really_right_slot = new Slot(planet.get(), SphericalCoordinate(45, 135));
-		planet->get_slots().insert(std::make_pair(really_right_slot->getID(), really_right_slot));
-
+		planet->distributeResourcesAmongstSlots();
 		return planet;
 	}
 

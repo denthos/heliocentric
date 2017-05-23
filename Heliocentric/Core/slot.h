@@ -29,11 +29,14 @@ public:
 
 	Planet* getPlanet() const;
 
+	int getResourceCount(Resources::Type resource) const;
+	void changeResourceCount(Resources::Type resource, int new_amount);
 
 protected:
-	Resources::Type resource_type;
-	float resource_deposit;
 	SphericalCoordinate coordinate;
 	Planet* planet;
 	City* city;
+
+private:
+	std::unordered_map<Resources::Type, int> resources;
 };

@@ -78,7 +78,7 @@ namespace Test
 
         TEST_METHOD(create_planet_test) {
             UID id = 100;
-			Planet mars(glm::vec3(0.0f, 0.0f, 0.0f), "Mars", 0.0f, 0.0f, EARTH, std::unordered_map<UID, Slot*>());
+			Planet mars(glm::vec3(0.0f, 0.0f, 0.0f), "Mars", 0.0f, 0.0f, EARTH, std::unordered_map<UID, Slot*>(), std::unordered_map<Resources::Type, int>());
 
             for (int i = 0; i < 3; ++i) {
 				Slot* slot = new Slot(id, &mars, SphericalCoordinate(1.0f, 1.0f));

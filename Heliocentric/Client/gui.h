@@ -1,8 +1,10 @@
 #pragma once
 
 #include "game_object.h"
+#include "resources.h"
 
 #include <nanogui\nanogui.h>
+#include <unordered_map>
 
 #if defined(NANOGUI_GLAD)
 	#if defined(NANOGUI_SHARED) && !defined(GLAD_GLAPI_EXPORT)
@@ -50,6 +52,9 @@ private:
 
 	ref<Window> slotWindow;
 	Button* slotButton;
+
+	Widget* slotResourcesWidget;
+	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
 
 	ref<Window> cityWindow;
 	Button* createUnitButton;
