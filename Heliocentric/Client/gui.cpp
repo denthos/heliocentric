@@ -4,6 +4,7 @@
 #include "selectable.h"
 #include "city.h"
 #include <iostream>
+#include <vector>
 using namespace nanogui;
 
 GUI::GUI(GLFWwindow * window) : Screen() {
@@ -45,12 +46,26 @@ void GUI::createSlotDisplay() {
 	slotWindow->setVisible(false);
 }
 
-void GUI::createTradeDisplay() {
+void GUI::createTradeDisplay(Player* my_player, Player* trade_partner) {
 	tradeWindow = formHelper->addWindow(Eigen::Vector2i(500, 500), "Trade Deal");
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
 	//ComboBox* listOfPlayers = new ComboBox(tradeWindow, { "player 1", "player 2", "player 3" });
 	formHelper->addGroup("Product to trade: ");
-	formHelper->addVariable("Resource type", Resources::ALUMINUM, true)->setItems(Resources::nameMap);
+	Resources::Type resource = Resources::FIRST;
+	std::vector<std::string> my_resource_list = {};
+	std::vector<std::string> partner_resource_list = {};
+
+	for (auto itr : my_player->owned_resources) {
+		my_resource_list.push_back(Resources::toString(itr.first));
+	}
+
+	for (auto itr : trade_partner->owned_resources) {
+		partner_resource_list.push_back(Resources::toString(itr.first));
+	}
+
+	formHelper->addVariable("Resource type", resource, true)->setItems(my_resource_list);
+	formHelper->addVariable("Resource type", resource, true)->setItems(partner_resource_list);
+
 	//formHelper->addVariable("string", "Select Player", enabled);
 	tradeWindow->setVisible(true);
 }

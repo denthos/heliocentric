@@ -47,12 +47,12 @@ public:
 	std::shared_ptr<TradeDeal> get_trade_deal(UID); // Return a trade deal by UID
 
 	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects; // TODO: move to private
+	std::unordered_map<Resources::Type, float> owned_resources; // Stores the amount of each type of resources the player owns
 
 private:
 	std::string name;
 	float player_score;
 	std::vector<GameObject*> objects_to_destroy;
-	std::unordered_map<Resources::Type, float> owned_resources; // Stores the amount of each type of resources the player owns
 	// std::queue<std::shared_ptr<TradeDeal>> active_trade_deals; // All active trade deals that involves this player, not implemented yet
 	std::unordered_map<UID, std::shared_ptr<TradeDeal>> pending_trade_deals; // All pending trade deals waiting to be accepted or declined
 

@@ -49,7 +49,7 @@ private:
 	void createUidDisplay();
 	void createSlotDisplay();
 	void createCityDisplay();
-	void createTradeDisplay();
+	void createTradeDisplay(Player* my_player, Player* trade_partner);
 
 
 	ref<Window> uidWindow;
