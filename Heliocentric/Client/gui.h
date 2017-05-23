@@ -1,6 +1,6 @@
 #pragma once
 #include "gui_utilities.h"
-#include "unit_gui.h"
+#include "unit_window.h"
 using namespace nanogui;
 
 class Slot;
@@ -21,7 +21,7 @@ public:
 	void hideUnitUI();
 
 private:
-	UnitGUI* unit_gui;
+	UnitWindow* unit_gui;
 	FormHelper* formHelper;
 
 	void createUidDisplay();

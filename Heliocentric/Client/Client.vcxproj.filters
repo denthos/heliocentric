@@ -157,13 +157,13 @@
     <ClInclude Include="gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="unit_gui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="gui_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="selectable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -282,7 +282,7 @@
     <ClCompile Include="orbital_camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unit_gui.cpp">
+    <ClCompile Include="unit_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

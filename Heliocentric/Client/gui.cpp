@@ -5,7 +5,7 @@
 
 GUI::GUI(GLFWwindow * window) : Screen() {
 	this->initialize(window, false);
-	unit_gui = new UnitGUI((Screen*) this, "Unit Stats");
+	unit_gui = new UnitWindow((Screen*) this, "Unit Stats");
 
 	formHelper = new FormHelper(this);
 
@@ -24,11 +24,11 @@ GUI::~GUI()
 
 void GUI::showUnitUI(AttackableGameObject* unit) {
 	this->unit_gui->updateSelection(unit);
-	this->unit_gui->show();
+	this->unit_gui->setVisible(true);
 }
 
 void GUI::hideUnitUI() {
-	this->unit_gui->hide();
+	this->unit_gui->setVisible(false);
 }
 
 void GUI::createUidDisplay() {

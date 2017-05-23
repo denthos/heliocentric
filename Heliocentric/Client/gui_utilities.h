@@ -1,7 +1,5 @@
 #pragma once
 
-#include "game_object.h"
-
 #include <nanogui\nanogui.h>
 
 #if defined(NANOGUI_GLAD)
