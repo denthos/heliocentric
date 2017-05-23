@@ -191,7 +191,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	resizeCallback(width, height);
 
-	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
+	octree = new Octree();
+	octree->enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
@@ -259,6 +260,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 Client::~Client() {
 	delete shader;
 	delete textureShader;
+
+	delete octree;
 
 	players.clear();
 	planets.clear();
@@ -360,25 +363,29 @@ void Client::display() {
 	cameras[selectedCamera]->calculateViewMatrix();
 	cameras[selectedCamera]->calculateViewFrustum();
 
-	octree.clear();
+	Octree * newOctree = new Octree();
+	newOctree->enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 
 	for (auto it = planets.begin(); it != planets.end(); ++it) {
-		octree.insert((*it).second.get());
+		newOctree->insert((*it).second.get());
 	}
 	for (auto it = units.begin(); it != units.end(); ++it) {
-		octree.insert((*it).second.get());
+		newOctree->insert((*it).second.get());
 	}
 	for (auto it = cities.begin(); it != cities.end(); ++it) {
-		octree.insert((*it).second.get());
+		newOctree->insert((*it).second.get());
 	}
 	for (auto it = slots.begin(); it != slots.end(); ++it) {
-		octree.insert((*it).second);
+		newOctree->insert((*it).second);
 	}
-	octree.update();
+	newOctree->update();
 
 	skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
-	octree.draw(*textureShader, *cameras[selectedCamera]);
 	
+	Octree * delOctree = octree;
+	octree = newOctree;
+	octree->draw(*textureShader, *cameras[selectedCamera]);
+	delete delOctree;
 	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
 	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
 	
@@ -538,7 +545,7 @@ void Client::setSelection(std::vector<GameObject*> new_selection) {
 void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
 	/* Select a new thing */
 	cameras[selectedCamera]->calculateViewMatrix();
-	GameObject * selected = dynamic_cast<GameObject *>(octree.intersect(cameras[selectedCamera]->projectRay(position)));
+	GameObject * selected = dynamic_cast<GameObject *>(octree->intersect(cameras[selectedCamera]->projectRay(position)));
 	if (selected) {
 		setSelection({ selected });
 	}
@@ -548,7 +555,7 @@ void Client::handleCameraSwitch(int key) {
 	cameras[selectedCamera]->setActive(false);
 	selectedCamera++;
 	if (selectedCamera >= cameras.size()) selectedCamera = 0;
-	octree.enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
+	octree->enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 	cameras[selectedCamera]->setActive(true);
 }
 
