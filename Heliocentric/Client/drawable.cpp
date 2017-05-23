@@ -88,11 +88,11 @@ BoundingBox Drawable::getBoundingBox() const {
 
 bool Drawable::intersect(const Ray & ray, Collision & collision) const {
 	Ray newRay;
-	Collision newCollision(collision);
+	Collision newCollision;
 	glm::mat4 inverse = glm::inverse(toWorld);
 	newRay.origin = glm::vec3(inverse * glm::vec4(ray.origin, 1.0f));
 	newRay.direction = glm::vec3(inverse * glm::vec4(ray.direction, 0.0f));
-	if (model->getBoundingBox().intersect(newRay, newCollision)) {
+	if (model->intersect(newRay, newCollision)) {
 		glm::vec3 collision_position = glm::vec3(toWorld * glm::vec4(newCollision.position, 1.0f)); 
 		float collision_distance = glm::distance(ray.origin, collision_position);
 		if (collision_distance < collision.distance) {
