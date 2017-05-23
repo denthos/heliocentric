@@ -20,6 +20,7 @@ public:
 	Slot* get_slot();
 	glm::vec3 get_position() const;
 
+	void extractResourcesFromSlotAndCreateUpdates(std::vector<std::shared_ptr<PlayerUpdate>>&, std::vector<std::shared_ptr<SlotUpdate>>&);
 	std::string getName() const;
 
 private:

@@ -34,6 +34,10 @@ void Slot::changeResourceCount(Resources::Type resource, int new_amount) {
 	this->resources[resource] = new_amount;
 }
 
+const std::unordered_map<Resources::Type, int>& Slot::getResources() const {
+	return this->resources;
+}
+
 int Slot::getResourceCount(Resources::Type resource) const {
 	auto& resource_count_pair = this->resources.find(resource);
 	if (resource_count_pair == this->resources.end()) {

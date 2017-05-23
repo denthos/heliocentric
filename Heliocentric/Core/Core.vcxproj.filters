@@ -164,6 +164,12 @@
     <ClInclude Include="game_session.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="slot_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="new_player_info_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -285,6 +291,12 @@
     </ClCompile>
     <ClCompile Include="resources.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slot_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="new_player_info_update.cpp">
+      <Filter>Updates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

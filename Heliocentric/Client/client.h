@@ -13,6 +13,7 @@
 #include "slot.h"
 #include "drawable_slot.h"
 #include "player_update.h"
+#include "new_player_info_update.h"
 #include "unit_creation_update.h"
 #include "unit_update.h"
 #include "city_update.h"
@@ -35,6 +36,7 @@
 #include "trade_data.h"
 #include "trade_deal.h"
 #include "selectable.h"
+#include "slot_update.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -53,6 +55,7 @@ public:
 	void mouseClickHandler(MouseButton, ScreenPosition);
 	
 	void playerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerUpdate>);
+	void newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<NewPlayerInfoUpdate>);
 	void unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitCreationUpdate>);
 	void unitUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitUpdate>);
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
@@ -60,6 +63,7 @@ public:
 	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
 	void tradeDataHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TradeData>);
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
+	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
 
 
 	void createCityForSlot(DrawableSlot*, std::string);

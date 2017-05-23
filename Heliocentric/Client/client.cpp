@@ -222,6 +222,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	initializeChannels();
 
 	this->subscribe<PlayerUpdate>(std::bind(&Client::playerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<NewPlayerInfoUpdate>(std::bind(&Client::newPlayerInfoUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitCreationUpdate>(std::bind(&Client::unitCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitUpdate>(std::bind(&Client::unitUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -229,6 +230,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
 	if (cameraSwitchKey >= 97 && cameraSwitchKey <= 122) cameraSwitchKey -= 32;
@@ -691,30 +693,37 @@ void Client::handleF12Key(int key) {
 	this->channeled_send(&command);
 }
 
+
+void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
+	auto& player_it = players.find(update->player_id);
+	if (player_it == players.end()) {
+		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
+		players[update->player_id] = std::make_shared<Player>(update->name, update->player_id);
+	}
+}
+
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
 	LOG_DEBUG("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
 	if (player_it == players.end()) {
-		players[update->id] = std::make_shared<Player>(update->player_name, update->id);
+		return;
 	}
 
-	if (this->player->getID() == update->id) {
-		LOG_DEBUG("Player gold amount before trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
-	}
 	update->apply(players[update->id].get());
-
-	if (this->player->getID() == update->id) {
-		LOG_DEBUG("Player gold amount after trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
-	}
 }
 
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
 	LOG_DEBUG("Unit creation update received");
-	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
-	units[update->id] = std::make_unique<DrawableUnit>(
-		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), new InstantLaserAttack(), update->def, update->health),
+	auto& player_it = players.find(update->player_id);
+	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
+
+	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
+		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), update->def, update->health),
 		spaceship
 	);
+
+	player_it->second->acquire_object(newUnit.get());
+	units.insert(std::make_pair(update->id, std::move(newUnit)));
 }
 
 void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {
@@ -729,6 +738,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	std::function<void()> createCityFunc = [slot_iter, update, player_iter, this]() {
 		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second, update->name));
 		slot_iter->second->attachCity(newCity);
+		player->acquire_object(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));
 
 		if (newCity->get_player()->getID() == player->getID()) {
@@ -790,6 +800,14 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
 	}
+}
+
+void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SlotUpdate> update) {
+	LOG_DEBUG("Received a slot update");
+	auto& slot_it = slots.find(update->id);
+	Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found");
+
+	update->apply(slot_it->second);
 }
 
 void Client::handle_client_disconnect() {

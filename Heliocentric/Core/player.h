@@ -15,10 +15,12 @@
 #include "game_object.h" since it #includes "player.h" */
 class GameObject;
 class PlayerUpdate;
+class NewPlayerInfoUpdate;
 
 class Player : public Identifiable {
 public:
 	friend PlayerUpdate;
+	friend NewPlayerInfoUpdate;
 	Player(std::string player_name);
 	Player(std::string player_name, UID id);
 
@@ -33,9 +35,20 @@ public:
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
 	void pop();                               // Pop all objects queued for destroy
 
-	float get_resource_amount(Resources::Type);
+	int get_resource_amount(Resources::Type);
+	void change_resource_amount(Resources::Type, int);
 
-	std::unordered_map<unsigned int, GameObject*> get_units();   // return list of owned units
+	template <typename T>
+	std::unordered_map<UID, GameObject*> getOwnedObjects() {
+		auto owned_objs_of_type = owned_objects.find(typeid(T));
+		if (owned_objs_of_type == owned_objects.end()) {
+			return std::unordered_map<UID, GameObject*>();
+		}
+
+		return owned_objs_of_type->second;
+	}
+
+	std::unordered_map<UID, GameObject*> get_units();   // return list of owned units
 	GameObject* get_unit(UID id);
 
 	void receive_trade_deal(std::shared_ptr<TradeDeal>); // Add newly received trade deal to pending list
@@ -47,7 +60,7 @@ public:
 	std::shared_ptr<TradeDeal> get_trade_deal(); // TEMPORARY: Return the first trade deal in map
 	std::shared_ptr<TradeDeal> get_trade_deal(UID); // Return a trade deal by UID
 
-	std::unordered_map<std::type_index, std::unordered_map<unsigned int, GameObject*>> owned_objects; // TODO: move to private
+	std::unordered_map<std::type_index, std::unordered_map<UID, GameObject*>> owned_objects; // TODO: move to private
 
 private:
 	std::string name;
@@ -55,7 +68,7 @@ private:
 	TechTree tech_tree;
   
 	std::vector<GameObject*> objects_to_destroy;
-	std::unordered_map<Resources::Type, float> owned_resources; // Stores the amount of each type of resources the player owns
+	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns
 	// std::queue<std::shared_ptr<TradeDeal>> active_trade_deals; // All active trade deals that involves this player, not implemented yet
 	std::unordered_map<UID, std::shared_ptr<TradeDeal>> pending_trade_deals; // All pending trade deals waiting to be accepted or declined
 

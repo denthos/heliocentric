@@ -7,9 +7,10 @@
 #include "player_id_confirmation.h"
 #include "city_creation_update.h"
 #include "instant_laser_attack.h"
+#include "new_player_info_update.h"
 
-GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
-	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), server_paused(false) {
+GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout, int resource_update_interval) :
+	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), server_paused(false), resource_update_interval_seconds(resource_update_interval) {
 
 	this->game = new GameSession();
 
@@ -144,7 +145,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	info->apply(player);
 
 	/* OK. We've applied the information to the player. Now we'd like to send this information to all other players */
-	std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(player->getID(), info->name);
+	std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(player->getID(), info->name);
 
 	LOG_DEBUG("Sending information about new player to all others..");
 	this->addUpdateToSendQueue(player_update);
@@ -156,7 +157,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 			continue;
 		}
 
-		std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(other_player_it.first, other_player_it.second->get_name().c_str());
+		std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(other_player_it.first, other_player_it.second->get_name());
 		this->addUpdateToSendQueue(player_update, { sender });
 	}
 }
@@ -173,6 +174,37 @@ void GameServer::performUpdates() {
 	/* update the unit manager */
 	this->unit_manager.doLogic();
 	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
+
+	/* Give players resources based on their owned cities */
+	std::vector<std::shared_ptr<PlayerUpdate>> player_updates;
+	std::vector<std::shared_ptr<SlotUpdate>> slot_updates;
+	if (updatePlayerResources(player_updates, slot_updates)) {
+		this->addUpdateToSendQueue(player_updates.begin(), player_updates.end());
+		this->addUpdateToSendQueue(slot_updates.begin(), slot_updates.end());
+	}
+
+}
+bool GameServer::updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates) {
+	int update_interval_ticks = (this->resource_update_interval_seconds * 1000) / tick_duration;
+
+	if (++lastResourceUpdateTick < update_interval_ticks) {
+		return false;
+	}
+
+	for (auto& player_pair : players) {
+		for (auto& city_pair : player_pair.second->getOwnedObjects<City>()) {
+			City* city = dynamic_cast<City*>(city_pair.second);
+			if (!city) {
+				LOG_ERR("Player has city that isn't a city...");
+				continue;
+			}
+
+			city->extractResourcesFromSlotAndCreateUpdates(player_updates, slot_updates);
+		}
+	}
+
+	lastResourceUpdateTick = 0;
+	return true;
 }
 
 void GameServer::sendUpdates() {
@@ -301,6 +333,7 @@ void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sen
 	// TODO: Create the city from the player's current technologies
 	City* new_city = new City(owning_player, new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second, command->city_name);
 	slot_iter->second->attachCity(new_city);
+	owning_player->acquire_object(new_city);
 
 	/* Bundle and send the update */
 	auto city_creation_update = std::make_shared<CityCreationUpdate>(owning_player->getID(), slot_iter->first, new_city->getID(), command->city_name);
