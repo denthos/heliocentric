@@ -2,6 +2,7 @@
 #include "identifiable.h"
 #include "resources.h"
 #include "trade_deal.h"
+#include "tech_tree.h"
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -51,6 +52,8 @@ public:
 private:
 	std::string name;
 	float player_score;
+	TechTree tech_tree;
+  
 	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, float> owned_resources; // Stores the amount of each type of resources the player owns
 	// std::queue<std::shared_ptr<TradeDeal>> active_trade_deals; // All active trade deals that involves this player, not implemented yet
