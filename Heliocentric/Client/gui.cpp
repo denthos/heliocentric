@@ -3,6 +3,8 @@
 #include "planet.h"
 #include "selectable.h"
 #include "city.h"
+#include <iostream>
+using namespace nanogui;
 
 GUI::GUI(GLFWwindow * window) : Screen() {
 	this->initialize(window, false);
@@ -39,10 +41,9 @@ void GUI::createTradeDisplay() {
 	tradeWindow = formHelper->addWindow(Eigen::Vector2i(500, 500), "Trade Deal");
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
 	//ComboBox* listOfPlayers = new ComboBox(tradeWindow, { "player 1", "player 2", "player 3" });
-	Widget* customizeTradeDeal = new Widget(tradeWindow);
-	formHelper->addWidget("Sample Widget", customizeTradeDeal);
-	customizeTradeDeal->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 20));
-	formHelper->addButton()
+	formHelper->addGroup("Product to trade: ");
+	formHelper->addVariable("Resource type", Resources::ALUMINUM, true)->setItems(Resources::nameMap);
+	//formHelper->addVariable("string", "Select Player", enabled);
 	tradeWindow->setVisible(true);
 }
 
