@@ -156,6 +156,7 @@ void GUI::createPlayerOverlay() {
 		ImageView * resourceImage = new ImageView(playerOverlay, image);
 		resourceImage->setTooltip(resourceName);
 		resourceImage->setFixedSize(Eigen::Vector2i(25, 25));
+		resourceImage->setFixedOffset(true); //DONT DRAG THE ICONS
 		Label * resourceLabel = new Label(playerOverlay, "0", FONT, FONT_SIZE);
 		resourceLabel->setTooltip(resourceName);
 		resourceLabel->setFixedWidth(MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER);
