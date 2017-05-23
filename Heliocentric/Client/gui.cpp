@@ -78,6 +78,7 @@ void GUI::setFPS(double fps) {
 void GUI::createUidDisplay() {
 	int ivar = 0;
 	uidWindow = formHelper->addWindow(Eigen::Vector2i(10, 40), "Selected Object");
+
 	uidDisplay = formHelper->addVariable("UID:", ivar);
 	uidDisplay->setTooltip("UID of the selected object.");
 	uidDisplay->setEditable(false);
@@ -85,14 +86,19 @@ void GUI::createUidDisplay() {
 
 void GUI::createSlotDisplay() {
 	slotWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "Selected Planet");
+	slotWindow->setWidth(200);
 
+	formHelper->addGroup("Naming");
 	// TODO: Make this a max of 16 characters
 	cityNameDisplay = formHelper->addVariable("Name", cityName);
 
+	formHelper->addGroup("Resources");
 	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
 		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
-		int rvar = 0;
-		resourceDisplay.insert(std::make_pair(type_of_resource, formHelper->addVariable(Resources::toString(type_of_resource), rvar)));
+		int rvar = 999999999;
+		detail::FormWidget<int>* resourceBox = formHelper->addVariable(Resources::toString(type_of_resource), rvar);
+		resourceBox->setEditable(false);
+		resourceDisplay.insert(std::make_pair(type_of_resource, resourceBox));
 	}
 
 	slotButton = formHelper->addButton("Establish City", []() {});
@@ -168,7 +174,7 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 }
 
 void GUI::createCityDisplay() {
-	cityWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "Selected City");
+	cityWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "City Name");
 	createUnitButton = formHelper->addButton("Create Unit", []() {});
 
 	cityWindow->setVisible(false);

@@ -63,7 +63,7 @@ private:
 
 	ref<Window> slotWindow;
 	Button* slotButton;
-	std::string cityName;
+	std::string cityName = "Default CityName";
 	detail::FormWidget<std::string>* cityNameDisplay;
 
 	Widget* slotResourcesWidget;
