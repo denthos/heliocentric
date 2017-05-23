@@ -818,11 +818,12 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	auto& slot_iter = slots.find(update->slot_id);
 	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
 
+	Player* owner = player_iter->second.get();
 	auto& update_queue = Lib::key_acquire(this->update_queue);
-	std::function<void()> createCityFunc = [slot_iter, update, player_iter, this]() {
-		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name));
+	std::function<void()> createCityFunc = [slot_iter, update, owner, this]() {
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name));
 		slot_iter->second->attachCity(newCity);
-		player->acquire_object(newCity);
+		owner->acquire_object(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));
 
 		if (newCity->get_player()->getID() == player->getID()) {
