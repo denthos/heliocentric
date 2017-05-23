@@ -184,11 +184,16 @@ void GameServer::performUpdates() {
 
 	/* First, update the universe */
 	this->universe.doLogic();
-	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
 
 	/* update the unit manager */
-	unit_manager.doLogic();
+	this->unit_manager.doLogic();
+
+	/* update the city manager */
+	this->city_manager.doLogic();
+
+	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
 	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
+	this->addUpdateToSendQueue(city_manager.get_updates().begin(), city_manager.get_updates().end());
 
 	/* Give players resources based on their owned cities */
 	std::vector<std::shared_ptr<PlayerUpdate>> player_updates;
@@ -199,6 +204,7 @@ void GameServer::performUpdates() {
 	}
 
 }
+
 bool GameServer::updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates) {
 	int update_interval_ticks = (this->resource_update_interval_seconds * 1000) / tick_duration;
 
@@ -344,14 +350,13 @@ void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sen
 		LOG_ERR("Slot not found");
 		return;
 	}
-
-	// TODO: Create the city from the player's current technologies
-	City* new_city = new City(owning_player, new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second, command->city_name);
-	slot_iter->second->attachCity(new_city);
-	owning_player->acquire_object(new_city);
+	else if (slot_iter->second->hasCity()) {
+		LOG_ERR("Slot with UID <", slot_iter->first, "> is occupied.");
+		return;
+	}
 
 	/* Bundle and send the update */
-	auto city_creation_update = std::make_shared<CityCreationUpdate>(owning_player->getID(), slot_iter->first, new_city->getID(), command->city_name);
+	std::shared_ptr<CityCreationUpdate> city_creation_update = city_manager.add_city(owning_player, slot_iter->second, command->city_name);
 	this->addUpdateToSendQueue(city_creation_update);
 }
 

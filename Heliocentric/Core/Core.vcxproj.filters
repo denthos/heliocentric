@@ -158,6 +158,9 @@
     <ClInclude Include="instant_laser_attack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="city_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="tech_tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -297,6 +300,9 @@
     </ClCompile>
     <ClCompile Include="new_player_info_update.cpp">
       <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="city_manager.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

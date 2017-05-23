@@ -22,6 +22,7 @@
   <ItemGroup>
     <ClCompile Include="attack.cpp" />
     <ClCompile Include="base_command.cpp" />
+    <ClCompile Include="city_manager.cpp" />
     <ClCompile Include="city_creation_update.cpp" />
     <ClCompile Include="city_update.cpp" />
     <ClCompile Include="config_parser.cpp" />
@@ -48,6 +49,7 @@
   <ItemGroup>
     <ClInclude Include="attack.h" />
     <ClInclude Include="base_command.h" />
+    <ClInclude Include="city_manager.h" />
     <ClInclude Include="city_creation_update.h" />
     <ClInclude Include="config_parser.h" />
     <ClInclude Include="debug_pause.h" />

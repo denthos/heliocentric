@@ -19,6 +19,7 @@
 #include "game_object_update.h"
 #include "universe.h"
 #include "unit_manager.h"
+#include "city_manager.h"
 #include "slot_update.h"
 
 #include "debug_pause.h"
@@ -51,6 +52,7 @@ private:
 	Universe universe;
 
 	UnitManager unit_manager;
+	CityManager city_manager;
 
 	bool updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates);
 	int lastResourceUpdateTick = 0;
