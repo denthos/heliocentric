@@ -522,13 +522,17 @@ void Client::update() {
 		float closestDrawable_Dist = glm::distance(closestDrawable_pos, lookAhead_origin);
 		//print pos before
 		LOG_DEBUG("pos before: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
-		// && closestDrawable_Dist < 50.0f
-		if (closestDrawable_pos != units[unit_id]->get_destination()) {
+		//closestDrawable_pos != units[unit_id]->get_destination() && 
+		if (closestDrawable_Dist < 50.0f) {
 			LOG_DEBUG("avoiding collisions");
 			//calculate the avoidance force
-			glm::vec3 avoidance_force = glm::vec3(0.0, 1000.0f, 0.0);
+			glm::vec3 avoidance_force = glm::vec3(0.0, 500.0f, 0.0);
+			glm::vec3 new_pos = units[unit_id]->get_position() + avoidance_force;
+			units[unit_id]->update_position(new_pos);
 
-			units[unit_id]->update_position(units[unit_id]->get_position() + avoidance_force);
+			UnitCommand move_command(units[unit_id]->getID(), new_pos.x, new_pos.y, new_pos.z);
+			channeled_send(&move_command);
+			
 			//print pos after
 			LOG_DEBUG("pos after: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
 
