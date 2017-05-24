@@ -6,25 +6,19 @@
 #include <glm/gtx/transform.hpp>
 #include "glm\gtx\quaternion.hpp"
 
-Unit::Unit(glm::vec3 pos) : AttackableGameObject(pos), orientation(glm::vec3(0.0f, 0.0f, 1.0f)), rotation(glm::mat4(1.0f)) {
-	this->manager = nullptr;
-	this->target = nullptr;
+Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed) :
+	AttackableGameObject(pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed), orientation(glm::vec3(0.0f, 0.0f, 1.0f)), rotation(glm::mat4(1.0f)) {
+	initialize();
 }
 
-Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
-	AttackableGameObject(pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)), rotation(glm::mat4(1.0f)) {
-	this->update = std::make_shared<UnitUpdate>(this->getID(), this->get_health(), pos.x, pos.y, pos.z);
-	this->movement_speed = movement_speed;
-	this->manager = nullptr;
-	this->target = nullptr;
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed) :
+	AttackableGameObject(id, pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed) {
+	initialize();
 }
 
-Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
-	AttackableGameObject(id, pos, owner, attack, def, heal), orientation(glm::vec3(0.0f, 0.0f, 1.0f)), rotation(glm::mat4(1.0f)) {
-	this->update = std::make_shared<UnitUpdate>(id, this->get_health(), pos.x, pos.y, pos.z);
-	this->movement_speed = movement_speed;
-	this->manager = nullptr;
-	this->target = nullptr;
+void Unit::initialize() {
+	glm::vec3 pos = get_position();
+	this->update = std::make_shared<UnitUpdate>(getID(), this->get_health(), pos.x, pos.y, pos.z);
 }
 
 Unit::CommandType Unit::do_logic() {
@@ -171,6 +165,9 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 {
 	// Go back to idle if unit was attacking
 	currentCommand = (currentCommand == UNIT_ATTACK) ? UNIT_IDLE : currentCommand;
+	
+	// TODO: Gain experience (?)
+	player->increase_player_score(opponent->getAttack().getDamage());
 	this->set_laser_shooting(false);
 	// TODO: Gain experience (?)
 }
@@ -198,12 +195,6 @@ void Unit::handle_counter(AttackableGameObject* opponent) {
 	// Unit has been attacked, notify 
 	send_update_to_manager(make_update());
 }
-
-
-void Unit::set_manager(UnitManager* manager) {
-	this->manager = manager;
-}
-
 
 void Unit::send_update_to_manager(std::shared_ptr<UnitUpdate>& update) {
 	if (this->manager != nullptr) {

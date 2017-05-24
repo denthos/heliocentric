@@ -2,6 +2,7 @@
 #include "drawable_planet.h"
 #include "sphere_mesh.h"
 #include "sphere_model.h"
+#include "gui.h"
 #include <glm/gtx/transform.hpp>
 DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship, Shader* unitShader, ParticleSystem* laser, ParticleSystem* explosion) : Unit(unit) {
 	this->toWorld = glm::translate(unit.get_position()) * glm::scale(glm::vec3(0.3f));
@@ -63,4 +64,12 @@ void DrawableUnit::bind_shader(Shader* shader) {
 bool DrawableUnit::do_animation(const Shader & shader, const Camera & camera) const {
 	draw(shader, camera);
 	return !is_exploding;
+}
+
+void DrawableUnit::select(GUI* gui, Client* client) {
+	gui->showUnitUI(this);
+}
+
+void DrawableUnit::unselect(GUI* gui, Client* client) {
+	gui->hideUnitUI();
 }

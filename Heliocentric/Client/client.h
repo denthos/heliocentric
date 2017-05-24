@@ -13,6 +13,7 @@
 #include "slot.h"
 #include "drawable_slot.h"
 #include "player_update.h"
+#include "new_player_info_update.h"
 #include "unit_creation_update.h"
 #include "unit_update.h"
 #include "city_update.h"
@@ -34,6 +35,8 @@
 #include "locked_item.h"
 #include "trade_data.h"
 #include "trade_deal.h"
+#include "selectable.h"
+#include "slot_update.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -50,8 +53,10 @@ public:
 	void update();
 
 	void mouseClickHandler(MouseButton, ScreenPosition);
+	void mouseRightClickHandler(MouseButton, ScreenPosition);
 	
 	void playerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerUpdate>);
+	void newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<NewPlayerInfoUpdate>);
 	void unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitCreationUpdate>);
 	void unitUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitUpdate>);
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
@@ -59,6 +64,13 @@ public:
 	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
 	void tradeDataHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TradeData>);
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
+	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
+
+
+	void createCityForSlot(DrawableSlot*, std::string);
+
+	void setSelection(std::vector<GameObject*>);
+	void createUnitFromCity(DrawableCity* city);
 
 protected:
 	/**** Handlers for ChanneledClient ****/
@@ -74,6 +86,13 @@ private:
 	std::vector<GameObject *> selection;
 	std::string windowTitle;
 	bool init = false;
+	double frameTimer;
+	unsigned long frameCounter;
+	unsigned long lastFrame;
+	bool focused;
+	Octree * octree;
+
+	GameObject* getObjectAtCursorPosition(const ScreenPosition& position);
 
 	KeyboardHandler keyboard_handler;
 	MouseHandler mouse_handler;
@@ -84,7 +103,6 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
 	std::unordered_map<UID, DrawableSlot*> slots;
 	std::unordered_map<UID, std::unique_ptr<Drawable>> dead_objects;
-	Octree octree;
 
 	std::shared_ptr<Player> player;
 
@@ -100,17 +118,17 @@ private:
 	void mouseButtonCallback(int button, int action, int mods);
 	void mouseCursorCallback(double x, double y);
 	void scrollWheelCallback(double x, double y);
+	void focusCallback(int focused);
 
 	void handleCameraSwitch(int);
 	void handleEscapeKey(int);
 	void handleF1Key(int);
 	void handleF2Key(int);
-	void handleF3Key(int);
 	void handleF4Key(int);
-	void handleF5Key(int);
 	void handleF6Key(int);
 	void handleF10Key(int);
 	void handleF11Key(int);
 	void handleF12Key(int);
+
 };
 

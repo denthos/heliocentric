@@ -7,7 +7,6 @@ AttackableGameObject::AttackableGameObject(glm::vec3 position) : GameObject(posi
 AttackableGameObject::AttackableGameObject(glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
 	GameObject(position, player),  attack(*attack), combatDefense(def),  health(heal) {};
 
-
 AttackableGameObject::AttackableGameObject(UID id, glm::vec3 position, Player* player, Attack* attack, int def, int heal) : 
 	GameObject(id, position, player), attack(*attack), combatDefense(def), health(heal) {};
 

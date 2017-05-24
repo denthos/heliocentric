@@ -3,6 +3,7 @@
 #include "unit.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "instant_laser_attack.h"
+#include "unit_manager.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -12,7 +13,7 @@ namespace Test
 	class TestUnit : public Unit {
 
 	public:
-		TestUnit(UID id, glm::vec3 position) : Unit(id, position, NULL, new InstantLaserAttack(), 100, 100) {
+		TestUnit(UID id, glm::vec3 position, UnitManager* manager) : Unit(id, position, NULL, new InstantLaserAttack(), manager, 100, 100) {
 			this->movement_speed = 200;
 		}
 
@@ -37,9 +38,11 @@ namespace Test
 		Test that setting target puts unit in attack mode.
 		*/
 		TEST_METHOD(set_combat_target_test) {
+			UnitManager manager;
+
 			/* Setup */
-			TestUnit* unit_1 = new TestUnit(100, glm::vec3(2.0f));
-			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f));
+			TestUnit* unit_1 = new TestUnit(100, glm::vec3(2.0f), &manager);
+			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f), &manager);
 
 			/* Combat */
 			unit_1->set_combat_target(unit_2);
@@ -52,11 +55,12 @@ namespace Test
 		Test that basic combat between units.
 		*/
 		TEST_METHOD(basic_unit_attack_test) {
+			UnitManager manager;
 			/* Setup */
 			Player player_1("Player 1", 102);
 			Player player_2("Player 2", 203);
-			TestUnit* unit_1 = new TestUnit(100, glm::vec3(2.0f));
-			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f));
+			TestUnit* unit_1 = new TestUnit(100, glm::vec3(2.0f), &manager);
+			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f), &manager);
 			player_1.acquire_object(unit_1);
 			player_2.acquire_object(unit_2);
 
@@ -72,11 +76,13 @@ namespace Test
 		Test that attacking unit gets closer to target if it's out of range.
 		*/
 		TEST_METHOD(out_of_range_test) {
+			UnitManager manager;
+
 			/* Setup */
 			Player player_1("Player 1", 102);
 			Player player_2("Player 2", 203);
-			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f));
-			TestUnit* unit_2 = new TestUnit(101, glm::vec3(250.0f));
+			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f), &manager);
+			TestUnit* unit_2 = new TestUnit(101, glm::vec3(250.0f), &manager);
 			player_1.acquire_object(unit_1);
 			player_2.acquire_object(unit_2);
 
@@ -100,11 +106,13 @@ namespace Test
 		TODO: Player::get_unit(id) does not work with subclass of Unit
 		*/
 		TEST_METHOD(unit_death_test) {
+			UnitManager manager;
+
 			/* Setup */
 			Player player_1("Player 1", 102);
 			Player player_2("Player 2", 203);
-			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f));
-			TestUnit* unit_2 = new TestUnit(101, glm::vec3(0.0f));
+			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f), &manager);
+			TestUnit* unit_2 = new TestUnit(101, glm::vec3(0.0f), &manager);
 
 			player_1.acquire_object(unit_1);
 			player_2.acquire_object(unit_2);

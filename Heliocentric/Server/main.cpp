@@ -9,7 +9,8 @@ int main() {
 	initializeChannels();
 
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
-	GameServer server(30, port, 5, 10);
+	int resource_update_interval = Lib::INIParser::getInstance().get<int>("ResourceUpdateIntervalSeconds");
+	GameServer server(30, port, 5, 10, resource_update_interval);
 	LOG_DEBUG("Starting server on port ", 9876);
 
 

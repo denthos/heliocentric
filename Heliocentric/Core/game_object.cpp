@@ -14,6 +14,10 @@ void GameObject::set_player(Player* assigned_player) {
 	player = assigned_player;
 }
 
+bool GameObject::has_player() {
+	return (player != NULL);
+}
+
 glm::vec3 GameObject::get_position() const {
 	return this->position;
 }

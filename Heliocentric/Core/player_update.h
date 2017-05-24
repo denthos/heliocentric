@@ -10,16 +10,16 @@
 class PlayerUpdate {
 public:
 	UID id;
-	char player_name[PLAYER_NAME_MAX_SIZE];
 
-	int gold_change; // just support gold for now
+	Resources::Type resource_type;
+	int new_resource_value; 
 
 	/**
 	Constructor for a player update.
-	@param id UID of the planet to be updated.
-	@param player_name Name of the player to be updated.
+	@param id UID of the player to be updated.
+	@param type The type of resource to be updated
+	@param amount The new amount of the resource
 	*/
-	PlayerUpdate(UID, const char*);
-	PlayerUpdate(UID, Resources::Type, int);
+	PlayerUpdate(UID id, Resources::Type type, int amount);
 	void apply(Player* player);
 };

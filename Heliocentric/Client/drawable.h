@@ -2,7 +2,6 @@
 
 #include "model.h"
 #include "bounding_box.h"
-#include <memory>
 
 class Drawable {
 public:

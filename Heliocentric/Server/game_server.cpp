@@ -7,9 +7,12 @@
 #include "player_id_confirmation.h"
 #include "city_creation_update.h"
 #include "instant_laser_attack.h"
+#include "new_player_info_update.h"
 
-GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout) :
-	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), game_paused(false) {
+GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout, int resource_update_interval) :
+	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), server_paused(false), resource_update_interval_seconds(resource_update_interval) {
+
+	this->game = new GameSession();
 
 	for (auto& planet_iter : this->universe.get_planets()) {
 		for (auto& slot_iter : planet_iter->get_slots_const()) {
@@ -17,7 +20,7 @@ GameServer::GameServer(int tick_duration, std::string port, int listen_queue, in
 		}
 	}
 
-	game_running = true;
+	server_running = true;
 	this->tick_duration = tick_duration;
 	this->subscribeToChannels();
 }
@@ -31,6 +34,12 @@ GameServer::~GameServer() {
 	for (auto& connection : connections.get().first) {
 		connection.second.reset();
 	}
+}
+
+
+void GameServer::addFunctionToProcessQueue(std::function<void()> work) {
+	auto& process_queue = Lib::key_acquire(this->update_process_queue);
+	process_queue.get().push(work);
 }
 
 void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) {
@@ -142,7 +151,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	info->apply(player);
 
 	/* OK. We've applied the information to the player. Now we'd like to send this information to all other players */
-	std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(player->getID(), info->name);
+	std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(player->getID(), info->name);
 
 	LOG_DEBUG("Sending information about new player to all others..");
 	this->addUpdateToSendQueue(player_update);
@@ -154,23 +163,69 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 			continue;
 		}
 
-		std::shared_ptr<PlayerUpdate> player_update = std::make_shared<PlayerUpdate>(other_player_it.first, other_player_it.second->get_name().c_str());
+		std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(other_player_it.first, other_player_it.second->get_name());
 		this->addUpdateToSendQueue(player_update, { sender });
 	}
 }
 
 void GameServer::performUpdates() {
-	if (this->game_paused) {
+	if (this->server_paused) {
 		return;
+	}
+
+	/* Perform queued updates */
+	{
+		auto& process_queue = Lib::key_acquire(this->update_process_queue);
+		while (!process_queue.get().empty()) {
+			process_queue.get().front()();
+			process_queue.get().pop();
+		}
 	}
 
 	/* First, update the universe */
 	this->universe.doLogic();
-	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
 
 	/* update the unit manager */
 	this->unit_manager.doLogic();
+
+	/* update the city manager */
+	this->city_manager.doLogic();
+
+	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
 	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
+	this->addUpdateToSendQueue(city_manager.get_updates().begin(), city_manager.get_updates().end());
+
+	/* Give players resources based on their owned cities */
+	std::vector<std::shared_ptr<PlayerUpdate>> player_updates;
+	std::vector<std::shared_ptr<SlotUpdate>> slot_updates;
+	if (updatePlayerResources(player_updates, slot_updates)) {
+		this->addUpdateToSendQueue(player_updates.begin(), player_updates.end());
+		this->addUpdateToSendQueue(slot_updates.begin(), slot_updates.end());
+	}
+
+}
+
+bool GameServer::updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates) {
+	int update_interval_ticks = (this->resource_update_interval_seconds * 1000) / tick_duration;
+
+	if (++lastResourceUpdateTick < update_interval_ticks) {
+		return false;
+	}
+
+	for (auto& player_pair : players) {
+		for (auto& city_pair : player_pair.second->getOwnedObjects<City>()) {
+			City* city = dynamic_cast<City*>(city_pair.second);
+			if (!city) {
+				LOG_ERR("Player has city that isn't a city...");
+				continue;
+			}
+
+			city->extractResourcesFromSlotAndCreateUpdates(player_updates, slot_updates);
+		}
+	}
+
+	lastResourceUpdateTick = 0;
+	return true;
 }
 
 void GameServer::sendUpdates() {
@@ -199,6 +254,45 @@ void GameServer::sendUpdates() {
 	}
 }
 
+void GameServer::checkVictory() {
+	/* The order of these conditions determines priority of victory conditions. */
+	if (game->domination_victory) {
+		return;
+	}
+
+	if (game->science_victory) {
+		return;
+	}
+
+	if (game->economic_victory) {
+		return;
+	}
+
+	if (game->time_victory) {
+		if (game->time_limit_reached()) {
+			game->game_running = false;
+
+			/* Player with the highest player score wins. */
+			float highest_score = 0.0f;
+			UID winner_candidate = INVALID_ID;
+			for (auto& it : players) {
+				if (it.second->get_player_score() > highest_score) {
+					highest_score = it.second->get_player_score();
+					winner_candidate = it.second->getID();
+				}
+			}
+
+			if (winner_candidate == INVALID_ID) {
+				LOG_DEBUG("No player connected. No one wins.");
+				return;
+			}
+
+			LOG_INFO("Player with UID ", winner_candidate, " has won the game!");
+			return;
+		}
+	}
+}
+
 
 void GameServer::run() {
 	this->open();
@@ -207,12 +301,20 @@ void GameServer::run() {
 	std::clock_t tick_start_time;
 	std::clock_t tick_elapsed_time;
 
-	while (game_running) {
+	while (server_running) {
+		/* Temporary solution to stop server from terminating after game ends */
+		if (!game->game_running) {
+			continue;
+		}
+
 		tick_start_time = std::clock();
+
+		game->increment_time(tick_duration);
 
 		// Add server logic
 		performUpdates();
 		sendUpdates();
+		checkVictory();
 
 		tick_elapsed_time = std::clock() - tick_start_time;
 		if (tick_elapsed_time > tick_duration) {
@@ -224,8 +326,8 @@ void GameServer::run() {
 	LOG_DEBUG("Server exited safely");
 }
 
-void GameServer::end_game() {
-	game_running = false;
+void GameServer::shut_down() {
+	server_running = false;
 	this->close();
 }
 
@@ -234,7 +336,7 @@ void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std
 		auto connections = Lib::key_acquire(this->connections);
 		LOG_DEBUG("Game paused by connection ", connections.get().second[sender]);
 	}
-	this->game_paused = !this->game_paused;
+	this->server_paused = !this->server_paused;
 }
 
 void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SettleCityCommand> command) {
@@ -248,13 +350,13 @@ void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sen
 		LOG_ERR("Slot not found");
 		return;
 	}
-
-	// TODO: Create the city from the player's current technologies
-	City* new_city = new City(owning_player, new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second);
-	slot_iter->second->attachCity(new_city);
+	else if (slot_iter->second->hasCity()) {
+		LOG_ERR("Slot with UID <", slot_iter->first, "> is occupied.");
+		return;
+	}
 
 	/* Bundle and send the update */
-	auto city_creation_update = std::make_shared<CityCreationUpdate>(owning_player->getID(), slot_iter->first, new_city->getID());
+	std::shared_ptr<CityCreationUpdate> city_creation_update = city_manager.add_city(owning_player, slot_iter->second, command->city_name);
 	this->addUpdateToSendQueue(city_creation_update);
 }
 
@@ -268,8 +370,10 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			Player* owner = this->extractPlayerFromConnection(sender);
 
-			std::shared_ptr<UnitCreationUpdate>update = unit_manager.add_unit(command, owner);
-			this->addUpdateToSendQueue(update);
+			this->addFunctionToProcessQueue([this, command, owner]() {
+				std::shared_ptr<UnitCreationUpdate> update = unit_manager.add_unit(command, owner);
+				this->addUpdateToSendQueue(update);
+			});
 			break;
 		}
 		case PlayerCommand::CMD_TRADE: {
@@ -313,12 +417,16 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	switch (command->command_type) {
 		case UnitCommand::CMD_ATTACK:
 			LOG_DEBUG("Unit command type: CMD_ATTACK");
-			unit_manager.do_attack(command.get()->initiator, command.get()->target);
+			this->addFunctionToProcessQueue([this, command]() {
+				unit_manager.do_attack(command.get()->initiator, command.get()->target);
+			});
 			break;
 		case UnitCommand::CMD_MOVE:
 			LOG_DEBUG("Unit command type: CMD_MOVE");
 			// TODO: Delegate to UnitManager
-			unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
+			this->addFunctionToProcessQueue([this, command]() {
+				unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
+			});
 			break;
 		default:
 			LOG_ERR("Invalid unit command.");

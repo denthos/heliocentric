@@ -21,6 +21,7 @@
 FreeCamera::FreeCamera(KeyboardHandler & keyboardHandler, MouseHandler & mouseHandler) {
 	loadSettings(keyboardHandler);
 	yaw = -90.0f;
+	pitch = 0.0f;
 	mouseHandler.registerMouseCursorHandler(std::bind(&FreeCamera::handleCursorInput, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	mouseHandler.registerMouseWheelHandler(std::bind(&FreeCamera::handleWheelInput, this, std::placeholders::_1));
 }

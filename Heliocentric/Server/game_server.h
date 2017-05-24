@@ -7,6 +7,7 @@
 #include <ctime>
 #include <initializer_list>
 
+#include "game_session.h"
 #include "logging.h"
 #include "player.h"
 #include "identifiable.h"
@@ -18,6 +19,8 @@
 #include "game_object_update.h"
 #include "universe.h"
 #include "unit_manager.h"
+#include "city_manager.h"
+#include "slot_update.h"
 
 #include "debug_pause.h"
 #include "player_command.h"
@@ -47,7 +50,12 @@ private:
 		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>>> connections;
 
 	Universe universe;
+
 	UnitManager unit_manager;
+	CityManager city_manager;
+
+	bool updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates);
+	int lastResourceUpdateTick = 0;
 
 	std::unordered_map<UID, std::unique_ptr<Player>> players;
 	std::unordered_map<UID, Slot*> slots;
@@ -58,7 +66,10 @@ private:
 		std::vector<SunNet::ChanneledSocketConnection_p> intended_recipients;
 	};
 
+
 	Lib::Lock<std::queue<UpdateToSend>> updates_to_send;
+	Lib::Lock<std::queue<std::function<void()>>> update_process_queue;
+	void addFunctionToProcessQueue(std::function<void()> work);
 
 	template <typename TUpdate>
 	void sendUpdateToConnection(std::shared_ptr<TUpdate> update, SunNet::ChanneledSocketConnection_p connection) {
@@ -110,9 +121,14 @@ private:
 	void performUpdates();
 	void sendUpdates();
 
-	std::atomic<bool> game_paused;
-	std::atomic<bool> game_running;
-	int tick_duration;
+	/* Checks victory condition every server tick */
+	void checkVictory();
+
+	GameSession* game; // Keeps track of all information about current game settings. Deconstructed after game ends.
+	std::atomic<bool> server_paused;
+	std::atomic<bool> server_running;
+	int tick_duration; // Duration of each tick in ms.
+	int resource_update_interval_seconds;
 
 	Player* extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p, bool retry=false);
 	void handleReceivePlayerClientToServerTransfer(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerClientToServerTransfer>);
@@ -136,9 +152,9 @@ protected:
 	virtual void handle_poll_timeout() {}
 
 public:
-	GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout);
+	GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout, int resource_update_interval_seconds);
 	~GameServer();
 
 	void run();
-	void end_game();
+	void shut_down();
 };

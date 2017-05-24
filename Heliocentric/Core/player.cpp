@@ -16,16 +16,19 @@ Player::Player(std::string player_name, UID id) : Identifiable(id), name(player_
 }
 
 void Player::initialize() {
+	player_score = 10.0f;
+
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
 	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
 	owned_objects[std::type_index(typeid(City))] = std::unordered_map<unsigned int, GameObject*>();
 	owned_objects[std::type_index(typeid(Slot))] = std::unordered_map<unsigned int, GameObject*>();
 
-	owned_resources[Resources::ALUMINUM] = 0.0f;
-	owned_resources[Resources::GOLD] = 100.0f; // just let the player have 100 gold for now
-	owned_resources[Resources::NANOMATERIAL] = 0.0f;
-	owned_resources[Resources::TITANIUM] = 0.0f;
-	owned_resources[Resources::URANIUM] = 0.0f;
+	/* Let each player have 100 of each type of resources for now */
+	owned_resources[Resources::ALUMINUM] = 100.0f;
+	owned_resources[Resources::GOLD] = 100.0f;
+	owned_resources[Resources::NANOMATERIAL] = 100.0f;
+	owned_resources[Resources::TITANIUM] = 100.0f;
+	owned_resources[Resources::URANIUM] = 100.0f;
 }
 
 std::string Player::get_name() {
@@ -34,6 +37,18 @@ std::string Player::get_name() {
 
 void Player::set_name(std::string new_name) {
 	name = new_name;
+}
+
+float Player::get_player_score() {
+	return player_score;
+}
+
+void Player::increase_player_score(float delta) {
+	player_score += delta;
+}
+
+void Player::decrease_player_score(float delta) {
+	player_score -= delta;
 }
 
 void Player::acquire_object(GameObject* object) {
@@ -57,16 +72,20 @@ void Player::pop() {
 }
 
 std::unordered_map<unsigned int, GameObject*> Player::get_units() {
-	return owned_objects[std::type_index(typeid(Unit))];
+	return getOwnedObjects<Unit>();
 }
 
 GameObject* Player::get_unit(UID id) {
 	return owned_objects[std::type_index(typeid(Unit))][id];
 }
 
-float Player::get_resource_amount(Resources::Type resource_type) {
+int Player::get_resource_amount(Resources::Type resource_type) {
 	/* Assuming the parameter is a valid resource type, because it really should be. */
 	return owned_resources[resource_type];
+}
+
+void Player::change_resource_amount(Resources::Type type, int delta) {
+	owned_resources[type] += delta;
 }
 
 void Player::receive_trade_deal(std::shared_ptr<TradeDeal> deal) {
