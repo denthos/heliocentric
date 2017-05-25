@@ -33,7 +33,7 @@ namespace Lib {
 		do {
 			const std::string file_name = file_data.cFileName;
 			const std::string full_file_path = directory + "/" + file_name;
-			const bool is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+			const int is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 
 			/* Windows includes "." and ".." entries. Skip them. */
 			if (file_name[0] == '.') {
