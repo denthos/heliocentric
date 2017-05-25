@@ -131,6 +131,32 @@ bool Octree::intersect(const Ray & ray, Collision & collision, Drawable *& drawa
 	return success;
 }
 
+bool Octree::checkCollision(Drawable * item)
+{
+	bool success = false;
+
+	if (this->hasChildren) {
+		for (int i = 0; i < 8; ++i) {
+			if (children[i]) {
+				if (children[i]->checkCollision(item)) {
+					success = true;
+				}
+					
+				
+			}
+		}
+	}
+
+	// check objects
+	for (auto & object : objects) {
+		if (item->getBoundingBox().collidesWith(object->getBoundingBox())) {
+			success = true;
+		}
+	}
+
+	return success;
+}
+
 void Octree::update() {
 	if (objects.size() <= 1)
 		return;

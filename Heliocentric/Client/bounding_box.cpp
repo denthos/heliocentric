@@ -79,3 +79,10 @@ bool BoundingBox::intersect(const Ray & ray, Collision & collision) const {
 	}
 	return false;
 }
+
+bool BoundingBox::collidesWith(BoundingBox other)
+{
+	return (min.x <= other.max.x && max.x >= other.min.x) && 
+		(min.y <= other.max.y && max.y >= other.min.y) && 
+		(min.z <= other.max.z && max.z >= other.min.z) && (min != other.min && max != other.max); //CHANGE because won't detect other units
+}

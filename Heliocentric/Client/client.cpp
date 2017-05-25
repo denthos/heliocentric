@@ -403,9 +403,6 @@ void Client::display() {
 		octree->draw(*textureShader, *cameras[selectedCamera]);
 		delete delOctree;
 
-		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
-		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
-
 		// blur the things that glow
 		int blurs = 5; //TODO init to number of blur iterations
 		bool blurX = true;
@@ -499,6 +496,16 @@ void Client::update() {
 		if (unit_it == units.end()) {
 			continue;
 		}
+
+		
+		if (octree->checkCollision(units[unit_id].get())) {
+			glm::vec3 new_pos = units[unit_id]->get_position() + glm::vec3(0.0f,10.0f ,0.0f);
+			units[unit_id]->update_position(new_pos);
+			LOG_DEBUG("FLYING AWAY");
+			UnitCommand move_command(units[unit_id]->getID(), new_pos.x, new_pos.y, new_pos.z);
+			channeled_send(&move_command); //permanently changes new destination of the unit
+		}
+		/*
 		unit_direction = units[unit_id]->get_destination() - units[unit_id]->get_position();
 		unit_bbox = units[unit_id]->getBoundingBox();
 		unit_max = unit_bbox.max;
@@ -506,7 +513,7 @@ void Client::update() {
 		float mid_y = (unit_max.y + unit_min.y) / 2.0f;
 		float mid_x = (unit_max.x + unit_min.x) / 2.0f;
 
-		lookAhead_origin = units[unit_id]->get_position() + glm::normalize(unit_direction) *180.0f;
+		lookAhead_origin = units[unit_id]->get_position() + glm::normalize(unit_direction) *100.0f;
 
 
 		Ray lookAhead = Ray(lookAhead_origin, unit_direction);
@@ -522,11 +529,13 @@ void Client::update() {
 		float closestDrawable_Dist = glm::distance(closestDrawable_pos, lookAhead_origin);
 		//print pos before
 		LOG_DEBUG("pos before: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
-		//
-		if ( closestDrawable_Dist < 250.0f) {
+		//should change this to bbox dimensions
+
+		if ( closestDrawable_Dist < 50.0f) {
 			LOG_DEBUG("avoiding collisions");
 			//calculate the avoidance force
-			glm::vec3 avoidance_force = glm::normalize(units[unit_id]->get_position() - closestDrawable_pos) * 150.0f  ;
+			glm::vec3 lookAheadTip = lookAhead_origin + glm::normalize(unit_direction) * 50.0f;
+			glm::vec3 avoidance_force = glm::normalize( lookAheadTip - closestDrawable_pos);
 			glm::vec3 new_pos = units[unit_id]->get_position() + avoidance_force;
 			units[unit_id]->update_position(new_pos);
 
@@ -538,7 +547,7 @@ void Client::update() {
 
 		}
 
-
+		*/
 	}
 
 	
@@ -863,7 +872,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), nullptr, update->def, update->health),
-		spaceship
+		spaceship //MODEL OF THE UNIT
 	);
 
 	player_it->second->acquire_object(newUnit.get());

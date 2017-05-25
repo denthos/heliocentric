@@ -16,6 +16,9 @@ public:
 	float destination_y;
 	float destination_z;
 
+	//ADD floats for force
+	//default to 0 in constructor. add these values to constructor too
+
 	/**
 	Constructor for a CMD_ATTACK type command.
 	Currently only this command takes two UID's, so no command type needs to be passed in as a parameter.
@@ -31,5 +34,5 @@ public:
 	@param destination_y y-axis of the destination that the initiator will move to.
 	@param destination_z z-axis of the destination that the initiator will move to.
 	*/
-	UnitCommand(UID, float, float, float);
+	UnitCommand(UID, float, float, float); //add three floats for default
 };

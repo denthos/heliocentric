@@ -96,7 +96,7 @@ glm::vec3 Unit::do_move() {
 	// Move towards destination.
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));
-		position += glm::normalize(destination - position) * speed;
+		position += glm::normalize(destination - position) * speed;// +force;
 		send_update_to_manager(make_update());
 	}
 	else {

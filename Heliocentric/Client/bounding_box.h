@@ -12,4 +12,5 @@ struct BoundingBox {
 	void expand(const glm::vec3 &);
 	void expand(const BoundingBox &);
 	bool intersect(const Ray &, Collision & collision = Collision()) const;
+	bool collidesWith(BoundingBox other);
 };
