@@ -57,8 +57,8 @@ namespace Test
 		TEST_METHOD(basic_unit_attack_test) {
 			UnitManager manager;
 			/* Setup */
-			Player player_1("Player 1", 102);
-			Player player_2("Player 2", 203);
+			Player player_1("Player 1", 102, PlayerColor::FIRST);
+			Player player_2("Player 2", 203, PlayerColor::FIRST);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(2.0f), &manager);
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f), &manager);
 			player_1.acquire_object(unit_1);
@@ -79,8 +79,8 @@ namespace Test
 			UnitManager manager;
 
 			/* Setup */
-			Player player_1("Player 1", 102);
-			Player player_2("Player 2", 203);
+			Player player_1("Player 1", 102, PlayerColor::FIRST);
+			Player player_2("Player 2", 203, PlayerColor::FIRST);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f), &manager);
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(250.0f), &manager);
 			player_1.acquire_object(unit_1);
@@ -109,8 +109,8 @@ namespace Test
 			UnitManager manager;
 
 			/* Setup */
-			Player player_1("Player 1", 102);
-			Player player_2("Player 2", 203);
+			Player player_1("Player 1", 102, PlayerColor::FIRST);
+			Player player_2("Player 2", 203, PlayerColor::FIRST);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f), &manager);
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(0.0f), &manager);
 

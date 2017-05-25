@@ -781,8 +781,8 @@ void Client::handleF12Key(int key) {
 void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
 	auto& player_it = players.find(update->player_id);
 	if (player_it == players.end()) {
-		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
-		players[update->player_id] = std::make_shared<Player>(update->name, update->player_id);
+		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, " COLOR: ", update->color);
+		players[update->player_id] = std::make_shared<Player>(update->name, update->player_id, update->color);
 	}
 }
 
@@ -837,7 +837,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
 	LOG_DEBUG("Received Player ID confirmation -- I am player with id ", update->id);
 	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
-	this->player = std::make_shared<Player>(player_name, update->id);
+	this->player = std::make_shared<Player>(player_name, update->id, update->color);
 	players[update->id] = this->player;
 	gui->setPlayer(this->player);
 

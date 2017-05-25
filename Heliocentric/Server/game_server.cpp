@@ -63,7 +63,14 @@ void GameServer::handle_channeledclient_error(SunNet::ChanneledSocketConnection_
 void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnection_p client) {
 	/* A new client is connected! Assign them an ID */
 	LOG_DEBUG("A new client connected.");
-	std::unique_ptr<Player> player = std::make_unique<Player>("PLAYER_NAME");
+	std::unique_ptr<Player> player = std::make_unique<Player>("PLAYER_NAME", this->nextPlayerColor);
+
+	int nextColor = static_cast<int>(this->nextPlayerColor) + 1;
+	if (nextColor >= PlayerColor::NUM_COLORS) {
+		LOG_ERR("NO MORE COLORS AVAILABLE!");
+	}
+
+	this->nextPlayerColor = static_cast<PlayerColor::Color>(nextColor);
 
 	{
 		auto connections = Lib::key_acquire(this->connections);
@@ -78,6 +85,7 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	*/
 	std::shared_ptr<PlayerIDConfirmation> id_confirm = std::make_shared<PlayerIDConfirmation>();
 	id_confirm->id = player->getID();
+	id_confirm->color = player->getColor();
 
 	LOG_DEBUG("Assigned id ", player->getID(), " to new player.. sending confirmation");
 	this->addUpdateToSendQueue(id_confirm, { client });
@@ -151,7 +159,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 	info->apply(player);
 
 	/* OK. We've applied the information to the player. Now we'd like to send this information to all other players */
-	std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(player->getID(), info->name);
+	std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(player->getID(), info->name, player->getColor());
 
 	LOG_DEBUG("Sending information about new player to all others..");
 	this->addUpdateToSendQueue(player_update);
@@ -163,7 +171,7 @@ void GameServer::handleReceivePlayerClientToServerTransfer(
 			continue;
 		}
 
-		std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(other_player_it.first, other_player_it.second->get_name());
+		std::shared_ptr<NewPlayerInfoUpdate> player_update = std::make_shared<NewPlayerInfoUpdate>(other_player_it.first, other_player_it.second->get_name(), other_player_it.second->getColor());
 		this->addUpdateToSendQueue(player_update, { sender });
 	}
 }

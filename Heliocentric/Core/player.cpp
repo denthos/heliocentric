@@ -7,11 +7,11 @@
 #include <iostream>
 #include <string>
 
-Player::Player(std::string player_name) : Identifiable(), name(player_name) {
+Player::Player(std::string player_name, PlayerColor::Color color) : Identifiable(), name(player_name), color(color) {
 	initialize();
 }
 
-Player::Player(std::string player_name, UID id) : Identifiable(id), name(player_name) {
+Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Identifiable(id), name(player_name), color(color) {
 	initialize();
 }
 
@@ -29,6 +29,15 @@ void Player::initialize() {
 	owned_resources[Resources::NANOMATERIAL] = 100.0f;
 	owned_resources[Resources::TITANIUM] = 100.0f;
 	owned_resources[Resources::URANIUM] = 100.0f;
+}
+
+
+PlayerColor::Color Player::getColor() const {
+	return this->color;
+}
+
+void Player::setColor(PlayerColor::Color color) {
+	this->color = color;
 }
 
 std::string Player::get_name() {

@@ -21,6 +21,7 @@
 #include "unit_manager.h"
 #include "city_manager.h"
 #include "slot_update.h"
+#include "player_color.h"
 
 #include "debug_pause.h"
 #include "player_command.h"
@@ -53,6 +54,8 @@ private:
 
 	UnitManager unit_manager;
 	CityManager city_manager;
+
+	PlayerColor::Color nextPlayerColor = PlayerColor::FIRST;
 
 	bool updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates);
 	int lastResourceUpdateTick = 0;
