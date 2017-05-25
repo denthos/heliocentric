@@ -506,7 +506,7 @@ void Client::update() {
 		float mid_y = (unit_max.y + unit_min.y) / 2.0f;
 		float mid_x = (unit_max.x + unit_min.x) / 2.0f;
 
-		lookAhead_origin = glm::vec3(mid_x, mid_y, unit_max.z);
+		lookAhead_origin = units[unit_id]->get_position() + glm::normalize(unit_direction) *180.0f;
 
 
 		Ray lookAhead = Ray(lookAhead_origin, unit_direction);
@@ -522,11 +522,11 @@ void Client::update() {
 		float closestDrawable_Dist = glm::distance(closestDrawable_pos, lookAhead_origin);
 		//print pos before
 		LOG_DEBUG("pos before: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
-		//closestDrawable_pos != units[unit_id]->get_destination() && 
-		if (closestDrawable_Dist < 50.0f) {
+		//
+		if ( closestDrawable_Dist < 250.0f) {
 			LOG_DEBUG("avoiding collisions");
 			//calculate the avoidance force
-			glm::vec3 avoidance_force = glm::vec3(0.0, 500.0f, 0.0);
+			glm::vec3 avoidance_force = glm::normalize(units[unit_id]->get_position() - closestDrawable_pos) * 150.0f  ;
 			glm::vec3 new_pos = units[unit_id]->get_position() + avoidance_force;
 			units[unit_id]->update_position(new_pos);
 
