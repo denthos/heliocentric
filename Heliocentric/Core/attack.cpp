@@ -49,7 +49,7 @@ void Attack::doProjectileTravel() {
 
 void Attack::doDamage(AttackableGameObject* target) {
 	/* Let's apply instantaneous damage */
-	target->take_damage((int) damage);
+	target->take_damage(damage);
 	changeState(COOLDOWN);
 }
 
