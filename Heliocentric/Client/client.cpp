@@ -503,7 +503,7 @@ void Client::update() {
 			units[unit_id]->update_position(new_pos);
 			LOG_DEBUG("FLYING AWAY");
 			UnitCommand move_command(units[unit_id]->getID(), new_pos.x, new_pos.y, new_pos.z);
-			channeled_send(&move_command); //permanently changes new destination of the unit
+			channeled_send(&move_command);
 		}
 		/*
 		unit_direction = units[unit_id]->get_destination() - units[unit_id]->get_position();
