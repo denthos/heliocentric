@@ -198,7 +198,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
-	diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
+	//diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
@@ -403,7 +404,7 @@ void Client::display() {
 
 		Octree * delOctree = octree;
 		octree = newOctree;
-		octree->draw(*textureShader, *cameras[selectedCamera]);
+		octree->draw(*diffuseShader, *cameras[selectedCamera]);
 		delete delOctree;
 
 		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
