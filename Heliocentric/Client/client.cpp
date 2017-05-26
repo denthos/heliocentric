@@ -79,8 +79,8 @@ GLuint FBO; //frame buffer for offscreen rendering
 GLuint gaussianFBO[COLOR_BUFFERS];
 GLuint gaussian_color_buff[COLOR_BUFFERS];
 
-Model * spaceship;
-Model * rocket;
+Model* spaceship_white, * spaceship_red, * spaceship_blue,
+* spaceship_green, * spaceship_yellow, * spaceship_orange;
 //don't forget to clean up afterwards
 
 //multiple render targets to specify more than one frag shader output
@@ -216,8 +216,11 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	}
 
 	// LOAD MODEL, IMPORTANT
-	spaceship = Model::getInstance(ROCKET_MODEL);
-	rocket = Model::getInstance(ROCKET_MODEL);
+	spaceship_white = Model::getInstance(ROCKET_MODEL);
+	spaceship_red = Model::getInstance("Models/bear.obj");
+	spaceship_blue = Model::getInstance("Models/nanosuit/nanosuit.obj");
+	spaceship_green = Model::getInstance("Models/Kameri explorer/Kameri explorer flying.obj");
+	
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -801,9 +804,36 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	auto& player_it = players.find(update->player_id);
 	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
 
+	Model * shipModel; //the one that will be assigned to unit
+	PlayerColor::Color player_color = player_it->second->getColor();
+
+	switch (player_color) {
+	case PlayerColor::WHITE:
+		shipModel = spaceship_white;
+		break;
+	case PlayerColor::RED:
+		shipModel = spaceship_red;
+		break;
+	case PlayerColor::BLUE:
+		shipModel = spaceship_blue;
+		break;
+	case PlayerColor::GREEN:
+		shipModel = spaceship_green;
+		break;
+	case PlayerColor::YELLOW:
+		shipModel = spaceship_green;
+		break;
+	case PlayerColor::ORANGE:
+		shipModel = spaceship_green;
+		break;
+	default:
+		shipModel = spaceship_white;
+		break;
+	}
+
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), nullptr, update->def, update->health),
-		spaceship
+		shipModel
 	);
 
 	player_it->second->acquire_object(newUnit.get());
