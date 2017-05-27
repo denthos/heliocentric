@@ -3,6 +3,7 @@
 #include "resources.h"
 #include "trade_deal.h"
 #include "tech_tree.h"
+#include "player_color.h"
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -21,11 +22,14 @@ class Player : public Identifiable {
 public:
 	friend PlayerUpdate;
 	friend NewPlayerInfoUpdate;
-	Player(std::string player_name);
-	Player(std::string player_name, UID id);
+	Player(std::string player_name, PlayerColor::Color color);
+	Player(std::string player_name, UID id, PlayerColor::Color color);
 
 	std::string get_name();
 	void set_name(std::string new_name);
+
+	PlayerColor::Color getColor() const;
+	void setColor(PlayerColor::Color);
 
 	float get_player_score();
 	void increase_player_score(float);
@@ -66,6 +70,7 @@ private:
 	std::string name;
 	float player_score;
 	TechTree tech_tree;
+	PlayerColor::Color color;
   
 	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns

@@ -173,6 +173,9 @@
     <ClInclude Include="new_player_info_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
+    <ClInclude Include="player_color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -287,7 +290,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="city_manager.cpp">
-	    <Filter>Source Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tech_tree.cpp">
       <Filter>Source Files</Filter>

@@ -60,6 +60,7 @@
     <ClInclude Include="game_object_update.h" />
     <ClInclude Include="instant_laser_attack.h" />
     <ClInclude Include="new_player_info_update.h" />
+    <ClInclude Include="player_color.h" />
     <ClInclude Include="settle_city_command.h" />
     <ClInclude Include="resources.h" />
     <ClInclude Include="slot_update.h" />
