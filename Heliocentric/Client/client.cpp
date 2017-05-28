@@ -676,9 +676,9 @@ void Client::handleF2Key(int key) {
 }
 
 
-void Client::createUnitFromCity(DrawableCity* city) {
+void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
 	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
-	PlayerCommand command(pos.x, pos.y, pos.z); 
+	PlayerCommand command(pos.x, pos.y, pos.z, unit_type->getIdentifier());
 
 	this->channeled_send(&command);
 }
@@ -802,7 +802,8 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
 
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
-		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), nullptr, update->def, update->health),
+		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(),
+			new InstantLaserAttack(), nullptr, update->def, update->health, 1.0f, UnitType::getByIdentifier(update->type)),
 		spaceship
 	);
 

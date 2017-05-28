@@ -5,6 +5,7 @@
 #pragma once
 #include "lib.h"
 #include "attackable_game_object.h"
+#include "unit_type.h"
 
 #include <memory>
 
@@ -31,7 +32,7 @@ public:
 	@param heal Health stat of this unit.
 	@param movement_speed Movement speed of this unit.
 	*/
-	Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed = 1.0f);
+	Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type);
 
 	/**
 	Unit constructor with a specified UID. Essentially creates a "copy" of this
@@ -45,7 +46,7 @@ public:
 	@param heal Health stat of this unit.
 	@param movement_speed Movement speed of this unit.
 	*/
-	Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed = 1.0f);
+	Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type);
   
 	/** 
 	Perform logic based on command. Called continuously by server to update current state 
@@ -129,6 +130,7 @@ protected:
 	// TODO: Change these to smart pointers.
 	AttackableGameObject* target;
 	UnitManager* manager;
+	const UnitType* type;
 
 	void initialize();
 };

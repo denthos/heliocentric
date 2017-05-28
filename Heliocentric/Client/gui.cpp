@@ -195,10 +195,12 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 
 void GUI::createCityDisplay() {
 	cityWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "City Name");
-	createUnitButton = formHelper->addButton("Create Unit", []() {});
+
+	formHelper->addGroup("Unit Management");
+	createUnitButton = new UnitCreateButton(cityWindow, UnitType::getByIdentifier(UnitType::TypeIdentifier::BASIC_UNIT));
+	formHelper->addWidget("", createUnitButton);
 
 	cityWindow->setVisible(false);
-
 }
 
 void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityCallback) {
@@ -221,7 +223,7 @@ void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
 }
 
-void GUI::displayCityUI(City* city, std::function<void()> unitCreateCallback) {
+void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
 	cityWindow->setTitle(city->getName());
 	createUnitButton->setCallback(unitCreateCallback);
 

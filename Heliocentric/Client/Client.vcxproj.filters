@@ -172,6 +172,9 @@
     <ClInclude Include="unit_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="unit_create_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
@@ -289,6 +292,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="unit_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_create_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

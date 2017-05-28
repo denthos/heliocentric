@@ -6,7 +6,8 @@
 class UnitCreationUpdate : public GameObjectUpdate {
 public:
 	UID player_id;
-	int att, def, range, health;
+	int def, health;
+	UnitType::TypeIdentifier type;
 
 	/**
 	Constructor for a UnitCreationUpdate, used when a unit is created.
@@ -15,11 +16,9 @@ public:
 	@param y y-axis of the position where the unit is created.
 	@param z z-axis of the position where the unit is created.
 	@param player_id UID of the player that owns this unit.
-	@param att Attack of this unit.
 	@param def Defense of this unit.
-	@param range Attack range of this unit.
 	@param health Health of this unit.
 	*/
-	UnitCreationUpdate(UID, float, float, float, UID, int, int, int, int);
+	UnitCreationUpdate(UID, float, float, float, UID, int, int, UnitType::TypeIdentifier type);
 	void apply(GameObject* obj);
 };

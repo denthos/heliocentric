@@ -13,7 +13,7 @@ namespace Test
 	class TestUnit : public Unit {
 
 	public:
-		TestUnit(UID id, glm::vec3 position, UnitManager* manager) : Unit(id, position, NULL, new InstantLaserAttack(), manager, 100, 100) {
+		TestUnit(UID id, glm::vec3 position, UnitManager* manager) : Unit(id, position, NULL, new InstantLaserAttack(), manager, 100, 100, 1.0f, UnitType::getByIdentifier(UnitType::TypeIdentifier::BASIC_UNIT)) {
 			this->movement_speed = 200;
 		}
 

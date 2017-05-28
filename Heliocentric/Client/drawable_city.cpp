@@ -20,7 +20,7 @@ void DrawableCity::update() {
 
 
 void DrawableCity::select(GUI* gui, Client* client) {
-	gui->displayCityUI(this, std::bind(&Client::createUnitFromCity, client, this));
+	gui->displayCityUI(this, std::bind(&Client::createUnitFromCity, client, this, std::placeholders::_1));
 }
 
 void DrawableCity::unselect(GUI* gui, Client* client) {

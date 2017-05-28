@@ -43,10 +43,12 @@
     <ClCompile Include="player_command.cpp" />
     <ClCompile Include="unit_command.cpp" />
     <ClCompile Include="unit_manager.cpp" />
+    <ClCompile Include="unit_type.cpp" />
     <ClCompile Include="unit_update.cpp" />
     <ClCompile Include="universe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="unit_type.h" />
     <ClInclude Include="attack.h" />
     <ClInclude Include="base_command.h" />
     <ClInclude Include="city_manager.h" />

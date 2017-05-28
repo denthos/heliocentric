@@ -2,6 +2,7 @@
 
 #include "base_command.h"
 #include "resources.h"
+#include "unit_type.h"
 
 /**
 This class works as a medium for client-to-server communication by carrying
@@ -26,6 +27,8 @@ public:
 	Resources::Type trade_selling;
 	int trade_sell_amount;
 
+	UnitType::TypeIdentifier createUnitType;
+
 	/* TODO: Include things like */
 	// UNIT_TYPE unit_type;
 
@@ -38,8 +41,9 @@ public:
 	@param create_location_x x-axis of the location where the unit should be created.
 	@param create_location_y y-axis of the location where the unit should be created.
 	@param create_location_z z-axis of the location where the unit should be created.
+	@param create_type The UnitType::TypeIdentifier of the unit created
 	*/
-	PlayerCommand(float, float, float);
+	PlayerCommand(float, float, float, UnitType::TypeIdentifier create_type);
 
 	PlayerCommand(UID, Resources::Type, int);
 };

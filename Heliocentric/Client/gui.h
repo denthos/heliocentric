@@ -3,10 +3,11 @@
 #include "gui_utilities.h"
 #include "unit_window.h"
 
-
 #include "game_object.h"
 #include "resources.h"
 #include "player.h"
+#include "unit_type.h"
+#include "unit_create_button.h"
 
 #include <nanogui\nanogui.h>
 #include <unordered_map>
@@ -55,7 +56,7 @@ public:
 	void hideSlotUI();
 
 
-	void displayCityUI(City* city, std::function<void()> createUnitCallback);
+	void displayCityUI(City* city, std::function<void(UnitType*)> createUnitCallback);
 	void hideCityUI();
 
 	void showUnitUI(AttackableGameObject* unit);
@@ -86,7 +87,7 @@ private:
 	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
 
 	ref<Window> cityWindow;
-	Button* createUnitButton;
+	UnitCreateButton* createUnitButton;
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;

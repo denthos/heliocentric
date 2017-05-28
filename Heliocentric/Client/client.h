@@ -70,7 +70,7 @@ public:
 	void createCityForSlot(DrawableSlot*, std::string);
 
 	void setSelection(std::vector<GameObject*>);
-	void createUnitFromCity(DrawableCity* city);
+	void createUnitFromCity(DrawableCity* city, UnitType* unit_type);
 
 protected:
 	/**** Handlers for ChanneledClient ****/

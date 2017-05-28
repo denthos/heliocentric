@@ -25,7 +25,7 @@ namespace Test
 			Player sylvia("Sylvia", playerID, PlayerColor::FIRST);
             UID id = 101;
 			Attack* att = new InstantLaserAttack();
-			Unit* battleShip = new Unit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, att, &manager, 0, 0);
+			Unit* battleShip = new Unit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, att, &manager, 0, 0, 1.0f, UnitType::getByIdentifier(UnitType::BASIC_UNIT));
 			Assert::AreEqual(4, (int)sylvia.owned_objects.size());
 			sylvia.acquire_object(battleShip);
             Assert::AreEqual(playerID, sylvia.getID());
@@ -37,9 +37,9 @@ namespace Test
             UID id1 = 101;
             UID id2 = 102;
             UID id3 = 103;
-            Unit* battleShip1 = new Unit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0);
-            Unit* battleShip2 = new Unit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0);
-            Unit* battleShip3 = new Unit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0);
+			Unit* battleShip1 = new Unit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0, 1.0f, UnitType::getByIdentifier(UnitType::BASIC_UNIT));
+            Unit* battleShip2 = new Unit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0, 1.0f, UnitType::getByIdentifier(UnitType::BASIC_UNIT));
+            Unit* battleShip3 = new Unit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0, 1.0f, UnitType::getByIdentifier(UnitType::BASIC_UNIT));
 
             sylvia.acquire_object(battleShip1);
             sylvia.acquire_object(battleShip2);
@@ -59,9 +59,9 @@ namespace Test
             UID id1 = 101;
             UID id2 = 102;
             UID id3 = 103;
-            Unit* battleShip1 = new Unit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0);
-            Unit* battleShip2 = new Unit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0);
-            Unit* battleShip3 = new Unit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0);
+			Unit* battleShip1 = new Unit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0, 1.0f, UnitType::getByIdentifier(UnitType::BASIC_UNIT));
+            Unit* battleShip2 = new Unit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0, 1.0f, UnitType::getByIdentifier(UnitType::BASIC_UNIT));
+            Unit* battleShip3 = new Unit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, 0, 0, 0, 0, 1.0f, UnitType::getByIdentifier(UnitType::BASIC_UNIT));
 
             sylvia.acquire_object(battleShip1);
             sylvia.acquire_object(battleShip2);
