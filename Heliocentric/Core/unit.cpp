@@ -18,6 +18,10 @@ Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* ma
 
 }
 
+const UnitType* Unit::getType() const {
+	return this->type;
+}
+
 void Unit::initialize() {
 	glm::vec3 pos = get_position();
 	this->update = std::make_shared<UnitUpdate>(getID(), this->get_health(), pos.x, pos.y, pos.z);

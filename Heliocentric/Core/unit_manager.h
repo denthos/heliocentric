@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_set>
 #include "unit.h"
+#include "unit_type.h"
 #include "unit_update.h"
 #include "player_command.h"
 #include "unit_creation_update.h"

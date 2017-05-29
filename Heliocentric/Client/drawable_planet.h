@@ -4,12 +4,15 @@
 #include "planet.h"
 #include "planet_update.h"
 #include "planet_types.h"
-#include "drawable_data.h"
 #include "selectable.h"
+
+struct DrawablePlanetData {
+	const Texture* texture;
+};
 
 class DrawablePlanet : public Planet, public Drawable, public Selectable {
 public:
-	static std::unordered_map<PlanetType, DrawableData>& getDataMap();
+	static std::unordered_map<PlanetType, DrawablePlanetData>& getDataMap();
 
 	DrawablePlanet(const Planet & planet);
 	~DrawablePlanet();

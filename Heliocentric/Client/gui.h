@@ -87,7 +87,7 @@ private:
 	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
 
 	ref<Window> cityWindow;
-	UnitCreateButton* createUnitButton;
+	std::vector<UnitCreateButton*> createUnitButtons;
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;

@@ -4,15 +4,15 @@
 #include "drawable_slot.h"
 #include <glm/gtx/transform.hpp>
 
-std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
-	static std::unordered_map<PlanetType, DrawableData> drawable_data_map;
+std::unordered_map<PlanetType, DrawablePlanetData>& DrawablePlanet::getDataMap() {
+	static std::unordered_map<PlanetType, DrawablePlanetData> drawable_data_map;
 	if (drawable_data_map.empty()) {
-		drawable_data_map.insert(std::make_pair(SUN, DrawableData(Texture::getInstance("Textures/sun.jpg"))));
-		drawable_data_map.insert(std::make_pair(MERCURY, DrawableData(Texture::getInstance("Textures/mercury.jpg"))));
-		drawable_data_map.insert(std::make_pair(VENUS, DrawableData(Texture::getInstance("Textures/venus.jpg"))));
-		drawable_data_map.insert(std::make_pair(EARTH, DrawableData(Texture::getInstance("Textures/earth.jpg"))));
-		drawable_data_map.insert(std::make_pair(MARS, DrawableData(Texture::getInstance("Textures/mars.jpg"))));
-		drawable_data_map.insert(std::make_pair(JUPITER, DrawableData(Texture::getInstance("Textures/jupiter.jpg"))));
+		drawable_data_map.insert(std::make_pair(SUN, DrawablePlanetData{Texture::getInstance("Textures/sun.jpg")}));
+		drawable_data_map.insert(std::make_pair(MERCURY, DrawablePlanetData{Texture::getInstance("Textures/mercury.jpg")}));
+		drawable_data_map.insert(std::make_pair(VENUS, DrawablePlanetData{Texture::getInstance("Textures/venus.jpg")}));
+		drawable_data_map.insert(std::make_pair(EARTH, DrawablePlanetData{Texture::getInstance("Textures/earth.jpg")}));
+		drawable_data_map.insert(std::make_pair(MARS, DrawablePlanetData{Texture::getInstance("Textures/mars.jpg")}));
+		drawable_data_map.insert(std::make_pair(JUPITER, DrawablePlanetData{Texture::getInstance("Textures/jupiter.jpg")}));
 	}
 
 	return drawable_data_map;

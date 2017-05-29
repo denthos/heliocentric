@@ -217,6 +217,7 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClInclude Include="gui.h" />
     <ClInclude Include="free_camera.h" />
     <ClInclude Include="gui_utilities.h" />
+    <ClInclude Include="model_preloader.h" />
     <ClInclude Include="mouse_button_status.h" />
     <ClInclude Include="mouse_handler.h" />
     <ClInclude Include="orbital_camera.h" />
@@ -228,7 +229,6 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClInclude Include="drawable_slot.h" />
     <ClInclude Include="keyboard_handler.h" />
     <ClInclude Include="drawable.h" />
-    <ClInclude Include="drawable_data.h" />
     <ClInclude Include="drawable_unit.h" />
     <ClInclude Include="mesh_geometry.h" />
     <ClInclude Include="selectable.h" />
@@ -262,6 +262,7 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClCompile Include="client.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="free_camera.cpp" />
+    <ClCompile Include="model_preloader.cpp" />
     <ClCompile Include="mouse_handler.cpp" />
     <ClCompile Include="orbital_camera.cpp" />
     <ClCompile Include="quad.cpp" />
@@ -272,7 +273,6 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClCompile Include="drawable_slot.cpp" />
     <ClCompile Include="keyboard_handler.cpp" />
     <ClCompile Include="drawable.cpp" />
-    <ClCompile Include="drawable_data.cpp" />
     <ClCompile Include="drawable_unit.cpp" />
     <ClCompile Include="mesh_geometry.cpp" />
     <ClCompile Include="skybox_geometry.cpp" />

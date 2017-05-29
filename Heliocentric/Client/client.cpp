@@ -9,6 +9,7 @@
 #include <soil.h>
 
 #include "free_camera.h"
+#include "model_preloader.h"
 #include "orbital_camera.h"
 #include "quad.h"
 #include "particle_system.h"
@@ -208,6 +209,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
+	// LOAD MODELS, IMPORTANT
+	ModelPreloader::preload();
+
 	for (auto& planet : this->universe.get_planets()) {
 		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
 		for (auto& slot : planets[planet->getID()]->get_slots_const()) {
@@ -215,9 +219,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		}
 	}
 
-	// LOAD MODEL, IMPORTANT
-	spaceship = Model::getInstance(ROCKET_MODEL);
-	rocket = Model::getInstance(ROCKET_MODEL);
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -801,10 +802,9 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	auto& player_it = players.find(update->player_id);
 	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
 
+	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
-		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(),
-			new InstantLaserAttack(), nullptr, update->def, update->health, 1.0f, UnitType::getByIdentifier(update->type)),
-		spaceship
+		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get()
 	);
 
 	player_it->second->acquire_object(newUnit.get());

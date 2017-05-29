@@ -4,11 +4,24 @@
 #include "sphere_model.h"
 #include "gui.h"
 #include <glm/gtx/transform.hpp>
-#define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
-DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship) : Unit(unit) {
-	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(0.1f));
-	model = spaceship;
+#define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+#define BEAR_MODEL "Models/bear.obj"
+
+const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUnit::getDataMap() {
+	static std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData> dataMap {
+		{UnitType::BASIC_UNIT, DrawableUnitData {Model::getInstance(ROCKET_MODEL), 0.1f}},
+		{UnitType::HEAVY_UNIT, DrawableUnitData {Model::getInstance(BEAR_MODEL), 1.0f}}
+	};
+
+	return dataMap;
+}
+
+DrawableUnit::DrawableUnit(const Unit & unit) : Unit(unit) {
+	this->data = getDataMap().at(getType()->getIdentifier());
+
+	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
+	this->model = data.model;
 }
 
 DrawableUnit::~DrawableUnit() {
@@ -16,7 +29,7 @@ DrawableUnit::~DrawableUnit() {
 }
 
 void DrawableUnit::update() {
-	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(0.1f));
+	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
 }
 
 void DrawableUnit::select(GUI* gui, Client* client) {

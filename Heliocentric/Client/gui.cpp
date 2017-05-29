@@ -197,8 +197,13 @@ void GUI::createCityDisplay() {
 	cityWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "City Name");
 
 	formHelper->addGroup("Unit Management");
-	createUnitButton = new UnitCreateButton(cityWindow, UnitType::getByIdentifier(UnitType::TypeIdentifier::BASIC_UNIT));
-	formHelper->addWidget("", createUnitButton);
+	for (int i = UnitType::FIRST; i < UnitType::NUM_TYPES; i++) {
+		UnitType::TypeIdentifier type = static_cast<UnitType::TypeIdentifier>(i);
+		UnitCreateButton* new_button = new UnitCreateButton(cityWindow, UnitType::getByIdentifier(type));
+		createUnitButtons.push_back(new_button);
+
+		formHelper->addWidget("", new_button);
+	}
 
 	cityWindow->setVisible(false);
 }
@@ -225,7 +230,10 @@ void GUI::hideSlotUI() {
 
 void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
 	cityWindow->setTitle(city->getName());
-	createUnitButton->setCallback(unitCreateCallback);
+
+	for (auto& createUnitButton : createUnitButtons) {
+		createUnitButton->setCallback(unitCreateCallback);
+	}
 
 	cityWindow->setVisible(true);
 }

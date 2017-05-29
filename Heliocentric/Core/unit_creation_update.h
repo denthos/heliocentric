@@ -1,7 +1,7 @@
 #pragma once
 
 #include "game_object_update.h"
-#include "unit.h"
+#include "unit_type.h"
 
 class UnitCreationUpdate : public GameObjectUpdate {
 public:
