@@ -16,19 +16,19 @@ void build_quad(vec4 position)
     fColor = gs_in[0].color; // gs_in[0] since there's only one input vertex
     float size = gs_in[0].size;
 
-    vec4 bottom_left = position + vec4(-0.5f, -0.5f, 0.0f, 0.0f) * size;    // 1:bottom-left   
+    vec4 bottom_left = position + vec4(-4.5f, -2.5f, 0.0f, 0.0f) * size;    // 1:bottom-left   
     gl_Position = projection * bottom_left;
     EmitVertex();   
 
-    vec4 bottom_right = position + vec4( 0.5f, -0.5f, 0.0f, 0.0f) * size;    // 2:bottom-right
+    vec4 bottom_right = position + vec4( 4.5f, -2.5f, 0.0f, 0.0f) * size;    // 2:bottom-right
     gl_Position = projection * bottom_right;
     EmitVertex();
 
-    vec4 top_left = position + vec4(-0.5f,  0.5f, 0.0f, 0.0f) * size;    // 3:top-left
+    vec4 top_left = position + vec4(-4.5f,  2.5f, 1.0f, 0.0f) * size;    // 3:top-left
     gl_Position = projection * top_left;
     EmitVertex();
 
-    vec4 top_right = position + vec4( 0.5f,  0.5f, 0.0f, 0.0f) * size;    // 4:top-right
+    vec4 top_right = position + vec4( 4.5f,  2.5f, 0.0f, 0.0f) * size;    // 4:top-right
     gl_Position = projection * top_right;
     EmitVertex();
 
