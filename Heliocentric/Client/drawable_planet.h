@@ -11,7 +11,7 @@ class DrawablePlanet : public Planet, public Drawable, public Selectable {
 public:
 	static std::unordered_map<PlanetType, DrawableData>& getDataMap();
 
-	DrawablePlanet(const Planet & planet);
+	DrawablePlanet(const Planet & planet, Shader * shader, Shader * slotShader);
 	~DrawablePlanet();
 	virtual void update();
 };

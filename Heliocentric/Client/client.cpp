@@ -210,7 +210,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
 	for (auto& planet : this->universe.get_planets()) {
-		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
+		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get(), textureShader, diffuseShader);
 		for (auto& slot : planets[planet->getID()]->get_slots_const()) {
 			slots.insert(std::make_pair(slot.first, static_cast<DrawableSlot*>(slot.second)));
 		}
@@ -406,7 +406,7 @@ void Client::display() {
 
 		Octree * delOctree = octree;
 		octree = newOctree;
-		octree->draw(*diffuseShader, *cameras[selectedCamera]);
+		octree->draw(*cameras[selectedCamera]);
 		delete delOctree;
 
 		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
@@ -836,7 +836,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), nullptr, update->def, update->health),
-		shipModel
+		shipModel, diffuseShader
 	);
 
 	player_it->second->acquire_object(newUnit.get());
@@ -854,7 +854,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	Player* owner = player_iter->second.get();
 	auto& update_queue = Lib::key_acquire(this->update_queue);
 	std::function<void()> createCityFunc = [slot_iter, update, owner, this]() {
-		DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name));
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name), diffuseShader);
 		slot_iter->second->attachCity(newCity);
 		owner->acquire_object(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));

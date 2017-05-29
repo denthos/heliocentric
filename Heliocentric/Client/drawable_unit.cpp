@@ -6,9 +6,10 @@
 #include <glm/gtx/transform.hpp>
 #define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
 
-DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship) : Unit(unit) {
+DrawableUnit::DrawableUnit(const Unit & unit, Model* spaceship, Shader * shader) : Unit(unit) {
 	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(0.1f));
 	model = spaceship;
+	this->shader = shader;
 }
 
 DrawableUnit::~DrawableUnit() {

@@ -7,9 +7,10 @@
 
 #include <glm/gtx/transform.hpp>
 
-DrawableCity::DrawableCity(const City& city) : City(city) {
+DrawableCity::DrawableCity(const City& city, Shader * shader) : City(city) {
 	this->model = Model::getInstance("Models/city.obj");
 	this->drawable_slot = static_cast<DrawableSlot*>(this->get_slot());
+	this->shader = shader;
 
 	this->toWorld = this->drawable_slot->getToWorld();
 }

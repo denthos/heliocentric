@@ -12,7 +12,7 @@ class Client;
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-	DrawableUnit(const Unit & unit, Model* spaceship);
+	DrawableUnit(const Unit & unit, Model* spaceship, Shader * shader);
 	~DrawableUnit();
 	virtual void update();
 

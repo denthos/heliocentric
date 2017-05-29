@@ -18,14 +18,15 @@ std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
 	return drawable_data_map;
 }
 
-DrawablePlanet::DrawablePlanet(const Planet & planet) : Planet(planet) {
+DrawablePlanet::DrawablePlanet(const Planet & planet, Shader * shader, Shader * slotShader) : Planet(planet) {
 	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(get_radius()));
 	model = new SphereModel(getDataMap().at(planet.get_type()).texture);
+	this->shader = shader;
 
 	/* Convert all the planet's slots to DrawableSlots */
 	auto& slots = this->get_slots();
 	for (auto slot_pair : slots) {
-		slots[slot_pair.first] = new DrawableSlot(*slot_pair.second, this);
+		slots[slot_pair.first] = new DrawableSlot(*slot_pair.second, this, slotShader);
 	}
 }
 
