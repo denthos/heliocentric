@@ -41,7 +41,7 @@
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 #define DIFFUSE_FRAG_SHADER "Shaders/diffuse_shader.frag"
 
-#define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+#define ROCKET_MODEL "Federation Interceptor HN48 flying.obj"
 
 //skybox texture files
 #define SKYBOX_FRONT "Textures/Skybox/Front_MauveSpaceBox.png"
@@ -217,10 +217,12 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	}
 
 	// LOAD MODEL, IMPORTANT
-	spaceship_white = Model::getInstance(ROCKET_MODEL);
-	spaceship_red = Model::getInstance("Models/bear.obj");
-	spaceship_blue = Model::getInstance("Models/nanosuit/nanosuit.obj");
-	spaceship_green = Model::getInstance("Models/Kameri explorer/Kameri explorer flying.obj");
+	spaceship_white = Model::getInstance("Models/White_Ship/Federation Interceptor HN48 flying.obj");
+	spaceship_red = Model::getInstance("Models/Red_Ship/Federation Interceptor HN48 flying.obj");
+	spaceship_blue = Model::getInstance("Models/Blue_Ship/Federation Interceptor HN48 flying.obj");
+	spaceship_green = Model::getInstance("Models/Green_Ship/Federation Interceptor HN48 flying.obj");
+	spaceship_orange = Model::getInstance("Models/Orange_Ship/Federation Interceptor HN48 flying.obj");
+	spaceship_yellow = Model::getInstance("Models/Pink_Ship/Federation Interceptor HN48 flying.obj");
 	
 
 	// Set up SunNet client and channel callbacks
@@ -822,10 +824,10 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 		shipModel = spaceship_green;
 		break;
 	case PlayerColor::YELLOW:
-		shipModel = spaceship_green;
+		shipModel = spaceship_yellow;
 		break;
 	case PlayerColor::ORANGE:
-		shipModel = spaceship_green;
+		shipModel = spaceship_orange;
 		break;
 	default:
 		shipModel = spaceship_white;

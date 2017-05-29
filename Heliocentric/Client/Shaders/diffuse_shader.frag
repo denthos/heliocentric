@@ -59,10 +59,11 @@ vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), m_shininess);
     // Combine results
-    vec3 ambient = m_diffuse * vec3(1.0f);
-    vec3 diffuse = diff * vec3(1.0f);
-    vec3 specular = spec * vec3(1.0f);
-    return (ambient + diffuse + specular)* m_diffuse;
+    vec3 ambient = m_ambient;
+    vec3 diffuse = diff * m_diffuse;
+    vec3 specular = spec * m_specular;
+    specular = clamp(specular, 0.0f, 1.0f);
+    return (ambient + diffuse + specular);
 }
 
 
@@ -72,7 +73,7 @@ void main()
 	vec3 viewDir = normalize(viewPos - FragPos);
 
 	vec3 result = calcSunLight( norm, FragPos, viewDir);
-	color = vec4(result, 1.0f);
+	color = vec4(m_diffuse, 1.0f) * vec4(result, 1.0f);
 
   buffer1_color = vec4(vec3(0.0), 1.0);
 
