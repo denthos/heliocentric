@@ -25,13 +25,13 @@ public:
 	Player(std::string player_name, PlayerColor::Color color);
 	Player(std::string player_name, UID id, PlayerColor::Color color);
 
-	std::string get_name();
+	std::string get_name() const;
 	void set_name(std::string new_name);
 
+	float get_player_score() const;
 	PlayerColor::Color getColor() const;
 	void setColor(PlayerColor::Color);
 
-	float get_player_score();
 	void increase_player_score(float);
 	void decrease_player_score(float);
 

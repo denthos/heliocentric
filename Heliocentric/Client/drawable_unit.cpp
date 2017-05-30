@@ -41,30 +41,8 @@ void DrawableUnit::draw(const Camera & camera) const {
 	GLuint shaderID = shader->getPid();
 
 	//color cities based on player color
-	switch (player_color) {
-	case PlayerColor::WHITE:
-		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 1.0f, 1.0f);
-		break;
-	case PlayerColor::RED:
-		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 0.0f, 0.0f);
-		break;
-	case PlayerColor::BLUE:
-		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 0.0f, 0.0f, 1.0f);
-		break;
-	case PlayerColor::GREEN:
-		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 0.0f, 1.0f, 0.0f);
-		break;
-	case PlayerColor::YELLOW:
-		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 1.0f, 0.0f);
-		break;
-	case PlayerColor::ORANGE:
-		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 0.30f, 0.0f);
-		break;
-	default:
-		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 1.0f, 1.0f);
-		break;
-	}
-
+	glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
+	glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
 	Drawable::draw(camera);
 }
 

@@ -34,6 +34,7 @@ GUI::GUI(GLFWwindow * window, int screenWidth, int screenHeight) : Screen(), scr
 	this->createSlotDisplay();
 	this->createCityDisplay();
 	this->createPlayerOverlay();
+	this->createLeaderboardWindow();
 
 	this->setVisible(true);
 	this->performLayout();
@@ -87,6 +88,7 @@ void GUI::setScreenSize(int width, int height) {
 
 void GUI::setPlayer(std::shared_ptr<Player> player) {
 	this->player = player;
+	this->updatePlayerLeaderboardValue(player.get());
 }
 
 void GUI::setFPS(double fps) {
@@ -168,6 +170,21 @@ void GUI::createPlayerOverlay() {
 	fpsDisplay = new Label(playerOverlay, "FPS: ", FONT, FONT_SIZE);
 	fpsDisplay->setTooltip("Frames per second");
 	fpsDisplay->setFixedWidth(9 * PIXELS_PER_CHARACTER);
+}
+
+void GUI::createLeaderboardWindow() {
+	this->leaderboardWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 140), "Leaderboard");
+	this->leaderboardWidget = new LeaderboardWidget(leaderboardWindow);
+	this->leaderboardWindow->setWidth(this->leaderboardWidget->width());
+	formHelper->addWidget("", leaderboardWidget);
+	this->leaderboardWindow->performLayout(nvgContext());
+}
+
+void GUI::updatePlayerLeaderboardValue(const Player* player) {
+	if (this->leaderboardWidget->updateScoreEntry(player)) {
+		this->leaderboardWindow->setHeight(this->leaderboardWidget->height() + 40);
+		this->leaderboardWindow->performLayout(nvgContext());
+	}
 }
 
 void GUI::unselectSelection(Client* client, std::vector<GameObject*>& old_selection) {

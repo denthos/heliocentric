@@ -24,13 +24,16 @@ void Player::initialize() {
 	owned_objects[std::type_index(typeid(Slot))] = std::unordered_map<unsigned int, GameObject*>();
 
 	/* Let each player have 100 of each type of resources for now */
-	owned_resources[Resources::ALUMINUM] = 100.0f;
-	owned_resources[Resources::GOLD] = 100.0f;
-	owned_resources[Resources::NANOMATERIAL] = 100.0f;
-	owned_resources[Resources::TITANIUM] = 100.0f;
-	owned_resources[Resources::URANIUM] = 100.0f;
+	owned_resources[Resources::ALUMINUM] = 100;
+	owned_resources[Resources::GOLD] = 100;
+	owned_resources[Resources::NANOMATERIAL] = 100;
+	owned_resources[Resources::TITANIUM] = 100;
+	owned_resources[Resources::URANIUM] = 100;
 }
 
+std::string Player::get_name() const {
+	return name;
+}
 
 PlayerColor::Color Player::getColor() const {
 	return this->color;
@@ -40,15 +43,12 @@ void Player::setColor(PlayerColor::Color color) {
 	this->color = color;
 }
 
-std::string Player::get_name() {
-	return name;
-}
 
 void Player::set_name(std::string new_name) {
 	name = new_name;
 }
 
-float Player::get_player_score() {
+float Player::get_player_score() const {
 	return player_score;
 }
 

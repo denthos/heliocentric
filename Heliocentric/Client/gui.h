@@ -6,6 +6,7 @@
 #include "game_object.h"
 #include "resources.h"
 #include "player.h"
+#include "leaderboard_widget.h"
 #include "slot_info_panel.h"
 #include "unit_type.h"
 #include "unit_create_button.h"
@@ -46,6 +47,8 @@ public:
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
 
+	void updatePlayerLeaderboardValue(const Player* player);
+
 private:
 	int screenWidth, screenHeight;
 	UnitWindow* unit_window;
@@ -55,6 +58,7 @@ private:
 	void createSlotDisplay();
 	void createCityDisplay();
 	void createPlayerOverlay();
+	void createLeaderboardWindow();
 
 	std::pair<int, std::string> placeholderImage;
 
@@ -82,4 +86,6 @@ private:
 	Label * fpsSpacer;
 	Label * fpsDisplay;
 
+	Window* leaderboardWindow;
+	LeaderboardWidget* leaderboardWidget;
 };

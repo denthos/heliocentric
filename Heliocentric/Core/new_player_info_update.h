@@ -8,4 +8,5 @@ public:
 	PlayerColor::Color color;
 
 	NewPlayerInfoUpdate(UID id, std::string name, PlayerColor::Color color);
+	void apply(Player*);
 };

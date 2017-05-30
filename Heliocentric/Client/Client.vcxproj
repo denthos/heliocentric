@@ -221,6 +221,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClInclude Include="gui.h" />
     <ClInclude Include="free_camera.h" />
     <ClInclude Include="gui_utilities.h" />
+    <ClInclude Include="leaderboard_widget.h" />
     <ClInclude Include="model_preloader.h" />
     <ClInclude Include="mouse_button_status.h" />
     <ClInclude Include="mouse_handler.h" />
@@ -268,6 +269,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClCompile Include="client.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="free_camera.cpp" />
+    <ClCompile Include="leaderboard_widget.cpp" />
     <ClCompile Include="model_preloader.cpp" />
     <ClCompile Include="mouse_handler.cpp" />
     <ClCompile Include="music_player.cpp" />
