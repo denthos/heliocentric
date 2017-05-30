@@ -53,7 +53,8 @@ void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p clie
 	auto connections = Lib::key_acquire(this->connections);
 	auto id_it = connections.get().second.find(client);
 	if (id_it != connections.get().second.end()) {
-		players.erase(id_it->second);
+		//TODO: Properly erase the player. For now, we won't erase him since it breaks things
+		//players.erase(id_it->second);
 		connections.get().first.erase(id_it->second);
 		connections.get().second.erase(id_it);
 	}
