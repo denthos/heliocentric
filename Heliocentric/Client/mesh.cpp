@@ -21,7 +21,7 @@ void Mesh::update() {
 
 }
 
-//TODO: separate binding functions for each mesh component? bind texture, bind material, bind light
+//TODO: separate binding functions for each mesh component? bind texture, bind material, bind zz
 void Mesh::draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld)
 {
 	//which diffuse and specular samplers

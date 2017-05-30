@@ -17,10 +17,12 @@ struct DrawableUnitData {
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-	DrawableUnit(const Unit & unit);
+
+	DrawableUnit(const Unit & unit, Shader * shader);
+
 	~DrawableUnit();
 	virtual void update();
-
+	virtual void draw(const Camera & camera) const;
 	void select(GUI*, Client*);
 	void unselect(GUI*, Client*);
 

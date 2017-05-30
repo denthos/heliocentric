@@ -17,11 +17,13 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 	return dataMap;
 }
 
-DrawableUnit::DrawableUnit(const Unit & unit) : Unit(unit) {
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader) : Unit(unit) {
 	this->data = getDataMap().at(getType()->getIdentifier());
+	this->shader = shader;
 
 	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
 	this->model = data.model;
+
 }
 
 DrawableUnit::~DrawableUnit() {
@@ -30,6 +32,39 @@ DrawableUnit::~DrawableUnit() {
 
 void DrawableUnit::update() {
 	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
+}
+
+void DrawableUnit::draw(const Camera & camera) const {
+	PlayerColor::Color player_color = this->get_player()->getColor();
+	shader->bind();
+	GLuint shaderID = shader->getPid();
+
+	//color cities based on player color
+	switch (player_color) {
+	case PlayerColor::WHITE:
+		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 1.0f, 1.0f);
+		break;
+	case PlayerColor::RED:
+		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 0.0f, 0.0f);
+		break;
+	case PlayerColor::BLUE:
+		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 0.0f, 0.0f, 1.0f);
+		break;
+	case PlayerColor::GREEN:
+		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 0.0f, 1.0f, 0.0f);
+		break;
+	case PlayerColor::YELLOW:
+		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 1.0f, 0.0f);
+		break;
+	case PlayerColor::ORANGE:
+		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 0.30f, 0.0f);
+		break;
+	default:
+		glUniform3f(glGetUniformLocation(shaderID, "m_color"), 1.0f, 1.0f, 1.0f);
+		break;
+	}
+
+	Drawable::draw(camera);
 }
 
 void DrawableUnit::select(GUI* gui, Client* client) {

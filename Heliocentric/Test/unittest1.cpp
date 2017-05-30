@@ -20,9 +20,11 @@ namespace Test
         }
 
         TEST_METHOD(claim_a_unit_test) {
+
             UnitManager manager;
             UID playerID = 123;
             Player sylvia("Sylvia", playerID, PlayerColor::FIRST);
+
             UID id = 101;
             Unit* battleship = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
             Assert::AreEqual(4, (int)sylvia.owned_objects.size());
@@ -32,8 +34,10 @@ namespace Test
         }
         
         TEST_METHOD(destroy_a_unit_test) {
+
             Player sylvia("Sylvia", 123, PlayerColor::FIRST);
             UnitManager manager;
+
             UID id1 = 101;
             UID id2 = 102;
             UID id3 = 103;
@@ -56,7 +60,9 @@ namespace Test
 
         TEST_METHOD(destroy_multiple_units_test) {
             Player sylvia("Sylvia", 123, PlayerColor::FIRST);
+
             UnitManager manager;
+
             UID id1 = 101;
             UID id2 = 102;
             UID id3 = 103;

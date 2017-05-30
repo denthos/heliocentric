@@ -52,8 +52,8 @@ Drawable::Drawable() : toWorld(glm::mat4(1.0f)) {
 
 }
 
-void Drawable::draw(const Shader & shader, const Camera & camera) const {
-	model->draw(shader, camera, toWorld);
+void Drawable::draw(const Camera & camera) const {
+	model->draw(*shader, camera, toWorld);
 #ifdef _DEBUG
 	if (DRAW_BOUNDING_BOXES) {
 		init();
@@ -61,9 +61,9 @@ void Drawable::draw(const Shader & shader, const Camera & camera) const {
 		bbShader.bind();
 		BoundingBox bb = model->getBoundingBox();
 		glm::mat4 transform = toWorld * glm::translate(glm::mat4(1.0f), bb.min) * glm::scale(glm::mat4(1.0f), bb.max - bb.min);
-		glUniformMatrix4fv(glGetUniformLocation(shader.getPid(), "view"), 1, GL_FALSE, &camera.view[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(shader.getPid(), "projection"), 1, GL_FALSE, &camera.perspective[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(shader.getPid(), "model"), 1, GL_FALSE, &transform[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shader->getPid(), "view"), 1, GL_FALSE, &camera.view[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shader->getPid(), "projection"), 1, GL_FALSE, &camera.perspective[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shader->getPid(), "model"), 1, GL_FALSE, &transform[0][0]);
 		glLineWidth(1.0f);
 		glBindVertexArray(bbVAO);
 		glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);

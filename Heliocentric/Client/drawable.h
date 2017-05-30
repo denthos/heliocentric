@@ -6,7 +6,7 @@
 class Drawable {
 public:
 	Drawable();
-	virtual void draw(const Shader &, const Camera &) const;
+	virtual void draw(const Camera &) const;
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;
 	virtual bool intersect(const Ray &, Collision &) const;
@@ -16,4 +16,5 @@ public:
 protected:
 	Model * model;
 	glm::mat4 toWorld;
+	Shader * shader;
 };

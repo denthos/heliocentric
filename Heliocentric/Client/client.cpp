@@ -42,7 +42,7 @@
 #define TEXTURE_FRAG_SHADER "Shaders/simple_texture.frag"
 #define DIFFUSE_FRAG_SHADER "Shaders/diffuse_shader.frag"
 
-#define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
+#define ROCKET_MODEL "Federation Interceptor HN48 flying.obj"
 
 //skybox texture files
 #define SKYBOX_FRONT "Textures/Skybox/Front_MauveSpaceBox.png"
@@ -72,6 +72,7 @@ Shader * quadShader;
 Shader * bloomShader;
 Shader * blurShader;
 Shader* diffuseShader;
+Shader* colorShader;
 Shader* particleShader;
 
 GLuint RBO;
@@ -80,8 +81,7 @@ GLuint FBO; //frame buffer for offscreen rendering
 GLuint gaussianFBO[COLOR_BUFFERS];
 GLuint gaussian_color_buff[COLOR_BUFFERS];
 
-Model * spaceship;
-Model * rocket;
+
 //don't forget to clean up afterwards
 
 //multiple render targets to specify more than one frag shader output
@@ -199,7 +199,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	shader = new Shader(VERT_SHADER, FRAG_SHADER);
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
-	diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
+	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag");
+	//diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
@@ -213,12 +215,11 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	ModelPreloader::preload();
 
 	for (auto& planet : this->universe.get_planets()) {
-		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get());
+		planets[planet->getID()] = std::make_unique<DrawablePlanet>(*planet.get(), textureShader, diffuseShader);
 		for (auto& slot : planets[planet->getID()]->get_slots_const()) {
 			slots.insert(std::make_pair(slot.first, static_cast<DrawableSlot*>(slot.second)));
 		}
 	}
-
 
 	// Set up SunNet client and channel callbacks
 	initializeChannels();
@@ -404,7 +405,7 @@ void Client::display() {
 
 		Octree * delOctree = octree;
 		octree = newOctree;
-		octree->draw(*textureShader, *cameras[selectedCamera]);
+		octree->draw(*cameras[selectedCamera]);
 		delete delOctree;
 
 		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
@@ -807,7 +808,9 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
-		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get()
+		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
+    colorShader
+
 	);
 
 	player_it->second->acquire_object(newUnit.get());
@@ -825,7 +828,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	Player* owner = player_iter->second.get();
 	auto& update_queue = Lib::key_acquire(this->update_queue);
 	std::function<void()> createCityFunc = [slot_iter, update, owner, this]() {
-		DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name));
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name), colorShader);
 		slot_iter->second->attachCity(newCity);
 		owner->acquire_object(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));

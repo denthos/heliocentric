@@ -8,10 +8,11 @@
 
 #include <glm/gtx/transform.hpp>
 
-DrawableSlot::DrawableSlot(const Slot& slot, DrawablePlanet* planet) : Slot(slot) {
+DrawableSlot::DrawableSlot(const Slot& slot, DrawablePlanet* planet, Shader * shader) : Slot(slot) {
 	this->planet = planet;
 	this->model = Model::getInstance("Models/donut.obj");
 	this->toWorld = glm::translate(get_position()) *  get_spherical_position().getRotationMatrix() * glm::scale(glm::vec3(planet->get_radius() / 10.0f));
+	this->shader = shader;
 }
 
 void DrawableSlot::update() {
@@ -30,9 +31,9 @@ void DrawableSlot::select(GUI* gui, Client* client) {
 }
 
 
-void DrawableSlot::draw(const Shader & shader, const Camera & camera) const {
+void DrawableSlot::draw(const Camera & camera) const {
 	if (!hasCity()) {
-		Drawable::draw(shader, camera);
+		Drawable::draw(camera);
 	}
 }
 

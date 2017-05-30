@@ -73,7 +73,9 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	int nextColor = static_cast<int>(this->nextPlayerColor) + 1;
 	if (nextColor >= PlayerColor::NUM_COLORS) {
 		LOG_ERR("NO MORE COLORS AVAILABLE!");
+
 		nextColor = static_cast<int>(PlayerColor::FIRST);
+
 	}
 
 	this->nextPlayerColor = static_cast<PlayerColor::Color>(nextColor);
