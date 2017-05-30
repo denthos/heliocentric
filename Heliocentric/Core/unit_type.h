@@ -25,6 +25,8 @@ public:
 
 
 	virtual bool hasBuildRequirements(const ResourceCollection& resources) const = 0;
+	virtual const ResourceCollection& getBuildRequirements() const = 0;
+
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
 
@@ -62,6 +64,10 @@ public:
 		}
 
 		return true;
+	}
+
+	const ResourceCollection& getBuildRequirements() const {
+		return this->buildRequirements;
 	}
 
 	const std::string& getTypeName() const {

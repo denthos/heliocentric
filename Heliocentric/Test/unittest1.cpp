@@ -26,9 +26,9 @@ namespace Test
             Player sylvia("Sylvia", playerID, PlayerColor::FIRST);
 
             UID id = 101;
-            Unit* battleship = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
-            Assert::AreEqual(4, (int)sylvia.owned_objects.size());
-            sylvia.acquire_object(battleship);
+			Unit* battleship = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
+			Assert::AreEqual(4, (int)sylvia.owned_objects.size());
+			sylvia.acquire_object(battleship);
             Assert::AreEqual(playerID, sylvia.getID());
             Assert::AreEqual(4, (int)sylvia.owned_objects.size());
         }
@@ -36,14 +36,13 @@ namespace Test
         TEST_METHOD(destroy_a_unit_test) {
 
             Player sylvia("Sylvia", 123, PlayerColor::FIRST);
-            UnitManager manager;
-
+			UnitManager manager;
             UID id1 = 101;
             UID id2 = 102;
             UID id3 = 103;
-            Unit* battleship1 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
-            Unit* battleship2 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
-            Unit* battleship3 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
+			Unit* battleship1 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
+			Unit* battleship2 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
+			Unit* battleship3 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
 
             sylvia.acquire_object(battleship1);
             sylvia.acquire_object(battleship2);
@@ -60,15 +59,13 @@ namespace Test
 
         TEST_METHOD(destroy_multiple_units_test) {
             Player sylvia("Sylvia", 123, PlayerColor::FIRST);
-
-            UnitManager manager;
-
+			UnitManager manager;
             UID id1 = 101;
             UID id2 = 102;
             UID id3 = 103;
-            Unit* battleship1 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
-            Unit* battleship2 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
-            Unit* battleship3 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
+			Unit* battleship1 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id1, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
+			Unit* battleship2 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id2, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
+			Unit* battleship3 = UnitType::getByIdentifier(UnitType::BASIC_UNIT)->createUnit(id3, glm::vec3(0.0f, 0.0f, 0.0f), &sylvia, &manager).get();
 
             sylvia.acquire_object(battleship1);
             sylvia.acquire_object(battleship2);

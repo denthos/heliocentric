@@ -682,6 +682,12 @@ void Client::handleF2Key(int key) {
 
 
 void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
+	/* First, let's check to see if the client-side player has enough resources */
+	if (!unit_type->hasBuildRequirements(this->player->getResources())) {
+		/* Cannot create the unit due to lack of sufficient resources */
+		return;
+	}
+
 	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
 	PlayerCommand command(pos.x, pos.y, pos.z, unit_type->getIdentifier());
 

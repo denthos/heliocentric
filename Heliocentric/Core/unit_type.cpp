@@ -17,3 +17,4 @@ std::unordered_map<UnitType::TypeIdentifier, UnitType*> UnitType::unittypeMap = 
 		new UnitTypeImpl<HeavyUnit>(TypeIdentifier::HEAVY_UNIT, ResourceCollection {{Resources::ALUMINUM, 50}, {Resources::TITANIUM, 20}}, 200, "Heavy Unit")
 	}
 };
+

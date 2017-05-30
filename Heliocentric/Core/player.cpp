@@ -97,6 +97,11 @@ void Player::change_resource_amount(Resources::Type type, int delta) {
 	owned_resources[type] += delta;
 }
 
+
+const ResourceCollection& Player::getResources() const {
+	return this->owned_resources;
+}
+
 void Player::receive_trade_deal(std::shared_ptr<TradeDeal> deal) {
 	pending_trade_deals[deal->getID()] = deal;
 }

@@ -387,7 +387,26 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			Player* owner = this->extractPlayerFromConnection(sender);
 
 			this->addFunctionToProcessQueue([this, command, owner]() {
+				//TODO: Make all managers know about other managers (eg playermanager) so that this is cleaner
+				UnitType* type = UnitType::getByIdentifier(command->createUnitType);
+				if (!type->hasBuildRequirements(owner->getResources())) {
+					// The player does not have the proper requirements. Bail out!
+					return;
+				}
+
 				std::shared_ptr<UnitCreationUpdate> update = unit_manager.add_unit(command, owner);
+
+				std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
+
+				/* Now we are going to decrement the player's resources */
+				for (auto& resource_pair : type->getBuildRequirements()) {
+					owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
+					playerResourceUpdates.push_back(
+						std::make_shared<PlayerUpdate>(owner->getID(), resource_pair.first, owner->get_resource_amount(resource_pair.first))
+					);
+				}
+
+				this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
 				this->addUpdateToSendQueue(update);
 			});
 			break;
