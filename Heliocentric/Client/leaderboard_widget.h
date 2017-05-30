@@ -17,5 +17,5 @@ private:
 	std::string formatScoreEntry(const Player* player);
 	Label* createNewLabel(const Player* player);
 
-	std::unordered_map<UID, Label*> playerLabels;
+	std::map<UID, Label*> playerLabels;
 };

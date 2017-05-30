@@ -10,6 +10,8 @@
 #include "new_player_info_update.h"
 #include "unit_spawner_update.h"
 
+#include "game_over_update.h"
+
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout, int resource_update_interval) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), server_paused(false), resource_update_interval_seconds(resource_update_interval) {
 
@@ -276,23 +278,38 @@ void GameServer::sendUpdates() {
 	}
 }
 
-void GameServer::checkVictory() {
+void GameServer::endGameIfGameOver() {
+	UID winnerUID;
+	if (!checkVictory(winnerUID)) {
+		return;
+	}
+
+	game->game_running = false;
+
+	/* Now we need to give a "GameOver" message to all players */
+	std::shared_ptr<GameOverUpdate> update = std::make_shared<GameOverUpdate>();
+	update->winnerID = winnerUID;
+
+	this->addUpdateToSendQueue(update);
+	sendUpdates();
+}
+
+bool GameServer::checkVictory(UID& winner) {
 	/* The order of these conditions determines priority of victory conditions. */
 	if (game->domination_victory) {
-		return;
+		return false;
 	}
 
 	if (game->science_victory) {
-		return;
+		return false;
 	}
 
 	if (game->economic_victory) {
-		return;
+		return false;
 	}
 
 	if (game->time_victory) {
 		if (game->time_limit_reached()) {
-			game->game_running = false;
 
 			/* Player with the highest player score wins. */
 			float highest_score = 0.0f;
@@ -304,14 +321,15 @@ void GameServer::checkVictory() {
 				}
 			}
 
-			if (winner_candidate == INVALID_ID) {
-				LOG_DEBUG("No player connected. No one wins.");
-				return;
-			}
-
-			LOG_INFO("Player with UID ", winner_candidate, " has won the game!");
-			return;
+			winner = winner_candidate;
+			return true;
 		}
+		else {
+			return false;
+		}
+	}
+	else{
+		return false;
 	}
 }
 
@@ -336,7 +354,7 @@ void GameServer::run() {
 		// Add server logic
 		performUpdates();
 		sendUpdates();
-		checkVictory();
+		endGameIfGameOver();
 
 		tick_elapsed_time = std::clock() - tick_start_time;
 		if (tick_elapsed_time > tick_duration) {

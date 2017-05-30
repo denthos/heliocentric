@@ -49,6 +49,8 @@ public:
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
 
+	void showGameOverWindow(bool victorious);
+	void hideGameOverWindow();
 	void updatePlayerLeaderboardValue(const Player* player);
 
 private:
@@ -60,6 +62,7 @@ private:
 	void createSlotDisplay();
 	void createCityDisplay();
 	void createPlayerOverlay();
+	void createGameOverWindow();
 	void createLeaderboardWindow();
 
 	std::pair<int, std::string> placeholderImage;
@@ -80,6 +83,9 @@ private:
 	UnitSpawnWidget* unitSpawnWidget;
 	SlotInfoPanel* citySlotInfoPanel;
 	void updateCityWindow();
+
+	ref<Window> gameOverWindow;
+	Label* gameOverLabel;
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;

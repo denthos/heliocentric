@@ -126,7 +126,9 @@ private:
 	void sendUpdates();
 
 	/* Checks victory condition every server tick */
-	void checkVictory();
+	bool checkVictory(UID& winner);
+
+	void endGameIfGameOver();
 
 	GameSession* game; // Keeps track of all information about current game settings. Deconstructed after game ends.
 	std::atomic<bool> server_paused;

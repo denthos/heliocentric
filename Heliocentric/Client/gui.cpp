@@ -34,6 +34,7 @@ GUI::GUI(GLFWwindow * window, int screenWidth, int screenHeight) : Screen(), scr
 	this->createSlotDisplay();
 	this->createCityDisplay();
 	this->createPlayerOverlay();
+	this->createGameOverWindow();
 	this->createLeaderboardWindow();
 
 	this->setVisible(true);
@@ -171,6 +172,26 @@ void GUI::createPlayerOverlay() {
 	fpsDisplay->setTooltip("Frames per second");
 	fpsDisplay->setFixedWidth(9 * PIXELS_PER_CHARACTER);
 }
+
+void GUI::createGameOverWindow() {
+	gameOverWindow = formHelper->addWindow(Eigen::Vector2i(0, 0), "GAME OVER");
+	gameOverLabel = new Label(gameOverWindow, "YOU ARE VICTORIOUS!", FONT, FONT_SIZE);
+
+	formHelper->addWidget("", gameOverLabel);
+	gameOverWindow->center();
+	gameOverWindow->setVisible(false);
+}
+
+void GUI::showGameOverWindow(bool victorious) {
+	std::string message = victorious ? "VICTORIOUS" : "A LOSER";
+	gameOverLabel->setCaption("YOU ARE " + message);
+	gameOverWindow->setVisible(true);
+}
+
+void GUI::hideGameOverWindow() {
+	gameOverWindow->setVisible(false);
+}
+
 
 void GUI::createLeaderboardWindow() {
 	this->leaderboardWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 140), "Leaderboard");

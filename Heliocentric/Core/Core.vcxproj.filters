@@ -191,6 +191,9 @@
     <ClInclude Include="player_color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_over_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
