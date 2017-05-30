@@ -120,3 +120,4 @@ void City::spawnCompleteHandler(UnitType* type) {
 	*/
 	manager->handleUnitSpawningComplete(type, this);
 }
+

@@ -17,7 +17,6 @@ struct DrawableUnitData {
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-
 	DrawableUnit(const Unit & unit, Shader * shader);
 
 	~DrawableUnit();

@@ -217,33 +217,17 @@ void GUI::createCityDisplay() {
 	citySlotInfoPanel = new SlotInfoPanel(cityWindow);
 	formHelper->addWidget("", citySlotInfoPanel);
 
-
 	formHelper->addGroup("Unit Management");
-	for (int i = UnitType::FIRST; i < UnitType::NUM_TYPES; i++) {
-		UnitType::TypeIdentifier type = static_cast<UnitType::TypeIdentifier>(i);
-		UnitCreateButton* new_button = new UnitCreateButton(cityWindow, UnitType::getByIdentifier(type));
-		createUnitButtons.push_back(new_button);
-
-		formHelper->addWidget("", new_button);
-	}
-
-	this->cityUnitCreateProgressBar = new ProgressBar(cityWindow);
-	cityUnitCreateProgressBar->setValue(0.0f);
-	formHelper->addWidget("", cityUnitCreateProgressBar);
+	unitSpawnWidget = new UnitSpawnWidget(cityWindow);
+	formHelper->addWidget("", unitSpawnWidget);
 
 	cityWindow->setVisible(false);
 }
 
+
 void GUI::updateCityWindow() {
 	if (cityWindow->visible()) {
-
-		if (selectedCity->isProducing()) {
-			cityUnitCreateProgressBar->setValue((float) selectedCity->getPercentCompletion() / 100.0f);
-		}
-		else {
-			cityUnitCreateProgressBar->setValue(0.0f);
-		}
-
+		unitSpawnWidget->updateSelection(selectedCity);
 	}
 }
 
@@ -266,12 +250,8 @@ void GUI::hideSlotUI() {
 void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
 	selectedCity = city;
 	cityWindow->setTitle(city->getName());
+	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
 	citySlotInfoPanel->updateDisplay(city->get_slot());
-
-	for (auto& createUnitButton : createUnitButtons) {
-		createUnitButton->setCallback(unitCreateCallback);
-	}
-
 	cityWindow->setVisible(true);
 }
 

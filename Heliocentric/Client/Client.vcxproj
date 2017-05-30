@@ -257,6 +257,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClInclude Include="thruster_emitter.h" />
     <ClInclude Include="transformation.h" />
     <ClInclude Include="unit_create_button.h" />
+    <ClInclude Include="unit_spawn_widget.h" />
     <ClInclude Include="unit_window.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="view_frustum.h" />
@@ -302,6 +303,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClCompile Include="thruster_emitter.cpp" />
     <ClCompile Include="transformation.cpp" />
     <ClCompile Include="unit_create_button.cpp" />
+    <ClCompile Include="unit_spawn_widget.cpp" />
     <ClCompile Include="unit_window.cpp" />
     <ClCompile Include="view_frustum.cpp" />
   </ItemGroup>

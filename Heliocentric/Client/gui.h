@@ -6,6 +6,8 @@
 #include "game_object.h"
 #include "resources.h"
 #include "player.h"
+#include "unit_type.h"
+#include "unit_spawn_widget.h"
 #include "leaderboard_widget.h"
 #include "slot_info_panel.h"
 #include "unit_type.h"
@@ -75,9 +77,8 @@ private:
 
 	City* selectedCity = NULL;
 	ref<Window> cityWindow;
+	UnitSpawnWidget* unitSpawnWidget;
 	SlotInfoPanel* citySlotInfoPanel;
-	std::vector<UnitCreateButton*> createUnitButtons;
-	ProgressBar* cityUnitCreateProgressBar;
 	void updateCityWindow();
 
 	Window * playerOverlay;

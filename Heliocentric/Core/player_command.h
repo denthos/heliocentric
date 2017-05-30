@@ -28,6 +28,7 @@ public:
 	Resources::Type trade_selling;
 	int trade_sell_amount;
 
+
 	/* TODO: Include things like */
 	// UNIT_TYPE unit_type;
 

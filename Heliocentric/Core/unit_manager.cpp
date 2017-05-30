@@ -47,11 +47,11 @@ std::unordered_map<UID, std::unique_ptr<Unit>>& UnitManager::get_active_units() 
 	return this->active_units;
 }
 
-std::shared_ptr<UnitCreationUpdate> UnitManager::add_unit(glm::vec3 position, UnitType* type, Player* player) {
-	std::unique_ptr<Unit> new_unit = type->createUnit(position, player, this);
+std::shared_ptr<UnitCreationUpdate> UnitManager::add_unit(glm::vec3 create_location, UnitType* type, Player* player) {
+	std::unique_ptr<Unit> new_unit = type->createUnit(create_location, player, this);
 
 	auto update = std::make_shared<UnitCreationUpdate>(new_unit->getID(),
-		position.x, position.y, position.z, player->getID(), 100, 100, type->getIdentifier());
+		create_location.x, create_location.y, create_location.z, player->getID(), 100, 100, type->getIdentifier());
 
 	idle_units.insert(std::make_pair(new_unit->getID(), std::move(new_unit)));
 	return update;

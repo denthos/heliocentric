@@ -20,7 +20,7 @@ public:
 	Unit* get_unit(UID uid) const;
 
 	std::unordered_map<UID, std::unique_ptr<Unit>>& get_active_units();
-	std::shared_ptr<UnitCreationUpdate> add_unit(glm::vec3 position, UnitType* type, Player* player);
+	std::shared_ptr<UnitCreationUpdate> add_unit(glm::vec3 create_location, UnitType* type, Player* player);
 	void do_move(UID id, float x, float y, float z);
 	void do_attack(UID attacker_id, AttackableGameObject* enemy);
 	std::unordered_set<std::shared_ptr<UnitUpdate>>& get_updates();
