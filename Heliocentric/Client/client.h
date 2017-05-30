@@ -23,6 +23,7 @@
 #include "tcp_socket_connection.hpp"
 #include "universe.h"
 #include "unit_manager.h"
+#include "music_player.h"
 #include "gui.h"
 #include <glad\glad.h>
 #include <GLFW/glfw3.h>
@@ -81,6 +82,7 @@ protected:
 private:
 	GLFWwindow * window;
 	GUI * gui;
+	MusicPlayer musicPlayer;
 	unsigned int selectedCamera;
 	std::vector<Camera *> cameras;
 	std::vector<GameObject *> selection;

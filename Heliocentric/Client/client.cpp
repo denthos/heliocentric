@@ -264,6 +264,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	frameTimer = glfwGetTime();
 	frameCounter = 0;
+
+	musicPlayer.load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
+	musicPlayer.play();
 }
 
 Client::~Client() {
