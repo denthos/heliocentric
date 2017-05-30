@@ -505,49 +505,6 @@ void Client::update() {
 			UnitCommand move_command(units[unit_id]->getID(), new_pos.x, new_pos.y, new_pos.z);
 			channeled_send(&move_command);
 		}
-		/*
-		unit_direction = units[unit_id]->get_destination() - units[unit_id]->get_position();
-		unit_bbox = units[unit_id]->getBoundingBox();
-		unit_max = unit_bbox.max;
-		unit_min = unit_bbox.min;
-		float mid_y = (unit_max.y + unit_min.y) / 2.0f;
-		float mid_x = (unit_max.x + unit_min.x) / 2.0f;
-
-		lookAhead_origin = units[unit_id]->get_position() + glm::normalize(unit_direction) *100.0f;
-
-
-		Ray lookAhead = Ray(lookAhead_origin, unit_direction);
-		Drawable* closestDrawable = octree->intersect(lookAhead);
-
-		if (!closestDrawable) {
-			LOG_DEBUG("nothing to collide with");
-			continue;
-		}
-
-		//it's not the target, and it's close to the unit
-		glm::vec3 closestDrawable_pos = glm::vec3(closestDrawable->getToWorld()[3]);
-		float closestDrawable_Dist = glm::distance(closestDrawable_pos, lookAhead_origin);
-		//print pos before
-		LOG_DEBUG("pos before: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
-		//should change this to bbox dimensions
-
-		if ( closestDrawable_Dist < 50.0f) {
-			LOG_DEBUG("avoiding collisions");
-			//calculate the avoidance force
-			glm::vec3 lookAheadTip = lookAhead_origin + glm::normalize(unit_direction) * 50.0f;
-			glm::vec3 avoidance_force = glm::normalize( lookAheadTip - closestDrawable_pos);
-			glm::vec3 new_pos = units[unit_id]->get_position() + avoidance_force;
-			units[unit_id]->update_position(new_pos);
-
-			UnitCommand move_command(units[unit_id]->getID(), new_pos.x, new_pos.y, new_pos.z);
-			channeled_send(&move_command);
-			
-			//print pos after
-			LOG_DEBUG("pos after: " + std::to_string(units[unit_id]->get_position().x) + std::to_string(units[unit_id]->get_position().y) + std::to_string(units[unit_id]->get_position().z));
-
-		}
-
-		*/
 	}
 
 	
