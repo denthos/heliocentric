@@ -86,8 +86,11 @@ private:
 	Widget* slotResourcesWidget;
 	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
 
+	City* selectedCity = NULL;
 	ref<Window> cityWindow;
 	std::vector<UnitCreateButton*> createUnitButtons;
+	ProgressBar* cityUnitCreateProgressBar;
+	void updateCityWindow();
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;

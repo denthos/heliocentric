@@ -17,6 +17,7 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 	return dataMap;
 }
 
+
 DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader) : Unit(unit) {
 	this->data = getDataMap().at(getType()->getIdentifier());
 	this->shader = shader;

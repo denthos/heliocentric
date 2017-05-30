@@ -8,6 +8,7 @@
 #include "city_creation_update.h"
 #include "instant_laser_attack.h"
 #include "new_player_info_update.h"
+#include "unit_spawner_update.h"
 
 GameServer::GameServer(int tick_duration, std::string port, int listen_queue, int poll_timeout, int resource_update_interval) :
 	SunNet::ChanneledServer<SunNet::TCPSocketConnection>("0.0.0.0", port, listen_queue, poll_timeout), server_paused(false), resource_update_interval_seconds(resource_update_interval) {
@@ -23,6 +24,9 @@ GameServer::GameServer(int tick_duration, std::string port, int listen_queue, in
 	server_running = true;
 	this->tick_duration = tick_duration;
 	this->subscribeToChannels();
+
+	this->unit_manager = std::make_unique<UnitManager>();
+	this->city_manager = std::make_unique<CityManager>(unit_manager.get());
 }
 
 GameServer::~GameServer() {
@@ -37,8 +41,8 @@ GameServer::~GameServer() {
 }
 
 AttackableGameObject* GameServer::get_attackable(UID uid) const {
-	AttackableGameObject* ret = unit_manager.get_unit(uid);
-	return (ret == nullptr) ? city_manager.get_city(uid) : ret;
+	AttackableGameObject* ret = unit_manager->get_unit(uid);
+	return (ret == nullptr) ? city_manager->get_city(uid) : ret;
 }
 
 
@@ -203,15 +207,17 @@ void GameServer::performUpdates() {
 	this->universe.doLogic();
 
 	/* update the city manager */
-	this->city_manager.doLogic();
+	this->city_manager->doLogic();
 
 	/* update the unit manager */
-	this->unit_manager.doLogic();
-
+	this->unit_manager->doLogic();
 
 	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
-	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
-	this->addUpdateToSendQueue(city_manager.get_updates().begin(), city_manager.get_updates().end());
+	this->addUpdateToSendQueue(unit_manager->get_updates().begin(), unit_manager->get_updates().end());
+
+	this->addUpdateToSendQueue(city_manager->get_updates().begin(), city_manager->get_updates().end());
+	this->addUpdateToSendQueue(city_manager->getSpawnerUpdates().begin(), city_manager->getSpawnerUpdates().end());
+	this->addUpdateToSendQueue(city_manager->getCreationUpdates().begin(), city_manager->getCreationUpdates().end());
 
 	/* Give players resources based on their owned cities */
 	std::vector<std::shared_ptr<PlayerUpdate>> player_updates;
@@ -230,7 +236,7 @@ bool GameServer::updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>
 		return false;
 	}
 
-	for (auto& city_pair : city_manager.get_cities()) {
+	for (auto& city_pair : city_manager->get_cities()) {
 
 		if (!city_pair.second) {
 			LOG_ERR("Failed to update resources for city with UID <", city_pair.first, ">");
@@ -372,7 +378,7 @@ void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sen
 	}
 
 	/* Bundle and send the update */
-	std::shared_ptr<CityCreationUpdate> city_creation_update = city_manager.add_city(owning_player, slot_iter->second, command->city_name);
+	std::shared_ptr<CityCreationUpdate> city_creation_update = city_manager->add_city(owning_player, slot_iter->second, command->city_name);
 	this->addUpdateToSendQueue(city_creation_update);
 }
 
@@ -394,11 +400,13 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 					return;
 				}
 
-				std::shared_ptr<UnitCreationUpdate> update = unit_manager.add_unit(command, owner);
-
-				std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
+				/* Now we are going to add the unit to the city's queue */
+				auto spawnUpdate = this->city_manager->spawnUnit(command);
+				this->addUpdateToSendQueue(spawnUpdate);
 
 				/* Now we are going to decrement the player's resources */
+				std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
+
 				for (auto& resource_pair : type->getBuildRequirements()) {
 					owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
 					playerResourceUpdates.push_back(
@@ -407,7 +415,6 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 				}
 
 				this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
-				this->addUpdateToSendQueue(update);
 			});
 			break;
 		}
@@ -452,17 +459,17 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	switch (command->command_type) {
 		case UnitCommand::CMD_ATTACK:
 			LOG_DEBUG("Unit command type: CMD_ATTACK");
-				this->addFunctionToProcessQueue([this, command]() {
-					AttackableGameObject* target = get_attackable(command.get()->target);
-					if (target)
-						unit_manager.do_attack(command.get()->initiator, target);
-				});
+			this->addFunctionToProcessQueue([this, command]() {
+				AttackableGameObject* target = get_attackable(command.get()->target);
+				if (target)
+					unit_manager->do_attack(command.get()->initiator, target);
+			});
 			break;
 		case UnitCommand::CMD_MOVE:
 			LOG_DEBUG("Unit command type: CMD_MOVE");
 			// TODO: Delegate to UnitManager
 			this->addFunctionToProcessQueue([this, command]() {
-				unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
+				unit_manager->do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
 			});
 			break;
 		default:

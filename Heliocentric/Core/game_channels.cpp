@@ -17,6 +17,7 @@
 #include "unit_command.h"
 #include "trade_command.h"
 #include "settle_city_command.h"
+#include "unit_spawner_update.h"
 
 #include "trade_deal.h"
 #include "slot_update.h"
@@ -42,4 +43,5 @@ void initializeChannels() {
 	channels::addNewChannel<SlotUpdate>();
 
 	channels::addNewChannel<TradeData>();
+	channels::addNewChannel<UnitSpawnerUpdate>();
 }

@@ -52,8 +52,8 @@ private:
 
 	Universe universe;
 
-	UnitManager unit_manager;
-	CityManager city_manager;
+	std::unique_ptr<UnitManager> unit_manager;
+	std::unique_ptr<CityManager> city_manager;
 
 	AttackableGameObject* get_attackable(UID uid) const;
 	PlayerColor::Color nextPlayerColor = PlayerColor::FIRST;

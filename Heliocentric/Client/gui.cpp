@@ -4,6 +4,7 @@
 #include "selectable.h"
 #include "city.h"
 #include "resources.h"
+#include "unit_spawner.h"
 
 #define RESOURCE_IMAGE_DIRECTORY "Images/Resources"
 #define PIXELS_PER_CHARACTER 14
@@ -46,6 +47,8 @@ void GUI::update() {
 			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
 		}
 	}
+
+	updateCityWindow();
 }
 
 
@@ -205,7 +208,24 @@ void GUI::createCityDisplay() {
 		formHelper->addWidget("", new_button);
 	}
 
+	this->cityUnitCreateProgressBar = new ProgressBar(cityWindow);
+	cityUnitCreateProgressBar->setValue(0.0f);
+	formHelper->addWidget("", cityUnitCreateProgressBar);
+
 	cityWindow->setVisible(false);
+}
+
+void GUI::updateCityWindow() {
+	if (cityWindow->visible()) {
+
+		if (selectedCity->isProducing()) {
+			cityUnitCreateProgressBar->setValue((float) selectedCity->getPercentCompletion() / 100.0f);
+		}
+		else {
+			cityUnitCreateProgressBar->setValue(0.0f);
+		}
+
+	}
 }
 
 void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityCallback) {
@@ -229,6 +249,7 @@ void GUI::hideSlotUI() {
 }
 
 void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
+	selectedCity = city;
 	cityWindow->setTitle(city->getName());
 
 	for (auto& createUnitButton : createUnitButtons) {

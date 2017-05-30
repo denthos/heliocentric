@@ -5,11 +5,12 @@
 #include "attackable_game_object.h"
 #include "slot.h"
 #include "player.h"
+#include "unit_spawner.h"
 
 class CityUpdate;
 class CityManager;
 
-class City : public AttackableGameObject {
+class City : public AttackableGameObject, public UnitSpawner {
 public:
 	friend CityUpdate;
 
@@ -44,6 +45,9 @@ protected:
 	virtual void handle_victory(AttackableGameObject* opponent);
 	virtual void handle_counter(AttackableGameObject* opponent);
 	void send_update_to_manager(std::shared_ptr<CityUpdate>& update);
+
+	/* Override for UnitSpawner */
+	void spawnCompleteHandler(UnitType* type);
 	
 	std::shared_ptr<CityUpdate> update;
 	AttackableGameObject* target = nullptr;

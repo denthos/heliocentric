@@ -33,6 +33,7 @@
 #include "trade_deal.h"
 #include "instant_laser_attack.h"
 #include "selectable.h"
+#include "unit_spawner_update.h"
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -234,6 +235,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<UnitSpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
 	if (cameraSwitchKey >= 97 && cameraSwitchKey <= 122) cameraSwitchKey -= 32;
@@ -689,7 +691,7 @@ void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
 	}
 
 	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
-	PlayerCommand command(pos.x, pos.y, pos.z, unit_type->getIdentifier());
+	PlayerCommand command(pos.x, pos.y, pos.z, unit_type->getIdentifier(), city->getID());
 
 	this->channeled_send(&command);
 }
@@ -816,11 +818,22 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
     colorShader
-
 	);
 
 	player_it->second->acquire_object(newUnit.get());
 	units.insert(std::make_pair(update->id, std::move(newUnit)));
+}
+
+
+void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitSpawnerUpdate> update) {
+	auto& spawner_it = this->spawners.find(update->id);
+	if (spawner_it == this->spawners.end()) {
+		LOG_ERR("Invalid spawner id ", update->id);
+		return;
+	}
+
+	LOG_DEBUG(update->percent);
+	update->apply(spawner_it->second);
 }
 
 void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {
@@ -838,6 +851,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 		slot_iter->second->attachCity(newCity);
 		owner->acquire_object(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));
+		spawners.insert(std::make_pair(newCity->getID(), newCity));
 
 		if (newCity->get_player()->getID() == player->getID()) {
 			setSelection({ newCity });
