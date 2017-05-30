@@ -6,28 +6,12 @@
 #include "game_object.h"
 #include "resources.h"
 #include "player.h"
+#include "slot_info_panel.h"
 #include "unit_type.h"
 #include "unit_create_button.h"
 
 #include <nanogui\nanogui.h>
 #include <unordered_map>
-
-#if defined(NANOGUI_GLAD)
-	#if defined(NANOGUI_SHARED) && !defined(GLAD_GLAPI_EXPORT)
-		#define GLAD_GLAPI_EXPORT
-	#endif
-
-	#include <glad/glad.h>
-#else
-	#if defined(__APPLE__)
-		#define GLFW_INCLUDE_GLCOREARB
-	#else
-		#define GL_GLEXT_PROTOTYPES
-	#endif
-#endif
-
-
-using namespace nanogui;
 
 class Slot;
 class Client;
@@ -83,11 +67,11 @@ private:
 	std::string cityName = "Default CityName";
 	detail::FormWidget<std::string>* cityNameDisplay;
 
-	Widget* slotResourcesWidget;
-	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
+	SlotInfoPanel* slotInfoPanel;
 
 	City* selectedCity = NULL;
 	ref<Window> cityWindow;
+	SlotInfoPanel* citySlotInfoPanel;
 	std::vector<UnitCreateButton*> createUnitButtons;
 	ProgressBar* cityUnitCreateProgressBar;
 	void updateCityWindow();

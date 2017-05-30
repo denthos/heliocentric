@@ -248,6 +248,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClInclude Include="plane.h" />
     <ClInclude Include="drawable_planet.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="slot_info_panel.h" />
     <ClInclude Include="sphere_geometry.h" />
     <ClInclude Include="sphere_mesh.h" />
     <ClInclude Include="sphere_model.h" />
@@ -291,6 +292,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClCompile Include="orbit.cpp" />
     <ClCompile Include="drawable_planet.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="slot_info_panel.cpp" />
     <ClCompile Include="sphere_geometry.cpp" />
     <ClCompile Include="sphere_mesh.cpp" />
     <ClCompile Include="sphere_model.cpp" />

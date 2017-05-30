@@ -109,18 +109,15 @@ void GUI::createSlotDisplay() {
 	slotWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "Selected Planet");
 	slotWindow->setWidth(200);
 
-	formHelper->addGroup("Naming");
+
+
+	formHelper->addGroup("Slot Info");
+	this->slotInfoPanel = new SlotInfoPanel(slotWindow);
+	formHelper->addWidget("", this->slotInfoPanel);
+
+	formHelper->addGroup("Found a City");
 	// TODO: Make this a max of 16 characters
 	cityNameDisplay = formHelper->addVariable("Name", cityName);
-
-	formHelper->addGroup("Resources");
-	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
-		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
-		int rvar = 999999999;
-		detail::FormWidget<int>* resourceBox = formHelper->addVariable(Resources::toString(type_of_resource), rvar);
-		resourceBox->setEditable(false);
-		resourceDisplay.insert(std::make_pair(type_of_resource, resourceBox));
-	}
 
 	slotButton = formHelper->addButton("Establish City", []() {});
 	slotWindow->setVisible(false);
@@ -199,6 +196,11 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 void GUI::createCityDisplay() {
 	cityWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "City Name");
 
+	formHelper->addGroup("Slot Info");
+	citySlotInfoPanel = new SlotInfoPanel(cityWindow);
+	formHelper->addWidget("", citySlotInfoPanel);
+
+
 	formHelper->addGroup("Unit Management");
 	for (int i = UnitType::FIRST; i < UnitType::NUM_TYPES; i++) {
 		UnitType::TypeIdentifier type = static_cast<UnitType::TypeIdentifier>(i);
@@ -235,11 +237,7 @@ void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityC
 		slotWindow->setVisible(false);
 	});
 
-	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
-		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
-		int resource_count = slot->getResourceCount(type_of_resource);
-		resourceDisplay[type_of_resource]->setValue(resource_count);
-	}
+	slotInfoPanel->updateDisplay(slot);
 
 	slotWindow->setVisible(true);
 }
@@ -251,6 +249,7 @@ void GUI::hideSlotUI() {
 void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
 	selectedCity = city;
 	cityWindow->setTitle(city->getName());
+	citySlotInfoPanel->updateDisplay(city->get_slot());
 
 	for (auto& createUnitButton : createUnitButtons) {
 		createUnitButton->setCallback(unitCreateCallback);

@@ -16,6 +16,9 @@
     <Filter Include="Drawables">
       <UniqueIdentifier>{d8324c74-8739-43d5-ac6e-fd992bfdf8aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GUI">
+      <UniqueIdentifier>{8020546e-00f3-4bd7-9ae1-5f48374c8be0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\shader.vert">
@@ -157,17 +160,20 @@
     <ClInclude Include="assimp_geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="gui_utilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="selectable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="slot_info_panel.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_utilities.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
     <ClInclude Include="unit_window.h">
-      <Filter>Header Files</Filter>
+      <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="music_player.h">
       <Filter>Header Files</Filter>
@@ -285,14 +291,17 @@
     <ClCompile Include="..\packages\nanogui\ext\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="orbital_camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gui.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="slot_info_panel.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
     <ClCompile Include="unit_window.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="music_player.cpp">
       <Filter>Source Files</Filter>
