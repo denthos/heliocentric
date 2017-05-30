@@ -16,6 +16,8 @@ private:
 public:
 	CityManager();
 	void doLogic();
+	City* get_city(UID uid) const;
+
 	std::unordered_map<UID, std::unique_ptr<City>>& get_cities();
 	std::shared_ptr<CityCreationUpdate> add_city(Player* player, Slot* slot, std::string name);
 	std::unordered_set<std::shared_ptr<CityUpdate>>& get_updates();

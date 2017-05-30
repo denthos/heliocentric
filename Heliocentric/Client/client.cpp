@@ -855,14 +855,18 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	update->apply(units[update->id].get());
 	units[update->id]->update();
 
-	/* 
+	/*
 	Handle unit death. We don't want to edit the units map in another thread,
 	so let's pop it in the main thread's queue
 	*/
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
-	if (units[update->id]->get_health() <= 0) {
+	if (units[update->id]->is_dead()) {
 		auto& update_queue = Lib::key_acquire(this->update_queue);
 		update_queue.get().push([update, this]() {
+			if (selection.size() > 0 && selection[0]->getID() == update->id) {
+				selection.erase(selection.begin());
+			}
+			units[update->id]->unselect(gui, this);
 			units.erase(update->id);
 		});
 	}
@@ -870,6 +874,26 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 
 void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<CityUpdate> update) {
 	update->apply(cities[update->id].get());
+
+	// Handle city death
+	LOG_DEBUG("City with ID " + std::to_string(update->id) + " health is " + std::to_string(cities[update->id]->get_health()));
+	if (cities[update->id]->is_dead()) {
+		auto& update_queue = Lib::key_acquire(this->update_queue);
+		Player* owner = cities[update->id]->get_player();
+		Slot* slot = cities[update->id]->get_slot();
+
+		std::function<void()> deleteCityFunc = [slot, update, owner, this]() {
+			slot->detachCity();
+			owner->add_to_destroy(cities[update->id].get());
+			if (selection.size() > 0 && selection[0]->getID() == update->id) {
+				selection.erase(selection.begin());
+			}
+			cities[update->id]->unselect(gui, this);
+			cities.erase(update->id);
+		};
+		
+		update_queue.get().push(deleteCityFunc);
+	}
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {

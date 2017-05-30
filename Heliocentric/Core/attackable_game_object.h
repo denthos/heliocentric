@@ -47,6 +47,10 @@ protected:
 
 public:
 
+	/**
+	Returns boolean indicating whether or not this attackable is dead.
+	*/
+	bool is_dead();
 
 	/**
 	Creates an attackable 

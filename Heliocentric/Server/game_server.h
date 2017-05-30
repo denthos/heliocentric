@@ -55,6 +55,7 @@ private:
 	UnitManager unit_manager;
 	CityManager city_manager;
 
+	AttackableGameObject* get_attackable(UID uid) const;
 	PlayerColor::Color nextPlayerColor = PlayerColor::FIRST;
 
 	bool updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates);

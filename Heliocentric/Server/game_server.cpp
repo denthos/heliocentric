@@ -36,6 +36,11 @@ GameServer::~GameServer() {
 	}
 }
 
+AttackableGameObject* GameServer::get_attackable(UID uid) const {
+	AttackableGameObject* ret = unit_manager.get_unit(uid);
+	return (ret == nullptr) ? city_manager.get_city(uid) : ret;
+}
+
 
 void GameServer::addFunctionToProcessQueue(std::function<void()> work) {
 	auto& process_queue = Lib::key_acquire(this->update_process_queue);
@@ -194,11 +199,12 @@ void GameServer::performUpdates() {
 	/* First, update the universe */
 	this->universe.doLogic();
 
+	/* update the city manager */
+	this->city_manager.doLogic();
+
 	/* update the unit manager */
 	this->unit_manager.doLogic();
 
-	/* update the city manager */
-	this->city_manager.doLogic();
 
 	this->addUpdateToSendQueue(universe.get_updates().begin(), universe.get_updates().end());
 	this->addUpdateToSendQueue(unit_manager.get_updates().begin(), unit_manager.get_updates().end());
@@ -221,16 +227,14 @@ bool GameServer::updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>
 		return false;
 	}
 
-	for (auto& player_pair : players) {
-		for (auto& city_pair : player_pair.second->getOwnedObjects<City>()) {
-			City* city = dynamic_cast<City*>(city_pair.second);
-			if (!city) {
-				LOG_ERR("Player has city that isn't a city...");
-				continue;
-			}
+	for (auto& city_pair : city_manager.get_cities()) {
 
-			city->extractResourcesFromSlotAndCreateUpdates(player_updates, slot_updates);
+		if (!city_pair.second) {
+			LOG_ERR("Failed to update resources for city with UID <", city_pair.first, ">");
+			continue;
 		}
+
+		city_pair.second->extractResourcesFromSlotAndCreateUpdates(player_updates, slot_updates);
 	}
 
 	lastResourceUpdateTick = 0;
@@ -426,9 +430,11 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	switch (command->command_type) {
 		case UnitCommand::CMD_ATTACK:
 			LOG_DEBUG("Unit command type: CMD_ATTACK");
-			this->addFunctionToProcessQueue([this, command]() {
-				unit_manager.do_attack(command.get()->initiator, command.get()->target);
-			});
+				this->addFunctionToProcessQueue([this, command]() {
+					AttackableGameObject* target = get_attackable(command.get()->target);
+					if (target)
+						unit_manager.do_attack(command.get()->initiator, target);
+				});
 			break;
 		case UnitCommand::CMD_MOVE:
 			LOG_DEBUG("Unit command type: CMD_MOVE");
