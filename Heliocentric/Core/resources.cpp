@@ -2,7 +2,7 @@
 
 // TODO: Move these data->string mappings to the client config file
 std::unordered_map < Resources::Type, std::string> Resources::nameMap  = {
-		{ALUMINUM, "Aluminium"},
+		{ALUMINUM, "Aluminum"},
 		{GOLD, "Gold"},
 		{NANOMATERIAL, "Nanomaterial"},
 		{TITANIUM, "Titanium"},

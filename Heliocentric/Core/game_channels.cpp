@@ -11,6 +11,7 @@
 
 #include "player_id_confirmation.h"
 #include "player_client_to_server_xfer.h"
+#include "new_player_info_update.h"
 #include "debug_pause.h"
 #include "player_command.h"
 #include "unit_command.h"
@@ -18,6 +19,7 @@
 #include "settle_city_command.h"
 
 #include "trade_deal.h"
+#include "slot_update.h"
 
 void initializeChannels() {
 	using channels = SunNet::Channels;
@@ -31,11 +33,13 @@ void initializeChannels() {
 
 	channels::addNewChannel<PlayerIDConfirmation>();
 	channels::addNewChannel<PlayerClientToServerTransfer>();
+	channels::addNewChannel<NewPlayerInfoUpdate>();
 	channels::addNewChannel<DebugPause>();
 	channels::addNewChannel<PlayerCommand>();
 	channels::addNewChannel<UnitCommand>();
 	channels::addNewChannel<TradeCommand>();
-  channels::addNewChannel<SettleCityCommand>();
+	channels::addNewChannel<SettleCityCommand>();
+	channels::addNewChannel<SlotUpdate>();
 
 	channels::addNewChannel<TradeData>();
 }

@@ -94,7 +94,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window);
+	gui = new GUI(window, width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -188,6 +188,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	cameras[selectedCamera]->setActive(true);
 
 	init = true;
+	focused = true;
 
 	resizeCallback(width, height);
 
@@ -222,6 +223,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	initializeChannels();
 
 	this->subscribe<PlayerUpdate>(std::bind(&Client::playerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<NewPlayerInfoUpdate>(std::bind(&Client::newPlayerInfoUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitCreationUpdate>(std::bind(&Client::unitCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitUpdate>(std::bind(&Client::unitUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityUpdate>(std::bind(&Client::cityUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -229,6 +231,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
 	if (cameraSwitchKey >= 97 && cameraSwitchKey <= 122) cameraSwitchKey -= 32;
@@ -245,6 +248,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE),
+		std::bind(&Client::mouseRightClickHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
@@ -255,6 +260,9 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	catch (const SunNet::ConnectException&) {
 		LOG_ERR("Could not connect to host at address ", address, " and port ", port);
 	}
+
+	frameTimer = glfwGetTime();
+	frameCounter = 0;
 }
 
 Client::~Client() {
@@ -324,6 +332,7 @@ void Client::createWindow(int width, int height) {
 
 	glfwSetCharCallback(window,
 		[](GLFWwindow * window, unsigned int codepoint) {
+
 			glfwEntry[window]->gui->charCallbackEvent(codepoint);
 		}
 	);
@@ -350,100 +359,121 @@ void Client::createWindow(int width, int height) {
 			glfwEntry[window]->scrollWheelCallback(x, y);
 		}
 	);
+	glfwSetWindowFocusCallback(window,
+		[](GLFWwindow * window, int focused) {
+			glfwEntry[window]->focusCallback(focused);
+		}
+	);
 }
 
 void Client::display() {
-  //first pass: render the scene as usual with the bloom framebuffer as the active frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	if (focused || frameCounter % 3 == 0) {
+		//first pass: render the scene as usual with the bloom framebuffer as the active frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-	// Clear buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Clear buffers
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	cameras[selectedCamera]->update();
-	cameras[selectedCamera]->calculateViewMatrix();
-	cameras[selectedCamera]->calculateViewFrustum();
+		cameras[selectedCamera]->update();
+		cameras[selectedCamera]->calculateViewMatrix();
+		cameras[selectedCamera]->calculateViewFrustum();
 
-	Octree * newOctree = new Octree();
-	newOctree->enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
+		Octree * newOctree = new Octree();
+		newOctree->enableViewFrustumCulling(&cameras[selectedCamera]->viewFrustum);
 
-	for (auto it = planets.begin(); it != planets.end(); ++it) {
-		newOctree->insert((*it).second.get());
-	}
-	for (auto it = units.begin(); it != units.end(); ++it) {
-		newOctree->insert((*it).second.get());
-	}
-	for (auto it = cities.begin(); it != cities.end(); ++it) {
-		newOctree->insert((*it).second.get());
-	}
-	for (auto it = slots.begin(); it != slots.end(); ++it) {
-		newOctree->insert((*it).second);
-	}
-	newOctree->update();
+		for (auto it = planets.begin(); it != planets.end(); ++it) {
+			newOctree->insert((*it).second.get());
+		}
+		for (auto it = units.begin(); it != units.end(); ++it) {
+			newOctree->insert((*it).second.get());
+		}
+		for (auto it = cities.begin(); it != cities.end(); ++it) {
+			newOctree->insert((*it).second.get());
+		}
+		for (auto it = slots.begin(); it != slots.end(); ++it) {
+			newOctree->insert((*it).second);
+		}
+		newOctree->update();
 
-	skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
-	
-	Octree * delOctree = octree;
-	octree = newOctree;
-	octree->draw(*textureShader, *cameras[selectedCamera]);
-	delete delOctree;
-	//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
-	//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
-	
-	// blur the things that glow
-	int blurs = 5; //TODO init to number of blur iterations
-	bool blurX = true;
 
-	blurShader->bind();
+		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
 
-	//fill one of the gaussian frame buffers with the blurred bright extraction
-	glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
-	glBindTexture(GL_TEXTURE_2D, color_buff[BRIGHTNESS_BUFFER]);
-	glUniform1i(glGetUniformLocation(blurShader->getPid(), "blurX"), blurX);
+		Octree * delOctree = octree;
+		octree = newOctree;
+		octree->draw(*textureShader, *cameras[selectedCamera]);
+		delete delOctree;
 
-	quad->draw();
-	blurX = !blurX;
+		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
+		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
 
-	//blur the image
-	for (int i = 0; i < blurs; i++) { 
-		
-		//bind appropriate frame buffer
+		// blur the things that glow
+		int blurs = 5; //TODO init to number of blur iterations
+		bool blurX = true;
+
+		blurShader->bind();
+
+		//fill one of the gaussian frame buffers with the blurred bright extraction
 		glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
-		//bind appropriate texture to blur (the one opposite to the current frame buffer you're writing to)
+		glBindTexture(GL_TEXTURE_2D, color_buff[BRIGHTNESS_BUFFER]);
+		glUniform1i(glGetUniformLocation(blurShader->getPid(), "blurX"), blurX);
+
+		quad->draw();
+		blurX = !blurX;
+
+		//blur the image
+		for (int i = 0; i < blurs; i++) {
+
+			//bind appropriate frame buffer
+			glBindFramebuffer(GL_FRAMEBUFFER, gaussianFBO[blurX]);
+			//bind appropriate texture to blur (the one opposite to the current frame buffer you're writing to)
+			glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
+
+			blurX = !blurX; //switch between blur directions
+
+			//draw texture
+			quad->draw();
+		}
+
+		blurShader->unbind();
+
+		//return to the default frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//draw the quad 
+		quadShader->bind();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, color_buff[REGULAR_BUFFER]);
+
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
 
-		blurX = !blurX; //switch between blur directions
-
-		//draw texture
+		glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
+		glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
+		glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
+		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
 		quad->draw();
+
+		quadShader->unbind();
+
+		// draw the UI
+		gui->drawWidgets();
+
+		glfwSwapBuffers(window);
+
 	}
-	
-	blurShader->unbind();
 
-	//return to the default frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//draw the quad 
-	quadShader->bind();
+	double currentTime = glfwGetTime();
+	frameCounter++;
+	if (currentTime - frameTimer >= 1.0) {
+		gui->setFPS(1000.0 / (double)(frameCounter - lastFrame));
+		lastFrame = frameCounter;
+		//frameTimer = currentTime;
+		frameTimer += 1.0;
+	}
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, color_buff[REGULAR_BUFFER]);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, gaussian_color_buff[!blurX]);
-	
-	glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
-	glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
-	glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
-	glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
-	quad->draw();
-
-	quadShader->unbind();
-
-	// draw the UI
-	gui->drawWidgets();
-
-	glfwSwapBuffers(window);
 
 	glfwPollEvents();
 }
@@ -451,6 +481,8 @@ void Client::display() {
 void Client::update() {
 
 	cameras[selectedCamera]->update();
+	
+	gui->update();
 
 	//particles->Update(*camera);
 	
@@ -501,6 +533,7 @@ void Client::resizeCallback(int width, int height) {
 
 	if (gui) {
 		gui->resizeCallbackEvent(width, height);
+		gui->setScreenSize(width, height);
 	}
 }
 
@@ -527,6 +560,10 @@ void Client::scrollWheelCallback(double x, double y) {
 	}
 }
 
+void Client::focusCallback(int focused) {
+	this->focused = focused ? true : false;
+}
+
 void Client::setSelection(std::vector<GameObject*> new_selection) {
 	/* Deselect everything on the GUI */
 	gui->unselectSelection(this, selection);
@@ -542,12 +579,59 @@ void Client::setSelection(std::vector<GameObject*> new_selection) {
 }
 
 
-void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
-	/* Select a new thing */
+GameObject* Client::getObjectAtCursorPosition(const ScreenPosition& position) {
 	cameras[selectedCamera]->calculateViewMatrix();
-	GameObject * selected = dynamic_cast<GameObject *>(octree->intersect(cameras[selectedCamera]->projectRay(position)));
-	if (selected) {
-		setSelection({ selected });
+	return dynamic_cast<GameObject *>(octree->intersect(cameras[selectedCamera]->projectRay(position)));
+}
+
+
+void Client::mouseClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	GameObject* selected_obj = getObjectAtCursorPosition(position);
+
+	if (selected_obj) {
+		setSelection({ selected_obj });
+	}
+}
+
+void Client::mouseRightClickHandler(MouseButton mouseButton, ScreenPosition position) {
+	/* Right clicks are only useful if we currently have a selection and the selection is all ours */
+	if (this->selection.size() <= 0) {
+		return;
+	}
+	else {
+		for (GameObject* single_selection : this->selection) {
+			if (!single_selection->has_player() || single_selection->get_player()->getID() != this->player->getID()) {
+				return;
+			}
+		}
+	}
+
+	GameObject* selected_obj = getObjectAtCursorPosition(position);
+	if (!selected_obj) {
+		return;
+	}
+
+	/* If the right clicked thing is not unit or it is owned by the current player, move */
+	glm::vec3 obj_position = selected_obj->get_position();
+	AttackableGameObject* selected_attackable = dynamic_cast<AttackableGameObject*>(selected_obj);
+
+	/* come to think of it this should probably all be done on the server.. */
+	if (!selected_obj->has_player() || selected_obj->get_player()->getID() == this->player->getID() || !selected_attackable) {
+		LOG_DEBUG("Moving selection to position <", obj_position.x, ",", obj_position.y, ",", obj_position.z, ">");
+
+		for (GameObject* single_selection : selection) {
+			UnitCommand move_command(single_selection->getID(), obj_position.x, obj_position.y, obj_position.z);
+			channeled_send(&move_command);
+		}
+	}
+	/* The right clicked thing is a unit and not owned by the current player */
+	else {
+		LOG_DEBUG("Selection attacking unit with ID ", selected_obj->getID());
+
+		for (GameObject* single_selection : selection) {
+			UnitCommand attack_command(single_selection->getID(), selected_obj->getID());
+			channeled_send(&attack_command);
+		}
 	}
 }
 
@@ -591,9 +675,11 @@ void Client::handleF2Key(int key) {
 	this->channeled_send(&deal);
 }
 
+
 void Client::createUnitFromCity(DrawableCity* city) {
 	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
 	PlayerCommand command(pos.x, pos.y, pos.z); 
+
 	this->channeled_send(&command);
 }
 
@@ -691,30 +777,37 @@ void Client::handleF12Key(int key) {
 	this->channeled_send(&command);
 }
 
+
+void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
+	auto& player_it = players.find(update->player_id);
+	if (player_it == players.end()) {
+		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
+		players[update->player_id] = std::make_shared<Player>(update->name, update->player_id);
+	}
+}
+
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
 	LOG_DEBUG("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
 	if (player_it == players.end()) {
-		players[update->id] = std::make_shared<Player>(update->player_name, update->id);
+		return;
 	}
 
-	if (this->player->getID() == update->id) {
-		LOG_DEBUG("Player gold amount before trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
-	}
 	update->apply(players[update->id].get());
-
-	if (this->player->getID() == update->id) {
-		LOG_DEBUG("Player gold amount after trading: ", players[update->id]->get_resource_amount(Resources::GOLD));
-	}
 }
 
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
 	LOG_DEBUG("Unit creation update received");
-	Lib::assertTrue(players.find(update->player_id) != players.end(), "Invalid player ID");
-	units[update->id] = std::make_unique<DrawableUnit>(
-		Unit(update->id, glm::vec3(update->x, update->y, update->z), players[update->player_id].get(), new InstantLaserAttack(), update->def, update->health),
+	auto& player_it = players.find(update->player_id);
+	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
+
+	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
+		Unit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), new InstantLaserAttack(), nullptr, update->def, update->health),
 		spaceship
 	);
+
+	player_it->second->acquire_object(newUnit.get());
+	units.insert(std::make_pair(update->id, std::move(newUnit)));
 }
 
 void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {
@@ -725,10 +818,12 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	auto& slot_iter = slots.find(update->slot_id);
 	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
 
+	Player* owner = player_iter->second.get();
 	auto& update_queue = Lib::key_acquire(this->update_queue);
-	std::function<void()> createCityFunc = [slot_iter, update, player_iter, this]() {
-		DrawableCity* newCity = new DrawableCity(City(update->city_id, player_iter->second.get(), new InstantLaserAttack(), 0, 0, 0, 0, slot_iter->second, update->name));
+	std::function<void()> createCityFunc = [slot_iter, update, owner, this]() {
+		DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name));
 		slot_iter->second->attachCity(newCity);
+		owner->acquire_object(newCity);
 		cities.insert(std::make_pair(newCity->getID(), newCity));
 
 		if (newCity->get_player()->getID() == player->getID()) {
@@ -744,6 +839,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 	std::string player_name = Lib::INIParser::getInstance().get<std::string>("PlayerName");
 	this->player = std::make_shared<Player>(player_name, update->id);
 	players[update->id] = this->player;
+	gui->setPlayer(this->player);
 
 	PlayerClientToServerTransfer info_transfer(player_name);
 
@@ -790,6 +886,14 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
 	}
+}
+
+void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SlotUpdate> update) {
+	LOG_DEBUG("Received a slot update");
+	auto& slot_it = slots.find(update->id);
+	Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found");
+
+	update->apply(slot_it->second);
 }
 
 void Client::handle_client_disconnect() {

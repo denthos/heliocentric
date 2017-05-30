@@ -4,20 +4,23 @@
 #include "unit_manager.h"
 #include "glm/gtc/matrix_transform.hpp"
 
-Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
-	AttackableGameObject(pos, owner, attack, def, heal) {
-	this->update = std::make_shared<UnitUpdate>(this->getID(), this->get_health(), pos.x, pos.y, pos.z);
-	this->movement_speed = movement_speed;
-	this->manager = nullptr;
-	this->target = nullptr;
+Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed) :
+	AttackableGameObject(pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed) {
+
+	initialize();
+
 }
 
-Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, int def, int heal, float movement_speed) :
-	AttackableGameObject(id, pos, owner, attack, def, heal) {
-	this->update = std::make_shared<UnitUpdate>(id, this->get_health(), pos.x, pos.y, pos.z);
-	this->movement_speed = movement_speed;
-	this->manager = nullptr;
-	this->target = nullptr;
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed) :
+	AttackableGameObject(id, pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed) {
+
+	initialize();
+
+}
+
+void Unit::initialize() {
+	glm::vec3 pos = get_position();
+	this->update = std::make_shared<UnitUpdate>(getID(), this->get_health(), pos.x, pos.y, pos.z);
 }
 
 Unit::CommandType Unit::do_logic() {
@@ -135,12 +138,6 @@ void Unit::handle_counter(AttackableGameObject* opponent) {
 	// Unit has been attacked, notify 
 	send_update_to_manager(make_update());
 }
-
-
-void Unit::set_manager(UnitManager* manager) {
-	this->manager = manager;
-}
-
 
 void Unit::send_update_to_manager(std::shared_ptr<UnitUpdate>& update) {
 	if (this->manager != nullptr) {

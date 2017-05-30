@@ -5,10 +5,17 @@
 #include "unit_update.h"
 #include "drawable_data.h"
 #include "model.h"
+#include "selectable.h"
 
-class DrawableUnit : public Unit, public Drawable {
+class GUI;
+class Client;
+
+class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
 	DrawableUnit(const Unit & unit, Model* spaceship);
 	~DrawableUnit();
 	virtual void update();
+
+	void select(GUI*, Client*);
+	void unselect(GUI*, Client*);
 };

@@ -21,6 +21,10 @@ void Model::update() {
 	}
 }
 
+bool Model::intersect(const Ray & ray, Collision & collision) const {
+	return boundingBox.intersect(ray, collision);
+}
+
 BoundingBox Model::getBoundingBox() {
 	return boundingBox;
 }

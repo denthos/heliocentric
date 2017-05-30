@@ -72,16 +72,20 @@ void Player::pop() {
 }
 
 std::unordered_map<unsigned int, GameObject*> Player::get_units() {
-	return owned_objects[std::type_index(typeid(Unit))];
+	return getOwnedObjects<Unit>();
 }
 
 GameObject* Player::get_unit(UID id) {
 	return owned_objects[std::type_index(typeid(Unit))][id];
 }
 
-float Player::get_resource_amount(Resources::Type resource_type) {
+int Player::get_resource_amount(Resources::Type resource_type) {
 	/* Assuming the parameter is a valid resource type, because it really should be. */
 	return owned_resources[resource_type];
+}
+
+void Player::change_resource_amount(Resources::Type type, int delta) {
+	owned_resources[type] += delta;
 }
 
 void Player::receive_trade_deal(std::shared_ptr<TradeDeal> deal) {
