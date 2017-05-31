@@ -214,9 +214,6 @@ void GameServer::performUpdates() {
 		it.second->doLogic();
 	}
 
-	/* update the unit manager */
-	this->unit_manager.doLogic();
-  
 	/* update player manager */
 	this->player_manager->doLogic();
 
