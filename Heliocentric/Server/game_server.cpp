@@ -209,6 +209,14 @@ void GameServer::performUpdates() {
 	/* First, update the universe */
 	this->universe.doLogic();
 
+	/* TODO: Maybe needs to add player manager, or maybe not... */
+	for (auto& it : this->players) {
+		it.second->doLogic();
+	}
+
+	/* update the unit manager */
+	this->unit_manager.doLogic();
+  
 	/* update player manager */
 	this->player_manager->doLogic();
 

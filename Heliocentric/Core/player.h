@@ -28,6 +28,8 @@ public:
 	Player(PlayerManager* player_manager, std::string player_name, PlayerColor::Color color);
 	Player(std::string player_name, UID id, PlayerColor::Color color);
 
+	void doLogic(); // Perform all logic that is done every server tick.
+
 	std::string get_name() const;
 	void set_name(std::string new_name);
 
@@ -37,6 +39,8 @@ public:
 
 	void increase_player_score(int);
 	void decrease_player_score(int);
+
+	float get_research_points();
 
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
@@ -74,6 +78,8 @@ private:
 	PlayerManager* manager;
 	std::string name;
 	int player_score;
+	float research_points; // research points accumulated every tick
+  
 	TechTree tech_tree;
 	PlayerColor::Color color;
 
