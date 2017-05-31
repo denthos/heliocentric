@@ -29,6 +29,7 @@ GameServer::GameServer(int tick_duration, std::string port, int listen_queue, in
 
 	this->unit_manager = std::make_unique<UnitManager>();
 	this->city_manager = std::make_unique<CityManager>(unit_manager.get());
+	this->player_manager = std::make_unique<PlayerManager>();
 }
 
 GameServer::~GameServer() {
@@ -75,7 +76,7 @@ void GameServer::handle_channeledclient_error(SunNet::ChanneledSocketConnection_
 void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnection_p client) {
 	/* A new client is connected! Assign them an ID */
 	LOG_DEBUG("A new client connected.");
-	std::unique_ptr<Player> player = std::make_unique<Player>("PLAYER_NAME", this->nextPlayerColor);
+	std::unique_ptr<Player> player = std::make_unique<Player>(player_manager.get(), "PLAYER_NAME", this->nextPlayerColor);
 
 	int nextColor = static_cast<int>(this->nextPlayerColor) + 1;
 	if (nextColor >= PlayerColor::NUM_COLORS) {
@@ -208,6 +209,9 @@ void GameServer::performUpdates() {
 	/* First, update the universe */
 	this->universe.doLogic();
 
+	/* update player manager */
+	this->player_manager->doLogic();
+
 	/* update the city manager */
 	this->city_manager->doLogic();
 
@@ -220,6 +224,8 @@ void GameServer::performUpdates() {
 	this->addUpdateToSendQueue(city_manager->get_updates().begin(), city_manager->get_updates().end());
 	this->addUpdateToSendQueue(city_manager->getSpawnerUpdates().begin(), city_manager->getSpawnerUpdates().end());
 	this->addUpdateToSendQueue(city_manager->getCreationUpdates().begin(), city_manager->getCreationUpdates().end());
+
+	this->addUpdateToSendQueue(player_manager->getPlayerScoreUpdates().begin(), player_manager->getPlayerScoreUpdates().end());
 
 	/* Give players resources based on their owned cities */
 	std::vector<std::shared_ptr<PlayerUpdate>> player_updates;

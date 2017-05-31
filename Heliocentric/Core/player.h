@@ -17,23 +17,26 @@
 class GameObject;
 class PlayerUpdate;
 class NewPlayerInfoUpdate;
+class PlayerScoreUpdate;
+class PlayerManager;
 
 class Player : public Identifiable {
 public:
+	friend PlayerScoreUpdate;
 	friend PlayerUpdate;
 	friend NewPlayerInfoUpdate;
-	Player(std::string player_name, PlayerColor::Color color);
+	Player(PlayerManager* player_manager, std::string player_name, PlayerColor::Color color);
 	Player(std::string player_name, UID id, PlayerColor::Color color);
 
 	std::string get_name() const;
 	void set_name(std::string new_name);
 
-	float get_player_score() const;
+	int get_player_score() const;
 	PlayerColor::Color getColor() const;
 	void setColor(PlayerColor::Color);
 
-	void increase_player_score(float);
-	void decrease_player_score(float);
+	void increase_player_score(int);
+	void decrease_player_score(int);
 
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
@@ -68,10 +71,14 @@ public:
 	std::unordered_map<std::type_index, std::unordered_map<UID, GameObject*>> owned_objects; // TODO: move to private
 
 private:
+	PlayerManager* manager;
 	std::string name;
-	float player_score;
+	int player_score;
 	TechTree tech_tree;
 	PlayerColor::Color color;
+
+	std::shared_ptr<PlayerScoreUpdate> score_update;
+	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
   
 	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns

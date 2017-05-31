@@ -8,6 +8,7 @@
 #include "planet_update.h"
 #include "city_update.h"
 #include "city_creation_update.h"
+#include "player_score_update.h"
 
 #include "player_id_confirmation.h"
 #include "player_client_to_server_xfer.h"
@@ -47,4 +48,5 @@ void initializeChannels() {
 	channels::addNewChannel<TradeData>();
 	channels::addNewChannel<GameOverUpdate>();
 	channels::addNewChannel<UnitSpawnerUpdate>();
+	channels::addNewChannel<PlayerScoreUpdate>();
 }

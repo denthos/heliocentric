@@ -1,4 +1,6 @@
 #include "player.h"
+#include "player_score_update.h"
+#include "player_manager.h"
 #include "unit.h"
 #include "planet.h"
 #include "city.h"
@@ -7,16 +9,16 @@
 #include <iostream>
 #include <string>
 
-Player::Player(std::string player_name, PlayerColor::Color color) : Identifiable(), name(player_name), color(color) {
+Player::Player(PlayerManager* player_manager, std::string player_name, PlayerColor::Color color) : Identifiable(), manager(player_manager), name(player_name), color(color) {
 	initialize();
 }
 
-Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Identifiable(id), name(player_name), color(color) {
+Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Identifiable(id), manager(nullptr), name(player_name), color(color) {
 	initialize();
 }
 
 void Player::initialize() {
-	player_score = 10.0f;
+	player_score = 10;
 
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
 	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
@@ -29,6 +31,7 @@ void Player::initialize() {
 	owned_resources[Resources::NANOMATERIAL] = 100;
 	owned_resources[Resources::TITANIUM] = 100;
 	owned_resources[Resources::URANIUM] = 100;
+	this->score_update = std::make_shared<PlayerScoreUpdate>(getID(), this->get_player_score());
 }
 
 std::string Player::get_name() const {
@@ -48,17 +51,29 @@ void Player::set_name(std::string new_name) {
 	name = new_name;
 }
 
-float Player::get_player_score() const {
+int Player::get_player_score() const {
 	return player_score;
 }
 
-void Player::increase_player_score(float delta) {
+void Player::increase_player_score(int delta) {
 	player_score += delta;
+	this->score_update->new_score = this->get_player_score();
+	this->send_update_to_manager(this->score_update);
 }
 
-void Player::decrease_player_score(float delta) {
+void Player::decrease_player_score(int delta) {
 	player_score -= delta;
+	this->score_update->new_score = this->get_player_score();
+	this->send_update_to_manager(this->score_update);
 }
+
+void Player::send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update) {
+	if (manager != nullptr) {
+		// No manager on client side :)
+		this->manager->register_update(update);
+	}
+}
+
 
 void Player::acquire_object(GameObject* object) {
 	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));

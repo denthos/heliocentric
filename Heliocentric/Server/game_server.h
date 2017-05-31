@@ -20,6 +20,7 @@
 #include "universe.h"
 #include "unit_manager.h"
 #include "city_manager.h"
+#include "player_manager.h"
 #include "slot_update.h"
 #include "player_color.h"
 
@@ -54,6 +55,7 @@ private:
 
 	std::unique_ptr<UnitManager> unit_manager;
 	std::unique_ptr<CityManager> city_manager;
+	std::unique_ptr<PlayerManager> player_manager;
 
 	AttackableGameObject* get_attackable(UID uid) const;
 	PlayerColor::Color nextPlayerColor = PlayerColor::FIRST;

@@ -194,6 +194,12 @@
     <ClInclude Include="game_over_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
+    <ClInclude Include="player_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player_score_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -339,6 +345,12 @@
     </ClCompile>
     <ClCompile Include="player_color.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player_score_update.cpp">
+      <Filter>Updates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
