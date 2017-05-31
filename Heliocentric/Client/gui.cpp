@@ -174,6 +174,7 @@ void GUI::createPlayerOverlay() {
 }
 
 void GUI::createTradeDisplay() {
+	LOG_DEBUG("Creating trade display");
 	tradeWindow = formHelper->addWindow(Eigen::Vector2i(500, 500), "Trade Deal");
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
 }

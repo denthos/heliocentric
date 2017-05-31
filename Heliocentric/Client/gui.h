@@ -58,11 +58,9 @@ public:
 	void displayCityUI(City* city, std::function<void()> createUnitCallback);
 	void hideCityUI();
 
-	void displayTradeUI();
+	void createTradeDisplay();
+	void customizeTrade(Player* my_player, Player* trade_partner);
 	void hideTradeUI();
-
-private:
-
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
 
