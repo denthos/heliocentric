@@ -3,7 +3,7 @@
 UnitWindow::UnitWindow(Widget* parent, const std::string &title) : Window(parent, title)
 {
 
-	this->setPosition(Vector2i(10 , 40));
+	this->setPosition(Vector2i(10 , 120));
 
 	setLayout(new GroupLayout());
 

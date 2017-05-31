@@ -3,30 +3,18 @@
 #include "gui_utilities.h"
 #include "unit_window.h"
 
-
 #include "game_object.h"
 #include "resources.h"
 #include "player.h"
+#include "unit_type.h"
+#include "unit_spawn_widget.h"
+#include "leaderboard_widget.h"
+#include "slot_info_panel.h"
+#include "unit_type.h"
+#include "unit_create_button.h"
 
 #include <nanogui\nanogui.h>
 #include <unordered_map>
-
-#if defined(NANOGUI_GLAD)
-	#if defined(NANOGUI_SHARED) && !defined(GLAD_GLAPI_EXPORT)
-		#define GLAD_GLAPI_EXPORT
-	#endif
-
-	#include <glad/glad.h>
-#else
-	#if defined(__APPLE__)
-		#define GLFW_INCLUDE_GLCOREARB
-	#else
-		#define GL_GLEXT_PROTOTYPES
-	#endif
-#endif
-
-
-using namespace nanogui;
 
 class Slot;
 class Client;
@@ -55,14 +43,18 @@ public:
 	void hideSlotUI();
 
 
-	void displayCityUI(City* city, std::function<void()> createUnitCallback);
+	void displayCityUI(City* city, std::function<void(UnitType*)> createUnitCallback);
 	void hideCityUI();
 
 	void createTradeDisplay();
 	void customizeTrade(Player* my_player, Player* trade_partner);
-	void hideTradeUI();
+	void hideCustomTradeUI();
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
+
+	void showGameOverWindow(bool victorious);
+	void hideGameOverWindow();
+	void updatePlayerLeaderboardValue(const Player* player);
 
 private:
 	int screenWidth, screenHeight;
@@ -72,8 +64,10 @@ private:
 	void createUidDisplay();
 	void createSlotDisplay();
 	void createCityDisplay();
-	void createTradeDisplay(Player* my_player, Player* trade_partner);
+	void createCustomTradeDisplay();
 	void createPlayerOverlay();
+	void createGameOverWindow();
+	void createLeaderboardWindow();
 
 	std::pair<int, std::string> placeholderImage;
 
@@ -86,11 +80,16 @@ private:
 	std::string cityName = "Default CityName";
 	detail::FormWidget<std::string>* cityNameDisplay;
 
-	Widget* slotResourcesWidget;
-	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
+	SlotInfoPanel* slotInfoPanel;
 
+	City* selectedCity = NULL;
 	ref<Window> cityWindow;
-	Button* createUnitButton;
+	UnitSpawnWidget* unitSpawnWidget;
+	SlotInfoPanel* citySlotInfoPanel;
+	void updateCityWindow();
+
+	ref<Window> gameOverWindow;
+	Label* gameOverLabel;
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;
@@ -98,6 +97,14 @@ private:
 	Label * fpsSpacer;
 	Label * fpsDisplay;
 
+	Window* leaderboardWindow;
+	LeaderboardWidget* leaderboardWidget;
+
+	// Everything Trade
 	ref<Window> tradeWindow;
+	ref<Window> customTradeWindow = NULL;
 	Button* createTradeButton;
+	Button* sendTradeButton;
+	Button* closeTradeButton;
+	float offerBaseVal = 0;
 };

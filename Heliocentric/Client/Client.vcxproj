@@ -90,12 +90,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SourceDir)..\packages\Assimp.3.0.0\build\native\include;$(SourceDir)..\packages\nupengl.core.redist.0.1.0.1;$(SourceDir)..\packages\nupengl.core.0.1.0.1;$(SourceDir)..\packages\soil.1.16.0\build\native\lib\x64\Release;$(SourceDir)..\packages\nanogui\ext\eigen;$(SourceDir)..\packages\nanogui\ext\glad\include;$(SourceDir)..\packages\nanogui\ext\nanovg\src;$(SourceDir)..\packages\nanogui\build\native\include;$(SourceDir)..\packages\soil.1.16.0\build\native\include;$(MSBuildThisFileDirectory)include;$(SolutionDir)/Core;$(SolutionDir)/SunNet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SourceDir)..\packages\Assimp.3.0.0\build\native\include;$(SourceDir)..\packages\nupengl.core.redist.0.1.0.1;$(SourceDir)..\packages\nupengl.core.0.1.0.1;$(SourceDir)..\packages\soil.1.16.0\build\native\lib\x64\Release;$(SourceDir)..\packages\fmod\inc;$(SourceDir)..\packages\nanogui\ext\eigen;$(SourceDir)..\packages\nanogui\ext\glad\include;$(SourceDir)..\packages\nanogui\ext\nanovg\src;$(SourceDir)..\packages\nanogui\build\native\include;$(SourceDir)..\packages\soil.1.16.0\build\native\include;$(MSBuildThisFileDirectory)include;$(SolutionDir)/Core;$(SolutionDir)/SunNet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;COMPILE_TIME_LOG_LEVEL=0;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>nanogui.lib;Core.lib;SunNet.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration);$(SolutionDir)/$(Platform)/$(Configuration);$(MSBuildThisFileDirectory)lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>fmod64_vc.lib;nanogui.lib;Core.lib;SunNet.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\fmod\lib;$(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration);$(SolutionDir)/$(Platform)/$(Configuration);$(MSBuildThisFileDirectory)lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -120,12 +120,14 @@
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>xcopy /D /Y Client_config.ini $(OutDir)
-xcopy /D /Y $(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration)\nanogui.dll $(OutDir)
+xcopy /D /Y $(SolutionDir)packages\nanogui\build\native\lib\x64\$(Configuration)\nanogui.dll $(OutDir)
+xcopy /D /Y $(SolutionDir)packages\fmod\lib\fmod64.dll $(OutDir)
 xcopy /I /D /E /Y Shaders\* $(OutDir)Shaders\
 xcopy /I /D /E /Y Textures\* $(OutDir)Textures\
 xcopy /I /D /E /Y Models\* $(OutDir)Models\
 xcopy /I /D /E /Y Images\* $(OutDir)Images\
-xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
+xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\
+xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Copying game resource files</Message>
@@ -155,14 +157,14 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SourceDir)..\packages\Assimp.3.0.0\build\native\include;$(SourceDir)..\packages\nupengl.core.redist.0.1.0.1;$(SourceDir)..\packages\nupengl.core.0.1.0.1;$(SourceDir)..\packages\soil.1.16.0\build\native\lib\x64\Release;$(SourceDir)..\packages\nanogui\ext\eigen;$(SourceDir)..\packages\nanogui\ext\glad\include;$(SourceDir)..\packages\nanogui\ext\nanovg\src;$(SourceDir)..\packages\nanogui\build\native\include;$(SourceDir)..\packages\soil.1.16.0\build\native\include;$(MSBuildThisFileDirectory)include;$(SolutionDir)/Core;$(SolutionDir)/SunNet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SourceDir)..\packages\fmod\inc;$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SourceDir)..\packages\Assimp.3.0.0\build\native\include;$(SourceDir)..\packages\nupengl.core.redist.0.1.0.1;$(SourceDir)..\packages\nupengl.core.0.1.0.1;$(SourceDir)..\packages\soil.1.16.0\build\native\lib\x64\Release;$(SourceDir)..\packages\nanogui\ext\eigen;$(SourceDir)..\packages\nanogui\ext\glad\include;$(SourceDir)..\packages\nanogui\ext\nanovg\src;$(SourceDir)..\packages\nanogui\build\native\include;$(SourceDir)..\packages\soil.1.16.0\build\native\include;$(MSBuildThisFileDirectory)include;$(SolutionDir)/Core;$(SolutionDir)/SunNet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;COMPILE_TIME_LOG_LEVEL=0;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>nanogui.lib;Core.lib;SunNet.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration);$(SolutionDir)/$(Platform)/$(Configuration);$(MSBuildThisFileDirectory)lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>fmod64_vc.lib;nanogui.lib;Core.lib;SunNet.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\fmod\lib;$(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration);$(SolutionDir)/$(Platform)/$(Configuration);$(MSBuildThisFileDirectory)lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -187,12 +189,14 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>xcopy /D /Y Client_config.ini $(OutDir)
-xcopy /D /Y $(SolutionDir)\packages\nanogui\build\native\lib\x64\$(Configuration)\nanogui.dll $(OutDir)
+xcopy /D /Y $(SolutionDir)packages\nanogui\build\native\lib\x64\$(Configuration)\nanogui.dll $(OutDir)
+xcopy /D /Y $(SolutionDir)packages\fmod\lib\fmod64.dll $(OutDir)
 xcopy /I /D /E /Y Shaders\* $(OutDir)Shaders\
 xcopy /I /D /E /Y Textures\* $(OutDir)Textures\
 xcopy /I /D /E /Y Models\* $(OutDir)Models\
 xcopy /I /D /E /Y Images\* $(OutDir)Images\
-xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
+xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\
+xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Copying game resource files</Message>
@@ -217,8 +221,11 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClInclude Include="gui.h" />
     <ClInclude Include="free_camera.h" />
     <ClInclude Include="gui_utilities.h" />
+    <ClInclude Include="leaderboard_widget.h" />
+    <ClInclude Include="model_preloader.h" />
     <ClInclude Include="mouse_button_status.h" />
     <ClInclude Include="mouse_handler.h" />
+    <ClInclude Include="music_player.h" />
     <ClInclude Include="orbital_camera.h" />
     <ClInclude Include="quad.h" />
     <ClInclude Include="laser_emitter.h" />
@@ -228,7 +235,6 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClInclude Include="drawable_slot.h" />
     <ClInclude Include="keyboard_handler.h" />
     <ClInclude Include="drawable.h" />
-    <ClInclude Include="drawable_data.h" />
     <ClInclude Include="drawable_unit.h" />
     <ClInclude Include="mesh_geometry.h" />
     <ClInclude Include="selectable.h" />
@@ -243,12 +249,15 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClInclude Include="plane.h" />
     <ClInclude Include="drawable_planet.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="slot_info_panel.h" />
     <ClInclude Include="sphere_geometry.h" />
     <ClInclude Include="sphere_mesh.h" />
     <ClInclude Include="sphere_model.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="thruster_emitter.h" />
     <ClInclude Include="transformation.h" />
+    <ClInclude Include="unit_create_button.h" />
+    <ClInclude Include="unit_spawn_widget.h" />
     <ClInclude Include="unit_window.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="view_frustum.h" />
@@ -261,7 +270,10 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClCompile Include="client.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="free_camera.cpp" />
+    <ClCompile Include="leaderboard_widget.cpp" />
+    <ClCompile Include="model_preloader.cpp" />
     <ClCompile Include="mouse_handler.cpp" />
+    <ClCompile Include="music_player.cpp" />
     <ClCompile Include="orbital_camera.cpp" />
     <ClCompile Include="quad.cpp" />
     <ClCompile Include="laser_emitter.cpp" />
@@ -271,7 +283,6 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClCompile Include="drawable_slot.cpp" />
     <ClCompile Include="keyboard_handler.cpp" />
     <ClCompile Include="drawable.cpp" />
-    <ClCompile Include="drawable_data.cpp" />
     <ClCompile Include="drawable_unit.cpp" />
     <ClCompile Include="mesh_geometry.cpp" />
     <ClCompile Include="skybox_geometry.cpp" />
@@ -284,12 +295,15 @@ xcopy /I /D /E /Y Fonts\* $(OutDir)Fonts\</Command>
     <ClCompile Include="orbit.cpp" />
     <ClCompile Include="drawable_planet.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="slot_info_panel.cpp" />
     <ClCompile Include="sphere_geometry.cpp" />
     <ClCompile Include="sphere_mesh.cpp" />
     <ClCompile Include="sphere_model.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="thruster_emitter.cpp" />
     <ClCompile Include="transformation.cpp" />
+    <ClCompile Include="unit_create_button.cpp" />
+    <ClCompile Include="unit_spawn_widget.cpp" />
     <ClCompile Include="unit_window.cpp" />
     <ClCompile Include="view_frustum.cpp" />
   </ItemGroup>

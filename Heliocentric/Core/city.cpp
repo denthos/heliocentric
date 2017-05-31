@@ -6,7 +6,7 @@
 #include "city_manager.h"
 
 City::City(Player* owner, Attack* attack, CityManager* manager, int def, int heal, int pr, int pop, Slot* assigned_slot, std::string name) :
-	AttackableGameObject(assigned_slot->get_position(), owner, attack, def, heal), production(pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
+	AttackableGameObject(assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID()), production(pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
 
 	initialize();
 
@@ -14,7 +14,7 @@ City::City(Player* owner, Attack* attack, CityManager* manager, int def, int hea
 
 
 City::City(UID id, Player* owner, Attack* attack, CityManager* manager, int def, int heal, int pr, int pop, Slot* assigned_slot, std::string name) :
-	AttackableGameObject(id, assigned_slot->get_position(), owner, attack, def, heal), production(pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
+	AttackableGameObject(id, assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID()), production(pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
 
 	initialize();
 
@@ -55,20 +55,24 @@ void City::handle_out_of_range(AttackableGameObject* opponent) {
 void City::handle_victory(AttackableGameObject* opponent) {
 	// Attack your next aggressor.
 	this->target = nullptr;
+	this->player->increase_player_score(opponent->getAttack().getDamage());
 }
 
 void City::handle_defeat(AttackableGameObject* opponent) {
+	LOG_DEBUG("City with UID <", this->getID(), "> died");
 	this->slot->detachCity();
+	this->player->add_to_destroy(this);
 	send_update_to_manager(make_update());
 }
 
 void City::handle_counter(AttackableGameObject* opponent) {
-	if (!(this->target) || this->target->get_health() <= 0) {
+	if (!(this->target) || this->target->is_dead()) {
 		// Attack this opponent if your current target is dead.
 		this->target = opponent;
 	}
 
 	if (this->target == opponent) {
+		LOG_DEBUG("Attacking opponent with UID <", this->target->getID(), ">");
 		if (!this->do_attack(this->target)) {
 			this->target = nullptr;
 		}
@@ -82,6 +86,12 @@ std::shared_ptr<CityUpdate> City::make_update() {
 }
 
 void City::extractResourcesFromSlotAndCreateUpdates(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates) {
+
+	if (this->is_dead()) {
+		return;
+	}
+
+
 	for (auto& resource_pair : get_slot()->getResources()) {
 
 		/* Change the player's resource count */
@@ -102,3 +112,12 @@ void City::extractResourcesFromSlotAndCreateUpdates(std::vector<std::shared_ptr<
 std::string City::getName() const {
 	return name;
 }
+
+void City::spawnCompleteHandler(UnitType* type) {
+	/* 
+	This happens when we are ready to create a unit! We need to somehow tell the unit manager.
+	Let's do so through the city manager
+	*/
+	manager->handleUnitSpawningComplete(type, this);
+}
+

@@ -4,6 +4,7 @@
 #include "selectable.h"
 #include "city.h"
 #include "resources.h"
+#include "unit_spawner.h"
 #include <iostream>
 #include <vector>
 
@@ -36,6 +37,9 @@ GUI::GUI(GLFWwindow * window, int screenWidth, int screenHeight) : Screen(), scr
 	this->createCityDisplay();
 	this->createPlayerOverlay();
 	this->createTradeDisplay();
+	
+	this->createGameOverWindow();
+	this->createLeaderboardWindow();
 
 	this->setVisible(true);
 	this->performLayout();
@@ -49,6 +53,8 @@ void GUI::update() {
 			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
 		}
 	}
+
+	updateCityWindow();
 }
 
 
@@ -87,6 +93,7 @@ void GUI::setScreenSize(int width, int height) {
 
 void GUI::setPlayer(std::shared_ptr<Player> player) {
 	this->player = player;
+	this->updatePlayerLeaderboardValue(player.get());
 }
 
 void GUI::setFPS(double fps) {
@@ -109,18 +116,15 @@ void GUI::createSlotDisplay() {
 	slotWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "Selected Planet");
 	slotWindow->setWidth(200);
 
-	formHelper->addGroup("Naming");
+
+
+	formHelper->addGroup("Slot Info");
+	this->slotInfoPanel = new SlotInfoPanel(slotWindow);
+	formHelper->addWidget("", this->slotInfoPanel);
+
+	formHelper->addGroup("Found a City");
 	// TODO: Make this a max of 16 characters
 	cityNameDisplay = formHelper->addVariable("Name", cityName);
-
-	formHelper->addGroup("Resources");
-	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
-		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
-		int rvar = 999999999;
-		detail::FormWidget<int>* resourceBox = formHelper->addVariable(Resources::toString(type_of_resource), rvar);
-		resourceBox->setEditable(false);
-		resourceDisplay.insert(std::make_pair(type_of_resource, resourceBox));
-	}
 
 	slotButton = formHelper->addButton("Establish City", []() {});
 	slotWindow->setVisible(false);
@@ -175,30 +179,107 @@ void GUI::createPlayerOverlay() {
 
 void GUI::createTradeDisplay() {
 	LOG_DEBUG("Creating trade display");
-	tradeWindow = formHelper->addWindow(Eigen::Vector2i(500, 500), "Trade Deal");
+	tradeWindow = formHelper->addWindow(Eigen::Vector2i(800, 500), "Trade Deal");
+	Widget* tradeWidget = new Widget(tradeWindow);
+	formHelper->addWidget("Select Players", tradeWidget);
+	ComboBox* listOfPlayers = new ComboBox(tradeWidget, { "player 1", "player 2", "player 3" });
+	formHelper->addWidget("Partner: ", listOfPlayers);
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
+
+	createTradeButton->setCallback([this]() {
+		std::cout << "Establish trade button pressed!" << std::endl;
+		if (customTradeWindow) {
+			customTradeWindow->setVisible(true);
+			tradeWindow->setVisible(false);
+		}
+		else {
+			this->createCustomTradeDisplay();
+		}
+	});
+	tradeWindow->setVisible(true);
+}
+
+void GUI::createCustomTradeDisplay() {
+	LOG_DEBUG("Creating custom trade");
+	customTradeWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "Customize Trade Window");
+	customTradeWindow->setVisible(true);
+	tradeWindow->setVisible(false);
+	customizeTrade(player.get(), player.get());
+	this->performLayout();
 }
 
 void GUI::customizeTrade(Player* my_player, Player* trade_partner) {
-	//ComboBox* listOfPlayers = new ComboBox(tradeWindow, { "player 1", "player 2", "player 3" });
 	formHelper->addGroup("Product to trade: ");
 	Resources::Type resource = Resources::FIRST;
 	std::vector<std::string> my_resource_list = {};
 	std::vector<std::string> partner_resource_list = {};
 
-	for (auto itr : my_player->owned_resources) {
+	for (auto itr : my_player->getResources()) {
 		my_resource_list.push_back(Resources::toString(itr.first));
 	}
 
-	for (auto itr : trade_partner->owned_resources) {
+	for (auto itr : trade_partner->getResources()) {
 		partner_resource_list.push_back(Resources::toString(itr.first));
 	}
 
+	formHelper->addVariable("Offer Amount: ", offerBaseVal);
 	formHelper->addVariable("Resource type", resource, true)->setItems(my_resource_list);
+	formHelper->addVariable("Trade Amount: ", offerBaseVal);
 	formHelper->addVariable("Resource type", resource, true)->setItems(partner_resource_list);
 
+	sendTradeButton = formHelper->addButton("Send", []() {});
+	closeTradeButton = formHelper->addButton("Close", []() {});
+
+	sendTradeButton->setCallback([this]() {
+		std::cout << "Sending Trade!" << std::endl;
+		this->hideCustomTradeUI();
+	});
+	closeTradeButton->setCallback([this]() {
+		std::cout << "Sending Trade!" << std::endl;
+		this->hideCustomTradeUI();
+	});
 	//formHelper->addVariable("string", "Select Player", enabled);
+	customTradeWindow->setVisible(true);
+}
+
+void GUI::hideCustomTradeUI() {
+	customTradeWindow->setVisible(false);
 	tradeWindow->setVisible(true);
+}
+
+void GUI::createGameOverWindow() {
+	gameOverWindow = formHelper->addWindow(Eigen::Vector2i(0, 0), "GAME OVER");
+	gameOverLabel = new Label(gameOverWindow, "YOU ARE VICTORIOUS!", FONT, FONT_SIZE);
+
+	formHelper->addWidget("", gameOverLabel);
+	gameOverWindow->center();
+	gameOverWindow->setVisible(false);
+}
+
+void GUI::showGameOverWindow(bool victorious) {
+	std::string message = victorious ? "VICTORIOUS" : "A LOSER";
+	gameOverLabel->setCaption("YOU ARE " + message);
+	gameOverWindow->setVisible(true);
+}
+
+void GUI::hideGameOverWindow() {
+	gameOverWindow->setVisible(false);
+}
+
+
+void GUI::createLeaderboardWindow() {
+	this->leaderboardWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 140), "Leaderboard");
+	this->leaderboardWidget = new LeaderboardWidget(leaderboardWindow);
+	this->leaderboardWindow->setWidth(this->leaderboardWidget->width());
+	formHelper->addWidget("", leaderboardWidget);
+	this->leaderboardWindow->performLayout(nvgContext());
+}
+
+void GUI::updatePlayerLeaderboardValue(const Player* player) {
+	if (this->leaderboardWidget->updateScoreEntry(player)) {
+		this->leaderboardWindow->setHeight(this->leaderboardWidget->height() + 40);
+		this->leaderboardWindow->performLayout(nvgContext());
+	}
 }
 
 void GUI::unselectSelection(Client* client, std::vector<GameObject*>& old_selection) {
@@ -226,10 +307,23 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 
 void GUI::createCityDisplay() {
 	cityWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "City Name");
-	createUnitButton = formHelper->addButton("Create Unit", []() {});
+
+	formHelper->addGroup("Slot Info");
+	citySlotInfoPanel = new SlotInfoPanel(cityWindow);
+	formHelper->addWidget("", citySlotInfoPanel);
+
+	formHelper->addGroup("Unit Management");
+	unitSpawnWidget = new UnitSpawnWidget(cityWindow);
+	formHelper->addWidget("", unitSpawnWidget);
 
 	cityWindow->setVisible(false);
+}
 
+
+void GUI::updateCityWindow() {
+	if (cityWindow->visible()) {
+		unitSpawnWidget->updateSelection(selectedCity);
+	}
 }
 
 void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityCallback) {
@@ -239,30 +333,24 @@ void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityC
 		slotWindow->setVisible(false);
 	});
 
-	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
-		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
-		int resource_count = slot->getResourceCount(type_of_resource);
-		resourceDisplay[type_of_resource]->setValue(resource_count);
-	}
+	slotInfoPanel->updateDisplay(slot);
 
 	slotWindow->setVisible(true);
 }
 /*
 void GUI::displayTradeUI(Player* player, std::function<void()> createTrade) {
 	tradeWindow->setTitle("Trade deal with " + player->get_name());
-	createTradeButton->setCallback([createTrade, this]() {
-		createTrade();
-	});
 }*/
 
 void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
 }
 
-void GUI::displayCityUI(City* city, std::function<void()> unitCreateCallback) {
+void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
+	selectedCity = city;
 	cityWindow->setTitle(city->getName());
-	createUnitButton->setCallback(unitCreateCallback);
-
+	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
+	citySlotInfoPanel->updateDisplay(city->get_slot());
 	cityWindow->setVisible(true);
 }
 

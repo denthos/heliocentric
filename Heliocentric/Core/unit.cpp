@@ -4,18 +4,22 @@
 #include "unit_manager.h"
 #include "glm/gtc/matrix_transform.hpp"
 
-Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed) :
-	AttackableGameObject(pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed) {
+Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type) :
+	AttackableGameObject(pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed), type(type) {
 
 	initialize();
 
 }
 
-Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed) :
-	AttackableGameObject(id, pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed) {
+Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type) :
+	AttackableGameObject(id, pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed), type(type) {
 
 	initialize();
 
+}
+
+const UnitType* Unit::getType() const {
+	return this->type;
 }
 
 void Unit::initialize() {
@@ -50,7 +54,7 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->x = this->position.x;
 	this->update->y = this->position.y;
 	this->update->z = this->position.z;
-	LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
+	// LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
 	return this->update;
 };
 

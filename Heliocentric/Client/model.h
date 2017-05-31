@@ -16,7 +16,7 @@ public:
 	void draw(const Shader & shader, const Camera & camera, const glm::mat4 & toWorld);
 	void update();
 	virtual bool intersect(const Ray & ray, Collision & collision) const;
-	BoundingBox getBoundingBox();
+	BoundingBox getBoundingBox() const;
 protected:
 	BoundingBox boundingBox;
 

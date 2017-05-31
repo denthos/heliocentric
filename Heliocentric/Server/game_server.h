@@ -20,7 +20,9 @@
 #include "universe.h"
 #include "unit_manager.h"
 #include "city_manager.h"
+#include "player_manager.h"
 #include "slot_update.h"
+#include "player_color.h"
 
 #include "debug_pause.h"
 #include "player_command.h"
@@ -51,8 +53,12 @@ private:
 
 	Universe universe;
 
-	UnitManager unit_manager;
-	CityManager city_manager;
+	std::unique_ptr<UnitManager> unit_manager;
+	std::unique_ptr<CityManager> city_manager;
+	std::unique_ptr<PlayerManager> player_manager;
+
+	AttackableGameObject* get_attackable(UID uid) const;
+	PlayerColor::Color nextPlayerColor = PlayerColor::FIRST;
 
 	bool updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates);
 	int lastResourceUpdateTick = 0;
@@ -122,7 +128,9 @@ private:
 	void sendUpdates();
 
 	/* Checks victory condition every server tick */
-	void checkVictory();
+	bool checkVictory(UID& winner);
+
+	void endGameIfGameOver();
 
 	GameSession* game; // Keeps track of all information about current game settings. Deconstructed after game ends.
 	std::atomic<bool> server_paused;

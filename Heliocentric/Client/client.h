@@ -23,6 +23,7 @@
 #include "tcp_socket_connection.hpp"
 #include "universe.h"
 #include "unit_manager.h"
+#include "music_player.h"
 #include "gui.h"
 #include <glad\glad.h>
 #include <GLFW/glfw3.h>
@@ -37,6 +38,8 @@
 #include "trade_deal.h"
 #include "selectable.h"
 #include "slot_update.h"
+#include "game_over_update.h"
+#include "player_score_update.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -62,15 +65,18 @@ public:
 	void cityUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityUpdate>);
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);
 	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
+	void playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerScoreUpdate>);
 	void tradeDataHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TradeData>);
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
+	void gameOverUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<GameOverUpdate>);
+	void unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitSpawnerUpdate>);
 
 
 	void createCityForSlot(DrawableSlot*, std::string);
 
 	void setSelection(std::vector<GameObject*>);
-	void createUnitFromCity(DrawableCity* city);
+	void createUnitFromCity(DrawableCity* city, UnitType* unit_type);
 
 protected:
 	/**** Handlers for ChanneledClient ****/
@@ -81,6 +87,7 @@ protected:
 private:
 	GLFWwindow * window;
 	GUI * gui;
+	MusicPlayer musicPlayer;
 	unsigned int selectedCamera;
 	std::vector<Camera *> cameras;
 	std::vector<GameObject *> selection;
@@ -102,6 +109,7 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
 	std::unordered_map<UID, DrawableSlot*> slots;
+	std::unordered_map<UID, UnitSpawner*> spawners;
 
 	std::shared_ptr<Player> player;
 

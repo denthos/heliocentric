@@ -18,7 +18,7 @@ public:
 	void insert(Drawable * object);
 	void update();
 	void clear();
-	void draw(const Shader & shader, const Camera & camera);
+	void draw(const Camera & camera);
 	void viewFrustumCull(ViewFrustum frustum);
 	void enableViewFrustumCulling(const ViewFrustum * frustum);
 	void disableViewFrustumCulling();
@@ -36,5 +36,5 @@ protected:
 	const ViewFrustum * viewFrustum;
 	bool shouldCull = false;
 
-	void drawNode(const Shader & shader, const Camera & camera);
+	void drawNode(const Camera & camera);
 };
