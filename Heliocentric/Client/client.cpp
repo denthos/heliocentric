@@ -923,8 +923,8 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	if (units[update->id]->is_dead()) {
 		if (selection.size() > 0 && selection[0]->getID() == update->id) {
 			selection.erase(selection.begin());
+			units[update->id]->unselect(gui, this);
 		}
-		units[update->id]->unselect(gui, this);
 		units.erase(update->id);
 	}
 }
@@ -942,8 +942,8 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		owner->add_to_destroy(cities[update->id].get());
 		if (selection.size() > 0 && selection[0]->getID() == update->id) {
 			selection.erase(selection.begin());
+			cities[update->id]->unselect(gui, this);
 		}
-		cities[update->id]->unselect(gui, this);
 		cities.erase(update->id);
 	}
 }
