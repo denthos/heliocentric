@@ -53,7 +53,10 @@ void UnitManager::do_move(UID id, float x, float y, float z, float fx, float fy,
 	}
 
 	auto& itr = active_units.find(id);
-	itr->second->set_destination(glm::vec3(x, y, z));
+	if (fy < 1.0) {
+		itr->second->set_destination(glm::vec3(x, y, z));
+	}
+	
 	itr->second->set_force(glm::vec3(fx, fy, fz));
 	itr->second->set_command(Unit::UNIT_MOVE);
 }

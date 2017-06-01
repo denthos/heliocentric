@@ -499,10 +499,10 @@ void Client::update() {
 
 		
 		if (octree->checkCollision(units[unit_id].get())) {
+
 			glm::vec3 new_pos = units[unit_id]->get_position() + glm::vec3(0.0f,10.0f ,0.0f);
-			units[unit_id]->update_position(new_pos);
 			LOG_DEBUG("FLYING AWAY");
-			UnitCommand move_command(units[unit_id]->getID(), new_pos.x, new_pos.y, new_pos.z);
+			UnitCommand move_command(units[unit_id]->getID(),new_pos.x, new_pos.y, new_pos.z, 0.0, 20.0, 0.0);
 			channeled_send(&move_command);
 		}
 	}
