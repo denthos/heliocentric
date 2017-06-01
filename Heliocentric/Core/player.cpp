@@ -108,6 +108,26 @@ int Player::get_resource_amount(Resources::Type resource_type) {
 	return owned_resources[resource_type];
 }
 
+int Player::get_resource_amount(int resource_index) {
+	/* Assuming the parameter is a valid resource type, because it really should be. */
+	int index = 0;
+	for (auto itr : owned_resources) {
+		if (index == resource_index)
+			return itr.second;
+		index++;
+	}
+}
+
+Resources::Type Player::get_resource_type(int resource_index) {
+	/* Assuming the parameter is a valid resource type, because it really should be. */
+	int index = 0;
+	for (auto itr : owned_resources) {
+		if (index == resource_index)
+			return itr.first;
+		index++;
+	}
+}
+
 void Player::change_resource_amount(Resources::Type type, int delta) {
 	owned_resources[type] += delta;
 }

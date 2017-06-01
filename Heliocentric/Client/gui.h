@@ -24,7 +24,6 @@ class GUI : public Screen {
 public:
 
 	
-
 	GUI(GLFWwindow *, int screenWidth, int screenHeight);
 	~GUI();
 
@@ -47,7 +46,7 @@ public:
 	void hideCityUI();
 
 	void createTradeDisplay();
-	void customizeTrade(Player* my_player, Player* trade_partner);
+	void customizeTrade();
 	void hideCustomTradeUI();
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
@@ -55,11 +54,13 @@ public:
 	void showGameOverWindow(bool victorious);
 	void hideGameOverWindow();
 	void updatePlayerLeaderboardValue(const Player* player);
+	void addPlayer(std::shared_ptr<Player> new_player);
 
 private:
 	int screenWidth, screenHeight;
 	UnitWindow* unit_window;
 	FormHelper* formHelper;
+	std::vector<std::shared_ptr<Player>> players;
 
 	void createUidDisplay();
 	void createSlotDisplay();
@@ -93,6 +94,7 @@ private:
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;
+	Player* trade_partner;
 	std::pair<Resources::Type, Label *> resourceLabels[Resources::NUM_RESOURCES];
 	Label * fpsSpacer;
 	Label * fpsDisplay;

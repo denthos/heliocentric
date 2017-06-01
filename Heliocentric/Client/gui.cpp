@@ -100,7 +100,10 @@ void GUI::setFPS(double fps) {
 	std::ostringstream oss;
 	oss << "FPS: " << (int)fps;
 	this->fpsDisplay->setCaption(oss.str());
+}
 
+void GUI::addPlayer(std::shared_ptr<Player> new_player) {
+	players.push_back(new_player);
 }
 
 void GUI::createUidDisplay() {
@@ -180,10 +183,6 @@ void GUI::createPlayerOverlay() {
 void GUI::createTradeDisplay() {
 	LOG_DEBUG("Creating trade display");
 	tradeWindow = formHelper->addWindow(Eigen::Vector2i(800, 500), "Trade Deal");
-	Widget* tradeWidget = new Widget(tradeWindow);
-	formHelper->addWidget("Select Players", tradeWidget);
-	ComboBox* listOfPlayers = new ComboBox(tradeWidget, { "player 1", "player 2", "player 3" });
-	formHelper->addWidget("Partner: ", listOfPlayers);
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
 
 	createTradeButton->setCallback([this]() {
@@ -193,6 +192,7 @@ void GUI::createTradeDisplay() {
 			tradeWindow->setVisible(false);
 		}
 		else {
+			this->trade_partner = this->player.get();
 			this->createCustomTradeDisplay();
 		}
 	});
@@ -204,42 +204,93 @@ void GUI::createCustomTradeDisplay() {
 	customTradeWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "Customize Trade Window");
 	customTradeWindow->setVisible(true);
 	tradeWindow->setVisible(false);
-	customizeTrade(player.get(), player.get());
+	customTradeWindow->center();
+	customizeTrade();
 	this->performLayout();
 }
 
-void GUI::customizeTrade(Player* my_player, Player* trade_partner) {
-	formHelper->addGroup("Product to trade: ");
+void GUI::customizeTrade() {
+	formHelper->addGroup("Select trade partner: ");
+	Widget* selectTradePartnerPanel = new Widget(customTradeWindow);
+	selectTradePartnerPanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 1, 2));
+	ComboBox* selectPartnerBox = new ComboBox(selectTradePartnerPanel);
+	std::vector<std::string> player_ids = {};
+	for (auto itr : players) {
+		LOG_DEBUG("ID is " + std::to_string((int)itr->getID()));
+		player_ids.push_back(std::to_string((int) itr->getID()));
+	}
+	selectPartnerBox->setItems(player_ids);
+	formHelper->addWidget("Select Trade Partner: ", selectTradePartnerPanel);
+
 	Resources::Type resource = Resources::FIRST;
 	std::vector<std::string> my_resource_list = {};
 	std::vector<std::string> partner_resource_list = {};
 
-	for (auto itr : my_player->getResources()) {
+	for (auto itr : this->player->getResources()) {
 		my_resource_list.push_back(Resources::toString(itr.first));
 	}
 
 	for (auto itr : trade_partner->getResources()) {
 		partner_resource_list.push_back(Resources::toString(itr.first));
 	}
+	Widget* tradePanel = new Widget(customTradeWindow);
+	tradePanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 2, 2));
 
-	formHelper->addVariable("Offer Amount: ", offerBaseVal);
-	formHelper->addVariable("Resource type", resource, true)->setItems(my_resource_list);
-	formHelper->addVariable("Trade Amount: ", offerBaseVal);
-	formHelper->addVariable("Resource type", resource, true)->setItems(partner_resource_list);
+	IntBox<int>* offerAmount = new IntBox<int>(tradePanel);
+	//new Label(offerAmount, "Offer Amount", "sans-bold");
+	ComboBox* offerResourceType = new ComboBox(tradePanel);
+	IntBox<int>* askForAmount = new IntBox<int>(tradePanel);
+	ComboBox* askForResourceType = new ComboBox(tradePanel);
+
+	selectPartnerBox->setCallback([askForAmount, askForResourceType, this](int player_index) {
+		this->trade_partner = this->players.at(player_index).get();
+		LOG_DEBUG("Player index is " + std::to_string(player_index));
+		std::vector<std::string> resource_list = {};
+		for (auto itr : trade_partner->getResources()) {
+			LOG_DEBUG("Player index is " + std::to_string(player_index));
+			resource_list.push_back(Resources::toString(itr.first));
+		}
+		askForAmount->setValue(0);
+		askForResourceType->setItems(resource_list);
+	});
+
+	offerAmount->setEditable(true);
+	offerAmount->setCallback([offerAmount](int val) {
+		if (val >= 0)
+			offerAmount->setValue(val);
+	});
+	offerResourceType->setItems(my_resource_list);
+	offerResourceType->setCallback([offerAmount, this](int val) {
+		offerAmount->setValue(this->player.get()->get_resource_amount(val));
+	});
+	askForAmount->setEditable(true);
+	askForAmount->setCallback([askForAmount](int val) {
+		if (val >= 0)
+			askForAmount->setValue(val);
+	});
+	askForResourceType->setItems(partner_resource_list);
+	askForResourceType->setCallback([askForAmount, this](int val) {
+		askForAmount->setValue(this->trade_partner->get_resource_amount(val));
+	});
+
+	formHelper->addWidget("Custom Trade Panel", tradePanel);
 
 	sendTradeButton = formHelper->addButton("Send", []() {});
 	closeTradeButton = formHelper->addButton("Close", []() {});
 
-	sendTradeButton->setCallback([this]() {
-		std::cout << "Sending Trade!" << std::endl;
+	sendTradeButton->setCallback([offerAmount, offerResourceType, askForAmount, askForResourceType, this]() {
+		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(this->player->get_resource_type(offerResourceType->selectedIndex()))
+			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(this->trade_partner->get_resource_type(offerResourceType->selectedIndex())));
+		LOG_DEBUG("Sending Custom Trade to another player...");
 		this->hideCustomTradeUI();
 	});
 	closeTradeButton->setCallback([this]() {
-		std::cout << "Sending Trade!" << std::endl;
+		LOG_DEBUG("Closing custom trade window.");
 		this->hideCustomTradeUI();
 	});
 	//formHelper->addVariable("string", "Select Player", enabled);
 	customTradeWindow->setVisible(true);
+	
 }
 
 void GUI::hideCustomTradeUI() {
@@ -337,10 +388,6 @@ void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityC
 
 	slotWindow->setVisible(true);
 }
-/*
-void GUI::displayTradeUI(Player* player, std::function<void()> createTrade) {
-	tradeWindow->setTitle("Trade deal with " + player->get_name());
-}*/
 
 void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
