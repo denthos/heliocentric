@@ -6,12 +6,12 @@
 #include <glm/gtx/transform.hpp>
 
 #define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
-#define BEAR_MODEL "Models/bear.obj"
+#define BEAR_MODEL "Models/Kameri explorer/Kameri explorer flying.obj"
 
 const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUnit::getDataMap() {
 	static std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData> dataMap {
 		{UnitType::BASIC_UNIT, DrawableUnitData {Model::getInstance(ROCKET_MODEL), 0.1f}},
-		{UnitType::HEAVY_UNIT, DrawableUnitData {Model::getInstance(BEAR_MODEL), 1.0f}}
+		{UnitType::HEAVY_UNIT, DrawableUnitData {Model::getInstance(BEAR_MODEL), 0.8f}}
 	};
 
 	return dataMap;
