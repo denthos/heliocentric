@@ -35,6 +35,8 @@
 #include "selectable.h"
 #include "unit_spawner_update.h"
 
+#define ALLOWED_ACTIONS_PER_TICK 200
+
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
 #define CUBEMAP_VERT_SHADER "Shaders/cubemap.vert"
@@ -489,6 +491,16 @@ void Client::display() {
 
 void Client::update() {
 
+	int action_counter = 0;
+	bool has_more_updates = true;
+	while (has_more_updates && action_counter++ < ALLOWED_ACTIONS_PER_TICK) {
+		has_more_updates = this->poll();
+	}
+
+	if (action_counter >= ALLOWED_ACTIONS_PER_TICK) {
+		LOG_WARN("Client performed ", action_counter, "in a single tick. Lots of stuff is being sent...");
+	}
+
 	cameras[selectedCamera]->update();
 	
 	gui->update();
@@ -496,12 +508,6 @@ void Client::update() {
 	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
-
-	auto& update_queue = Lib::key_acquire(this->update_queue);
-	while (!update_queue.get().empty()) {
-		update_queue.get().back()();
-		update_queue.get().pop();
-	}
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -870,20 +876,15 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
 
 	Player* owner = player_iter->second.get();
-	auto& update_queue = Lib::key_acquire(this->update_queue);
-	std::function<void()> createCityFunc = [slot_iter, update, owner, this]() {
-		DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name), colorShader);
-		slot_iter->second->attachCity(newCity);
-		owner->acquire_object(newCity);
-		cities.insert(std::make_pair(newCity->getID(), newCity));
-		spawners.insert(std::make_pair(newCity->getID(), newCity));
+	DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name), colorShader);
+	slot_iter->second->attachCity(newCity);
+	owner->acquire_object(newCity);
+	cities.insert(std::make_pair(newCity->getID(), newCity));
+	spawners.insert(std::make_pair(newCity->getID(), newCity));
 
-		if (newCity->get_player()->getID() == player->getID()) {
-			setSelection({ newCity });
-		}
-	};
-
-	update_queue.get().push(createCityFunc);
+	if (newCity->get_player()->getID() == player->getID()) {
+		setSelection({ newCity });
+	}
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
@@ -910,14 +911,11 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	*/
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->is_dead()) {
-		auto& update_queue = Lib::key_acquire(this->update_queue);
-		update_queue.get().push([update, this]() {
-			if (selection.size() > 0 && selection[0]->getID() == update->id) {
-				selection.erase(selection.begin());
-			}
-			units[update->id]->unselect(gui, this);
-			units.erase(update->id);
-		});
+		if (selection.size() > 0 && selection[0]->getID() == update->id) {
+			selection.erase(selection.begin());
+		}
+		units[update->id]->unselect(gui, this);
+		units.erase(update->id);
 	}
 }
 
@@ -927,27 +925,23 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	// Handle city death
 	LOG_DEBUG("City with ID " + std::to_string(update->id) + " health is " + std::to_string(cities[update->id]->get_health()));
 	if (cities[update->id]->is_dead()) {
-		auto& update_queue = Lib::key_acquire(this->update_queue);
 		Player* owner = cities[update->id]->get_player();
 		Slot* slot = cities[update->id]->get_slot();
 
-		std::function<void()> deleteCityFunc = [slot, update, owner, this]() {
-			slot->detachCity();
-			owner->add_to_destroy(cities[update->id].get());
-			if (selection.size() > 0 && selection[0]->getID() == update->id) {
-				selection.erase(selection.begin());
-			}
-			cities[update->id]->unselect(gui, this);
-			cities.erase(update->id);
-		};
-		
-		update_queue.get().push(deleteCityFunc);
+		slot->detachCity();
+		owner->add_to_destroy(cities[update->id].get());
+		if (selection.size() > 0 && selection[0]->getID() == update->id) {
+			selection.erase(selection.begin());
+		}
+		cities[update->id]->unselect(gui, this);
+		cities.erase(update->id);
 	}
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
-	update->apply(planets[update->id].get());
-	planets[update->id]->update();
+	DrawablePlanet* planet = planets[update->id].get();
+	update->apply(planet);
+	planet->update();
 }
 
 void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> deal) {
