@@ -27,7 +27,12 @@ public:
 
 	static const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& getDataMap();
 
+	void updateRotationMatrix();
+	glm::mat4 getRotationMatrix() const;
+
 private:
 	DrawableUnitData data;
+	glm::mat4 rotation_matrix;
+	glm::vec3 old_orientation;
 	bool glow;
 };

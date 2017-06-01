@@ -82,6 +82,10 @@ public:
 
 	const UnitType* getType() const;
 
+	void set_orientation(glm::vec3 orientation);
+	glm::vec3 get_orientation() const;
+	bool do_attack(AttackableGameObject* target);
+
 
 protected:
 	/**
@@ -115,6 +119,8 @@ protected:
 	@return Current position of this unit.
 	*/
 	glm::vec3 do_move();
+	void do_orient(glm::vec3 target);
+
 
 	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
 
@@ -133,6 +139,7 @@ protected:
 	AttackableGameObject* target;
 	UnitManager* manager;
 	const UnitType* type;
+	glm::vec3 orientation;
 
 	void initialize();
 };

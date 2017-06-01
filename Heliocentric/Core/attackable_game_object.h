@@ -103,6 +103,6 @@ public:
 	@param The target to attack.
 	@return Whether or not target is a legal -- e.g., a nullptr is an illegal target.
 	*/
-	bool do_attack(AttackableGameObject* target);
+	virtual bool do_attack(AttackableGameObject* target);
 };
 

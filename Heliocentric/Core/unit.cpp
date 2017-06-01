@@ -5,14 +5,14 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type) :
-	AttackableGameObject(pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed), type(type) {
+	AttackableGameObject(pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed), type(type), orientation(0.0f, 0.0f, 1.0f) {
 
 	initialize();
 
 }
 
 Unit::Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type) :
-	AttackableGameObject(id, pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed), type(type) {
+	AttackableGameObject(id, pos, owner, attack, def, heal), manager(manager), target(nullptr), movement_speed(movement_speed), type(type), orientation(0.0f, 0.0f, 1.0f) {
 
 	initialize();
 
@@ -54,6 +54,10 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->x = this->position.x;
 	this->update->y = this->position.y;
 	this->update->z = this->position.z;
+
+	this->update->orientation_x = this->orientation.x;
+	this->update->orientation_y = this->orientation.y;
+	this->update->orientation_z = this->orientation.z;
 	// LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
 	return this->update;
 };
@@ -72,6 +76,21 @@ glm::vec3 Unit::set_destination(GameObject* object) {
 	// Follow object as it moves.
 	this->destination = object->get_position();
 	return this->destination;
+}
+
+void Unit::do_orient(glm::vec3 target) {
+	glm::vec3 ideal_orientation = target - this->position;
+	ideal_orientation.y = 0;
+
+	this->orientation = glm::normalize(ideal_orientation);
+}
+
+glm::vec3 Unit::get_orientation() const {
+	return this->orientation;
+}
+
+void Unit::set_orientation(glm::vec3 orient) {
+	this->orientation = orient;
 }
 
 
@@ -95,8 +114,17 @@ void Unit::set_command(CommandType command) {
 	}
 }
 
+bool Unit::do_attack(AttackableGameObject* target) {
+	do_orient(target->get_position());
+	bool attack_return = AttackableGameObject::do_attack(target);
+	send_update_to_manager(make_update());
+	return attack_return;
+}
+
 
 glm::vec3 Unit::do_move() {
+	do_orient(destination);
+
 	// Move towards destination.
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));

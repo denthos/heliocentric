@@ -18,7 +18,7 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 }
 
 
-DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader) : Unit(unit) {
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader) : Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
 	this->data = getDataMap().at(getType()->getIdentifier());
 	this->shader = shader;
 
@@ -33,7 +33,8 @@ DrawableUnit::~DrawableUnit() {
 }
 
 void DrawableUnit::update() {
-	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
+	this->updateRotationMatrix();
+	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
@@ -63,4 +64,40 @@ void DrawableUnit::select(GUI* gui, Client* client) {
 void DrawableUnit::unselect(GUI* gui, Client* client) {
 	gui->hideUnitUI();
 	glow = false;
+}
+
+glm::mat4 DrawableUnit::getRotationMatrix() const {
+	return this->rotation_matrix;
+}
+
+void DrawableUnit::updateRotationMatrix() {
+	if (glm::distance(old_orientation, orientation) <= 0.005) {
+		return;
+	}
+
+	float cosine = glm::clamp(glm::dot(old_orientation, orientation), -1.0f, 1.0f);
+
+	float denom = glm::length(old_orientation) * glm::length(orientation);
+
+	/* If we are about to do bad division, just bail out*/
+	if (denom == 0) {
+		return;
+	}
+
+	float cosine_ratio = cosine / denom;
+
+	/* If we are about to do acos() on something outside its domain, bail out*/
+	if (cosine_ratio < -1 || cosine_ratio > 1) {
+		return;
+	}
+
+	float rotAngle = glm::acos(cosine / denom);
+	glm::vec3 cross = glm::cross(old_orientation, orientation);
+
+	if (cross.y < 0) {
+		rotAngle = -rotAngle;
+	}
+
+	this->rotation_matrix = glm::rotate(this->rotation_matrix, rotAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+	this->old_orientation = orientation;
 }

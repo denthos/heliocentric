@@ -13,8 +13,10 @@ public:
 	@param z z-axis of the new position of the unit.
 	*/
 	int health;
+	float orientation_x;
+	float orientation_y;
+	float orientation_z;
 	UnitUpdate(UID, float, float, float);
 	UnitUpdate(UID, int, float, float, float);
 	void apply(GameObject* obj);
-	//void apply(Unit* obj);
 };
