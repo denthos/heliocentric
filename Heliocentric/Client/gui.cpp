@@ -1,3 +1,4 @@
+#include "client.h"
 #include "gui.h"
 #include "slot.h"
 #include "planet.h"
@@ -294,8 +295,8 @@ void GUI::customizeTrade() {
 		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(this->player->get_resource_type(offerResourceType->selectedIndex()))
 			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(this->trade_partner->get_resource_type(askForResourceType->selectedIndex())));
 		LOG_DEBUG("Sending Custom Trade to another player...");
-		TradeData deal(this->player->getID(), trade_partner->getID(), Resources::GOLD, 10);
-		//this->channeled_send(&deal);
+		TradeData deal(this->player->getID(), trade_partner->getID(), this->player->get_resource_type(offerResourceType->selectedIndex()), offerAmount->value(), this->trade_partner->get_resource_type(askForResourceType->selectedIndex()), askForAmount->value());
+		client->channeled_send(&deal);
 		this->hideCustomTradeUI();
 	});
 	closeTradeButton->setCallback([this]() {
