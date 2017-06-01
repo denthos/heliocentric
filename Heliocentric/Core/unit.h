@@ -71,6 +71,8 @@ public:
 	*/
 	glm::vec3 set_destination(glm::vec3 destination);
 
+	glm::vec3 set_force(glm::vec3 force);
+
 	/**
 	Sets the unit to follow the given game object.
 	@param The game object which this unit should follow.
@@ -117,7 +119,7 @@ protected:
 
 	std::shared_ptr<UnitUpdate> update;
 	CommandType currentCommand = UNIT_IDLE;
-	glm::vec3 destination;
+	glm::vec3 destination, force;
 
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);

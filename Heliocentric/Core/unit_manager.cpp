@@ -44,7 +44,7 @@ std::shared_ptr<UnitCreationUpdate> UnitManager::add_unit(std::shared_ptr<Player
 	return update;
 }
 
-void UnitManager::do_move(UID id, float x, float y, float z) {
+void UnitManager::do_move(UID id, float x, float y, float z, float fx, float fy, float fz) {
 	LOG_DEBUG("unit ", id, " put in active list.");
 
 	if (!set_active(id)) {
@@ -54,6 +54,7 @@ void UnitManager::do_move(UID id, float x, float y, float z) {
 
 	auto& itr = active_units.find(id);
 	itr->second->set_destination(glm::vec3(x, y, z));
+	itr->second->set_force(glm::vec3(fx, fy, fz));
 	itr->second->set_command(Unit::UNIT_MOVE);
 }
 

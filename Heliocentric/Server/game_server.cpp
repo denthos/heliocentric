@@ -425,7 +425,8 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 			LOG_DEBUG("Unit command type: CMD_MOVE");
 			// TODO: Delegate to UnitManager
 			this->addFunctionToProcessQueue([this, command]() {
-				unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
+				//JESSICA LOOK HERE
+				unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z, command.get()->force_x, command.get()->force_y, command.get()->force_z);
 			});
 			break;
 		default:

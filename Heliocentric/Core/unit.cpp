@@ -63,6 +63,11 @@ glm::vec3 Unit::set_destination(glm::vec3 destination) {
 	return this->destination;
 }
 
+glm::vec3 Unit::set_force(glm::vec3 force) {
+	this->force = force;
+	return this->force;
+}
+
 
 glm::vec3 Unit::set_destination(GameObject* object) {
 	// Follow object as it moves.

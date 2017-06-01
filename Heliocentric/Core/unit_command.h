@@ -15,6 +15,7 @@ public:
 	float destination_x; // Destination that the unit is moving towards
 	float destination_y;
 	float destination_z;
+	float force_x, force_y, force_z;
 
 	/**
 	Constructor for a CMD_ATTACK type command.
@@ -31,5 +32,5 @@ public:
 	@param destination_y y-axis of the destination that the initiator will move to.
 	@param destination_z z-axis of the destination that the initiator will move to.
 	*/
-	UnitCommand(UID, float, float, float);
+	UnitCommand(UID, float, float, float, float fx = 0.0, float fy = 0.0, float fz = 0.0);
 };
