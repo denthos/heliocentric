@@ -281,9 +281,17 @@ void GUI::hideSlotUI() {
 void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
 	selectedCity = city;
 	cityWindow->setTitle(city->getName());
-	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
 	citySlotInfoPanel->updateDisplay(city->get_slot());
 	cityWindow->setVisible(true);
+
+	/* Only show the spawn ui if the owner clicked the city */
+	if (this->player->getID() == city->get_player()->getID()) {
+		unitSpawnWidget->setVisible(true);
+		unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
+	}
+	else {
+		unitSpawnWidget->setVisible(false);
+	}
 }
 
 void GUI::hideCityUI() {

@@ -20,6 +20,8 @@ void UnitSpawnWidget::createButtons() {
 void UnitSpawnWidget::createProgressbar() {
 	createUnitProgress = new ProgressBar(this);
 	createUnitProgress->setValue(0.0f);
+
+	queueLabel = new Label(this, "In Queue: 999");
 }
 
 void UnitSpawnWidget::updateSelection(UnitSpawner* spawner) {
@@ -29,6 +31,8 @@ void UnitSpawnWidget::updateSelection(UnitSpawner* spawner) {
 	else {
 		createUnitProgress->setValue(0.0f);
 	}
+
+	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getUnitSpawnQueue().size()));
 }
 
 void UnitSpawnWidget::setCreateButtonCallback(std::function<void(UnitType*)> callback) {
