@@ -175,9 +175,6 @@
     <ClInclude Include="unit_window.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="leaderboard_widget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="music_player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -198,6 +195,9 @@
     </ClInclude>
     <ClInclude Include="unit_spawn_widget.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="leaderboard_widget.h">
+      <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -318,9 +318,6 @@
     <ClCompile Include="unit_window.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="leaderboard_widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="music_player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -341,6 +338,9 @@
     </ClCompile>
     <ClCompile Include="unit_spawn_widget.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="leaderboard_widget.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
