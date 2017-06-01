@@ -686,7 +686,7 @@ void Client::handleF2Key(int key) {
 		return;
 	}
 
-	TradeData deal(this->player->getID(), recipient, Resources::GOLD, 10);
+	TradeData deal(this->player->getID(), recipient, Resources::GOLD, 10, Resources::GOLD, 10);
 	this->channeled_send(&deal);
 }
 
@@ -774,7 +774,8 @@ void Client::handleF10Key(int key) {
 
 	/* Start a counter-offer based on the found trade deal */
 	/* TODO: Maybe there's a better way to make "modifying" a deal easier */
-	TradeData deal(trade_deal->get_recipient(), trade_deal->get_sender(), trade_deal->get_sell_type(), trade_deal->get_sell_amount() * 2);
+	TradeData deal(trade_deal->get_recipient(), trade_deal->get_sender(), trade_deal->get_sell_type(),
+		trade_deal->get_sell_amount(), trade_deal->get_buy_type(), trade_deal->get_buy_amount() * 2);
 	this->channeled_send(&deal);
 }
 

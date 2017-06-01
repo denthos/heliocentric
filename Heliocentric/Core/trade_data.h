@@ -30,6 +30,6 @@ public:
 	@param item Type of resource sender gives.
 	@param amount Amount of resource sender gives.
 	*/
-	TradeData(UID, UID, Resources::Type, int);
+	TradeData(UID, UID, Resources::Type, int, Resources::Type, int);
 	void apply();
 };
