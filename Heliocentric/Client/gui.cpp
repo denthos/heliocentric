@@ -51,7 +51,9 @@ void GUI::update() {
 	}
 
 	updateCityWindow();
+	updateUnitWindow();
 }
+
 
 
 GUI::~GUI()
@@ -59,13 +61,21 @@ GUI::~GUI()
 	delete unit_window;
 }
 
+void GUI::updateUnitWindow() {
+	if (selectedUnit) {
+		unit_window->updateSelection(selectedUnit);
+	}
+}
+
 
 void GUI::showUnitUI(AttackableGameObject* unit) {
+	selectedUnit = unit;
 	this->unit_window->updateSelection(unit);
 	this->unit_window->setVisible(true);
 }
 
 void GUI::hideUnitUI() {
+	selectedUnit = NULL;
 	this->unit_window->setVisible(false);
 }
 

@@ -55,7 +55,11 @@ public:
 
 private:
 	int screenWidth, screenHeight;
+
 	UnitWindow* unit_window;
+	AttackableGameObject* selectedUnit = NULL;
+	void updateUnitWindow();
+
 	FormHelper* formHelper;
 
 	void createUidDisplay();
