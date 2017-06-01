@@ -58,7 +58,11 @@ public:
 
 private:
 	int screenWidth, screenHeight;
+
 	UnitWindow* unit_window;
+	AttackableGameObject* selectedUnit = NULL;
+	void updateUnitWindow();
+
 	FormHelper* formHelper;
 	std::vector<std::shared_ptr<Player>> players;
 	Client* client;

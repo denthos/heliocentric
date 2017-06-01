@@ -6,12 +6,12 @@
 #include <glm/gtx/transform.hpp>
 
 #define ROCKET_MODEL "Models/Federation Interceptor HN48/Federation Interceptor HN48 flying.obj"
-#define BEAR_MODEL "Models/bear.obj"
+#define BEAR_MODEL "Models/Kameri explorer/Kameri explorer flying.obj"
 
 const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUnit::getDataMap() {
 	static std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData> dataMap {
 		{UnitType::BASIC_UNIT, DrawableUnitData {Model::getInstance(ROCKET_MODEL), 0.1f}},
-		{UnitType::HEAVY_UNIT, DrawableUnitData {Model::getInstance(BEAR_MODEL), 1.0f}}
+		{UnitType::HEAVY_UNIT, DrawableUnitData {Model::getInstance(BEAR_MODEL), 0.8f}}
 	};
 
 	return dataMap;
@@ -24,6 +24,7 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader) : Unit(unit) {
 
 	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
 	this->model = data.model;
+	this->glow = false;
 
 }
 
@@ -40,16 +41,26 @@ void DrawableUnit::draw(const Camera & camera) const {
 	shader->bind();
 	GLuint shaderID = shader->getPid();
 
+	//highlight selected unit
+	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), glow);
+
 	//color cities based on player color
 	glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
 	glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
 	Drawable::draw(camera);
+
+	shader->bind();
+	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), 0);
+	shader->unbind();
+
 }
 
 void DrawableUnit::select(GUI* gui, Client* client) {
 	gui->showUnitUI(this);
+	glow = true;
 }
 
 void DrawableUnit::unselect(GUI* gui, Client* client) {
 	gui->hideUnitUI();
+	glow = false;
 }

@@ -32,6 +32,8 @@ public:
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
 
+	virtual int getBaseHealth() const = 0;
+
 private:
 	static std::unordered_map<UnitType::TypeIdentifier, UnitType*> unittypeMap;
 };
@@ -39,8 +41,8 @@ private:
 template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
-	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName) :
-		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName) {}
+	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName, int baseHealth) :
+		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth) {}
 
 	std::unique_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
 		return std::make_unique<UnitClass>(position, owner, manager, this);
@@ -76,6 +78,10 @@ public:
 		return this->buildTime;
 	}
 
+	int getBaseHealth() const {
+		return this->baseHealth;
+	}
+
 	const std::string& getTypeName() const {
 		return this->typeName;
 	}
@@ -87,6 +93,7 @@ public:
 private:
 	ResourceCollection buildRequirements;
 	int buildTime;
+	int baseHealth;
 
 	std::string typeName;
 

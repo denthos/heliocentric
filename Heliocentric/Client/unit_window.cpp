@@ -1,4 +1,6 @@
 #include "unit_window.h"
+#include "unit.h"
+#include "unit_type.h"
 
 UnitWindow::UnitWindow(Widget* parent, const std::string &title) : Window(parent, title)
 {
@@ -74,19 +76,21 @@ UnitWindow::UnitWindow(Widget* parent, const std::string &title) : Window(parent
 	delete player_name;
 }
 
-void UnitWindow::updateSelection(AttackableGameObject * selected)
-{
-	AttackableGameObject* unit = dynamic_cast<AttackableGameObject*>(selected);
+void UnitWindow::updateSelection(AttackableGameObject * selected){
+	Attack selected_attack = selected->getAttack();
+	attack_strength->setValue(selected_attack.getDamage());
+	attack_range->setValue(selected_attack.getRange()); 
+	combat_defense_strength->setValue(selected->get_combat_defense());
+	health_stat->setCaption( std::to_string(selected->get_health())+"%");
+	healthbar->setValue((float)(selected->get_health())/100.0f);
+	player_name->setCaption(selected->get_player()->get_name());
 
+	Unit* unit = dynamic_cast<Unit*>(selected);
 	if (unit) {
-		Attack unit_attack = unit->getAttack();
-		attack_strength->setValue(unit_attack.getDamage());
-		attack_range->setValue(unit_attack.getRange()); 
-		combat_defense_strength->setValue(unit->get_combat_defense());
-		health_stat->setCaption( std::to_string(unit->get_health())+"%");
-		healthbar->setValue((float)(unit->get_health())/100.0f);
-		player_name->setCaption(unit->get_player()->get_name());
-
+		float health = ((float)unit->get_health() / (float)unit->getType()->getBaseHealth());
+		int health_percentage = (int)(health * 100.0f);
+		health_stat->setCaption(std::to_string(health_percentage) + "%");
+		healthbar->setValue(health);
 	}
 }
 

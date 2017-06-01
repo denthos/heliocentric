@@ -33,9 +33,8 @@ public:
 	TradeDeal(std::shared_ptr<TradeData>);
 	TradeDeal(std::shared_ptr<TradeData>, UID);
 
-	/* Constructor for a "giveaway" deal */
-	TradeDeal(UID, UID, Resources::Type, int);
-	TradeDeal(UID, UID, UID, Resources::Type, int);
+	TradeDeal(UID, UID, Resources::Type, int, Resources::Type, int);
+	TradeDeal(UID, UID, UID, Resources::Type, int, Resources::Type, int);
 
 	void apply();
 	void accept();

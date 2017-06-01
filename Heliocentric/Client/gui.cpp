@@ -55,7 +55,9 @@ void GUI::update() {
 	}
 
 	updateCityWindow();
+	updateUnitWindow();
 }
+
 
 
 GUI::~GUI()
@@ -63,13 +65,21 @@ GUI::~GUI()
 	delete unit_window;
 }
 
+void GUI::updateUnitWindow() {
+	if (selectedUnit) {
+		unit_window->updateSelection(selectedUnit);
+	}
+}
+
 
 void GUI::showUnitUI(AttackableGameObject* unit) {
+	selectedUnit = unit;
 	this->unit_window->updateSelection(unit);
 	this->unit_window->setVisible(true);
 }
 
 void GUI::hideUnitUI() {
+	selectedUnit = NULL;
 	this->unit_window->setVisible(false);
 }
 
@@ -400,9 +410,17 @@ void GUI::hideSlotUI() {
 void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
 	selectedCity = city;
 	cityWindow->setTitle(city->getName());
-	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
 	citySlotInfoPanel->updateDisplay(city->get_slot());
 	cityWindow->setVisible(true);
+
+	/* Only show the spawn ui if the owner clicked the city */
+	if (this->player->getID() == city->get_player()->getID()) {
+		unitSpawnWidget->setVisible(true);
+		unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
+	}
+	else {
+		unitSpawnWidget->setVisible(false);
+	}
 }
 
 void GUI::hideCityUI() {

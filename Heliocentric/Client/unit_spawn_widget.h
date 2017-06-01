@@ -18,4 +18,5 @@ private:
 
 	std::vector<UnitCreateButton*> createUnitButtons;
 	ProgressBar* createUnitProgress;
+	Label* queueLabel;
 };

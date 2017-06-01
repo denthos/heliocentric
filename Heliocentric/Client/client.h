@@ -113,9 +113,6 @@ private:
 
 	std::shared_ptr<Player> player;
 
-	/* Updates to be performed that are graphics related. All graphics work need to be done in main thread. */
-	Lib::Lock<std::queue<std::function<void()>>> update_queue;
-
 	void createWindow(int width, int height);
 
 	// glfw callbacks

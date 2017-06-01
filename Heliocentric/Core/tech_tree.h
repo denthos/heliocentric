@@ -23,12 +23,20 @@ friend class TechTree;
 private:
 	std::string name;
 	bool researched;
-	int science_to_unlock;
+	float research_points_required;
+	float research_points_accumulated;
+	float research_progress; // percentage of research points accumulated
 	std::vector<Technology*> parents;
 	std::vector<Technology*> children;
 
 public:
-	Technology(int, int);
+	Technology(int, float);
+
+	/**
+	Called by tech tree, which delegates funtionalities to this method.
+	@param research_points Reserch points being accumulated.
+	*/
+	void research(float);
 
 	/**
 	Tells if this tech is available for research.
@@ -46,20 +54,37 @@ public:
 
 class TechTree {
 private:
-	Technology* researching; // The selected tech that is being researched
+	/* TODO: Potential race condition? Might need a lock on current_research. */
+	Technology* current_research; // The selected tech that is being researched
 	static const std::unordered_map<int, std::string> tech_name_map;
 	std::unordered_map<int, Technology*> techs;
 	std::vector<Technology*> available_techs;
 
 	void build_tree();
+	void set_research_idle();
 
 public:
 	TechTree();
 	~TechTree();
 
-	void research(int);
+	/**
+	Called every server tick to accumulate research points on a selected tech.
+	@param research_points Reserch points being accumulated each time this method is called.
+	*/
+	void research(float);
+
+	/**
+	Chooses a tech as currently researching tech.
+	@param tech ID of the tech to choose.
+	*/
 	void choose_tech(int);
+
+	/**
+	Gets all the available techs, that are techs with all prerequisites satisfied and can be
+	researched at the moment.
+	@return Vector of IDs of techs that can be researched.
+	*/
 	std::vector<int> get_available_techs();
 
-	class BadTechNameException : std::exception {};
+	class BadTechIDException : std::exception {};
 };
