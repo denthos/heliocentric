@@ -24,7 +24,7 @@ class GUI : public Screen {
 public:
 
 	
-	GUI(GLFWwindow *, int screenWidth, int screenHeight);
+	GUI(GLFWwindow *, Client * client, int screenWidth, int screenHeight);
 	~GUI();
 
 	void update();
@@ -61,6 +61,7 @@ private:
 	UnitWindow* unit_window;
 	FormHelper* formHelper;
 	std::vector<std::shared_ptr<Player>> players;
+	Client* client;
 
 	void createUidDisplay();
 	void createSlotDisplay();

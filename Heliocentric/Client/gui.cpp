@@ -15,7 +15,7 @@
 #define FONT_FILE "Fonts/Courier.ttf"
 #define MAX_RESOURCE_CHARACTERS 9
 
-GUI::GUI(GLFWwindow * window, int screenWidth, int screenHeight) : Screen(), screenWidth(screenWidth), screenHeight(screenHeight) {
+GUI::GUI(GLFWwindow * window, Client* client, int screenWidth, int screenHeight) : Screen(), client(client), screenWidth(screenWidth), screenHeight(screenHeight) {
 	this->initialize(window, false);
 	unit_window = new UnitWindow((Screen*) this, "Unit Stats");
 
@@ -192,7 +192,7 @@ void GUI::createTradeDisplay() {
 			tradeWindow->setVisible(false);
 		}
 		else {
-			this->trade_partner = this->player.get();
+			this->trade_partner = this->players[0].get();
 			this->createCustomTradeDisplay();
 		}
 	});
@@ -247,11 +247,13 @@ void GUI::customizeTrade() {
 		LOG_DEBUG("Player index is " + std::to_string(player_index));
 		std::vector<std::string> resource_list = {};
 		for (auto itr : trade_partner->getResources()) {
-			LOG_DEBUG("Player index is " + std::to_string(player_index));
+			LOG_DEBUG("Resource type is " + Resources::toString(itr.first));
 			resource_list.push_back(Resources::toString(itr.first));
 		}
 		askForAmount->setValue(0);
 		askForResourceType->setItems(resource_list);
+		formHelper->refresh();
+		this->performLayout(nvgContext());
 	});
 
 	offerAmount->setEditable(true);
@@ -280,8 +282,10 @@ void GUI::customizeTrade() {
 
 	sendTradeButton->setCallback([offerAmount, offerResourceType, askForAmount, askForResourceType, this]() {
 		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(this->player->get_resource_type(offerResourceType->selectedIndex()))
-			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(this->trade_partner->get_resource_type(offerResourceType->selectedIndex())));
+			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(this->trade_partner->get_resource_type(askForResourceType->selectedIndex())));
 		LOG_DEBUG("Sending Custom Trade to another player...");
+		TradeData deal(this->player->getID(), trade_partner->getID(), Resources::GOLD, 10);
+		//this->channeled_send(&deal);
 		this->hideCustomTradeUI();
 	});
 	closeTradeButton->setCallback([this]() {
