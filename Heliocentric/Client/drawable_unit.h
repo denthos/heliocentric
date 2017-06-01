@@ -29,4 +29,5 @@ public:
 
 private:
 	DrawableUnitData data;
+	bool glow;
 };

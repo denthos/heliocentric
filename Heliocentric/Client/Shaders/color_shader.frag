@@ -30,6 +30,7 @@ layout (location = 1) out vec4 buffer1_color;
 uniform vec3 viewPos;
 uniform vec3 m_color;
 uniform PointLight pointLight;
+uniform bool glow;
 
 
 vec3 calcSunLight(vec3 normal, vec3 fragPos, vec3 viewDir) {
@@ -55,6 +56,13 @@ void main()
 
 	vec3 result = calcSunLight( norm, FragPos, viewDir);
 	color = vec4(m_color * m_diffuse, 1.0f) * vec4(result, 1.0f);
+
+	if(glow){
+		buffer1_color = color;
+	}
+	else{
+		buffer1_color = vec4(vec3(0.0), 1.0);
+	}
 
 
 }

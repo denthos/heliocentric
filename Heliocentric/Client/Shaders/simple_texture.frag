@@ -22,7 +22,8 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec2 TexCoord;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec4 brightColor;
 
 uniform vec3 viewPos;
 uniform sampler2D ourTexture;
@@ -70,4 +71,9 @@ void main()
 
 	vec3 result = calcSunLight(norm, FragPos, viewDir);
 	color = texture(ourTexture, TexCoord) * vec4(result, 1.0f);
+
+	float luminance = color.r * 0.3 + color.g * 0.59 + color.b * 0.11;
+
+	if(luminance > 0.03){ brightColor = color;}
+	else{ brightColor = vec4(vec3(0.0), 1.0);}
 }
