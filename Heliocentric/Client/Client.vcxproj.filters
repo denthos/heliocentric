@@ -187,6 +187,9 @@
     <ClInclude Include="model_preloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="music_player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="unit_create_button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -325,6 +328,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="model_preloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="music_player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="unit_create_button.cpp">

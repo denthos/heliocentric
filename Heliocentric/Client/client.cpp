@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <soil.h>
+#include <thread>
 
 #include "free_camera.h"
 #include "model_preloader.h"
@@ -272,8 +273,12 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	frameTimer = glfwGetTime();
 	frameCounter = 0;
 
+	musicPlayer.load_sound("Audio/Holst_The_Planets_Mars.ogg");
 	musicPlayer.load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
-	musicPlayer.play();
+	musicPlayer.load_sound("Audio/Holst_The_Planets_Venus.ogg");
+	musicPlayer.load_sound("Audio/Holst_The_Planets_Uranus.ogg");
+	musicPlayer.load_sound("Audio/Holst_The_Planets_Mercury.ogg");
+	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, &musicPlayer);
 }
 
 Client::~Client() {
@@ -289,6 +294,10 @@ Client::~Client() {
 	slots.clear();
 
 	glfwEntry.erase(window);
+
+	/* Stop sound thread */
+	musicPlayer.stop();
+	sound_thread.join();
 }
 
 bool Client::isRunning() {

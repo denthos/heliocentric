@@ -85,6 +85,8 @@ protected:
 	virtual void handle_poll_timeout();
 
 private:
+	std::thread sound_thread;
+
 	GLFWwindow * window;
 	GUI * gui;
 	MusicPlayer musicPlayer;
