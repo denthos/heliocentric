@@ -5,6 +5,8 @@ TradeDeal::TradeDeal(std::shared_ptr<TradeData> deal) : Identifiable() {
 	this->recipient = deal->recipient;
 	this->sell_type = deal->sell_type;
 	this->sell_amount = deal->sell_amount;
+	this->buy_type = deal->buy_type;
+	this->buy_amount = deal->buy_amount;
 }
 
 TradeDeal::TradeDeal(std::shared_ptr<TradeData> deal, UID id) : Identifiable(id) {
@@ -12,15 +14,19 @@ TradeDeal::TradeDeal(std::shared_ptr<TradeData> deal, UID id) : Identifiable(id)
 	this->recipient = deal->recipient;
 	this->sell_type = deal->sell_type;
 	this->sell_amount = deal->sell_amount;
+	this->buy_type = deal->buy_type;
+	this->buy_amount = deal->buy_amount;
 }
 
-TradeDeal::TradeDeal(UID sender, UID recipient, Resources::Type item, int amount) :
-	Identifiable(), sender(sender), recipient(recipient), sell_type(item), sell_amount(amount)  {
+TradeDeal::TradeDeal(UID sender, UID recipient, Resources::Type sell_type, int sell_amount,
+	Resources::Type buy_type, int buy_amount) : Identifiable(), sender(sender), recipient(recipient),
+	sell_type(sell_type), sell_amount(sell_amount), buy_type(buy_type), buy_amount(buy_amount) {
 	this->trade_status = PENDING;
 }
 
-TradeDeal::TradeDeal(UID id, UID sender, UID recipient, Resources::Type item, int amount) :
-	Identifiable(id), sender(sender), recipient(recipient), sell_type(item), sell_amount(amount) {
+TradeDeal::TradeDeal(UID id, UID sender, UID recipient, Resources::Type sell_type, int sell_amount,
+	Resources::Type buy_type, int buy_amount) : Identifiable(id), sender(sender), recipient(recipient),
+	sell_type(sell_type), sell_amount(sell_amount), buy_type(buy_type), buy_amount(buy_amount) {
 	this->trade_status = PENDING;
 }
 

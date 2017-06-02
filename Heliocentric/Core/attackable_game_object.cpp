@@ -10,6 +10,10 @@ AttackableGameObject::AttackableGameObject(UID id, glm::vec3 position, Player* p
 	GameObject(id, position, player), attack(*attack), combatDefense(def), health(heal) {};
 
 
+bool AttackableGameObject::is_dead() {
+	return this->get_health() <= 0;
+}
+
 Attack& AttackableGameObject::getAttack() {
 	return this->attack;
 }
@@ -38,17 +42,17 @@ int AttackableGameObject::take_damage(int damage) {
 	return this->health;
 }
 
-bool AttackableGameObject::do_attack(AttackableGameObject * target)
+bool AttackableGameObject::do_attack(std::shared_ptr<AttackableGameObject> target)
 {
 	if (target == nullptr) {
 		LOG_ERR("target is null.");
 		return false;
 	}
-	else if (target == this || target->player == this->player) {
+	else if (target->getID() == this->getID() || target->player == this->player) {
 		LOG_ERR("Cannot attack same player.");
 		return false;
 	}
-	else if (target->get_health() <= 0) {
+	else if (target->is_dead()) {
 		LOG_ERR("Cannot attack a dead unit.");
 		return false;
 	}
@@ -56,31 +60,31 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 	bool target_is_dead = false, this_is_dead = false;
 	LOG_DEBUG("Attacker position is " + std::to_string(this->get_position().x) + " " + std::to_string(this->get_position().y) + " " + std::to_string(this->get_position().z));
 	LOG_DEBUG("Target position is " + std::to_string(target->get_position().x) + " " + std::to_string(target->get_position().y) + " " + std::to_string(target->get_position().z));
-	LOG_DEBUG("Distance between attacker and target is " + std::to_string(glm::distance(this->position, target->get_position())));
+	LOG_DEBUG("Distance between attacker and target is " + std::to_string(glm::distance(this->get_position(), target->get_position())));
 
-	if (glm::distance(this->position, target->get_position()) <= (float) this->attack.getRange()) {
+	if (glm::distance(this->get_position(), target->get_position()) <= (float) this->attack.getRange()) {
 
 		// Target is within range.
-		this->attack.doAttack(target);
+		this->attack.doAttack(target.get());
 
-		if (target->health <= 0) {
-			target->handle_defeat(this);
+		if (target->is_dead()) {
+			target->handle_defeat(this->shared_from_this());
 			target_is_dead = true;
 			LOG_DEBUG("Enemy is dead.");
 		}
 		else {
-			target->handle_counter(this);
+			target->handle_counter(this->shared_from_this());
 			LOG_DEBUG("Enemy is countering.");
 		}
 
-		if (this->health <= 0) {
+		if (this->is_dead()) {
 			this->handle_defeat(target);
 			this_is_dead = true;
 			LOG_DEBUG("Player spaceship is dead.");
 		}
 		if (target_is_dead != this_is_dead) {
 			// Someone is still alive -- they are the victor. 
-			(target_is_dead ? this : target)->handle_victory((target_is_dead) ? target : this);
+			(target_is_dead ? this->shared_from_this() : target)->handle_victory((target_is_dead) ? target : this->shared_from_this());
 		}
 	}
 	else {

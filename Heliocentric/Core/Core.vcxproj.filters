@@ -21,6 +21,12 @@
     <Filter Include="Commands">
       <UniqueIdentifier>{a2680ed8-3455-4362-8da6-54e3eca0296d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Units">
+      <UniqueIdentifier>{3df61926-f0d9-4a4a-92e4-c32a8ffa76d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers">
+      <UniqueIdentifier>{29aad4f1-f1b3-492c-9719-331be87de5be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="attackable_game_object.h">
@@ -39,9 +45,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="planet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="unit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="identifiable.h">
@@ -80,14 +83,8 @@
     <ClInclude Include="locked_item.h">
       <Filter>Utility Library</Filter>
     </ClInclude>
-    <ClInclude Include="unit_sample.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="player_id_confirmation.h">
       <Filter>Updates</Filter>
-    </ClInclude>
-    <ClInclude Include="universe.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="unit_command.h">
       <Filter>Commands</Filter>
@@ -122,9 +119,6 @@
     <ClInclude Include="player_client_to_server_xfer.h">
       <Filter>Commands</Filter>
     </ClInclude>
-    <ClInclude Include="unit_manager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="spherical_coordinate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -158,9 +152,6 @@
     <ClInclude Include="instant_laser_attack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="city_manager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tech_tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -172,6 +163,48 @@
     </ClInclude>
     <ClInclude Include="new_player_info_update.h">
       <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unit.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_unit.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="heavy_unit.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_spawner_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_spawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player_color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_over_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="player_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player_score_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="universe.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_manager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="player_manager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="city_manager.h">
+      <Filter>Managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -188,13 +221,7 @@
     <ClCompile Include="slot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="unit_sample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -232,9 +259,6 @@
     <ClCompile Include="attackable_game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="universe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="fileutils.cpp">
       <Filter>Utility Library</Filter>
     </ClCompile>
@@ -262,9 +286,6 @@
     <ClCompile Include="attackable_game_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unit_manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="spherical_coordinate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -286,9 +307,6 @@
     <ClCompile Include="attack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="city_manager.cpp">
-	    <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tech_tree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -306,6 +324,39 @@
     </ClCompile>
     <ClCompile Include="city_manager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_type.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unit.cpp">
+      <Filter>Units</Filter>
+    </ClCompile>
+    <ClCompile Include="basic_unit.cpp">
+      <Filter>Units</Filter>
+    </ClCompile>
+    <ClCompile Include="heavy_unit.cpp">
+      <Filter>Units</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_spawner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player_color.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player_score_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="universe.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_manager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="player_manager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="city_manager.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

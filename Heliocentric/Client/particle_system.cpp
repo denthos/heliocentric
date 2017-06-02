@@ -2,12 +2,13 @@
 #include "client.h"
 #define DEFAULT_SPAWN_RATE  20
 
-ParticleSystem::ParticleSystem(float spawn_rate, int spawns_per_emission, ParticleEmitter* emitter)
+ParticleSystem::ParticleSystem(float spawn_rate, int spawns_per_emission, ParticleEmitter* emitter, Shader* shader)
 {
 	this->max_particles  = MAX_PARTICLES;
 	this->spawn_rate = spawn_rate;
 	this->emitter = emitter; //default emitter
 	this->spawns_per_emission = spawns_per_emission;
+	this->shader = shader;
 	
 
 	lastUsedIndex = 0;
@@ -59,15 +60,15 @@ void ParticleSystem::Update(const Camera &camera)
 
 }
 
-void ParticleSystem::draw(const Shader &shader, const Camera &camera, const glm::mat4 &toWorld)
+void ParticleSystem::draw(const Camera &camera, const glm::mat4 &toWorld)
 {
 	sortParticles();
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	shader.bind();
-	GLuint shaderID = shader.getPid();
+	shader->bind();
+	GLuint shaderID = shader->getPid();
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, &camera.perspective[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_FALSE, &camera.view[0][0]);
@@ -85,7 +86,7 @@ void ParticleSystem::draw(const Shader &shader, const Camera &camera, const glm:
 	glBindVertexArray(0);
 	//texture.unbind();
 
-	shader.unbind();
+	shader->unbind();
 	
 }
 

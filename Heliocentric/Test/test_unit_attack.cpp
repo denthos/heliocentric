@@ -13,7 +13,7 @@ namespace Test
 	class TestUnit : public Unit {
 
 	public:
-		TestUnit(UID id, glm::vec3 position, UnitManager* manager) : Unit(id, position, NULL, new InstantLaserAttack(), manager, 100, 100) {
+		TestUnit(UID id, glm::vec3 position, UnitManager* manager) : Unit(id, position, NULL, new InstantLaserAttack(), manager, 100, 100, 1.0f, UnitType::getByIdentifier(UnitType::TypeIdentifier::BASIC_UNIT)) {
 			this->movement_speed = 200;
 		}
 
@@ -45,7 +45,7 @@ namespace Test
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f), &manager);
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 			Assert::IsTrue(unit_1->is_in_attack_mode());
 			Assert::IsTrue(unit_2->is_in_idle_mode());
@@ -57,15 +57,15 @@ namespace Test
 		TEST_METHOD(basic_unit_attack_test) {
 			UnitManager manager;
 			/* Setup */
-			Player player_1("Player 1", 102);
-			Player player_2("Player 2", 203);
+			Player player_1("Player 1", 102, PlayerColor::FIRST);
+			Player player_2("Player 2", 203, PlayerColor::FIRST);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(2.0f), &manager);
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f), &manager);
 			player_1.acquire_object(unit_1);
 			player_2.acquire_object(unit_2);
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 			unit_1->do_logic();
 			Assert::AreEqual(unit_2->get_health(), 50);
@@ -79,8 +79,8 @@ namespace Test
 			UnitManager manager;
 
 			/* Setup */
-			Player player_1("Player 1", 102);
-			Player player_2("Player 2", 203);
+			Player player_1("Player 1", 102, PlayerColor::FIRST);
+			Player player_2("Player 2", 203, PlayerColor::FIRST);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f), &manager);
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(250.0f), &manager);
 			player_1.acquire_object(unit_1);
@@ -89,7 +89,7 @@ namespace Test
 			Assert::IsTrue(glm::distance(unit_1->get_position(), unit_2->get_position()) >= 250.0f);
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 			unit_1->do_logic();
 
@@ -109,8 +109,8 @@ namespace Test
 			UnitManager manager;
 
 			/* Setup */
-			Player player_1("Player 1", 102);
-			Player player_2("Player 2", 203);
+			Player player_1("Player 1", 102, PlayerColor::FIRST);
+			Player player_2("Player 2", 203, PlayerColor::FIRST);
 			TestUnit* unit_1 = new TestUnit(100, glm::vec3(0.0f), &manager);
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(0.0f), &manager);
 
@@ -119,7 +119,7 @@ namespace Test
 			Assert::IsNotNull(unit_2->get_player());
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 
 			// Kill unit_2 : should take two hits

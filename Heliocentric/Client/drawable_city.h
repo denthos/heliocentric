@@ -11,8 +11,9 @@ private:
 	DrawableSlot* drawable_slot;
 
 public:
-	DrawableCity(const City&);
+	DrawableCity(const City&, Shader * shader);
 	virtual void update();
+	virtual void draw(const Camera & camera) const;
 	void select(GUI* gui, Client* client);
 	void unselect(GUI* gui, Client* client);
 };

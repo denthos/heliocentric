@@ -59,6 +59,7 @@ public:
 	/**
 	Attacks the target. This does attack logic instantly, so the
 	caller better make sure that the target is in range
+	@return Whether the attack is attacking
 	*/
 	void doAttack(AttackableGameObject* target);
 };

@@ -13,6 +13,8 @@ void UnitUpdate::apply(GameObject* obj) {
 		return;
 	}
 	unit->set_health(this->health);
+	unit->set_orientation(glm::vec3(orientation_x, orientation_y, orientation_z));
+	unit->client_setAttacking(this->attacking);
 }
 /*
 void UnitUpdate::apply(Unit* obj) {

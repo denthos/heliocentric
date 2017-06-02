@@ -25,7 +25,7 @@ bool Model::intersect(const Ray & ray, Collision & collision) const {
 	return boundingBox.intersect(ray, collision);
 }
 
-BoundingBox Model::getBoundingBox() {
+BoundingBox Model::getBoundingBox() const {
 	return boundingBox;
 }
 

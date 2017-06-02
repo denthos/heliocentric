@@ -13,3 +13,5 @@ public:
 private:
 	static std::unordered_map < Resources::Type, std::string> nameMap;
 };
+
+typedef std::unordered_map<Resources::Type, int> ResourceCollection;

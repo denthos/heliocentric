@@ -4,28 +4,29 @@
 #include "drawable_slot.h"
 #include <glm/gtx/transform.hpp>
 
-std::unordered_map<PlanetType, DrawableData>& DrawablePlanet::getDataMap() {
-	static std::unordered_map<PlanetType, DrawableData> drawable_data_map;
+std::unordered_map<PlanetType, DrawablePlanetData>& DrawablePlanet::getDataMap() {
+	static std::unordered_map<PlanetType, DrawablePlanetData> drawable_data_map;
 	if (drawable_data_map.empty()) {
-		drawable_data_map.insert(std::make_pair(SUN, DrawableData(Texture::getInstance("Textures/sun.jpg"))));
-		drawable_data_map.insert(std::make_pair(MERCURY, DrawableData(Texture::getInstance("Textures/mercury.jpg"))));
-		drawable_data_map.insert(std::make_pair(VENUS, DrawableData(Texture::getInstance("Textures/venus.jpg"))));
-		drawable_data_map.insert(std::make_pair(EARTH, DrawableData(Texture::getInstance("Textures/earth.jpg"))));
-		drawable_data_map.insert(std::make_pair(MARS, DrawableData(Texture::getInstance("Textures/mars.jpg"))));
-		drawable_data_map.insert(std::make_pair(JUPITER, DrawableData(Texture::getInstance("Textures/jupiter.jpg"))));
+		drawable_data_map.insert(std::make_pair(SUN, DrawablePlanetData{Texture::getInstance("Textures/sun.jpg")}));
+		drawable_data_map.insert(std::make_pair(MERCURY, DrawablePlanetData{Texture::getInstance("Textures/mercury.jpg")}));
+		drawable_data_map.insert(std::make_pair(VENUS, DrawablePlanetData{Texture::getInstance("Textures/venus.jpg")}));
+		drawable_data_map.insert(std::make_pair(EARTH, DrawablePlanetData{Texture::getInstance("Textures/earth.jpg")}));
+		drawable_data_map.insert(std::make_pair(MARS, DrawablePlanetData{Texture::getInstance("Textures/mars.jpg")}));
+		drawable_data_map.insert(std::make_pair(JUPITER, DrawablePlanetData{Texture::getInstance("Textures/jupiter.jpg")}));
 	}
 
 	return drawable_data_map;
 }
 
-DrawablePlanet::DrawablePlanet(const Planet & planet) : Planet(planet) {
+DrawablePlanet::DrawablePlanet(const Planet & planet, Shader * shader, Shader * slotShader) : Planet(planet) {
 	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(get_radius()));
 	model = new SphereModel(getDataMap().at(planet.get_type()).texture);
+	this->shader = shader;
 
 	/* Convert all the planet's slots to DrawableSlots */
 	auto& slots = this->get_slots();
 	for (auto slot_pair : slots) {
-		slots[slot_pair.first] = new DrawableSlot(*slot_pair.second, this);
+		slots[slot_pair.first] = new DrawableSlot(*slot_pair.second, this, slotShader);
 	}
 }
 

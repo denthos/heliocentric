@@ -8,12 +8,12 @@
 namespace SunNet {
 	/**
 	A collection of states that the client can be in.
-        +---+
-        |   V
+		+---+
+		|   V
 	  +--------+        +-----------+         +-------------+
 	->| CLOSED |  ----> | CONNECTED |  ---->  | DESTRUCTING |
 	  +--------+        +-----------+         +-------------+
-          ^                   |
+		  ^                   |
 		  +-------------------+
 	*/
 	enum ClientState {
@@ -35,24 +35,26 @@ namespace SunNet {
 	template <class TSocketConnection>
 	class Client {
 	private:
-		std::thread poll_thread;
 		PollService poll_service;
 
 		ClientState state;
 
-		void state_transition(std::initializer_list<ClientState> const & valid_from_states, ClientState new_state) {
-			bool in_valid_from_state = false;
-			for (const ClientState& valid_from_state : valid_from_states) {
-				if (this->state == valid_from_state) {
-					in_valid_from_state = true;
+		void assert_valid_state(std::initializer_list<ClientState> const& valid_states) {
+			bool is_valid_state = false;
+			for (const ClientState& valid_state : valid_states) {
+				if (this->state == valid_state) {
+					is_valid_state = true;
 					break;
 				}
 			}
 
-			if (!in_valid_from_state) {
+			if (!is_valid_state) {
 				throw InvalidStateTransitionException();
 			}
+		}
 
+		void state_transition(std::initializer_list<ClientState> const & valid_from_states, ClientState new_state) {
+			assert_valid_state(valid_from_states);
 			this->state = new_state;
 		}
 
@@ -63,53 +65,7 @@ namespace SunNet {
 		*/
 		std::function<SocketConnection_p()> connection_create_func;
 
-		/**
-		The function that the polling thread uses. While the client is
-		connected, polls the connection looking for status updates. When something
-		is ready to occur, the corresponding "hook" is called.
-
-		Handles poll timeouts, client errors, and whent he client is ready
-		to read data from the server
-
-		@throws InvalidSocketPollException if a catastrophic errors occurs and for whatever
-		reason poll() returns a socket that we don't know about.
-		*/
-		void poll() {
-			while (this->state == CLIENT_CONNECTED) {
-				SocketCollection_p ready_sockets = this->poll_service.poll();
-
-				if (ready_sockets->size() == 0) {
-					/* CHECKPOINT */
-					if (this->state == CLIENT_DESTRUCTING) break;
-					this->handle_poll_timeout();
-					continue;
-				}
-				
-				for (auto socket_iter = ready_sockets->begin(); socket_iter != ready_sockets->end(); ++socket_iter) {
-
-					if (socket_iter->connection == this->connection) {
-						if (socket_iter->status == SOCKET_STATUS_ERROR) {
-							/* CHECKPOINT */
-							if (this->state == CLIENT_DESTRUCTING) break;
-							this->handle_client_error();
-						}
-						else if (socket_iter->status == SOCKET_STATUS_DISCONNECT) {
-							/* CHECKPOINT */
-							if (this->state == CLIENT_DESTRUCTING) break;
-							this->handle_client_disconnect();
-						}
-						else {
-							/* CHECKPOINT */
-							if (this->state == CLIENT_DESTRUCTING) break;
-							this->handle_client_ready_to_read();
-						}
-					}
-					else {
-						throw InvalidSocketPollException();
-					}
-				}
-			}
-		}
+		
 
 	protected:
 		std::shared_ptr<SocketConnection> connection;
@@ -150,9 +106,6 @@ namespace SunNet {
 			Join the poll thread if need be. Please god don't let it call any virtual
 			methods... If it does, we crash.
 			*/
-			if (this->poll_thread.joinable()) {
-				this->poll_thread.join();
-			}
 
 			/* Now, reset the connection. */
 			this->connection.reset();
@@ -166,15 +119,13 @@ namespace SunNet {
 		@param port the port to connect to
 		*/
 		void connect(std::string address, std::string port) {
-			this->state_transition({ CLIENT_CLOSED }, CLIENT_CONNECTED);
+			this->assert_valid_state({ CLIENT_CLOSED });
 
 			this->connection = this->connection_create_func();
-
-			/* Connect. If the connection succeeds, change state */
 			this->connection->connect(address, port);
 			this->poll_service.add_socket(this->connection);
 
-			this->poll_thread = std::thread(&Client<TSocketConnection>::poll, this);
+			this->state_transition({ CLIENT_CLOSED }, CLIENT_CONNECTED);
 		}
 
 		/**
@@ -195,11 +146,6 @@ namespace SunNet {
 			Also no rush. The polling thread will not bail out at any checkpoints.
 			The user is properly disconnecting us, so let's take our sweet time :)
 			*/
-			if (std::this_thread::get_id() != this->poll_thread.get_id()) {
-				if (this->poll_thread.joinable()) {
-					this->poll_thread.join();
-				}
-			}
 
 			this->poll_service.clear_sockets();
 
@@ -225,6 +171,56 @@ namespace SunNet {
 		*/
 		void read(NETWORK_BYTE* buffer, NETWORK_BYTE_SIZE size) {
 			this->connection->receive(buffer, size);
+		}
+
+		/**
+		The function that the polling thread uses. While the client is
+		connected, polls the connection looking for status updates. When something
+		is ready to occur, the corresponding "hook" is called.
+
+		Handles poll timeouts, client errors, and whent he client is ready
+		to read data from the server
+
+		@throws InvalidSocketPollException if a catastrophic errors occurs and for whatever
+		reason poll() returns a socket that we don't know about.
+		*/
+		bool poll() {
+			if (this->state != CLIENT_CONNECTED) {
+				return false;
+			}
+			SocketCollection_p ready_sockets = this->poll_service.poll();
+
+			if (ready_sockets->size() == 0) {
+				/* CHECKPOINT */
+				if (this->state == CLIENT_DESTRUCTING) return false;
+				this->handle_poll_timeout();
+				return false;
+			}
+
+			for (auto socket_iter = ready_sockets->begin(); socket_iter != ready_sockets->end(); ++socket_iter) {
+
+				if (socket_iter->connection == this->connection) {
+					if (socket_iter->status == SOCKET_STATUS_ERROR) {
+						/* CHECKPOINT */
+						if (this->state == CLIENT_DESTRUCTING) return false;
+						this->handle_client_error();
+					}
+					else if (socket_iter->status == SOCKET_STATUS_DISCONNECT) {
+						/* CHECKPOINT */
+						if (this->state == CLIENT_DESTRUCTING) return false;
+						this->handle_client_disconnect();
+					}
+					else {
+						/* CHECKPOINT */
+						if (this->state == CLIENT_DESTRUCTING) return false;
+						this->handle_client_ready_to_read();
+					}
+				}
+				else {
+					throw InvalidSocketPollException();
+				}
+			}
+			return true;
 		}
 
 

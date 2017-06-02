@@ -1,32 +1,20 @@
 #pragma once
 
 #include "gui_utilities.h"
-#include "unit_window.h"
-
+#include "attackable_gameobject_widget.h"
 
 #include "game_object.h"
 #include "resources.h"
 #include "player.h"
+#include "unit_type.h"
+#include "unit_spawn_widget.h"
+#include "leaderboard_widget.h"
+#include "slot_info_panel.h"
+#include "unit_type.h"
+#include "unit_create_button.h"
 
 #include <nanogui\nanogui.h>
 #include <unordered_map>
-
-#if defined(NANOGUI_GLAD)
-	#if defined(NANOGUI_SHARED) && !defined(GLAD_GLAPI_EXPORT)
-		#define GLAD_GLAPI_EXPORT
-	#endif
-
-	#include <glad/glad.h>
-#else
-	#if defined(__APPLE__)
-		#define GLFW_INCLUDE_GLCOREARB
-	#else
-		#define GL_GLEXT_PROTOTYPES
-	#endif
-#endif
-
-
-using namespace nanogui;
 
 class Slot;
 class Client;
@@ -55,23 +43,36 @@ public:
 	void hideSlotUI();
 
 
-	void displayCityUI(City* city, std::function<void()> createUnitCallback);
+	void displayCityUI(City* city, std::function<void(UnitType*)> createUnitCallback);
 	void hideCityUI();
 
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
 
+	void showGameOverWindow(bool victorious);
+	void hideGameOverWindow();
+	void updatePlayerLeaderboardValue(const Player* player);
+
 private:
 	int screenWidth, screenHeight;
-	UnitWindow* unit_window;
+
+	AttackableGameObject* selectedUnit = NULL;
+	void updateUnitWindow();
+
 	FormHelper* formHelper;
 
 	void createUidDisplay();
 	void createSlotDisplay();
 	void createCityDisplay();
 	void createPlayerOverlay();
+	void createGameOverWindow();
+	void createLeaderboardWindow();
+	void createUnitDisplay();
 
 	std::pair<int, std::string> placeholderImage;
+
+	Window* unit_window;
+	AttackableGameObjectWidget* unit_info_widget;
 
 	ref<Window> uidWindow;
 	detail::FormWidget<int> * uidDisplay;
@@ -82,11 +83,17 @@ private:
 	std::string cityName = "Default CityName";
 	detail::FormWidget<std::string>* cityNameDisplay;
 
-	Widget* slotResourcesWidget;
-	std::unordered_map<Resources::Type, detail::FormWidget<int>*> resourceDisplay;
+	SlotInfoPanel* slotInfoPanel;
 
+	City* selectedCity = NULL;
 	ref<Window> cityWindow;
-	Button* createUnitButton;
+	AttackableGameObjectWidget* cityInfoWidget;
+	UnitSpawnWidget* unitSpawnWidget;
+	SlotInfoPanel* citySlotInfoPanel;
+	void updateCityWindow();
+
+	ref<Window> gameOverWindow;
+	Label* gameOverLabel;
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;
@@ -94,4 +101,6 @@ private:
 	Label * fpsSpacer;
 	Label * fpsDisplay;
 
+	Window* leaderboardWindow;
+	LeaderboardWidget* leaderboardWidget;
 };

@@ -4,6 +4,7 @@
 #include "selectable.h"
 #include "city.h"
 #include "resources.h"
+#include "unit_spawner.h"
 
 #define RESOURCE_IMAGE_DIRECTORY "Images/Resources"
 #define PIXELS_PER_CHARACTER 14
@@ -14,7 +15,6 @@
 
 GUI::GUI(GLFWwindow * window, int screenWidth, int screenHeight) : Screen(), screenWidth(screenWidth), screenHeight(screenHeight) {
 	this->initialize(window, false);
-	unit_window = new UnitWindow((Screen*) this, "Unit Stats");
 
 	// load placeholder image
 	std::vector<std::pair<int, std::string>> placeholderL = loadImageDirectory(nvgContext(), "Images/Placeholder");
@@ -33,6 +33,9 @@ GUI::GUI(GLFWwindow * window, int screenWidth, int screenHeight) : Screen(), scr
 	this->createSlotDisplay();
 	this->createCityDisplay();
 	this->createPlayerOverlay();
+	this->createGameOverWindow();
+	this->createLeaderboardWindow();
+	this->createUnitDisplay();
 
 	this->setVisible(true);
 	this->performLayout();
@@ -46,7 +49,11 @@ void GUI::update() {
 			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
 		}
 	}
+
+	updateCityWindow();
+	updateUnitWindow();
 }
+
 
 
 GUI::~GUI()
@@ -54,13 +61,27 @@ GUI::~GUI()
 	delete unit_window;
 }
 
+void GUI::updateUnitWindow() {
+	if (selectedUnit) {
+		unit_info_widget->updateSelection(selectedUnit);
+	}
+}
+
 
 void GUI::showUnitUI(AttackableGameObject* unit) {
-	this->unit_window->updateSelection(unit);
+	selectedUnit = unit;
+
+	Unit* cast_unit = dynamic_cast<Unit*>(unit);
+	if (cast_unit) {
+		this->unit_window->setTitle(cast_unit->getType()->getTypeName());
+	}
+
+	updateUnitWindow();
 	this->unit_window->setVisible(true);
 }
 
 void GUI::hideUnitUI() {
+	selectedUnit = NULL;
 	this->unit_window->setVisible(false);
 }
 
@@ -84,6 +105,7 @@ void GUI::setScreenSize(int width, int height) {
 
 void GUI::setPlayer(std::shared_ptr<Player> player) {
 	this->player = player;
+	this->updatePlayerLeaderboardValue(player.get());
 }
 
 void GUI::setFPS(double fps) {
@@ -106,18 +128,15 @@ void GUI::createSlotDisplay() {
 	slotWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "Selected Planet");
 	slotWindow->setWidth(200);
 
-	formHelper->addGroup("Naming");
+
+
+	formHelper->addGroup("Slot Info");
+	this->slotInfoPanel = new SlotInfoPanel(slotWindow);
+	formHelper->addWidget("", this->slotInfoPanel);
+
+	formHelper->addGroup("Found a City");
 	// TODO: Make this a max of 16 characters
 	cityNameDisplay = formHelper->addVariable("Name", cityName);
-
-	formHelper->addGroup("Resources");
-	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
-		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
-		int rvar = 999999999;
-		detail::FormWidget<int>* resourceBox = formHelper->addVariable(Resources::toString(type_of_resource), rvar);
-		resourceBox->setEditable(false);
-		resourceDisplay.insert(std::make_pair(type_of_resource, resourceBox));
-	}
 
 	slotButton = formHelper->addButton("Establish City", []() {});
 	slotWindow->setVisible(false);
@@ -156,6 +175,7 @@ void GUI::createPlayerOverlay() {
 		ImageView * resourceImage = new ImageView(playerOverlay, image);
 		resourceImage->setTooltip(resourceName);
 		resourceImage->setFixedSize(Eigen::Vector2i(25, 25));
+		resourceImage->setFixedOffset(true); //DONT DRAG THE ICONS
 		Label * resourceLabel = new Label(playerOverlay, "0", FONT, FONT_SIZE);
 		resourceLabel->setTooltip(resourceName);
 		resourceLabel->setFixedWidth(MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER);
@@ -167,6 +187,41 @@ void GUI::createPlayerOverlay() {
 	fpsDisplay = new Label(playerOverlay, "FPS: ", FONT, FONT_SIZE);
 	fpsDisplay->setTooltip("Frames per second");
 	fpsDisplay->setFixedWidth(9 * PIXELS_PER_CHARACTER);
+}
+
+void GUI::createGameOverWindow() {
+	gameOverWindow = formHelper->addWindow(Eigen::Vector2i(0, 0), "GAME OVER");
+	gameOverLabel = new Label(gameOverWindow, "YOU ARE VICTORIOUS!", FONT, FONT_SIZE);
+
+	formHelper->addWidget("", gameOverLabel);
+	gameOverWindow->center();
+	gameOverWindow->setVisible(false);
+}
+
+void GUI::showGameOverWindow(bool victorious) {
+	std::string message = victorious ? "VICTORIOUS" : "A LOSER";
+	gameOverLabel->setCaption("YOU ARE " + message);
+	gameOverWindow->setVisible(true);
+}
+
+void GUI::hideGameOverWindow() {
+	gameOverWindow->setVisible(false);
+}
+
+
+void GUI::createLeaderboardWindow() {
+	this->leaderboardWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 140), "Leaderboard");
+	this->leaderboardWidget = new LeaderboardWidget(leaderboardWindow);
+	this->leaderboardWindow->setWidth(this->leaderboardWidget->width());
+	formHelper->addWidget("", leaderboardWidget);
+	this->leaderboardWindow->performLayout(nvgContext());
+}
+
+void GUI::updatePlayerLeaderboardValue(const Player* player) {
+	if (this->leaderboardWidget->updateScoreEntry(player)) {
+		this->leaderboardWindow->setHeight(this->leaderboardWidget->height() + 40);
+		this->leaderboardWindow->performLayout(nvgContext());
+	}
 }
 
 void GUI::unselectSelection(Client* client, std::vector<GameObject*>& old_selection) {
@@ -194,10 +249,39 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 
 void GUI::createCityDisplay() {
 	cityWindow = formHelper->addWindow(Eigen::Vector2i(10, 120), "City Name");
-	createUnitButton = formHelper->addButton("Create Unit", []() {});
+
+	formHelper->addGroup("Slot Info");
+	citySlotInfoPanel = new SlotInfoPanel(cityWindow);
+	formHelper->addWidget("", citySlotInfoPanel);
+
+	formHelper->addGroup("City Stats");
+	cityInfoWidget = new AttackableGameObjectWidget(cityWindow);
+	formHelper->addWidget("", cityInfoWidget);
+
+	formHelper->addGroup("Unit Management");
+	unitSpawnWidget = new UnitSpawnWidget(cityWindow);
+	formHelper->addWidget("", unitSpawnWidget);
 
 	cityWindow->setVisible(false);
+}
 
+void GUI::createUnitDisplay() {
+	unit_window = formHelper->addWindow(Eigen::Vector2i(10, 120), "Unit Type Goes Here");
+
+	formHelper->addGroup("Unit Information");
+	unit_info_widget = new AttackableGameObjectWidget(unit_window);
+	formHelper->addWidget("", unit_info_widget);
+
+	unit_window->setVisible(false);
+}
+
+
+void GUI::updateCityWindow() {
+	if (cityWindow->visible()) {
+		unitSpawnWidget->updateSelection(selectedCity);
+		cityInfoWidget->updateSelection(selectedCity);
+		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
+	}
 }
 
 void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityCallback) {
@@ -207,11 +291,7 @@ void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityC
 		slotWindow->setVisible(false);
 	});
 
-	for (int resource_type = Resources::FIRST; resource_type != Resources::NUM_RESOURCES; resource_type++) {
-		Resources::Type type_of_resource = static_cast<Resources::Type>(resource_type);
-		int resource_count = slot->getResourceCount(type_of_resource);
-		resourceDisplay[type_of_resource]->setValue(resource_count);
-	}
+	slotInfoPanel->updateDisplay(slot);
 
 	slotWindow->setVisible(true);
 }
@@ -220,11 +300,22 @@ void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
 }
 
-void GUI::displayCityUI(City* city, std::function<void()> unitCreateCallback) {
+void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
+	selectedCity = city;
 	cityWindow->setTitle(city->getName());
-	createUnitButton->setCallback(unitCreateCallback);
+	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
 
+	updateCityWindow();
 	cityWindow->setVisible(true);
+
+	/* Only show the spawn ui if the owner clicked the city */
+	if (this->player->getID() == city->get_player()->getID()) {
+		unitSpawnWidget->setVisible(true);
+		unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
+	}
+	else {
+		unitSpawnWidget->setVisible(false);
+	}
 }
 
 void GUI::hideCityUI() {

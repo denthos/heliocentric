@@ -53,20 +53,20 @@ void Octree::clear() {
 	}
 }
 
-void Octree::draw(const Shader & shader, const Camera & camera) {
-	drawNode(shader, camera);
+void Octree::draw(const Camera & camera) {
+	drawNode(camera);
 }
 
-void Octree::drawNode(const Shader & shader, const Camera & camera) {
+void Octree::drawNode(const Camera & camera) {
 	// Draw this nodes objects
 	for (auto it = objects.begin(); it != objects.end(); ++it) {
-		(*it)->draw(shader, camera);
+		(*it)->draw(camera);
 	}
 
 	// Draw all child nodes
 	for (int i = 0; i < 8; ++i) {
 		if (children[i])
-			children[i]->drawNode(shader, camera);
+			children[i]->drawNode(camera);
 	}
 }
 

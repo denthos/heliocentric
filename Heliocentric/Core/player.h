@@ -3,6 +3,7 @@
 #include "resources.h"
 #include "trade_deal.h"
 #include "tech_tree.h"
+#include "player_color.h"
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -16,25 +17,36 @@
 class GameObject;
 class PlayerUpdate;
 class NewPlayerInfoUpdate;
+class PlayerScoreUpdate;
+class PlayerManager;
 
 class Player : public Identifiable {
 public:
+	friend PlayerScoreUpdate;
 	friend PlayerUpdate;
 	friend NewPlayerInfoUpdate;
-	Player(std::string player_name);
-	Player(std::string player_name, UID id);
+	Player(PlayerManager* player_manager, std::string player_name, PlayerColor::Color color);
+	Player(std::string player_name, UID id, PlayerColor::Color color);
 
-	std::string get_name();
+	void doLogic(); // Perform all logic that is done every server tick.
+
+	std::string get_name() const;
 	void set_name(std::string new_name);
 
-	float get_player_score();
-	void increase_player_score(float);
-	void decrease_player_score(float);
+	int get_player_score() const;
+	PlayerColor::Color getColor() const;
+	void setColor(PlayerColor::Color);
+
+	void increase_player_score(int);
+	void decrease_player_score(int);
+
+	float get_research_points();
 
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
 	void pop();                               // Pop all objects queued for destroy
 
+	const ResourceCollection& getResources() const;
 	int get_resource_amount(Resources::Type);
 	void change_resource_amount(Resources::Type, int);
 
@@ -63,9 +75,16 @@ public:
 	std::unordered_map<std::type_index, std::unordered_map<UID, GameObject*>> owned_objects; // TODO: move to private
 
 private:
+	PlayerManager* manager;
 	std::string name;
-	float player_score;
+	int player_score;
+	float research_points; // research points accumulated every tick
+  
 	TechTree tech_tree;
+	PlayerColor::Color color;
+
+	std::shared_ptr<PlayerScoreUpdate> score_update;
+	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
   
 	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns

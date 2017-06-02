@@ -11,7 +11,7 @@ static std::atomic<UID> _uuid_counter = 1;
 
 class Identifiable {
 public:
-	UID getID() { return this->_id; }
+	UID getID() const { return this->_id; } 
 	class BadUIDException : std::exception {};
 protected:
 	Identifiable() { this->_id = _uuid_counter++; }

@@ -10,6 +10,7 @@
 
 class UnitUpdate;
 class UnitManager;
+class UnitType;
 
 /**
 An abstract class that defines a base unit.
@@ -21,31 +22,6 @@ public:
 
 	enum CommandType { UNIT_ATTACK, UNIT_IDLE, UNIT_MOVE, UNIT_DIE };
 
-	/**
-	Unit constructor without specifying UID. Used on server end.
-	@param pos Position of the unit.
-	@param owner Indicates which player owns this unit.
-	@param att Attack stat of this unit.
-	@param def Defense stat of this unit.
-	@param range Range stat of this unit.
-	@param heal Health stat of this unit.
-	@param movement_speed Movement speed of this unit.
-	*/
-	Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed = 1.0f);
-
-	/**
-	Unit constructor with a specified UID. Essentially creates a "copy" of this
-	unit, since it does not create a new UID for it. Used on client end.
-	@param id UID of this unit.
-	@param pos Position of the unit.
-	@param owner Indicates which player owns this unit.
-	@param att Attack stat of this unit.
-	@param def Defense stat of this unit.
-	@param range Range stat of this unit.
-	@param heal Health stat of this unit.
-	@param movement_speed Movement speed of this unit.
-	*/
-	Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed = 1.0f);
   
 	/** 
 	Perform logic based on command. Called continuously by server to update current state 
@@ -96,7 +72,7 @@ public:
 	Tells the unit to attack the target.
 	@param The target that this unit is attacking.
 	*/
-	void set_combat_target(AttackableGameObject* target);
+	void set_combat_target(std::shared_ptr<AttackableGameObject> target);
 
 
 	/**
@@ -104,14 +80,50 @@ public:
 	**/
 	void set_command(CommandType command);
 
+	const UnitType* getType() const;
+
+	void set_orientation(glm::vec3 orientation);
+	glm::vec3 get_orientation() const;
+
+	bool client_isAttacking() const;
+	void client_setAttacking(bool);
+	virtual bool do_attack(std::shared_ptr<AttackableGameObject>);
+
 
 protected:
+	/**
+	Unit constructor without specifying UID. Used on server end.
+	@param pos Position of the unit.
+	@param owner Indicates which player owns this unit.
+	@param att Attack stat of this unit.
+	@param def Defense stat of this unit.
+	@param range Range stat of this unit.
+	@param heal Health stat of this unit.
+	@param movement_speed Movement speed of this unit.
+	*/
+	Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type);
+
+	/**
+	Unit constructor with a specified UID. Essentially creates a "copy" of this
+	unit, since it does not create a new UID for it. Used on client end.
+	@param id UID of this unit.
+	@param pos Position of the unit.
+	@param owner Indicates which player owns this unit.
+	@param att Attack stat of this unit.
+	@param def Defense stat of this unit.
+	@param range Range stat of this unit.
+	@param heal Health stat of this unit.
+	@param movement_speed Movement speed of this unit.
+	*/
+	Unit(UID id, glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type);
 
 	/**
 	Tells the unit to move towards destination.
 	@return Current position of this unit.
 	*/
 	glm::vec3 do_move();
+	void do_orient(glm::vec3 target);
+
 
 	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
 
@@ -120,16 +132,19 @@ protected:
 	glm::vec3 hi_pri_dest, low_pri_dest;
 	bool hasHighPri = false;
 
-	virtual void handle_out_of_range(AttackableGameObject* opponent);
-	virtual void handle_defeat(AttackableGameObject* opponent);
-	virtual void handle_victory(AttackableGameObject* opponent);
-	virtual void handle_counter(AttackableGameObject* opponent);
+	virtual void handle_out_of_range(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_defeat(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_victory(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_counter(std::shared_ptr<AttackableGameObject> opponent);
 
-	void send_update_to_manager(std::shared_ptr<UnitUpdate>& update);
+	void send_update_to_manager(std::shared_ptr<UnitUpdate> update);
 
 	// TODO: Change these to smart pointers.
-	AttackableGameObject* target;
+	std::shared_ptr<AttackableGameObject> target;
 	UnitManager* manager;
+	const UnitType* type;
+	glm::vec3 orientation;
+	bool client_isattacking;
 
 	void initialize();
 };
