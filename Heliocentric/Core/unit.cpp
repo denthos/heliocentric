@@ -133,7 +133,6 @@ void Unit::set_command(CommandType command) {
 	}
 }
 
-
 bool Unit::client_isAttacking() const {
 	return this->client_isattacking;
 }
@@ -141,6 +140,7 @@ bool Unit::client_isAttacking() const {
 void Unit::client_setAttacking(bool attacking) {
 	this->client_isattacking = attacking;
 }
+
 
 bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {
 	do_orient(target->get_position());
@@ -154,6 +154,7 @@ glm::vec3 Unit::do_move() {
 	// Move towards destination.
 	glm::vec3 destination = hasHighPri ? hi_pri_dest : low_pri_dest;
 
+	this->attack.resetAttack();
 	do_orient(destination);
 
 	float dist_to_dest = glm::distance(position, destination);

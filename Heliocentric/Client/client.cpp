@@ -275,12 +275,15 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	frameTimer = glfwGetTime();
 	frameCounter = 0;
 
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Mars.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Venus.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Uranus.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Mercury.ogg");
-	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, &musicPlayer);
+	soundSystem = new ThreeDSoundSystem(*this->cameras[this->selectedCamera]);
+	musicPlayer = new MusicPlayer(soundSystem);
+
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Mars.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Venus.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Uranus.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Mercury.ogg");
+	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, musicPlayer);
 }
 
 Client::~Client() {
@@ -298,7 +301,7 @@ Client::~Client() {
 	glfwEntry.erase(window);
 
 	/* Stop sound thread */
-	musicPlayer.stop();
+	musicPlayer->stop();
 	sound_thread.join();
 }
 
@@ -548,6 +551,8 @@ void Client::update() {
 	gui->update();
 	
 	this->keyboard_handler.callKeyboardHandlers();
+
+	this->soundSystem->update(*this->cameras[this->selectedCamera]);
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -889,7 +894,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles
+		colorShader, laser_particles, soundSystem
 	);
 
 	player_it->second->acquire_object(newUnit.get());
