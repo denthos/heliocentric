@@ -86,13 +86,6 @@ float Player::get_research_points() {
 	return research_points;
 }
 
-void Player::send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update) {
-	if (manager != nullptr) {
-		// No manager on client side :)
-		this->manager->register_update(update);
-	}
-}
-
 
 void Player::acquire_object(GameObject* object) {
 	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));

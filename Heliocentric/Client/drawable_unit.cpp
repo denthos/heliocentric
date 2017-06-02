@@ -19,7 +19,8 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 }
 
 
-DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader) : Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)) {
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser) : 
+	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser) {
 	this->data = getDataMap().at(getType()->getIdentifier());
 	this->shader = shader;
 
