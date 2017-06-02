@@ -24,7 +24,12 @@ void UnitSpawnWidget::createProgressbar() {
 	queueLabel = new Label(this, "In Queue: 999");
 }
 
-void UnitSpawnWidget::updateSelection(UnitSpawner* spawner) {
+void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, const ResourceCollection& resources) {
+
+	for (auto& button : createUnitButtons) {
+		button->updateCreateButton(resources);
+	}
+
 	if (spawner->isProducing()) {
 		createUnitProgress->setValue((float)spawner->getPercentCompletion() / 100.0f);
 	}
