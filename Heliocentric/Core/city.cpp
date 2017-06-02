@@ -25,8 +25,12 @@ void City::initialize() {
 	this->target = nullptr;
 }
 
-int City::get_population() {
+int City::get_population() const {
 	return population;
+}
+
+int City::get_production() const {
+	return production;
 }
 
 void City::set_population(int new_pop) {

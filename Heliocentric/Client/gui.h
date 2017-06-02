@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gui_utilities.h"
-#include "unit_window.h"
+#include "attackable_gameobject_widget.h"
 
 #include "game_object.h"
 #include "resources.h"
@@ -56,7 +56,6 @@ public:
 private:
 	int screenWidth, screenHeight;
 
-	UnitWindow* unit_window;
 	AttackableGameObject* selectedUnit = NULL;
 	void updateUnitWindow();
 
@@ -68,8 +67,12 @@ private:
 	void createPlayerOverlay();
 	void createGameOverWindow();
 	void createLeaderboardWindow();
+	void createUnitDisplay();
 
 	std::pair<int, std::string> placeholderImage;
+
+	Window* unit_window;
+	AttackableGameObjectWidget* unit_info_widget;
 
 	ref<Window> uidWindow;
 	detail::FormWidget<int> * uidDisplay;
@@ -84,6 +87,7 @@ private:
 
 	City* selectedCity = NULL;
 	ref<Window> cityWindow;
+	AttackableGameObjectWidget* cityInfoWidget;
 	UnitSpawnWidget* unitSpawnWidget;
 	SlotInfoPanel* citySlotInfoPanel;
 	void updateCityWindow();

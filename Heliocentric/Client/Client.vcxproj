@@ -258,7 +258,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClInclude Include="transformation.h" />
     <ClInclude Include="unit_create_button.h" />
     <ClInclude Include="unit_spawn_widget.h" />
-    <ClInclude Include="unit_window.h" />
+    <ClInclude Include="attackable_gameobject_widget.h" />
     <ClInclude Include="vertex.h" />
     <ClInclude Include="view_frustum.h" />
   </ItemGroup>
@@ -304,7 +304,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClCompile Include="transformation.cpp" />
     <ClCompile Include="unit_create_button.cpp" />
     <ClCompile Include="unit_spawn_widget.cpp" />
-    <ClCompile Include="unit_window.cpp" />
+    <ClCompile Include="attackable_gameobject_widget.cpp" />
     <ClCompile Include="view_frustum.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

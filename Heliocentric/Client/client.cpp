@@ -886,7 +886,8 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
 
 	Player* owner = player_iter->second.get();
-	DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name), colorShader);
+	City city(update->city_id, owner, new InstantLaserAttack(), nullptr, update->defense, update->health, update->production, update->population, slot_iter->second, update->name);
+	DrawableCity* newCity = new DrawableCity(city, colorShader);
 	slot_iter->second->attachCity(newCity);
 	owner->acquire_object(newCity);
 	cities.insert(std::make_pair(newCity->getID(), newCity));

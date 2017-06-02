@@ -39,7 +39,8 @@ std::shared_ptr<CityCreationUpdate> CityManager::add_city(Player* player, Slot* 
 	std::shared_ptr<City> new_city = std::make_shared<City>(player, new InstantLaserAttack(), this, 100, 100, 0, 0, slot, name);
 	slot->attachCity(new_city.get());
 	player->acquire_object(new_city.get());
-	auto city_creation_update = std::make_shared<CityCreationUpdate>(player->getID(), slot->getID(), new_city->getID(), new_city->getName());
+	auto city_creation_update = std::make_shared<CityCreationUpdate>(player->getID(), slot->getID(), new_city->getID(), new_city->getName(),
+		new_city->get_combat_defense(), new_city->get_health(), new_city->get_production(), new_city->get_population());
 	LOG_DEBUG("Created city with UID <", new_city->getID(), ">");
 	cities.insert(std::make_pair(new_city->getID(), std::move(new_city)));
 	return city_creation_update;
