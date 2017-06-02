@@ -143,6 +143,7 @@ bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {
 
 
 glm::vec3 Unit::do_move() {
+	this->attack.resetAttack();
 	do_orient(destination);
 
 	// Move towards destination.

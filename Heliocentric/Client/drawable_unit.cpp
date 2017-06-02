@@ -56,7 +56,6 @@ void DrawableUnit::draw(const Camera & camera) const {
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), glow);
 	shader->bind();
 
-
     //color cities based on player color
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
     glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
@@ -93,22 +92,19 @@ void DrawableUnit::updateRotationMatrix() {
 	}
 
 	float cosine = glm::clamp(glm::dot(old_orientation, orientation), -1.0f, 1.0f);
-
 	float denom = glm::length(old_orientation) * glm::length(orientation);
-
-	/* If we are about to do bad division, just bail out*/
-	if (denom == 0) {
-		return;
-	}
-
 	float cosine_ratio = cosine / denom;
 
-	/* If we are about to do acos() on something outside its domain, bail out*/
-	if (cosine_ratio < -1 || cosine_ratio > 1) {
+	float rotAngle = glm::acos(cosine_ratio);
+
+	/* 
+	It is entirely possible that something went wrong with our angle. If something
+	did go wrong, let's just bail out
+	*/
+	if (std::isnan(rotAngle)) {
 		return;
 	}
 
-	float rotAngle = glm::acos(cosine / denom);
 	glm::vec3 cross = glm::cross(old_orientation, orientation);
 
 	if (cross.y < 0) {
