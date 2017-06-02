@@ -512,6 +512,7 @@ void GameServer::handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, 
 	/* It's called "recipient" because it's the recipient of this deal, even though its connection is named "sender". */
 	Player* recipient = this->extractPlayerFromConnection(sender);
 	std::shared_ptr<TradeDeal> trade_deal;
+	LOG_DEBUG("Trade deal id is ", command->initiator);
 	try {
 		trade_deal = recipient->get_trade_deal(command->initiator);
 	}
@@ -523,14 +524,21 @@ void GameServer::handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, 
 		case TradeCommand::CMD_TRADE_ACCEPT: {
 			recipient->trade_deal_accept(command->initiator);
 
-			std::shared_ptr<PlayerUpdate> sender_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
+			std::shared_ptr<PlayerUpdate> sender_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
 				trade_deal->get_sell_type(), trade_deal->get_sell_amount() * (-1));
-			std::shared_ptr<PlayerUpdate> recipient_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
+			std::shared_ptr<PlayerUpdate> recipient_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
 				trade_deal->get_sell_type(), trade_deal->get_sell_amount());
+			std::shared_ptr<PlayerUpdate> sender_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
+				trade_deal->get_buy_type(), trade_deal->get_buy_amount());
+			std::shared_ptr<PlayerUpdate> recipient_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
+				trade_deal->get_buy_type(), trade_deal->get_buy_amount() * (-1));
 
 			/* Player updates need to be sent to all clients, obviously. */
-			this->addUpdateToSendQueue(sender_update);
-			this->addUpdateToSendQueue(recipient_update);
+			LOG_DEBUG("Adding update to send queue");
+			this->addUpdateToSendQueue(sender_sell_update);
+			this->addUpdateToSendQueue(recipient_sell_update);
+			this->addUpdateToSendQueue(sender_buy_update);
+			this->addUpdateToSendQueue(recipient_buy_update);
 			
 			break;
 		}
@@ -561,6 +569,7 @@ void GameServer::handleTradeData(SunNet::ChanneledSocketConnection_p sender, std
 		deal->trade_deal_id = trade_deal->getID(); // Assign the TradeDeal's ID
 
 		/* Put the TradeDeal to recipient's pending deals */
+		LOG_ERR("TEMP TradeDeal ID", trade_deal->getID());
 		players[deal->recipient]->receive_trade_deal(trade_deal);
 		
 		auto connections = Lib::key_acquire(this->connections);

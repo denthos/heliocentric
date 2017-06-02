@@ -77,6 +77,8 @@ public:
 
 	void setSelection(std::vector<GameObject*>);
 	void createUnitFromCity(DrawableCity* city, UnitType* unit_type);
+	void sendTradeDeal(std::shared_ptr<TradeData> deal);
+	void sendTradeCommand(UID trade_id, bool is_accepted);
 
 protected:
 	/**** Handlers for ChanneledClient ****/

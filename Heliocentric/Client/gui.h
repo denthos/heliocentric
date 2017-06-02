@@ -24,7 +24,7 @@ class GUI : public Screen {
 public:
 
 	
-	GUI(GLFWwindow *, Client * client, int screenWidth, int screenHeight);
+	GUI(GLFWwindow *, std::function<void(std::shared_ptr<TradeData>)> tradeButtonCallback, std::function<void(UID, bool)> tradeHandlerCallback, int screenWidth, int screenHeight);
 	~GUI();
 
 	void update();
@@ -33,7 +33,6 @@ public:
 
 	void setPlayer(std::shared_ptr<Player>);
 	void setFPS(double);
-
 
 	void unselectSelection(Client*, std::vector<GameObject*>& old_selection);
 	void selectSelection(Client*, std::vector<GameObject*>& old_selection);
@@ -55,6 +54,7 @@ public:
 	void hideGameOverWindow();
 	void updatePlayerLeaderboardValue(const Player* player);
 	void addPlayer(std::shared_ptr<Player> new_player);
+	void createTradeHandlerDisplay(std::shared_ptr<TradeData> data);
 
 private:
 	int screenWidth, screenHeight;
@@ -65,6 +65,9 @@ private:
 
 	FormHelper* formHelper;
 	std::vector<std::shared_ptr<Player>> players;
+
+	std::function<void(std::shared_ptr<TradeData>)> tradeCallback;
+	std::function<void(UID, bool)> tradeHandlerCallback;
 	Client* client;
 
 	void createUidDisplay();
@@ -110,8 +113,10 @@ private:
 	// Everything Trade
 	ref<Window> tradeWindow;
 	ref<Window> customTradeWindow = NULL;
+	ref<Window> tradeHandlerWindow = NULL;
 	Button* createTradeButton;
 	Button* sendTradeButton;
 	Button* closeTradeButton;
 	float offerBaseVal = 0;
+	Label* tradeHandlerLabel;
 };

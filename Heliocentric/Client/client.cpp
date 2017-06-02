@@ -1,6 +1,6 @@
 #include "client.h"
 
-#include <glad\glad.h>
+//#include <glad\glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
@@ -98,7 +98,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window, this, width, height);
+	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2), width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -704,6 +704,10 @@ void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
 	this->channeled_send(&command);
 }
 
+void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {
+	this->channeled_send(deal.get());
+}
+
 void Client::handleF4Key(int key) {
 
 	auto unit_it = units.begin();
@@ -791,6 +795,17 @@ void Client::handleF11Key(int key) {
 	this->channeled_send(&command);
 }
 
+void Client::sendTradeCommand(UID trade_id, bool is_accepted) {
+	if (is_accepted)
+		player->trade_deal_accept(trade_id);
+	else
+		player->trade_deal_decline(trade_id);
+	LOG_DEBUG("Send trade command called");
+	TradeCommand command(trade_id, is_accepted);
+	this->channeled_send(&command);
+}
+
+
 void Client::handleF12Key(int key) {
 	// Decline the first trade deal in player's pending map
 	UID deal_id = player->trade_deal_decline();
@@ -824,7 +839,7 @@ void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn
 }
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
-	LOG_DEBUG("Received update for player with id: ", update->id);
+	LOG_INFO("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
 	if (player_it == players.end()) {
 		return;
@@ -958,7 +973,9 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 	else {
 		LOG_DEBUG("I am the receiver of this trade deal");
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
+		LOG_DEBUG("In trade data handler, the trade deal id is ", deal->trade_deal_id);
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
+		gui->createTradeHandlerDisplay(deal);
 	}
 }
 
