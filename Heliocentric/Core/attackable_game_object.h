@@ -3,6 +3,7 @@
 @brief An abstract class that defines an attackable game object.
 */
 #pragma once
+#include <memory>
 #include "lib.h"
 #include "game_object.h"
 #include "attack.h"
@@ -10,7 +11,7 @@
 /**
 An abstract class that defines an attackable game object.
 */
-class AttackableGameObject : public GameObject {
+class AttackableGameObject : public GameObject, public std::enable_shared_from_this<AttackableGameObject> {
 protected:
 	Attack attack;
 	int combatDefense;
@@ -23,26 +24,26 @@ protected:
 	Hook that allows defender to react after being attacked.
 	@param The attacking opponent
 	*/
-	virtual void handle_counter(AttackableGameObject* attacker) = 0;
+	virtual void handle_counter(std::shared_ptr<AttackableGameObject> attacker) = 0;
 
 	/**
 	Hook for handling when an initiated attack fails because the opponent
 	is out of range. 
 	@param The combat opponent.
 	*/
-	virtual void handle_out_of_range(AttackableGameObject* opponent) = 0;
+	virtual void handle_out_of_range(std::shared_ptr<AttackableGameObject> opponent) = 0;
 
 	/**
 	Hook for handling when the attackable's health drops below zero.
 	@param The defeating opponent.
 	*/
-	virtual void handle_defeat(AttackableGameObject* opponent) = 0;
+	virtual void handle_defeat(std::shared_ptr<AttackableGameObject> opponent) = 0;
 
 	/**
 	Hook for handling an opponent's defeat. 
 	@param The defeated opponent.
 	*/
-	virtual void handle_victory(AttackableGameObject* opponent) = 0;
+	virtual void handle_victory(std::shared_ptr<AttackableGameObject> opponent) = 0;
 
 
 public:
@@ -59,6 +60,8 @@ public:
 
 
 	AttackableGameObject(UID id, glm::vec3 position, Player* player, Attack* attack, int def, int heal);
+
+	virtual ~AttackableGameObject() {}
 
 	/**
 	Returns the attack strength of this object.
@@ -103,6 +106,6 @@ public:
 	@param The target to attack.
 	@return Whether or not target is a legal -- e.g., a nullptr is an illegal target.
 	*/
-	virtual bool do_attack(AttackableGameObject* target);
+	virtual bool do_attack(std::shared_ptr<AttackableGameObject> target);
 };
 

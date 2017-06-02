@@ -10,19 +10,19 @@
 
 class UnitManager {
 private:
-	std::unordered_map<UID, std::unique_ptr<Unit>> active_units;
-	std::unordered_map<UID, std::unique_ptr<Unit>> idle_units;
+	std::unordered_map<UID, std::shared_ptr<Unit>> active_units;
+	std::unordered_map<UID, std::shared_ptr<Unit>> idle_units;
 	std::unordered_set<std::shared_ptr<UnitUpdate>> unit_updates;
 
 public:
 	UnitManager();
 	void doLogic();
-	Unit* get_unit(UID uid) const;
+	std::shared_ptr<Unit> get_unit(UID uid) const;
 
-	std::unordered_map<UID, std::unique_ptr<Unit>>& get_active_units();
+	std::unordered_map<UID, std::shared_ptr<Unit>>& get_active_units();
 	std::shared_ptr<UnitCreationUpdate> add_unit(glm::vec3 create_location, UnitType* type, Player* player);
 	void do_move(UID id, float x, float y, float z);
-	void do_attack(UID attacker_id, AttackableGameObject* enemy);
+	void do_attack(UID attacker_id, std::shared_ptr<AttackableGameObject> enemy);
 	std::unordered_set<std::shared_ptr<UnitUpdate>>& get_updates();
 
 	bool set_active(UID id);

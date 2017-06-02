@@ -33,6 +33,7 @@ Unit::CommandType Unit::do_logic() {
 		break;
 	case UNIT_ATTACK:
 		if (!do_attack(this->target)) {
+			this->target.reset();
 			currentCommand = UNIT_IDLE;
 		}
 		break;
@@ -102,7 +103,8 @@ void Unit::set_movement_speed_max(float movement_speed) {
 	this->movement_speed = movement_speed;
 }
 
-void Unit::set_combat_target(AttackableGameObject* target) {
+void Unit::set_combat_target(std::shared_ptr<AttackableGameObject> target) {
+	this->target.reset();
 	this->target = target;
 }
 
@@ -114,7 +116,7 @@ void Unit::set_command(CommandType command) {
 	}
 }
 
-bool Unit::do_attack(AttackableGameObject* target) {
+bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {
 	do_orient(target->get_position());
 	bool attack_return = AttackableGameObject::do_attack(target);
 	send_update_to_manager(make_update());
@@ -138,16 +140,16 @@ glm::vec3 Unit::do_move() {
 	return position;
 }
 
-void Unit::handle_out_of_range(AttackableGameObject * opponent)
+void Unit::handle_out_of_range(std::shared_ptr<AttackableGameObject> opponent)
 {
 	// Move towards opponent if in attack mode.
 	if (currentCommand == UNIT_ATTACK) {
-		set_destination(opponent);
+		set_destination(opponent.get());
 		do_move();
 	}
 }
 
-void Unit::handle_defeat(AttackableGameObject * opponent)
+void Unit::handle_defeat(std::shared_ptr<AttackableGameObject> opponent)
 {
 	// Tell Player you have died.
 	//player->add_to_destroy(this);
@@ -157,7 +159,7 @@ void Unit::handle_defeat(AttackableGameObject * opponent)
 	LOG_DEBUG("Unit " + std::to_string(this->getID()) + " set to UNIT_DIE.");
 }
 
-void Unit::handle_victory(AttackableGameObject * opponent)
+void Unit::handle_victory(std::shared_ptr<AttackableGameObject> opponent)
 {
 	// Go back to idle if unit was attacking
 	currentCommand = (currentCommand == UNIT_ATTACK) ? UNIT_IDLE : currentCommand;
@@ -166,12 +168,12 @@ void Unit::handle_victory(AttackableGameObject * opponent)
 	player->increase_player_score(opponent->getAttack().getDamage());
 }
 
-void Unit::handle_counter(AttackableGameObject* opponent) {
+void Unit::handle_counter(std::shared_ptr<AttackableGameObject> opponent) {
 	// Unit has been attacked, notify 
 	send_update_to_manager(make_update());
 }
 
-void Unit::send_update_to_manager(std::shared_ptr<UnitUpdate>& update) {
+void Unit::send_update_to_manager(std::shared_ptr<UnitUpdate> update) {
 	if (this->manager != nullptr) {
 		this->manager->register_update(update);
 	}

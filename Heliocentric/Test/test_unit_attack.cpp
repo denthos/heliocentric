@@ -45,7 +45,7 @@ namespace Test
 			TestUnit* unit_2 = new TestUnit(101, glm::vec3(3.0f), &manager);
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 			Assert::IsTrue(unit_1->is_in_attack_mode());
 			Assert::IsTrue(unit_2->is_in_idle_mode());
@@ -65,7 +65,7 @@ namespace Test
 			player_2.acquire_object(unit_2);
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 			unit_1->do_logic();
 			Assert::AreEqual(unit_2->get_health(), 50);
@@ -89,7 +89,7 @@ namespace Test
 			Assert::IsTrue(glm::distance(unit_1->get_position(), unit_2->get_position()) >= 250.0f);
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 			unit_1->do_logic();
 
@@ -119,7 +119,7 @@ namespace Test
 			Assert::IsNotNull(unit_2->get_player());
 
 			/* Combat */
-			unit_1->set_combat_target(unit_2);
+			// unit_1->set_combat_target(unit_2);
 			unit_1->set_command(Unit::UNIT_ATTACK);
 
 			// Kill unit_2 : should take two hits

@@ -28,27 +28,27 @@ void UnitManager::doLogic() {
 	}
 }
 
-Unit* UnitManager::get_unit(UID uid) const {
+std::shared_ptr<Unit> UnitManager::get_unit(UID uid) const {
 	auto& it = idle_units.find(uid);
 	if (it == idle_units.end()) {
 		auto& it = active_units.find(uid);
 		if (it != active_units.end()) {
-			return it->second.get();
+			return it->second;
 		}
 	}
 	else {
-		return it->second.get();
+		return it->second;
 	}
 
 	return nullptr;
 }
 
-std::unordered_map<UID, std::unique_ptr<Unit>>& UnitManager::get_active_units() {
+std::unordered_map<UID, std::shared_ptr<Unit>>& UnitManager::get_active_units() {
 	return this->active_units;
 }
 
 std::shared_ptr<UnitCreationUpdate> UnitManager::add_unit(glm::vec3 create_location, UnitType* type, Player* player) {
-	std::unique_ptr<Unit> new_unit = type->createUnit(create_location, player, this);
+	std::shared_ptr<Unit> new_unit = type->createUnit(create_location, player, this);
 
 	auto update = std::make_shared<UnitCreationUpdate>(new_unit->getID(),
 		create_location.x, create_location.y, create_location.z, player->getID(), 100, 100, type->getIdentifier());
@@ -91,7 +91,7 @@ bool UnitManager::set_active(UID id) {
 
 
 
-void UnitManager::do_attack(UID attacker_id, AttackableGameObject* enemy) {
+void UnitManager::do_attack(UID attacker_id, std::shared_ptr<AttackableGameObject> enemy) {
 	Lib::assertTrue(set_active(attacker_id), "Could not find attacking unit!");
 	auto& attacker_itr = active_units.find(attacker_id);
 	attacker_itr->second->set_combat_target(enemy);

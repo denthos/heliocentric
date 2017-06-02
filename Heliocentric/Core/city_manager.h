@@ -12,7 +12,7 @@
 
 class CityManager {
 private:
-	std::unordered_map<UID, std::unique_ptr<City>> cities;
+	std::unordered_map<UID, std::shared_ptr<City>> cities;
 	std::unordered_set<std::shared_ptr<CityUpdate>> city_updates;
 	std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>> spawner_updates;
 	std::unordered_set<std::shared_ptr<UnitCreationUpdate>> unit_creation_updates;
@@ -23,15 +23,15 @@ public:
 	CityManager(UnitManager* unit_manager);
 
 	void doLogic();
-	City* get_city(UID uid) const;
+	std::shared_ptr<City> get_city(UID uid) const;
 
-	std::unordered_map<UID, std::unique_ptr<City>>& get_cities();
+	std::unordered_map<UID, std::shared_ptr<City>>& get_cities();
 
 	std::shared_ptr<CityCreationUpdate> add_city(Player* player, Slot* slot, std::string name);
 	std::shared_ptr<UnitSpawnerUpdate> spawnUnit(std::shared_ptr<PlayerCommand>);
 
 	std::unordered_set<std::shared_ptr<CityUpdate>>& get_updates();
-	void register_update(std::shared_ptr<CityUpdate>& update);
+	void register_update(std::shared_ptr<CityUpdate> update);
 
 	const std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>>& getSpawnerUpdates() const;
 	const std::unordered_set<std::shared_ptr<UnitCreationUpdate>>& getCreationUpdates() const;

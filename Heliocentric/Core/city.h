@@ -40,16 +40,16 @@ private:
 
 protected:
 	// TODO: Override these combat hooks
-	virtual void handle_out_of_range(AttackableGameObject* opponent);
-	virtual void handle_defeat(AttackableGameObject* opponent);
-	virtual void handle_victory(AttackableGameObject* opponent);
-	virtual void handle_counter(AttackableGameObject* opponent);
-	void send_update_to_manager(std::shared_ptr<CityUpdate>& update);
+	virtual void handle_out_of_range(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_defeat(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_victory(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_counter(std::shared_ptr<AttackableGameObject> opponent);
+	void send_update_to_manager(std::shared_ptr<CityUpdate> update);
 
 	/* Override for UnitSpawner */
 	void spawnCompleteHandler(UnitType* type);
 	
 	std::shared_ptr<CityUpdate> update;
-	AttackableGameObject* target = nullptr;
+	std::shared_ptr<AttackableGameObject> target;
 	CityManager* manager;
 };

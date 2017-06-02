@@ -22,6 +22,7 @@ City::City(UID id, Player* owner, Attack* attack, CityManager* manager, int def,
 
 void City::initialize() {
 	this->update = std::make_shared<CityUpdate>(this->getID(), this->get_health());
+	this->target = nullptr;
 }
 
 int City::get_population() {
@@ -40,41 +41,42 @@ glm::vec3 City::get_position() const {
 	return slot->get_position();
 }
 
-void City::send_update_to_manager(std::shared_ptr<CityUpdate>& update) {
+void City::send_update_to_manager(std::shared_ptr<CityUpdate> update) {
 	if (this->manager != nullptr) {
 		this->manager->register_update(update);
 	}
 }
 
 
-void City::handle_out_of_range(AttackableGameObject* opponent) {
+void City::handle_out_of_range(std::shared_ptr<AttackableGameObject> opponent) {
 	// Opponent is out of range, so try next aggressor.
-	this->target = nullptr;
+	this->target.reset();
 }
 
-void City::handle_victory(AttackableGameObject* opponent) {
+void City::handle_victory(std::shared_ptr<AttackableGameObject> opponent) {
 	// Attack your next aggressor.
-	this->target = nullptr;
+	this->target.reset();
 	this->player->increase_player_score(opponent->getAttack().getDamage());
 }
 
-void City::handle_defeat(AttackableGameObject* opponent) {
+void City::handle_defeat(std::shared_ptr<AttackableGameObject> opponent) {
 	LOG_DEBUG("City with UID <", this->getID(), "> died");
 	this->slot->detachCity();
 	this->player->add_to_destroy(this);
 	send_update_to_manager(make_update());
 }
 
-void City::handle_counter(AttackableGameObject* opponent) {
-	if (!(this->target) || this->target->is_dead()) {
+void City::handle_counter(std::shared_ptr<AttackableGameObject> opponent) {
+	if (this->target == nullptr || this->target->is_dead()) {
 		// Attack this opponent if your current target is dead.
+		this->target.reset();
 		this->target = opponent;
 	}
 
-	if (this->target == opponent) {
+	if (this->target->getID() == opponent->getID()) {
 		LOG_DEBUG("Attacking opponent with UID <", this->target->getID(), ">");
 		if (!this->do_attack(this->target)) {
-			this->target = nullptr;
+			this->target.reset();
 		}
 	}
 	send_update_to_manager(make_update());

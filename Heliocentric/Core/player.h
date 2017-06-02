@@ -85,6 +85,7 @@ private:
 
 	std::shared_ptr<PlayerScoreUpdate> score_update;
 	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
+
   
 	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns
