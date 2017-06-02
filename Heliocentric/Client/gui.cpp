@@ -308,6 +308,7 @@ void GUI::customizeTrade() {
 }
 
 void GUI::createTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
+	currentTradeData = data;
 	if (customTradeWindow && tradeHandlerLabel) {
 		std::ostringstream oss;
 		oss << "Player " << std::to_string(data->sender) << " is offering " << std::to_string(data->sell_amount)
@@ -332,15 +333,15 @@ void GUI::createTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
 		}
 		Button* acceptBtn = formHelper->addButton("Accept", []() {});
 		Button* declineBtn = formHelper->addButton("Decline", []() {});
-		acceptBtn->setCallback([data, this]() {
-			LOG_DEBUG("Trade id is " + std::to_string(data->trade_deal_id));
-			tradeHandlerCallback(data->trade_deal_id, true);
+		acceptBtn->setCallback([this]() {
+			LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
+			tradeHandlerCallback(currentTradeData->trade_deal_id, true);
 			tradeHandlerWindow->setVisible(false);
 			LOG_DEBUG("I accepted trade deal.");
 		});
-		declineBtn->setCallback([data, this]() {
-			LOG_DEBUG("Trade id is " + std::to_string(data->trade_deal_id));
-			tradeHandlerCallback(data->trade_deal_id, false);
+		declineBtn->setCallback([this]() {
+			LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
+			tradeHandlerCallback(currentTradeData->trade_deal_id, false);
 			tradeHandlerWindow->setVisible(false);
 			LOG_DEBUG("I decline trade deal.");
 		});

@@ -114,6 +114,7 @@ private:
 	ref<Window> tradeWindow;
 	ref<Window> customTradeWindow = NULL;
 	ref<Window> tradeHandlerWindow = NULL;
+	std::shared_ptr<TradeData> currentTradeData;
 	Button* createTradeButton;
 	Button* sendTradeButton;
 	Button* closeTradeButton;
