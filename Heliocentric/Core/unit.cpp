@@ -2,6 +2,7 @@
 #include "logging.h"
 #include "unit_update.h"
 #include "unit_manager.h"
+#include "attack.h"
 #include "glm/gtc/matrix_transform.hpp"
 
 Unit::Unit(glm::vec3 pos, Player* owner, Attack* attack, UnitManager* manager, int def, int heal, float movement_speed, const UnitType* type) :
@@ -60,6 +61,14 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 	this->update->orientation_y = this->orientation.y;
 	this->update->orientation_z = this->orientation.z;
 	// LOG_DEBUG("Unit with ID " + std::to_string(this->update->id) + " with health " + std::to_string(this->update->health) +  ". Position is " + std::to_string(this->update->x) + " " + std::to_string(this->update->y) + " " + std::to_string(this->update->z) );
+
+	if (this->attack.projectileInMotion() || this->attack.damaging()) {
+		this->update->attacking = true;
+	}
+	else {
+		this->update->attacking = false;
+	}
+
 	return this->update;
 };
 
@@ -114,6 +123,15 @@ void Unit::set_command(CommandType command) {
 	{
 		currentCommand = command;
 	}
+}
+
+
+bool Unit::client_isAttacking() const {
+	return this->client_isattacking;
+}
+
+void Unit::client_setAttacking(bool attacking) {
+	this->client_isattacking = attacking;
 }
 
 bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {

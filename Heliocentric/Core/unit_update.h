@@ -19,4 +19,6 @@ public:
 	UnitUpdate(UID, float, float, float);
 	UnitUpdate(UID, int, float, float, float);
 	void apply(GameObject* obj);
+	bool attacking;
 };
+

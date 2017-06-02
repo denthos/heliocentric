@@ -66,6 +66,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 
 Quad * quad; //texture sampler
 ParticleSystem* particles;
+ParticleSystem* laser_particles;
 
 
 SkyboxMesh* skybox;
@@ -211,7 +212,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
-	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter());
+	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
+	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
@@ -858,7 +860,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader
+		colorShader, laser_particles
 	);
 
 	player_it->second->acquire_object(newUnit.get());

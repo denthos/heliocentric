@@ -6,6 +6,7 @@
 #include "model.h"
 #include "selectable.h"
 #include "unit_type.h"
+#include "particle_system.h"
 
 class GUI;
 class Client;
@@ -17,7 +18,7 @@ struct DrawableUnitData {
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-	DrawableUnit(const Unit & unit, Shader * shader);
+	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser);
 
 	~DrawableUnit();
 	virtual void update();
@@ -32,7 +33,10 @@ public:
 
 private:
 	DrawableUnitData data;
+
 	glm::mat4 rotation_matrix;
 	glm::vec3 old_orientation;
+	ParticleSystem* laser;
+	glm::vec3 laser_offset;
 	bool glow;
 };

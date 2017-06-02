@@ -188,6 +188,9 @@
     <ClInclude Include="game_over_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
+    <ClInclude Include="player_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="player_score_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
