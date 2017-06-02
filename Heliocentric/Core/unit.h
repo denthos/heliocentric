@@ -69,9 +69,7 @@ public:
 	@param destination The destination where the unit is moving towards.
 	@return The destination of this unit.
 	*/
-	glm::vec3 set_destination(glm::vec3 destination);
-
-	glm::vec3 set_force(glm::vec3 force);
+	void set_destination(glm::vec3 destination, bool high_pri);
 
 	/**
 	Sets the unit to follow the given game object.
@@ -119,7 +117,8 @@ protected:
 
 	std::shared_ptr<UnitUpdate> update;
 	CommandType currentCommand = UNIT_IDLE;
-	glm::vec3 destination, force;
+	glm::vec3 hi_pri_dest, low_pri_dest;
+	bool hasHighPri = false;
 
 	virtual void handle_out_of_range(AttackableGameObject* opponent);
 	virtual void handle_defeat(AttackableGameObject* opponent);

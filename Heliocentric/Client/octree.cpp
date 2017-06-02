@@ -138,6 +138,7 @@ bool Octree::checkCollision(Drawable * item)
 	if (this->hasChildren) {
 		for (int i = 0; i < 8; ++i) {
 			if (children[i]) {
+				
 				if (children[i]->checkCollision(item)) {
 					success = true;
 				}
@@ -149,7 +150,8 @@ bool Octree::checkCollision(Drawable * item)
 
 	// check objects
 	for (auto & object : objects) {
-		if (item->getBoundingBox().collidesWith(object->getBoundingBox())) {
+		BoundingBox obstacleBB = object->getBoundingBox();
+		if (item->getBoundingBox().collidesWith(obstacleBB)) {
 			success = true;
 		}
 	}

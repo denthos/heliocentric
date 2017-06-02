@@ -479,7 +479,6 @@ void Client::update() {
 
 	cameras[selectedCamera]->update();
 
-	glm::vec3 lookAhead_origin, unit_direction;
 	UID unit_id;
 	BoundingBox unit_bbox;
 	glm::vec3 unit_max, unit_min;
@@ -499,18 +498,15 @@ void Client::update() {
 
 		
 		if (octree->checkCollision(units[unit_id].get())) {
-
 			glm::vec3 new_pos = units[unit_id]->get_position() + glm::vec3(0.0f,10.0f ,0.0f);
 			LOG_DEBUG("FLYING AWAY");
-			UnitCommand move_command(units[unit_id]->getID(),new_pos.x, new_pos.y, new_pos.z, 0.0, 20.0, 0.0);
+			UnitCommand move_command(units[unit_id]->getID(),new_pos.x, new_pos.y, new_pos.z, true);
 			channeled_send(&move_command);
 		}
 	}
 
 	
 	gui->update();
-
-	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
 
@@ -646,7 +642,7 @@ void Client::mouseRightClickHandler(MouseButton mouseButton, ScreenPosition posi
 		LOG_DEBUG("Moving selection to position <", obj_position.x, ",", obj_position.y, ",", obj_position.z, ">");
 
 		for (GameObject* single_selection : selection) {
-			UnitCommand move_command(single_selection->getID(), obj_position.x, obj_position.y, obj_position.z);
+			UnitCommand move_command(single_selection->getID(), obj_position.x, obj_position.y, obj_position.z, false);
 			channeled_send(&move_command);
 		}
 	}
@@ -716,7 +712,7 @@ void Client::handleF4Key(int key) {
 		return;
 	}
 	std::advance(unit_it, rand() % units.size());
-	UnitCommand command(unit_it->first, (float)(rand() % 1000), (float)(rand() % 1000), (float)(rand() % 1000));
+	UnitCommand command(unit_it->first, (float)(rand() % 1000), (float)(rand() % 1000), (float)(rand() % 1000), false);
 	this->channeled_send(&command);
 }
 

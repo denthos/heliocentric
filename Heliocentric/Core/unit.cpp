@@ -55,24 +55,27 @@ std::shared_ptr<UnitUpdate> Unit::make_update() {
 };
 
 glm::vec3 Unit::get_destination() {
-	return this->destination;
+	if (hasHighPri) {
+		return hi_pri_dest;
+	}
+	return low_pri_dest;
 }
 
-glm::vec3 Unit::set_destination(glm::vec3 destination) {
-	this->destination = destination;
-	return this->destination;
-}
-
-glm::vec3 Unit::set_force(glm::vec3 force) {
-	this->force = force;
-	return this->force;
+void Unit::set_destination(glm::vec3 destination, bool high_pri) {
+	if (high_pri) {
+		this->hi_pri_dest = destination;
+		hasHighPri = true;
+	}
+	else {
+		this->low_pri_dest = destination;
+	}
 }
 
 
 glm::vec3 Unit::set_destination(GameObject* object) {
 	// Follow object as it moves.
-	this->destination = object->get_position();
-	return this->destination;
+	this->low_pri_dest = object->get_position();
+	return this->low_pri_dest;
 }
 
 
@@ -99,15 +102,27 @@ void Unit::set_command(CommandType command) {
 
 glm::vec3 Unit::do_move() {
 	// Move towards destination.
+	glm::vec3 destination = hasHighPri ? hi_pri_dest : low_pri_dest;
+	float dist_to_dest = glm::distance(position, destination);
+	if (destination == glm::vec3(0.0f) && dist_to_dest < 100.0f) { //janky sun fix
+		currentCommand = UNIT_IDLE;
+		hasHighPri = false;
+		return position;
+
+	}
+
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));
-		position += glm::normalize(destination - position) * speed + force;
+		position += glm::normalize(destination - position) * speed;
+
+
 		send_update_to_manager(make_update());
 	}
 	else {
 		// Reaced destination
 		currentCommand = UNIT_IDLE;
 	}
+	hasHighPri = false;
 	return position;
 }
 
