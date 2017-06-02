@@ -99,6 +99,14 @@ void TechTree::choose_tech(int tech) {
 	LOG_INFO("Now researching ", current_research->name);
 }
 
+std::string TechTree::get_current_research_name() {
+	return current_research->name;
+}
+
+float TechTree::get_current_research_progress() {
+	return current_research->research_progress;
+}
+
 std::vector<int> TechTree::get_available_techs() {
 	/* TODO: Implement a more efficient algorithm to find all available techs */
 	std::vector<int> ret;
