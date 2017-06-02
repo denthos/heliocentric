@@ -19,20 +19,22 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 }
 
 
-DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser) : 
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ThreeDSoundSystem* sound_system) : 
 	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser) {
-	this->data = getDataMap().at(getType()->getIdentifier());
-	this->shader = shader;
+    this->data = getDataMap().at(getType()->getIdentifier());
+    this->shader = shader;
 
-	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
-	this->model = data.model;
-	this->glow = false;
+    this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
+    this->model = data.model;
+    this->laser = laser;
+    this->glow = false;
 
     BoundingBox bbox = getBoundingBox();
     glm::vec3 b_max = bbox.max;
     glm::vec3 b_min = bbox.min;
     float z_center = (b_max.z + b_min.z) / 2.0f;
     this->laser_offset = glm::vec3(0.0f, 60.0f, b_max.z - z_center);
+	this->shoot_sound = new Audio3DSound(sound_system, "Audio/laser1.wav");
 }
 
 DrawableUnit::~DrawableUnit() {
@@ -42,6 +44,7 @@ DrawableUnit::~DrawableUnit() {
 void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
+	shoot_sound->update(this->get_position());
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
@@ -63,6 +66,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 	shader->unbind();
 
 	if (this->client_isattacking) {
+		shoot_sound->play(get_position());
 		laser->Update(camera);
 		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}

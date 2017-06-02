@@ -199,6 +199,15 @@
     <ClInclude Include="unit_spawn_widget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="audio_3d_sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="threed_sound_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="attackable_gameobject_widget.h">
           <Filter>GUI</Filter>
     </ClInclude>
@@ -346,6 +355,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="unit_spawn_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="audio_3d_sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="threed_sound_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="attackable_gameobject_widget.cpp">
