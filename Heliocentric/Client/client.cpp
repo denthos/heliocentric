@@ -528,18 +528,18 @@ void Client::update() {
 			continue;
 		}
 
-		
-		if (octree->checkCollision(units[unit_id].get())) {
-			glm::vec3 force = glm::normalize(units[unit_id]->get_position() - units[unit_id]->get_destination());
+		DrawableUnit* unit = unit_it->second.get();
+		if (octree->checkCollision(unit)) {
+			glm::vec3 force = glm::normalize(unit->get_position() - unit->get_destination());
 			if (force.x > 0.9f) { force.x = 0; }
 			if (force.y > 0.9f) { force.y = 0; }
 			if (force.z > 0.9f) { force.z = 0; }
 
 			force = glm::normalize(force) * 20.0f;
 
-			glm::vec3 new_pos = units[unit_id]->get_position() + force;
+			glm::vec3 new_pos = unit->get_position() + force;
 			LOG_DEBUG("FLYING AWAY");
-			UnitCommand move_command(units[unit_id]->getID(),new_pos.x, new_pos.y, new_pos.z, true);
+			UnitCommand move_command(unit->getID(),new_pos.x, new_pos.y, new_pos.z, true);
 			channeled_send(&move_command);
 		}
 	}
@@ -944,7 +944,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	//LOG_DEBUG("Unit update received");
-	Unit* unit = units[update->id].get();
+	DrawableUnit* unit = units[update->id].get();
 
 	update->apply(unit);
 	unit->update();

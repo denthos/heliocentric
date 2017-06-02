@@ -36,6 +36,16 @@ bool BoundingBox::contains(const BoundingBox & box) {
 	return false;
 }
 
+bool BoundingBox::contains(glm::vec3 point) {
+	if (point.x >= min.x && point.y >= min.y && point.z >= min.z) {
+		if (point.x <= max.x && point.y <= max.y && point.z <= max.z) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 void BoundingBox::expand(const glm::vec3 & vertex) {
 	if (vertex.x < min.x) min.x = vertex.x;
 	if (vertex.y < min.y) min.y = vertex.y;
@@ -80,7 +90,7 @@ bool BoundingBox::intersect(const Ray & ray, Collision & collision) const {
 	return false;
 }
 
-bool BoundingBox::collidesWith(BoundingBox other)
+bool BoundingBox::collidesWith(const BoundingBox& other)
 {
 	return (min.x <= other.max.x && max.x >= other.min.x) && 
 		(min.y <= other.max.y && max.y >= other.min.y) && 

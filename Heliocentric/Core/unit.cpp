@@ -151,29 +151,29 @@ bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {
 
 
 glm::vec3 Unit::do_move() {
-	do_orient(destination);
-
 	// Move towards destination.
 	glm::vec3 destination = hasHighPri ? hi_pri_dest : low_pri_dest;
+
+	do_orient(destination);
+
 	float dist_to_dest = glm::distance(position, destination);
 	if (destination == glm::vec3(0.0f) && dist_to_dest < 100.0f) { //janky sun fix
 		currentCommand = UNIT_IDLE;
 		hasHighPri = false;
 		return position;
-
 	}
 
 	if (destination != position) {
 		float speed = fmin(movement_speed, glm::distance(destination, position));
 		position += glm::normalize(destination - position) * speed;
 
-
 		send_update_to_manager(make_update());
 	}
 	else {
-		// Reaced destination
+		// Reached destination
 		currentCommand = UNIT_IDLE;
 	}
+
 	hasHighPri = false;
 	return position;
 }

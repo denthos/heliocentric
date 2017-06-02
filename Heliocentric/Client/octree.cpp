@@ -149,7 +149,7 @@ bool Octree::checkCollision(Drawable * item)
 	}
 
 	// check objects
-	for (auto & object : objects) {
+	for (auto object : objects) {
 		BoundingBox obstacleBB = object->getBoundingBox();
 		if (item->getBoundingBox().collidesWith(obstacleBB)) {
 			success = true;

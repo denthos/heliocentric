@@ -9,8 +9,9 @@ struct BoundingBox {
 	BoundingBox();
 	BoundingBox(glm::vec3 min, glm::vec3 max);
 	bool contains(const BoundingBox &);
+	bool contains(glm::vec3 point);
 	void expand(const glm::vec3 &);
 	void expand(const BoundingBox &);
 	bool intersect(const Ray &, Collision & collision = Collision()) const;
-	bool collidesWith(BoundingBox other);
+	bool collidesWith(const BoundingBox& other);
 };

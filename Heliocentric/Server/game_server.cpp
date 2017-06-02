@@ -499,7 +499,7 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 			// TODO: Delegate to UnitManager
 			this->addFunctionToProcessQueue([this, command]() {
 				//JESSICA LOOK HERE
-				unit_manager.do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z, command.get()->high_pri);
+				unit_manager->do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z, command.get()->high_pri);
 			});
 			break;
 		default:

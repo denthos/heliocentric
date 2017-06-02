@@ -24,7 +24,7 @@ public:
 	void disableViewFrustumCulling();
 	Drawable * intersect(const Ray &);
 	bool intersect(const Ray &, Collision &, Drawable *&) const;
-	bool checkCollision(Drawable * item);
+	bool checkCollision(Drawable * item, Drawable*& collides_with);
 
 protected:
 	static float MIN_VOLUME;
