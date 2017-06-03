@@ -316,6 +316,7 @@ void GUI::createTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
 			<< " amount of " << Resources::toString(data->buy_type);
 		std::string output = oss.str();
 		tradeHandlerLabel->setCaption(output);
+		LOG_DEBUG("Creating trade caption when window is available");
 	} else {
 		tradeHandlerWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "You have an offer!");
 
@@ -324,13 +325,9 @@ void GUI::createTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
 			<< " amount of " << Resources::toString(data->sell_type) << " for " << std::to_string(data->buy_amount)
 			<< " amount of " << Resources::toString(data->buy_type);
 		std::string output = oss.str();
-		if (tradeHandlerLabel)
-		{
-			tradeHandlerLabel->setCaption(output);
-		} else {
-			tradeHandlerLabel = new Label(tradeHandlerWindow, "", FONT, FONT_SIZE);
-			formHelper->addWidget(output, tradeHandlerLabel);
-		}
+		LOG_DEBUG("Creating new trade label when window is unavailable");
+		tradeHandlerLabel = new Label(tradeHandlerWindow, output, FONT, FONT_SIZE);
+		formHelper->addWidget("", tradeHandlerLabel);
 		Button* acceptBtn = formHelper->addButton("Accept", []() {});
 		Button* declineBtn = formHelper->addButton("Decline", []() {});
 		acceptBtn->setCallback([this]() {
@@ -346,6 +343,7 @@ void GUI::createTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
 			LOG_DEBUG("I decline trade deal.");
 		});
 	}
+	formHelper->refresh();
 	tradeHandlerWindow->setVisible(true);
 	this->performLayout();
 }

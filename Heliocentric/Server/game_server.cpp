@@ -569,7 +569,6 @@ void GameServer::handleTradeData(SunNet::ChanneledSocketConnection_p sender, std
 		deal->trade_deal_id = trade_deal->getID(); // Assign the TradeDeal's ID
 
 		/* Put the TradeDeal to recipient's pending deals */
-		LOG_ERR("TEMP TradeDeal ID", trade_deal->getID());
 		players[deal->recipient]->receive_trade_deal(trade_deal);
 		
 		auto connections = Lib::key_acquire(this->connections);

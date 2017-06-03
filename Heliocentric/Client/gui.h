@@ -119,5 +119,5 @@ private:
 	Button* sendTradeButton;
 	Button* closeTradeButton;
 	float offerBaseVal = 0;
-	Label* tradeHandlerLabel;
+	Label* tradeHandlerLabel = NULL;
 };
