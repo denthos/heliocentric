@@ -16,6 +16,10 @@ public:
 private:
 	void createButtons();
 	void createProgressbar();
+	void createProductionLabel();
+	void createQueueLabel();
+
+	Label* productionLabel;
 
 	std::vector<UnitCreateButton*> createUnitButtons;
 	ProgressBar* createUnitProgress;

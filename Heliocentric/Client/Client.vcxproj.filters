@@ -181,9 +181,6 @@
     <ClInclude Include="music_player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="unit_create_button.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="model_preloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -197,7 +194,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="unit_spawn_widget.h">
-      <Filter>Header Files</Filter>
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_create_button.h">
+      <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="audio_3d_sound.h">
       <Filter>Header Files</Filter>
@@ -339,9 +339,6 @@
     <ClCompile Include="music_player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unit_create_button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="model_preloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -355,7 +352,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="unit_spawn_widget.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_create_button.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="audio_3d_sound.cpp">
       <Filter>Source Files</Filter>

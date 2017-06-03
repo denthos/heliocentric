@@ -6,7 +6,7 @@
 #include "city_manager.h"
 
 City::City(Player* owner, Attack* attack, CityManager* manager, int def, int heal, int pr, int pop, Slot* assigned_slot, std::string name) :
-	AttackableGameObject(assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID()), production(pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
+	AttackableGameObject(assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID(), pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
 
 	initialize();
 
@@ -14,7 +14,7 @@ City::City(Player* owner, Attack* attack, CityManager* manager, int def, int hea
 
 
 City::City(UID id, Player* owner, Attack* attack, CityManager* manager, int def, int heal, int pr, int pop, Slot* assigned_slot, std::string name) :
-	AttackableGameObject(id, assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID()), production(pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
+	AttackableGameObject(id, assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID(), pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
 
 	initialize();
 
