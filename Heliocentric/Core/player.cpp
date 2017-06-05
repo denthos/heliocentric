@@ -120,13 +120,7 @@ int Player::get_resource_amount(Resources::Type resource_type) {
 }
 
 int Player::get_resource_amount(int resource_index) {
-	/* Assuming the parameter is a valid resource type, because it really should be. */
-	int index = 0;
-	for (auto itr : owned_resources) {
-		if (index == resource_index)
-			return itr.second;
-		index++;
-	}
+	return owned_resources[static_cast<Resources::Type>(resource_index)];
 }
 
 void Player::set_resource_amount(Resources::Type resource_type, int resource_amount) {
@@ -134,13 +128,7 @@ void Player::set_resource_amount(Resources::Type resource_type, int resource_amo
 }
 
 Resources::Type Player::get_resource_type(int resource_index) {
-	/* Assuming the parameter is a valid resource type, because it really should be. */
-	int index = 0;
-	for (auto itr : owned_resources) {
-		if (index == resource_index)
-			return itr.first;
-		index++;
-	}
+	return static_cast<Resources::Type>(resource_index);
 }
 
 void Player::change_resource_amount(Resources::Type type, int delta) {

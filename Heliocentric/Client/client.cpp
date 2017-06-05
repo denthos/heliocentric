@@ -795,13 +795,11 @@ void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn
 	auto& player_it = players.find(update->player_id);
 
 	std::shared_ptr<Player> player_info;
-	std::shared_ptr<Player> player_info_for_gui;
 	if (player_it == players.end()) {
 		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
 		player_info = std::make_shared<Player>(update->name, update->player_id, update->color);
-		player_info_for_gui = std::make_shared<Player>(update->name, update->player_id, update->color);
 		players[update->player_id] = player_info;
-		gui->addPlayer(player_info_for_gui);
+		gui->addPlayer(player_info);
 	}
 	else {
 		player_info = player_it->second;
@@ -947,7 +945,7 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
 		LOG_DEBUG("In trade data handler, the trade deal id is ", deal->trade_deal_id);
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
-		gui->updateTradeHandlerDisplay(deal);
+		gui->showTradeHandlerUI(deal);
 	}
 }
 

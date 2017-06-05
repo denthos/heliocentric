@@ -45,17 +45,21 @@ public:
 	void hideCityUI();
 
 	void createTradeDisplay();
-	void customizeTrade();
+	void createCustomTradeUI();
+	void updateCustomTradeUI();
+	void showCustomTradeUI();
 	void hideCustomTradeUI();
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
+	void createTradeHandlerUI();
+	void showTradeHandlerUI(std::shared_ptr<TradeData> data);
+	void hideTradeHandlerUI();
+	void updateTradeHandlerUI(std::shared_ptr<TradeData> data);
 
 	void showGameOverWindow(bool victorious);
 	void hideGameOverWindow();
 	void updatePlayerLeaderboardValue(const Player* player);
 	void addPlayer(std::shared_ptr<Player> new_player);
-	void createTradeHandlerDisplay();
-	void updateTradeHandlerDisplay(std::shared_ptr<TradeData> data);
 
 private:
 	int screenWidth, screenHeight;
@@ -74,7 +78,6 @@ private:
 	void createUidDisplay();
 	void createSlotDisplay();
 	void createCityDisplay();
-	void createCustomTradeDisplay();
 	void createPlayerOverlay();
 	void createGameOverWindow();
 	void createLeaderboardWindow();
@@ -103,7 +106,7 @@ private:
 
 	Window * playerOverlay;
 	std::shared_ptr<Player> player;
-	Player* trade_partner;
+	std::shared_ptr<Player> trade_partner;
 	std::pair<Resources::Type, Label *> resourceLabels[Resources::NUM_RESOURCES];
 	Label * fpsSpacer;
 	Label * fpsDisplay;
@@ -113,7 +116,7 @@ private:
 
 	// Everything Trade
 	ref<Window> tradeWindow;
-	ref<Window> customTradeWindow = NULL;
+	ref<Window> customTradeWindow;
 	ref<Window> tradeHandlerWindow;
 	std::shared_ptr<TradeData> currentTradeData;
 	Button* createTradeButton;
@@ -121,4 +124,13 @@ private:
 	Button* closeTradeButton;
 	float offerBaseVal = 0;
 	Label* tradeHandlerLabel;
+
+	// custom trade
+	Widget* selectTradePartnerPanel;
+	ComboBox* selectPartnerBox;
+	Widget* tradePanel;
+	IntBox<int>* offerAmount;
+	ComboBox* offerResourceType;
+	IntBox<int>* askForAmount;
+	ComboBox* askForResourceType;
 };

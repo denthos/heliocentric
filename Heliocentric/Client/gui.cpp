@@ -40,7 +40,8 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	this->createCityDisplay();
 	this->createPlayerOverlay();
 	this->createTradeDisplay();
-	this->createTradeHandlerDisplay();
+	this->createCustomTradeUI();
+	this->createTradeHandlerUI();
 	
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
@@ -118,6 +119,14 @@ void GUI::setFPS(double fps) {
 
 void GUI::addPlayer(std::shared_ptr<Player> new_player) {
 	players.push_back(new_player);
+	std::vector<std::string> player_ids = {};
+	for (auto itr : players) {
+		LOG_DEBUG("Player ID is " + std::to_string((int)itr->getID()));
+		player_ids.push_back(std::to_string((int)itr->getID()));
+	}
+	selectPartnerBox->setItems(player_ids);
+	formHelper->refresh();
+	this->performLayout();
 }
 
 void GUI::createUidDisplay() {
@@ -200,63 +209,35 @@ void GUI::createTradeDisplay() {
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
 
 	createTradeButton->setCallback([this]() {
-		std::cout << "Establish trade button pressed!" << std::endl;
-		if (customTradeWindow) {
-			customTradeWindow->setVisible(true);
-			tradeWindow->setVisible(false);
-		}
-		else {
-			this->trade_partner = this->players[0].get();
-			this->createCustomTradeDisplay();
-		}
+		showCustomTradeUI();
 	});
-	tradeWindow->setVisible(true);
 }
 
-void GUI::createCustomTradeDisplay() {
+void GUI::createCustomTradeUI() {
 	LOG_DEBUG("Creating custom trade");
 	customTradeWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "Customize Trade Window");
-	customTradeWindow->setVisible(true);
-	tradeWindow->setVisible(false);
+	customTradeWindow->setVisible(false);
 	customTradeWindow->center();
-	customizeTrade();
-	this->performLayout();
-}
-
-void GUI::customizeTrade() {
+	
+	// set up player selection
 	formHelper->addGroup("Select trade partner: ");
-	Widget* selectTradePartnerPanel = new Widget(customTradeWindow);
+	selectTradePartnerPanel = new Widget(customTradeWindow);
 	selectTradePartnerPanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 1, 2));
-	ComboBox* selectPartnerBox = new ComboBox(selectTradePartnerPanel);
-	std::vector<std::string> player_ids = {};
-	for (auto itr : players) {
-		LOG_DEBUG("Player ID is " + std::to_string((int)itr->getID()));
-		player_ids.push_back(std::to_string((int) itr->getID()));
-	}
-	selectPartnerBox->setItems(player_ids);
+	selectPartnerBox = new ComboBox(selectTradePartnerPanel);
+	selectPartnerBox->setItems({});
 	formHelper->addWidget("Select Trade Partner: ", selectTradePartnerPanel);
 
-	Resources::Type resource = Resources::FIRST;
-	std::vector<std::string> my_resource_list = {};
-	std::vector<std::string> partner_resource_list = {};
-
-	for (auto itr : this->player->getResources()) {
-		my_resource_list.push_back(Resources::toString(itr.first));
-	}
-
-	for (auto itr : trade_partner->getResources()) {
-		partner_resource_list.push_back(Resources::toString(itr.first));
-	}
-	Widget* tradePanel = new Widget(customTradeWindow);
+	// set up trade panel for resource types and amounts
+	tradePanel = new Widget(customTradeWindow);
 	tradePanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 2, 2));
 
-	IntBox<int>* offerAmount = new IntBox<int>(tradePanel);
-	ComboBox* offerResourceType = new ComboBox(tradePanel);
-	IntBox<int>* askForAmount = new IntBox<int>(tradePanel);
-	ComboBox* askForResourceType = new ComboBox(tradePanel);
+	offerAmount = new IntBox<int>(tradePanel);
+	offerResourceType = new ComboBox(tradePanel);
+	askForAmount = new IntBox<int>(tradePanel);
+	askForResourceType = new ComboBox(tradePanel);
 
-	selectPartnerBox->setCallback([askForAmount, askForResourceType, this](int player_index) {
-		this->trade_partner = this->players.at(player_index).get();
+	selectPartnerBox->setCallback([this](int player_index) {
+		this->trade_partner = this->players.at(player_index);
 		LOG_DEBUG("Player index is " + std::to_string(player_index));
 		std::vector<std::string> resource_list = {};
 		for (auto itr : trade_partner->getResources()) {
@@ -270,21 +251,21 @@ void GUI::customizeTrade() {
 	});
 
 	offerAmount->setEditable(true);
-	offerAmount->setCallback([offerAmount](int val) {
+	offerAmount->setCallback([this](int val) {
 		if (val >= 0)
 			offerAmount->setValue(val);
 	});
-	offerResourceType->setItems(my_resource_list);
-	offerResourceType->setCallback([offerAmount, this](int val) {
+	offerResourceType->setItems({});
+	offerResourceType->setCallback([this](int val) {
 		offerAmount->setValue(this->player.get()->get_resource_amount(val));
 	});
 	askForAmount->setEditable(true);
-	askForAmount->setCallback([askForAmount](int val) {
+	askForAmount->setCallback([this](int val) {
 		if (val >= 0)
 			askForAmount->setValue(val);
 	});
-	askForResourceType->setItems(partner_resource_list);
-	askForResourceType->setCallback([askForAmount, this](int val) {
+	askForResourceType->setItems({});
+	askForResourceType->setCallback([this](int val) {
 		askForAmount->setValue(this->trade_partner->get_resource_amount(val));
 	});
 
@@ -293,11 +274,11 @@ void GUI::customizeTrade() {
 	sendTradeButton = formHelper->addButton("Send", []() {});
 	closeTradeButton = formHelper->addButton("Close", []() {});
 
-	sendTradeButton->setCallback([offerAmount, offerResourceType, askForAmount, askForResourceType, this]() {
+	sendTradeButton->setCallback([this]() {
 		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(this->player->get_resource_type(offerResourceType->selectedIndex()))
 			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(this->trade_partner->get_resource_type(askForResourceType->selectedIndex())));
 		LOG_DEBUG("Sending Custom Trade to another player...");
-		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), this->player->get_resource_type(offerResourceType->selectedIndex()), 
+		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), this->player->get_resource_type(offerResourceType->selectedIndex()),
 			offerAmount->value(), this->trade_partner->get_resource_type(askForResourceType->selectedIndex()), askForAmount->value()));
 		this->hideCustomTradeUI();
 	});
@@ -305,10 +286,50 @@ void GUI::customizeTrade() {
 		LOG_DEBUG("Closing custom trade window.");
 		this->hideCustomTradeUI();
 	});
+
+	formHelper->refresh();
+	this->performLayout();
+}
+
+void GUI::updateCustomTradeUI() {
+	// set default trade partner to be first on player list
+	if (this->players.size() > 0)
+		this->trade_partner = this->players.at(0);
+	else
+		LOG_ERR("Only one player is connected, trade function disabled.");
+
+	std::vector<std::string> player_ids = {};
+	for (auto itr : players) {
+		LOG_DEBUG("Player ID is " + std::to_string((int)itr->getID()));
+		player_ids.push_back(std::to_string((int) itr->getID()));
+	}
+	selectPartnerBox->setItems(player_ids);
+
+	std::vector<std::string> my_resource_list = {};
+	std::vector<std::string> partner_resource_list = {};
+
+	for (auto itr : this->player->getResources()) {
+		my_resource_list.push_back(Resources::toString(itr.first));
+	}
+
+	for (auto itr : trade_partner->getResources()) {
+		partner_resource_list.push_back(Resources::toString(itr.first));
+	}
+
+	offerResourceType->setItems(my_resource_list);
+	askForResourceType->setItems(partner_resource_list);
+
+	this->performLayout();
+
+}
+
+void GUI::showCustomTradeUI() {
+	updateCustomTradeUI();
+	tradeWindow->setVisible(false);
 	customTradeWindow->setVisible(true);
 }
 
-void GUI::createTradeHandlerDisplay() {
+void GUI::createTradeHandlerUI() {
 	tradeHandlerWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "You have an offer!");
 	tradeHandlerLabel = new Label(tradeHandlerWindow, "holder", FONT, FONT_SIZE);
 	formHelper->addWidget("", tradeHandlerLabel);
@@ -317,19 +338,28 @@ void GUI::createTradeHandlerDisplay() {
 	acceptBtn->setCallback([this]() {
 		LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
 		tradeHandlerCallback(currentTradeData->trade_deal_id, true);
-		tradeHandlerWindow->setVisible(false);
+		hideTradeHandlerUI();
 		LOG_DEBUG("I accepted trade deal.");
 	});
 	declineBtn->setCallback([this]() {
 		LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
 		tradeHandlerCallback(currentTradeData->trade_deal_id, false);
-		tradeHandlerWindow->setVisible(false);
+		hideTradeHandlerUI();
 		LOG_DEBUG("I decline trade deal.");
 	});
 	tradeHandlerWindow->setVisible(false);
 }
 
-void GUI::updateTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
+void GUI::showTradeHandlerUI(std::shared_ptr<TradeData> data) {
+	updateTradeHandlerUI(data);
+	tradeHandlerWindow->setVisible(true);
+}
+
+void GUI::hideTradeHandlerUI() {
+	tradeHandlerWindow->setVisible(false);
+}
+
+void GUI::updateTradeHandlerUI(std::shared_ptr<TradeData> data) {
 	currentTradeData = data;
 	std::ostringstream oss;
 	oss << "Player " << std::to_string(data->sender) << " is offering " << std::to_string(data->sell_amount)
@@ -341,7 +371,6 @@ void GUI::updateTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
 
 	// refresh ui
 	formHelper->refresh();
-	tradeHandlerWindow->setVisible(true);
 	this->performLayout();
 }
 
