@@ -524,16 +524,27 @@ void GameServer::handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, 
 		case TradeCommand::CMD_TRADE_ACCEPT: {
 			recipient->trade_deal_accept(command->initiator);
 
-			std::shared_ptr<PlayerUpdate> sender_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
-				trade_deal->get_sell_type(), trade_deal->get_sell_amount() * (-1));
-			std::shared_ptr<PlayerUpdate> recipient_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
-				trade_deal->get_sell_type(), trade_deal->get_sell_amount());
-			std::shared_ptr<PlayerUpdate> sender_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
-				trade_deal->get_buy_type(), trade_deal->get_buy_amount());
-			std::shared_ptr<PlayerUpdate> recipient_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
-				trade_deal->get_buy_type(), trade_deal->get_buy_amount() * (-1));
+			int sender_sell_amount = this->players[trade_deal->get_sender()]->get_resource_amount(trade_deal->get_sell_type());
+			int sender_buy_amount = this->players[trade_deal->get_sender()]->get_resource_amount(trade_deal->get_buy_type());
+			int receiver_sell_amount = this->players[trade_deal->get_recipient()]->get_resource_amount(trade_deal->get_sell_type());
+			int receiver_buy_amount = this->players[trade_deal->get_recipient()]->get_resource_amount(trade_deal->get_buy_type());
 
-			/* Player updates need to be sent to all clients, obviously. */
+			// update server
+			this->players[trade_deal->get_sender()]->set_resource_amount(trade_deal->get_sell_type(), trade_deal->get_sell_amount() * (-1) + sender_sell_amount);
+			this->players[trade_deal->get_sender()]->set_resource_amount(trade_deal->get_buy_type(), trade_deal->get_buy_amount() + sender_buy_amount);
+			this->players[trade_deal->get_recipient()]->set_resource_amount(trade_deal->get_sell_type(), trade_deal->get_sell_amount() + receiver_sell_amount);
+			this->players[trade_deal->get_recipient()]->set_resource_amount(trade_deal->get_buy_type(), trade_deal->get_buy_amount() * (-1) + receiver_buy_amount);
+
+			// send update to client
+			std::shared_ptr<PlayerUpdate> sender_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
+				trade_deal->get_sell_type(), trade_deal->get_sell_amount() * (-1) + sender_sell_amount);
+			std::shared_ptr<PlayerUpdate> sender_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
+				trade_deal->get_buy_type(), trade_deal->get_buy_amount() + sender_buy_amount);
+			std::shared_ptr<PlayerUpdate> recipient_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
+				trade_deal->get_sell_type(), trade_deal->get_sell_amount() + receiver_sell_amount);
+			std::shared_ptr<PlayerUpdate> recipient_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
+				trade_deal->get_buy_type(), trade_deal->get_buy_amount() * (-1) + receiver_buy_amount);
+
 			LOG_DEBUG("Adding update to send queue");
 			this->addUpdateToSendQueue(sender_sell_update);
 			this->addUpdateToSendQueue(recipient_sell_update);

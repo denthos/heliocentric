@@ -129,6 +129,10 @@ int Player::get_resource_amount(int resource_index) {
 	}
 }
 
+void Player::set_resource_amount(Resources::Type resource_type, int resource_amount) {
+	owned_resources[resource_type] = resource_amount;
+}
+
 Resources::Type Player::get_resource_type(int resource_index) {
 	/* Assuming the parameter is a valid resource type, because it really should be. */
 	int index = 0;

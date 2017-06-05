@@ -17,7 +17,8 @@
 #define FONT_FILE "Fonts/Courier.ttf"
 #define MAX_RESOURCE_CHARACTERS 9
 
-GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tradeCallback, std::function<void(UID, bool)> tradeHandlerCallback, int screenWidth, int screenHeight) : Screen(), tradeCallback(tradeCallback), tradeHandlerCallback(tradeHandlerCallback), screenWidth(screenWidth), screenHeight(screenHeight) {
+GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tradeCallback, std::function<void(UID, bool)> tradeHandlerCallback, int screenWidth, int screenHeight) : 
+	Screen(), tradeCallback(tradeCallback), tradeHandlerCallback(tradeHandlerCallback), screenWidth(screenWidth), screenHeight(screenHeight) {
 	this->initialize(window, false);
 	unit_window = new UnitWindow((Screen*) this, "Unit Stats");
 
@@ -249,7 +250,6 @@ void GUI::customizeTrade() {
 	tradePanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 2, 2));
 
 	IntBox<int>* offerAmount = new IntBox<int>(tradePanel);
-	//new Label(offerAmount, "Offer Amount", "sans-bold");
 	ComboBox* offerResourceType = new ComboBox(tradePanel);
 	IntBox<int>* askForAmount = new IntBox<int>(tradePanel);
 	ComboBox* askForResourceType = new ComboBox(tradePanel);
@@ -296,14 +296,14 @@ void GUI::customizeTrade() {
 		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(this->player->get_resource_type(offerResourceType->selectedIndex()))
 			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(this->trade_partner->get_resource_type(askForResourceType->selectedIndex())));
 		LOG_DEBUG("Sending Custom Trade to another player...");
-		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), this->player->get_resource_type(offerResourceType->selectedIndex()), offerAmount->value(), this->trade_partner->get_resource_type(askForResourceType->selectedIndex()), askForAmount->value()));
+		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), this->player->get_resource_type(offerResourceType->selectedIndex()), 
+			offerAmount->value(), this->trade_partner->get_resource_type(askForResourceType->selectedIndex()), askForAmount->value()));
 		this->hideCustomTradeUI();
 	});
 	closeTradeButton->setCallback([this]() {
 		LOG_DEBUG("Closing custom trade window.");
 		this->hideCustomTradeUI();
 	});
-	//formHelper->addVariable("string", "Select Player", enabled);
 	customTradeWindow->setVisible(true);
 }
 

@@ -251,8 +251,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -783,18 +781,6 @@ void Client::handleF10Key(int key) {
 	this->channeled_send(&deal);
 }
 
-void Client::handleF11Key(int key) {
-	// Accept the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_accept();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
-
-	TradeCommand command(deal_id, true);
-	this->channeled_send(&command);
-}
-
 void Client::sendTradeCommand(UID trade_id, bool is_accepted) {
 	if (is_accepted)
 		player->trade_deal_accept(trade_id);
@@ -804,20 +790,6 @@ void Client::sendTradeCommand(UID trade_id, bool is_accepted) {
 	TradeCommand command(trade_id, is_accepted);
 	this->channeled_send(&command);
 }
-
-
-void Client::handleF12Key(int key) {
-	// Decline the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_decline();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
-
-	TradeCommand command(deal_id, false);
-	this->channeled_send(&command);
-}
-
 
 void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
 	auto& player_it = players.find(update->player_id);
@@ -839,7 +811,7 @@ void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn
 }
 
 void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerUpdate> update) {
-	LOG_INFO("Received update for player with id: ", update->id);
+	LOG_DEBUG("Received update for player with id: ", update->id);
 	auto& player_it = players.find(update->id);
 	if (player_it == players.end()) {
 		return;
