@@ -84,8 +84,8 @@ public:
 	float get_current_research_progress();
 
 	/**
-	Gets all the available techs, that are techs with all prerequisites satisfied and can be
-	researched at the moment.
+	Gets all the available techs, which are techs with all prerequisites satisfied and
+	have not been researched yet.
 	@return Vector of IDs of techs that can be researched.
 	*/
 	std::vector<int> get_available_techs();

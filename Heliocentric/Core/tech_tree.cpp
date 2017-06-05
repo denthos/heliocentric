@@ -23,10 +23,16 @@ void Technology::research(float research_points) {
 }
 
 bool Technology::is_available() {
+	/* Not available if any of its parents is not reasearched. */
 	for (auto it : parents) {
 		if (!it->researched) {
 			return false;
 		}
+	}
+
+	/* Not available if this tech has already been researched. */
+	if (this->researched) {
+		return false;
 	}
 
 	return true;
