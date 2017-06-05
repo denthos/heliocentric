@@ -36,7 +36,7 @@ public:
 	// here so we can change them based on the player's technologies
 
 	/**
-	Constructor for a CMD_CREATE type command, which is a temporary command
+	Constructor for a CMD_CREATE_UNIT type command, which is a temporary command
 	used to create a unit for testing.
 	@param create_location_x x-axis of the location where the unit should be created.
 	@param create_location_y y-axis of the location where the unit should be created.
