@@ -238,6 +238,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerScoreUpdate>(std::bind(&Client::playerScoreUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlayerResearchUpdate>(std::bind(&Client::playerResearchUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -848,8 +849,9 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 }
 
 void Client::playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerScoreUpdate> update) {
+	LOG_DEBUG("Player score update received");
 	auto& player_it = players.find(update->id);
-	if (player_it == players.end()) {
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
 		return;
 	}
 
@@ -857,10 +859,22 @@ void Client::playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p socket
 	gui->updatePlayerLeaderboardValue(player_it->second.get());
 }
 
+void Client::playerResearchUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerResearchUpdate> update) {
+	LOG_DEBUG("Player research update received");
+	auto& player_it = players.find(update->id);
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
+		return;
+	}
+
+	update->apply(players[update->id].get());
+}
+
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
 	LOG_DEBUG("Unit creation update received");
 	auto& player_it = players.find(update->player_id);
-	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
+		return;
+	}
 
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
@@ -980,7 +994,9 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SlotUpdate> update) {
 	LOG_DEBUG("Received a slot update");
 	auto& slot_it = slots.find(update->id);
-	Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found");
+	if (Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found") == false) {
+		return;
+	}
 
 	update->apply(slot_it->second);
 }

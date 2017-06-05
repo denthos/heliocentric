@@ -18,6 +18,7 @@ class GameObject;
 class PlayerUpdate;
 class NewPlayerInfoUpdate;
 class PlayerScoreUpdate;
+class PlayerResearchUpdate;
 class PlayerManager;
 
 class Player : public Identifiable {
@@ -28,7 +29,11 @@ public:
 	Player(PlayerManager* player_manager, std::string player_name, PlayerColor::Color color);
 	Player(std::string player_name, UID id, PlayerColor::Color color);
 
-	void doLogic(); // Perform all logic that is done every server tick.
+	void choose_research(int id); // Set current research by tech id
+	void research(); // Called by server
+	void research(float research_points); // Called by client
+
+	float get_research_points();
 
 	std::string get_name() const;
 	void set_name(std::string new_name);
@@ -39,8 +44,6 @@ public:
 
 	void increase_player_score(int);
 	void decrease_player_score(int);
-
-	float get_research_points();
 
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
@@ -85,6 +88,7 @@ private:
 
 	std::shared_ptr<PlayerScoreUpdate> score_update;
 	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
+	void send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update);
   
 	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns
