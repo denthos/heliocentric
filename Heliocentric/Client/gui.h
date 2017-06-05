@@ -54,7 +54,8 @@ public:
 	void hideGameOverWindow();
 	void updatePlayerLeaderboardValue(const Player* player);
 	void addPlayer(std::shared_ptr<Player> new_player);
-	void createTradeHandlerDisplay(std::shared_ptr<TradeData> data);
+	void createTradeHandlerDisplay();
+	void updateTradeHandlerDisplay(std::shared_ptr<TradeData> data);
 
 private:
 	int screenWidth, screenHeight;
@@ -113,11 +114,11 @@ private:
 	// Everything Trade
 	ref<Window> tradeWindow;
 	ref<Window> customTradeWindow = NULL;
-	ref<Window> tradeHandlerWindow = NULL;
+	ref<Window> tradeHandlerWindow;
 	std::shared_ptr<TradeData> currentTradeData;
 	Button* createTradeButton;
 	Button* sendTradeButton;
 	Button* closeTradeButton;
 	float offerBaseVal = 0;
-	Label* tradeHandlerLabel = NULL;
+	Label* tradeHandlerLabel;
 };

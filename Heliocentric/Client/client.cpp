@@ -947,7 +947,7 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
 		LOG_DEBUG("In trade data handler, the trade deal id is ", deal->trade_deal_id);
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
-		gui->createTradeHandlerDisplay(deal);
+		gui->updateTradeHandlerDisplay(deal);
 	}
 }
 

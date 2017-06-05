@@ -40,6 +40,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	this->createCityDisplay();
 	this->createPlayerOverlay();
 	this->createTradeDisplay();
+	this->createTradeHandlerDisplay();
 	
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
@@ -307,42 +308,38 @@ void GUI::customizeTrade() {
 	customTradeWindow->setVisible(true);
 }
 
-void GUI::createTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
-	currentTradeData = data;
-	if (customTradeWindow && tradeHandlerLabel) {
-		std::ostringstream oss;
-		oss << "Player " << std::to_string(data->sender) << " is offering " << std::to_string(data->sell_amount)
-			<< " amount of " << Resources::toString(data->sell_type) << " for " << std::to_string(data->buy_amount)
-			<< " amount of " << Resources::toString(data->buy_type);
-		std::string output = oss.str();
-		tradeHandlerLabel->setCaption(output);
-		LOG_DEBUG("Creating trade caption when window is available");
-	} else {
-		tradeHandlerWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "You have an offer!");
+void GUI::createTradeHandlerDisplay() {
+	tradeHandlerWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "You have an offer!");
+	tradeHandlerLabel = new Label(tradeHandlerWindow, "holder", FONT, FONT_SIZE);
+	formHelper->addWidget("", tradeHandlerLabel);
+	Button* acceptBtn = formHelper->addButton("Accept", []() {});
+	Button* declineBtn = formHelper->addButton("Decline", []() {});
+	acceptBtn->setCallback([this]() {
+		LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
+		tradeHandlerCallback(currentTradeData->trade_deal_id, true);
+		tradeHandlerWindow->setVisible(false);
+		LOG_DEBUG("I accepted trade deal.");
+	});
+	declineBtn->setCallback([this]() {
+		LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
+		tradeHandlerCallback(currentTradeData->trade_deal_id, false);
+		tradeHandlerWindow->setVisible(false);
+		LOG_DEBUG("I decline trade deal.");
+	});
+	tradeHandlerWindow->setVisible(false);
+}
 
-		std::ostringstream oss;
-		oss << "Player " << std::to_string(data->sender) << " is offering " << std::to_string(data->sell_amount) 
-			<< " amount of " << Resources::toString(data->sell_type) << " for " << std::to_string(data->buy_amount)
-			<< " amount of " << Resources::toString(data->buy_type);
-		std::string output = oss.str();
-		LOG_DEBUG("Creating new trade label when window is unavailable");
-		tradeHandlerLabel = new Label(tradeHandlerWindow, output, FONT, FONT_SIZE);
-		formHelper->addWidget("", tradeHandlerLabel);
-		Button* acceptBtn = formHelper->addButton("Accept", []() {});
-		Button* declineBtn = formHelper->addButton("Decline", []() {});
-		acceptBtn->setCallback([this]() {
-			LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
-			tradeHandlerCallback(currentTradeData->trade_deal_id, true);
-			tradeHandlerWindow->setVisible(false);
-			LOG_DEBUG("I accepted trade deal.");
-		});
-		declineBtn->setCallback([this]() {
-			LOG_DEBUG("Trade id is " + std::to_string(currentTradeData->trade_deal_id));
-			tradeHandlerCallback(currentTradeData->trade_deal_id, false);
-			tradeHandlerWindow->setVisible(false);
-			LOG_DEBUG("I decline trade deal.");
-		});
-	}
+void GUI::updateTradeHandlerDisplay(std::shared_ptr<TradeData> data) {
+	currentTradeData = data;
+	std::ostringstream oss;
+	oss << "Player " << std::to_string(data->sender) << " is offering " << std::to_string(data->sell_amount)
+		<< " amount of " << Resources::toString(data->sell_type) << " for " << std::to_string(data->buy_amount)
+		<< " amount of " << Resources::toString(data->buy_type);
+	std::string output = oss.str();
+	tradeHandlerLabel->setCaption(output);
+	LOG_DEBUG("Creating trade caption when window is available");
+
+	// refresh ui
 	formHelper->refresh();
 	tradeHandlerWindow->setVisible(true);
 	this->performLayout();
