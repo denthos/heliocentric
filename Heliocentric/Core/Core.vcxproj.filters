@@ -27,9 +27,6 @@
     <Filter Include="Managers">
       <UniqueIdentifier>{29aad4f1-f1b3-492c-9719-331be87de5be}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Buildings">
-      <UniqueIdentifier>{5a462d50-3b96-4e7a-a0a6-878bb2528b03}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="attackable_game_object.h">
@@ -209,21 +206,6 @@
     <ClInclude Include="city_manager.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="building_type.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="buildable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="building.h">
-      <Filter>Buildings</Filter>
-    </ClInclude>
-    <ClInclude Include="fission_plant.h">
-      <Filter>Buildings</Filter>
-    </ClInclude>
-    <ClInclude Include="fusion_plant.h">
-      <Filter>Buildings</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -375,21 +357,6 @@
     </ClCompile>
     <ClCompile Include="city_manager.cpp">
       <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="building_type..cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="buildable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="building.cpp">
-      <Filter>Buildings</Filter>
-    </ClCompile>
-    <ClCompile Include="fission_plant.cpp">
-      <Filter>Buildings</Filter>
-    </ClCompile>
-    <ClCompile Include="fusion_plant.cpp">
-      <Filter>Buildings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

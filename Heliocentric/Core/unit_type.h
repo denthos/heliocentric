@@ -1,5 +1,4 @@
 #pragma once
-#include "buildable.h"
 #include "resources.h"
 #include "identifiable.h"
 #include <glm/vec3.hpp>
@@ -9,14 +8,14 @@
 class Player;
 class UnitManager;
 
-class UnitType : public Buildable {
+class UnitType{
 public:
 	enum TypeIdentifier {
 		BASIC_UNIT,
 		HEAVY_UNIT
 	};
 
-	const static TypeIdentifier FIRST = BASIC_UNIT; // should always be the first in enum
+	const static TypeIdentifier FIRST = BASIC_UNIT;
 	const static int NUM_TYPES = 2;
 
 	static UnitType* getByIdentifier(TypeIdentifier);

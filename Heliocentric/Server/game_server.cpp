@@ -416,8 +416,8 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 
 	/* This currently only handles create command */
 	switch (command->command_type) {
-		case PlayerCommand::CMD_CREATE_UNIT: {
-			LOG_DEBUG("Player command type: CMD_CREATE_UNIT.");
+		case PlayerCommand::CMD_CREATE: {
+			LOG_DEBUG("Player command type: CMD_CREATE.");
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			Player* owner = this->extractPlayerFromConnection(sender);
 
@@ -444,15 +444,6 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 				}
 
 				this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
-			});
-			break;
-		}
-		case PlayerCommand::CMD_CREATE_BUILDING : {
-			LOG_DEBUG("Player command type: CMD_CREATE_BUILDING.");
-			Player* owner = this->extractPlayerFromConnection(sender);
-
-			this->addFunctionToProcessQueue([this, command, owner]() {
-				
 			});
 			break;
 		}
