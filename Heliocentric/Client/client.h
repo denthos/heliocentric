@@ -40,6 +40,7 @@
 #include "slot_update.h"
 #include "game_over_update.h"
 #include "player_score_update.h"
+#include "threed_sound_system.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -87,9 +88,12 @@ protected:
 	virtual void handle_poll_timeout();
 
 private:
+	std::thread sound_thread;
+
 	GLFWwindow * window;
 	GUI * gui;
-	MusicPlayer musicPlayer;
+	ThreeDSoundSystem* soundSystem;
+	MusicPlayer* musicPlayer;
 	unsigned int selectedCamera;
 	std::vector<Camera *> cameras;
 	std::vector<GameObject *> selection;

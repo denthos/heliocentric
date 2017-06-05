@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <soil.h>
+#include <thread>
 
 #include "free_camera.h"
 #include "model_preloader.h"
@@ -65,6 +66,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 
 Quad * quad; //texture sampler
 ParticleSystem* particles;
+ParticleSystem* laser_particles;
 
 
 SkyboxMesh* skybox;
@@ -210,7 +212,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
-	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter());
+	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
+	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
@@ -270,8 +273,15 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	frameTimer = glfwGetTime();
 	frameCounter = 0;
 
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
-	musicPlayer.play();
+	soundSystem = new ThreeDSoundSystem(*this->cameras[this->selectedCamera]);
+	musicPlayer = new MusicPlayer(soundSystem);
+
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Mars.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Venus.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Uranus.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Mercury.ogg");
+	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, musicPlayer);
 }
 
 Client::~Client() {
@@ -287,6 +297,10 @@ Client::~Client() {
 	slots.clear();
 
 	glfwEntry.erase(window);
+
+	/* Stop sound thread */
+	musicPlayer->stop();
+	sound_thread.join();
 }
 
 bool Client::isRunning() {
@@ -506,6 +520,8 @@ void Client::update() {
 	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
+
+	this->soundSystem->update(*this->cameras[this->selectedCamera]);
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -836,7 +852,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader
+		colorShader, laser_particles, soundSystem
 	);
 
 	player_it->second->acquire_object(newUnit.get());
@@ -864,7 +880,8 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	Lib::assertTrue(slot_iter != slots.end(), "Invalid slot id");
 
 	Player* owner = player_iter->second.get();
-	DrawableCity* newCity = new DrawableCity(City(update->city_id, owner, new InstantLaserAttack(), nullptr, 0, 0, 0, 0, slot_iter->second, update->name), colorShader);
+	City city(update->city_id, owner, new InstantLaserAttack(), nullptr, update->defense, update->health, update->production, update->population, slot_iter->second, update->name);
+	DrawableCity* newCity = new DrawableCity(city, colorShader);
 	slot_iter->second->attachCity(newCity);
 	owner->acquire_object(newCity);
 	cities.insert(std::make_pair(newCity->getID(), newCity));
@@ -901,8 +918,8 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	if (units[update->id]->is_dead()) {
 		if (selection.size() > 0 && selection[0]->getID() == update->id) {
 			selection.erase(selection.begin());
+			units[update->id]->unselect(gui, this);
 		}
-		units[update->id]->unselect(gui, this);
 		units.erase(update->id);
 	}
 }
@@ -920,8 +937,8 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		owner->add_to_destroy(cities[update->id].get());
 		if (selection.size() > 0 && selection[0]->getID() == update->id) {
 			selection.erase(selection.begin());
+			cities[update->id]->unselect(gui, this);
 		}
-		cities[update->id]->unselect(gui, this);
 		cities.erase(update->id);
 	}
 }

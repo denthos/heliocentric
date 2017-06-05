@@ -9,11 +9,12 @@
 
 class ParticleSystem {
 public:
-	ParticleSystem(float spawn_rate, int spawns_per_emission, ParticleEmitter* emitter); //init fields
+	ParticleSystem(float spawn_rate, int spawns_per_emission, ParticleEmitter* emitter, Shader* shader); //init fields
 	~ParticleSystem();
 
 	void Update(const Camera &camera);
-	void draw(const Shader &shader, const Camera &camera, const glm::mat4 &toWorld);
+	void draw(const Camera &camera, const glm::mat4 &toWorld);
+	void reset();
 	glm::mat4 world_mat;
 
 private:
@@ -41,4 +42,5 @@ private:
 	int findLastUsed();
 	void spawn(int spawnIndex);
 	void sortParticles();
+	Shader* shader;
 };

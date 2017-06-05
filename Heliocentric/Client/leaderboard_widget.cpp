@@ -1,6 +1,9 @@
 #include "leaderboard_widget.h"
 #include "player_color.h"
 
+#define FONT "courier"
+#define FONT_SIZE 16
+
 LeaderboardWidget::LeaderboardWidget(Widget* parent) : Widget(parent) {
 	this->setLayout(new GridLayout(Orientation::Horizontal, 1, Alignment::Fill));
 	this->setWidth(150);
@@ -26,7 +29,7 @@ Label* LeaderboardWidget::createNewLabel(const Player* player) {
 
 	Label* playerLabel = new Label(this, defaultLabel);
 
-	glm::vec3 rgbVec = 255.0f * PlayerColor::colorToRGBVec(player->getColor());
+	glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player->getColor());
 	playerLabel->setColor(Color(Eigen::Vector3f(rgbVec.x, rgbVec.y, rgbVec.z)));
 
 	this->playerLabels.insert(std::make_pair(player->getID(), playerLabel));

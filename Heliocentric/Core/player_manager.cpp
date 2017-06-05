@@ -7,7 +7,7 @@ void PlayerManager::doLogic() {
 	player_score_updates.clear();
 }
 
-void PlayerManager::register_update(std::shared_ptr<PlayerScoreUpdate>& update) {
+void PlayerManager::register_update(std::shared_ptr<PlayerScoreUpdate> update) {
 	player_score_updates.insert(update);
 }
 

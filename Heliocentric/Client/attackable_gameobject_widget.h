@@ -4,15 +4,12 @@
 #include "attackable_game_object.h"
 using namespace nanogui;
 
-class UnitWindow : public Window {
+class AttackableGameObjectWidget : public Widget {
 public:
-	UnitWindow(Widget* parent, const std::string &title);
-	~UnitWindow();
+	AttackableGameObjectWidget(Widget* parent);
+	~AttackableGameObjectWidget();
 	virtual void updateSelection(AttackableGameObject * selected);
 private:
-	Widget* close_widget;
-	Button* close_button;
-
 	Widget* info_widget;
 	//combatdefense
 	Label* combat_defense_label;
@@ -32,7 +29,4 @@ private:
 	//playername
 	Label* player_label;
 	Label* player_name;
-
-	bool hidden;
-
 };

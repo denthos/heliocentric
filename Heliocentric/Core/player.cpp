@@ -86,6 +86,7 @@ float Player::get_research_points() {
 	return research_points;
 }
 
+
 void Player::acquire_object(GameObject* object) {
 	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
 	// update object members

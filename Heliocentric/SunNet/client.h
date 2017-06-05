@@ -8,12 +8,12 @@
 namespace SunNet {
 	/**
 	A collection of states that the client can be in.
-        +---+
-        |   V
+		+---+
+		|   V
 	  +--------+        +-----------+         +-------------+
 	->| CLOSED |  ----> | CONNECTED |  ---->  | DESTRUCTING |
 	  +--------+        +-----------+         +-------------+
-          ^                   |
+		  ^                   |
 		  +-------------------+
 	*/
 	enum ClientState {
@@ -39,19 +39,22 @@ namespace SunNet {
 
 		ClientState state;
 
-		void state_transition(std::initializer_list<ClientState> const & valid_from_states, ClientState new_state) {
-			bool in_valid_from_state = false;
-			for (const ClientState& valid_from_state : valid_from_states) {
-				if (this->state == valid_from_state) {
-					in_valid_from_state = true;
+		void assert_valid_state(std::initializer_list<ClientState> const& valid_states) {
+			bool is_valid_state = false;
+			for (const ClientState& valid_state : valid_states) {
+				if (this->state == valid_state) {
+					is_valid_state = true;
 					break;
 				}
 			}
 
-			if (!in_valid_from_state) {
+			if (!is_valid_state) {
 				throw InvalidStateTransitionException();
 			}
+		}
 
+		void state_transition(std::initializer_list<ClientState> const & valid_from_states, ClientState new_state) {
+			assert_valid_state(valid_from_states);
 			this->state = new_state;
 		}
 
@@ -116,13 +119,13 @@ namespace SunNet {
 		@param port the port to connect to
 		*/
 		void connect(std::string address, std::string port) {
-			this->state_transition({ CLIENT_CLOSED }, CLIENT_CONNECTED);
+			this->assert_valid_state({ CLIENT_CLOSED });
 
 			this->connection = this->connection_create_func();
-
-			/* Connect. If the connection succeeds, change state */
 			this->connection->connect(address, port);
 			this->poll_service.add_socket(this->connection);
+
+			this->state_transition({ CLIENT_CLOSED }, CLIENT_CONNECTED);
 		}
 
 		/**
@@ -182,7 +185,7 @@ namespace SunNet {
 		reason poll() returns a socket that we don't know about.
 		*/
 		bool poll() {
-			if (!this->state == CLIENT_CONNECTED) {
+			if (this->state != CLIENT_CONNECTED) {
 				return false;
 			}
 			SocketCollection_p ready_sockets = this->poll_service.poll();

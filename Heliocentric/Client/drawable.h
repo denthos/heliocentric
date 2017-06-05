@@ -6,6 +6,7 @@
 class Drawable {
 public:
 	Drawable();
+	virtual ~Drawable() {}
 	virtual void draw(const Camera &) const;
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;

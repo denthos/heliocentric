@@ -72,7 +72,7 @@ public:
 	Tells the unit to attack the target.
 	@param The target that this unit is attacking.
 	*/
-	void set_combat_target(AttackableGameObject* target);
+	void set_combat_target(std::shared_ptr<AttackableGameObject> target);
 
 
 	/**
@@ -81,6 +81,13 @@ public:
 	void set_command(CommandType command);
 
 	const UnitType* getType() const;
+
+	void set_orientation(glm::vec3 orientation);
+	glm::vec3 get_orientation() const;
+
+	bool client_isAttacking() const;
+	void client_setAttacking(bool);
+	virtual bool do_attack(std::shared_ptr<AttackableGameObject>);
 
 
 protected:
@@ -115,6 +122,8 @@ protected:
 	@return Current position of this unit.
 	*/
 	glm::vec3 do_move();
+	void do_orient(glm::vec3 target);
+
 
 	float movement_speed;  // maximum speed that this unit can achieve when powered by its own engine
 
@@ -122,17 +131,19 @@ protected:
 	CommandType currentCommand = UNIT_IDLE;
 	glm::vec3 destination;
 
-	virtual void handle_out_of_range(AttackableGameObject* opponent);
-	virtual void handle_defeat(AttackableGameObject* opponent);
-	virtual void handle_victory(AttackableGameObject* opponent);
-	virtual void handle_counter(AttackableGameObject* opponent);
+	virtual void handle_out_of_range(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_defeat(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_victory(std::shared_ptr<AttackableGameObject> opponent);
+	virtual void handle_counter(std::shared_ptr<AttackableGameObject> opponent);
 
-	void send_update_to_manager(std::shared_ptr<UnitUpdate>& update);
+	void send_update_to_manager(std::shared_ptr<UnitUpdate> update);
 
 	// TODO: Change these to smart pointers.
-	AttackableGameObject* target;
+	std::shared_ptr<AttackableGameObject> target;
 	UnitManager* manager;
 	const UnitType* type;
+	glm::vec3 orientation;
+	bool client_isattacking;
 
 	void initialize();
 };

@@ -6,6 +6,8 @@
 #include "model.h"
 #include "selectable.h"
 #include "unit_type.h"
+#include "particle_system.h"
+#include "audio_3d_sound.h"
 
 class GUI;
 class Client;
@@ -17,7 +19,7 @@ struct DrawableUnitData {
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-	DrawableUnit(const Unit & unit, Shader * shader);
+	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ThreeDSoundSystem* sound_system);
 
 	~DrawableUnit();
 	virtual void update();
@@ -27,7 +29,17 @@ public:
 
 	static const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& getDataMap();
 
+	void updateRotationMatrix();
+	glm::mat4 getRotationMatrix() const;
+
 private:
 	DrawableUnitData data;
+
+	glm::mat4 rotation_matrix;
+	glm::vec3 old_orientation;
+	ParticleSystem* laser;
+	glm::vec3 laser_offset;
+	Audio3DSound* shoot_sound;
+
 	bool glow;
 };

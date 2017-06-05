@@ -172,10 +172,16 @@
     <ClInclude Include="gui_utilities.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="leaderboard_widget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="unit_window.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="leaderboard_widget.h">
+    <ClInclude Include="music_player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model_preloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="music_player.h">
@@ -187,14 +193,26 @@
     <ClInclude Include="model_preloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="unit_create_button.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="model_preloader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="unit_spawn_widget.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_create_button.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_3d_sound.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="threed_sound_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound_system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="attackable_gameobject_widget.h">
+          <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="leaderboard_widget.h">
+      <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -312,10 +330,16 @@
     <ClCompile Include="slot_info_panel.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="leaderboard_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="unit_window.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="leaderboard_widget.cpp">
+    <ClCompile Include="music_player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model_preloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="music_player.cpp">
@@ -327,14 +351,26 @@
     <ClCompile Include="model_preloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unit_create_button.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="model_preloader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="unit_spawn_widget.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_create_button.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="audio_3d_sound.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="threed_sound_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="attackable_gameobject_widget.cpp">
+     <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="leaderboard_widget.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

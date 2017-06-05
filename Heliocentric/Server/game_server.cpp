@@ -43,8 +43,8 @@ GameServer::~GameServer() {
 	}
 }
 
-AttackableGameObject* GameServer::get_attackable(UID uid) const {
-	AttackableGameObject* ret = unit_manager->get_unit(uid);
+std::shared_ptr<AttackableGameObject> GameServer::get_attackable(UID uid) const {
+	std::shared_ptr<AttackableGameObject> ret = unit_manager->get_unit(uid);
 	return (ret == nullptr) ? city_manager->get_city(uid) : ret;
 }
 
@@ -489,7 +489,7 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 		case UnitCommand::CMD_ATTACK:
 			LOG_DEBUG("Unit command type: CMD_ATTACK");
 			this->addFunctionToProcessQueue([this, command]() {
-				AttackableGameObject* target = get_attackable(command.get()->target);
+				std::shared_ptr<AttackableGameObject> target = get_attackable(command.get()->target);
 				if (target)
 					unit_manager->do_attack(command.get()->initiator, target);
 			});

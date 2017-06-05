@@ -79,6 +79,10 @@ public:
 	*/
 	void choose_tech(int);
 
+	std::string get_current_research_name();
+
+	float get_current_research_progress();
+
 	/**
 	Gets all the available techs, that are techs with all prerequisites satisfied and can be
 	researched at the moment.

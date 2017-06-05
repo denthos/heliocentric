@@ -16,7 +16,7 @@ public:
 
 	void doLogic();
 
-	void register_update(std::shared_ptr<PlayerScoreUpdate>& update);
+	void register_update(std::shared_ptr<PlayerScoreUpdate> update);
 
 	const std::unordered_set<std::shared_ptr<PlayerScoreUpdate>>& getPlayerScoreUpdates() const;
 };

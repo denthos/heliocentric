@@ -42,13 +42,13 @@ int AttackableGameObject::take_damage(int damage) {
 	return this->health;
 }
 
-bool AttackableGameObject::do_attack(AttackableGameObject * target)
+bool AttackableGameObject::do_attack(std::shared_ptr<AttackableGameObject> target)
 {
 	if (target == nullptr) {
 		LOG_ERR("target is null.");
 		return false;
 	}
-	else if (target == this || target->player == this->player) {
+	else if (target->getID() == this->getID() || target->player == this->player) {
 		LOG_ERR("Cannot attack same player.");
 		return false;
 	}
@@ -65,15 +65,15 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 	if (glm::distance(this->get_position(), target->get_position()) <= (float) this->attack.getRange()) {
 
 		// Target is within range.
-		this->attack.doAttack(target);
+		this->attack.doAttack(target.get());
 
 		if (target->is_dead()) {
-			target->handle_defeat(this);
+			target->handle_defeat(this->shared_from_this());
 			target_is_dead = true;
 			LOG_DEBUG("Enemy is dead.");
 		}
 		else {
-			target->handle_counter(this);
+			target->handle_counter(this->shared_from_this());
 			LOG_DEBUG("Enemy is countering.");
 		}
 
@@ -84,7 +84,7 @@ bool AttackableGameObject::do_attack(AttackableGameObject * target)
 		}
 		if (target_is_dead != this_is_dead) {
 			// Someone is still alive -- they are the victor. 
-			(target_is_dead ? this : target)->handle_victory((target_is_dead) ? target : this);
+			(target_is_dead ? this->shared_from_this() : target)->handle_victory((target_is_dead) ? target : this->shared_from_this());
 		}
 	}
 	else {

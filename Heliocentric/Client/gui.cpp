@@ -20,7 +20,6 @@
 GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tradeCallback, std::function<void(UID, bool)> tradeHandlerCallback, int screenWidth, int screenHeight) : 
 	Screen(), tradeCallback(tradeCallback), tradeHandlerCallback(tradeHandlerCallback), screenWidth(screenWidth), screenHeight(screenHeight) {
 	this->initialize(window, false);
-	unit_window = new UnitWindow((Screen*) this, "Unit Stats");
 
 	// load placeholder image
 	std::vector<std::pair<int, std::string>> placeholderL = loadImageDirectory(nvgContext(), "Images/Placeholder");
@@ -45,6 +44,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
+	this->createUnitDisplay();
 
 	this->setVisible(true);
 	this->performLayout();
@@ -72,14 +72,20 @@ GUI::~GUI()
 
 void GUI::updateUnitWindow() {
 	if (selectedUnit) {
-		unit_window->updateSelection(selectedUnit);
+		unit_info_widget->updateSelection(selectedUnit);
 	}
 }
 
 
 void GUI::showUnitUI(AttackableGameObject* unit) {
 	selectedUnit = unit;
-	this->unit_window->updateSelection(unit);
+
+	Unit* cast_unit = dynamic_cast<Unit*>(unit);
+	if (cast_unit) {
+		this->unit_window->setTitle(cast_unit->getType()->getTypeName());
+	}
+
+	updateUnitWindow();
 	this->unit_window->setVisible(true);
 }
 
@@ -445,6 +451,10 @@ void GUI::createCityDisplay() {
 	citySlotInfoPanel = new SlotInfoPanel(cityWindow);
 	formHelper->addWidget("", citySlotInfoPanel);
 
+	formHelper->addGroup("City Stats");
+	cityInfoWidget = new AttackableGameObjectWidget(cityWindow);
+	formHelper->addWidget("", cityInfoWidget);
+
 	formHelper->addGroup("Unit Management");
 	unitSpawnWidget = new UnitSpawnWidget(cityWindow);
 	formHelper->addWidget("", unitSpawnWidget);
@@ -452,10 +462,22 @@ void GUI::createCityDisplay() {
 	cityWindow->setVisible(false);
 }
 
+void GUI::createUnitDisplay() {
+	unit_window = formHelper->addWindow(Eigen::Vector2i(10, 120), "Unit Type Goes Here");
+
+	formHelper->addGroup("Unit Information");
+	unit_info_widget = new AttackableGameObjectWidget(unit_window);
+	formHelper->addWidget("", unit_info_widget);
+
+	unit_window->setVisible(false);
+}
+
 
 void GUI::updateCityWindow() {
 	if (cityWindow->visible()) {
-		unitSpawnWidget->updateSelection(selectedCity);
+		unitSpawnWidget->updateSelection(selectedCity, this->player->getResources());
+		cityInfoWidget->updateSelection(selectedCity);
+		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
 	}
 }
 
@@ -478,7 +500,9 @@ void GUI::hideSlotUI() {
 void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
 	selectedCity = city;
 	cityWindow->setTitle(city->getName());
-	citySlotInfoPanel->updateDisplay(city->get_slot());
+	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
+
+	updateCityWindow();
 	cityWindow->setVisible(true);
 
 	/* Only show the spawn ui if the owner clicked the city */

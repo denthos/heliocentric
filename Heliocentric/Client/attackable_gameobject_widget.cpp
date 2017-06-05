@@ -1,11 +1,9 @@
-#include "unit_window.h"
 #include "unit.h"
 #include "unit_type.h"
+#include "attackable_gameobject_widget.h"
 
-UnitWindow::UnitWindow(Widget* parent, const std::string &title) : Window(parent, title)
+AttackableGameObjectWidget::AttackableGameObjectWidget(Widget* parent) : Widget(parent)
 {
-
-	this->setPosition(Vector2i(10 , 120));
 
 	setLayout(new GroupLayout());
 
@@ -37,26 +35,11 @@ UnitWindow::UnitWindow(Widget* parent, const std::string &title) : Window(parent
 
 	healthbar = new ProgressBar(this);
 	healthbar->setValue(1.0f);
+}
 
-	//close button
-	close_widget = new Widget(this);
-	close_widget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 0, 0));
-
-	close_button = new Button(close_widget, "close");
-	close_button->setCallback([&] {
-		this->setVisible(false);
-	});
-
-
-	setVisible(false);
-	
-}UnitWindow::~UnitWindow()
+AttackableGameObjectWidget::~AttackableGameObjectWidget()
 {
-	//delete close_widget;
-	delete close_button;
-
 	//delete info_widget;
-	
 	delete combat_defense_label;
 	delete combat_defense_strength;
 
@@ -76,21 +59,33 @@ UnitWindow::UnitWindow(Widget* parent, const std::string &title) : Window(parent
 	delete player_name;
 }
 
-void UnitWindow::updateSelection(AttackableGameObject * selected){
+void AttackableGameObjectWidget::updateSelection(AttackableGameObject * selected)
+{
 	Attack selected_attack = selected->getAttack();
-	attack_strength->setValue(selected_attack.getDamage());
-	attack_range->setValue(selected_attack.getRange()); 
+	attack_strength->setValue((int)selected_attack.getDamage());
+	attack_range->setValue((int)selected_attack.getRange()); 
 	combat_defense_strength->setValue(selected->get_combat_defense());
 	health_stat->setCaption( std::to_string(selected->get_health())+"%");
 	healthbar->setValue((float)(selected->get_health())/100.0f);
+
 	player_name->setCaption(selected->get_player()->get_name());
+	glm::vec3 rgbVec = PlayerColor::colorToRGBVec(selected->get_player()->getColor());
+	player_name->setColor(Color(Eigen::Vector3f(rgbVec.x, rgbVec.y, rgbVec.z)));
+
+	float health;
+	int health_percentage;
 
 	Unit* unit = dynamic_cast<Unit*>(selected);
 	if (unit) {
-		float health = ((float)unit->get_health() / (float)unit->getType()->getBaseHealth());
-		int health_percentage = (int)(health * 100.0f);
-		health_stat->setCaption(std::to_string(health_percentage) + "%");
-		healthbar->setValue(health);
+		health = ((float)unit->get_health() / (float)unit->getType()->getBaseHealth());
+		health_percentage = (int)(health * 100.0f);
 	}
+	else {
+		health = ((float)selected->get_health() / 100.0f);
+		health_percentage = (int)(health * 100.0f);
+	}
+
+	health_stat->setCaption(std::to_string(health_percentage) + "%");
+	healthbar->setValue(health);
 }
 
