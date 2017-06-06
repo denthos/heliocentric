@@ -11,7 +11,7 @@ public:
 	virtual void update() = 0;
 	virtual BoundingBox getBoundingBox() const;
 	virtual bool intersect(const Ray &, Collision &) const;
-
+	bool do_animation(const Shader &, const Camera &) const;
 	const glm::mat4& getToWorld() const;
 
 protected:

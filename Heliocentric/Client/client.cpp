@@ -67,6 +67,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 Quad * quad; //texture sampler
 ParticleSystem* particles;
 ParticleSystem* laser_particles;
+ParticleSystem* explosion_particles;
 
 
 SkyboxMesh* skybox;
@@ -79,6 +80,7 @@ Shader * blurShader;
 Shader* diffuseShader;
 Shader* colorShader;
 Shader* particleShader;
+Shader* unitShader;
 
 GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
@@ -206,7 +208,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
 	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag");
-	//diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
@@ -214,6 +216,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
 	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
+	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
@@ -889,7 +892,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles, soundSystem
+		colorShader, laser_particles, explosion_particles, soundSystem
 	);
 
 	player_it->second->acquire_object(newUnit.get());

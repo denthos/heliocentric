@@ -107,3 +107,7 @@ bool Drawable::intersect(const Ray & ray, Collision & collision) const {
 const glm::mat4& Drawable::getToWorld() const {
 	return this->toWorld;
 }
+
+bool Drawable::do_animation(const Shader &, const Camera &) const {
+	return false;
+}

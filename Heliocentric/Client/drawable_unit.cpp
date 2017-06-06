@@ -19,8 +19,8 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 }
 
 
-DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ThreeDSoundSystem* sound_system) : 
-	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser) {
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system) : 
+	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser), explosion(explosion) {
     this->data = getDataMap().at(getType()->getIdentifier());
     this->shader = shader;
 
@@ -64,11 +64,24 @@ void DrawableUnit::draw(const Camera & camera) const {
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), 0);
 	shader->unbind();
 
+	// unit explosion when dead
+	if (false) {
+		glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), true);
+		
+		explosion->Update(camera);
+		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
+	}
+
 	if (this->client_isattacking) {
 		shoot_sound->play(get_position());
 		laser->Update(camera);
 		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}
+}
+
+bool DrawableUnit::do_animation(const Shader & shader, const Camera & camera) const {
+	draw(camera);
+	return is_exploding;
 }
 
 
