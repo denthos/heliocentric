@@ -504,6 +504,13 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	}
 }
 
+void GameServer::handleResearchCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<ResearchCommand> command) {
+	LOG_DEBUG("Received a research command.");
+
+	Player* player = this->extractPlayerFromConnection(sender);
+	player->choose_research(command->tech_id);
+}
+
 void GameServer::handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeCommand> command) {
 	LOG_DEBUG("Received a trade command.");
 
@@ -579,4 +586,5 @@ void GameServer::subscribeToChannels() {
 	this->subscribe<TradeData>(std::bind(&GameServer::handleTradeData, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SettleCityCommand>(std::bind(&GameServer::handleSettleCityCommand, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerClientToServerTransfer>(std::bind(&GameServer::handleReceivePlayerClientToServerTransfer, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<ResearchCommand>(std::bind(&GameServer::handleResearchCommand, this, std::placeholders::_1, std::placeholders::_2));
 }

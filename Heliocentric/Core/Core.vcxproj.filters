@@ -209,6 +209,9 @@
     <ClInclude Include="player_research_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
+    <ClInclude Include="research_command.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -363,6 +366,9 @@
     </ClCompile>
     <ClCompile Include="player_research_update.cpp">
       <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="research_command.cpp">
+      <Filter>Commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
