@@ -25,6 +25,7 @@
 
 #include "trade_deal.h"
 #include "slot_update.h"
+#include "research_command.h"
 
 void initializeChannels() {
 	using channels = SunNet::Channels;
@@ -51,4 +52,5 @@ void initializeChannels() {
 	channels::addNewChannel<UnitSpawnerUpdate>();
 	channels::addNewChannel<PlayerScoreUpdate>();
 	channels::addNewChannel<PlayerResearchUpdate>();
+	channels::addNewChannel<ResearchCommand>();
 }
