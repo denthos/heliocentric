@@ -812,7 +812,7 @@ void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn
 
 	std::shared_ptr<Player> player_info;
 	if (player_it == players.end()) {
-		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
+		LOG_INFO("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
 		player_info = std::make_shared<Player>(update->name, update->player_id, update->color);
 		players[update->player_id] = player_info;
 		gui->addPlayer(player_info);

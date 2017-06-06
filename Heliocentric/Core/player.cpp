@@ -120,22 +120,13 @@ int Player::get_resource_amount(Resources::Type resource_type) {
 	return owned_resources[resource_type];
 }
 
-int Player::get_resource_amount(int resource_index) {
-	return owned_resources[static_cast<Resources::Type>(resource_index)];
-}
-
 void Player::set_resource_amount(Resources::Type resource_type, int resource_amount) {
 	owned_resources[resource_type] = resource_amount;
-}
-
-Resources::Type Player::get_resource_type(int resource_index) {
-	return static_cast<Resources::Type>(resource_index);
 }
 
 void Player::change_resource_amount(Resources::Type type, int delta) {
 	owned_resources[type] += delta;
 }
-
 
 const ResourceCollection& Player::getResources() const {
 	return this->owned_resources;
