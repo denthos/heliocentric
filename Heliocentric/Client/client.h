@@ -139,6 +139,7 @@ private:
 	void handleF10Key(int);
 	void handleF11Key(int);
 	void handleF12Key(int);
-
+	void handleLeftBracketKey(int);
+	void handleRightBracketKey(int);
 };
 

@@ -257,6 +257,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -818,6 +820,14 @@ void Client::handleF12Key(int key) {
 
 	TradeCommand command(deal_id, false);
 	this->channeled_send(&command);
+}
+
+void Client::handleLeftBracketKey(int key) {
+	musicPlayer->volume_decrease();
+}
+
+void Client::handleRightBracketKey(int key) {
+	musicPlayer->volume_increase();
 }
 
 
