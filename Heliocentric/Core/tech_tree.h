@@ -21,6 +21,7 @@ class Technology {
 friend class TechTree;
 
 private:
+	int id;
 	std::string name;
 	bool researched;
 	float research_points_required;
@@ -70,8 +71,9 @@ public:
 	/**
 	Called every server tick to accumulate research points on a selected tech.
 	@param research_points Reserch points being accumulated each time this method is called.
+	@return False if no research is selected. True otherwise.
 	*/
-	void research(float);
+	bool research(float);
 
 	/**
 	Chooses a tech as currently researching tech.
@@ -79,16 +81,31 @@ public:
 	*/
 	void choose_tech(int);
 
+	/**
+	Returns ID of current research.
+	@return ID of current research.
+	*/
+	int get_current_research_id();
+
+	/**
+	Returns name of current research.
+	@return name of current research.
+	*/
 	std::string get_current_research_name();
 
+	/**
+	Returns progress of current research.
+	@return progress of current research.
+	*/
 	float get_current_research_progress();
 
 	/**
-	Gets all the available techs, that are techs with all prerequisites satisfied and can be
-	researched at the moment.
+	Gets all the available techs, which are techs with all prerequisites satisfied and
+	have not been researched yet.
 	@return Vector of IDs of techs that can be researched.
 	*/
 	std::vector<int> get_available_techs();
 
 	class BadTechIDException : std::exception {};
+	class ResearchIdleException : std::exception {};
 };

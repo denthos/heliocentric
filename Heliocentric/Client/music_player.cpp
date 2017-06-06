@@ -41,3 +41,23 @@ void MusicPlayer::stop() {
 	stopped = true;
 	LOG_INFO("Music has been stopped");
 }
+
+void MusicPlayer::volume_increase() {
+	float volume;
+	channel->getVolume(&volume);
+
+	if (volume < MAX_VOLUME) {
+		volume += VOLUME_STEP;
+		channel->setVolume(volume);
+	}
+}
+
+void MusicPlayer::volume_decrease() {
+	float volume;
+	channel->getVolume(&volume);
+
+	if (volume > MIN_VOLUME) {
+		volume -= VOLUME_STEP;
+		channel->setVolume(volume);
+	}
+}

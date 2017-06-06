@@ -4,6 +4,10 @@
 #include <stdexcept>
 #include <vector>
 
+#define MAX_VOLUME 1.0f
+#define MIN_VOLUME 0.0f
+#define VOLUME_STEP 0.1f
+
 class MusicPlayer { 
 public:
 	MusicPlayer(SoundSystem* system);
@@ -14,6 +18,8 @@ public:
 	void load_sound(std::string);
 	void play();
 	void stop();
+	void volume_increase();
+	void volume_decrease();
 
 	class MusicLoadException : public std::runtime_error {
 	public:
