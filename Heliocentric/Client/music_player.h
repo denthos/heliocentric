@@ -1,12 +1,11 @@
 #pragma once
-#include "sound_system.h"
+#include "fmod.hpp"
 #include <string>
-#include <stdexcept>
 #include <vector>
 
-class MusicPlayer { 
+class MusicPlayer {
 public:
-	MusicPlayer(SoundSystem* system);
+	MusicPlayer();
 	~MusicPlayer();
 
 	class SoundLoadError : public std::exception {};
@@ -15,21 +14,13 @@ public:
 	void play();
 	void stop();
 
-	class MusicLoadException : public std::runtime_error {
-	public:
-		MusicLoadException(std::string what) : std::runtime_error(what) {}
-	};
-
-	class MusicPlayException : public std::runtime_error {
-	public:
-		MusicPlayException() : std::runtime_error("Could not play music") {}
-	};
-
 private:
-	SoundSystem* system;
+	FMOD::System* system;
 	std:: vector<FMOD::Sound*> sounds;
 
 	FMOD::Channel* channel = 0;
+	FMOD_RESULT result; // check result for debugging
+	unsigned int version;
 	void* extradriverdata = nullptr;
 	bool stopped;
 };

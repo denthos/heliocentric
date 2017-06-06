@@ -40,7 +40,7 @@ std::shared_ptr<CityCreationUpdate> CityManager::add_city(Player* player, Slot* 
 	slot->attachCity(new_city.get());
 	player->acquire_object(new_city.get());
 	auto city_creation_update = std::make_shared<CityCreationUpdate>(player->getID(), slot->getID(), new_city->getID(), new_city->getName(),
-		new_city->get_combat_defense(), new_city->get_health(), new_city->getProduction(), new_city->get_population());
+		new_city->get_combat_defense(), new_city->get_health(), new_city->get_production(), new_city->get_population());
 	LOG_DEBUG("Created city with UID <", new_city->getID(), ">");
 	cities.insert(std::make_pair(new_city->getID(), std::move(new_city)));
 	return city_creation_update;

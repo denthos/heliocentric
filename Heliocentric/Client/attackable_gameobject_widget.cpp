@@ -67,10 +67,7 @@ void AttackableGameObjectWidget::updateSelection(AttackableGameObject * selected
 	combat_defense_strength->setValue(selected->get_combat_defense());
 	health_stat->setCaption( std::to_string(selected->get_health())+"%");
 	healthbar->setValue((float)(selected->get_health())/100.0f);
-
 	player_name->setCaption(selected->get_player()->get_name());
-	glm::vec3 rgbVec = PlayerColor::colorToRGBVec(selected->get_player()->getColor());
-	player_name->setColor(Color(Eigen::Vector3f(rgbVec.x, rgbVec.y, rgbVec.z)));
 
 	float health;
 	int health_percentage;

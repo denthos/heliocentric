@@ -4,10 +4,8 @@
 UnitSpawnWidget::UnitSpawnWidget(Widget* parent) : Widget(parent) {
 	this->setLayout(new GridLayout(Orientation::Horizontal, 1, Alignment::Fill));
 
-	createProductionLabel();
 	createButtons();
 	createProgressbar();
-	createQueueLabel();
 }
 
 void UnitSpawnWidget::createButtons() {
@@ -23,22 +21,10 @@ void UnitSpawnWidget::createProgressbar() {
 	createUnitProgress = new ProgressBar(this);
 	createUnitProgress->setValue(0.0f);
 
-}
-
-void UnitSpawnWidget::createQueueLabel() {
 	queueLabel = new Label(this, "In Queue: 999");
 }
 
-void UnitSpawnWidget::createProductionLabel() {
-	productionLabel = new Label(this, "Production: 999");
-}
-
-void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, const ResourceCollection& resources) {
-
-	for (auto& button : createUnitButtons) {
-		button->updateCreateButton(resources);
-	}
-
+void UnitSpawnWidget::updateSelection(UnitSpawner* spawner) {
 	if (spawner->isProducing()) {
 		createUnitProgress->setValue((float)spawner->getPercentCompletion() / 100.0f);
 	}
@@ -46,7 +32,6 @@ void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, const ResourceCollec
 		createUnitProgress->setValue(0.0f);
 	}
 
-	productionLabel->setCaption("Production: " + std::to_string(spawner->getProduction()));
 	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getUnitSpawnQueue().size()));
 }
 

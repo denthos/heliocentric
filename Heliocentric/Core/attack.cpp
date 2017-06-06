@@ -80,7 +80,3 @@ void Attack::doAttack(AttackableGameObject* target) {
 		break;
 	}
 }
-
-void Attack::resetAttack() {
-	changeState(READY);
-}
