@@ -35,9 +35,11 @@
     <ClCompile Include="heavy_unit.cpp" />
     <ClCompile Include="player_manager.cpp" />
     <ClCompile Include="player_color.cpp" />
+    <ClCompile Include="player_research_update.cpp" />
     <ClCompile Include="player_score_update.cpp" />
     <ClCompile Include="buildable.cpp" />
     <ClCompile Include="research_facility.cpp" />
+    <ClCompile Include="research_command.cpp" />
     <ClCompile Include="tech_tree.cpp" />
     <ClCompile Include="game_session.cpp" />
     <ClCompile Include="new_player_info_update.cpp" />
@@ -66,9 +68,11 @@
     <ClInclude Include="game_over_update.h" />
     <ClInclude Include="heavy_unit.h" />
     <ClInclude Include="player_manager.h" />
+    <ClInclude Include="player_research_update.h" />
     <ClInclude Include="player_score_update.h" />
     <ClInclude Include="buildable.h" />
     <ClInclude Include="research_facility.h" />
+    <ClInclude Include="research_command.h" />
     <ClInclude Include="unit_spawner.h" />
     <ClInclude Include="unit_spawner_update.h" />
     <ClInclude Include="unit_type.h" />

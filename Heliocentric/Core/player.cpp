@@ -20,9 +20,10 @@ Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Iden
 void Player::initialize() {
 	player_score = 10;
 	research_points = 0.1f;
+	settlement_limit = INITIAL_SETTLEMENT_LIMIT;
 
 	/* TEMP: For testing purpose */
-	//tech_tree.choose_tech(1);
+	// tech_tree.choose_tech(1);
 
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
 	owned_objects[std::type_index(typeid(Planet))] = std::unordered_map<unsigned int, GameObject*>();
@@ -35,10 +36,26 @@ void Player::initialize() {
 	owned_resources[Resources::NANOMATERIAL] = 100;
 	owned_resources[Resources::TITANIUM] = 100;
 	owned_resources[Resources::URANIUM] = 100;
-	this->score_update = std::make_shared<PlayerScoreUpdate>(getID(), this->get_player_score());
+	this->score_update = std::make_shared<PlayerScoreUpdate>(getID(), this->get_player_score());	
 }
 
-void Player::doLogic() {
+void Player::choose_research(int id) {
+	tech_tree.choose_tech(id);
+}
+
+void Player::research() {
+	try {
+		if (tech_tree.research(this->research_points)) {
+			send_update_to_manager(std::make_shared<PlayerResearchUpdate>(this->getID(),
+				tech_tree.get_current_research_id(), this->research_points));
+		}
+	}
+	catch (TechTree::ResearchIdleException) {
+		return;
+	}
+}
+
+void Player::research(float research_points) {
 	tech_tree.research(research_points);
 }
 
@@ -82,10 +99,20 @@ void Player::send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update) {
 	}
 }
 
+void Player::send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update) {
+	if (manager != nullptr) {
+		// No manager on client side :)
+		this->manager->register_update(update);
+	}
+}
+
 float Player::get_research_points() {
 	return research_points;
 }
 
+bool Player::can_settle() {
+	return getOwnedObjects<City>().size() < settlement_limit;
+}
 
 void Player::acquire_object(GameObject* object) {
 	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
@@ -120,10 +147,13 @@ int Player::get_resource_amount(Resources::Type resource_type) {
 	return owned_resources[resource_type];
 }
 
+void Player::set_resource_amount(Resources::Type resource_type, int resource_amount) {
+	owned_resources[resource_type] = resource_amount;
+}
+
 void Player::change_resource_amount(Resources::Type type, int delta) {
 	owned_resources[type] += delta;
 }
-
 
 const ResourceCollection& Player::getResources() const {
 	return this->owned_resources;

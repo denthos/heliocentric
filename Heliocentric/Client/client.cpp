@@ -1,6 +1,6 @@
 #include "client.h"
 
-#include <glad\glad.h>
+//#include <glad\glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
@@ -100,7 +100,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window, width, height);
+	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2), width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -238,6 +238,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerScoreUpdate>(std::bind(&Client::playerScoreUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlayerResearchUpdate>(std::bind(&Client::playerResearchUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -254,8 +255,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -720,6 +721,10 @@ void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
 	this->channeled_send(&command);
 }
 
+void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {
+	this->channeled_send(deal.get());
+}
+
 void Client::handleF4Key(int key) {
 
 	auto unit_it = units.begin();
@@ -795,28 +800,22 @@ void Client::handleF10Key(int key) {
 	this->channeled_send(&deal);
 }
 
-void Client::handleF11Key(int key) {
-	// Accept the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_accept();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
-
-	TradeCommand command(deal_id, true);
+void Client::sendTradeCommand(UID trade_id, bool is_accepted) {
+	if (is_accepted)
+		player->trade_deal_accept(trade_id);
+	else
+		player->trade_deal_decline(trade_id);
+	LOG_DEBUG("Send trade command called");
+	TradeCommand command(trade_id, is_accepted);
 	this->channeled_send(&command);
 }
 
-void Client::handleF12Key(int key) {
-	// Decline the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_decline();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
+void Client::handleLeftBracketKey(int key) {
+	musicPlayer->volume_decrease();
+}
 
-	TradeCommand command(deal_id, false);
-	this->channeled_send(&command);
+void Client::handleRightBracketKey(int key) {
+	musicPlayer->volume_increase();
 }
 
 
@@ -825,15 +824,15 @@ void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn
 
 	std::shared_ptr<Player> player_info;
 	if (player_it == players.end()) {
-		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
+		LOG_INFO("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
 		player_info = std::make_shared<Player>(update->name, update->player_id, update->color);
 		players[update->player_id] = player_info;
+		gui->addPlayer(player_info);
 	}
 	else {
 		player_info = player_it->second;
 		update->apply(player_info.get());
 	}
-
 	gui->updatePlayerLeaderboardValue(player_info.get());
 }
 
@@ -848,8 +847,9 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 }
 
 void Client::playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerScoreUpdate> update) {
+	LOG_DEBUG("Player score update received");
 	auto& player_it = players.find(update->id);
-	if (player_it == players.end()) {
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
 		return;
 	}
 
@@ -857,10 +857,22 @@ void Client::playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p socket
 	gui->updatePlayerLeaderboardValue(player_it->second.get());
 }
 
+void Client::playerResearchUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerResearchUpdate> update) {
+	LOG_DEBUG("Player research update received");
+	auto& player_it = players.find(update->id);
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
+		return;
+	}
+
+	update->apply(players[update->id].get());
+}
+
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
 	LOG_DEBUG("Unit creation update received");
 	auto& player_it = players.find(update->player_id);
-	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
+		return;
+	}
 
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
@@ -970,17 +982,24 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		LOG_DEBUG("I am the sender of this trade deal");
 		// For now, we don't have to do anything if this player sent this trade deal.
 	}
-	else {
+	else if (this->player->getID() == deal->recipient) {
 		LOG_DEBUG("I am the receiver of this trade deal");
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
+		LOG_DEBUG("In trade data handler, the trade deal id is ", deal->trade_deal_id);
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
+		gui->showTradeHandlerUI(players[deal->sender], deal);
+	}
+	else {
+		LOG_ERR("Received Trade deal meant for someone else...");
 	}
 }
 
 void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SlotUpdate> update) {
 	LOG_DEBUG("Received a slot update");
 	auto& slot_it = slots.find(update->id);
-	Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found");
+	if (Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found") == false) {
+		return;
+	}
 
 	update->apply(slot_it->second);
 }

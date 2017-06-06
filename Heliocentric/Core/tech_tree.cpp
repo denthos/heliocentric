@@ -11,7 +11,7 @@ std::unordered_map<int, std::string> tech_name_map = {
 	{6, "Tech 6"}
 };
 
-Technology::Technology(int tech, float research_points_required) :
+Technology::Technology(int tech, float research_points_required) : id(tech),
 	researched(false), research_points_required(research_points_required) {
 	this->name = tech_name_map[tech];
 }
@@ -23,6 +23,12 @@ void Technology::research(float research_points) {
 }
 
 bool Technology::is_available() {
+	/* Not available if this tech has already been researched. */
+	if (this->researched) {
+		return false;
+	}
+
+	/* Not available if any of its parents has not been researched yet. */
 	for (auto it : parents) {
 		if (!it->researched) {
 			return false;
@@ -74,10 +80,10 @@ void TechTree::set_research_idle() {
 	current_research = nullptr;
 }
 
-void TechTree::research(float research_points) {
+bool TechTree::research(float research_points) {
 	if (current_research == nullptr) {
 		/* Maybe somehow notify the player that they don't have a tech selected instead of spamming the console */
-		return;
+		return false;
 	}
 	else {
 		current_research->research(research_points);
@@ -87,11 +93,13 @@ void TechTree::research(float research_points) {
 			set_research_idle();
 		}
 	}
+
+	return true;
 }
 
 void TechTree::choose_tech(int tech) {
 	if (techs.find(tech) == techs.end()) {
-		LOG_ERR("Woah! A nonexistent tech was selected!");
+		LOG_ERR("Woah! A nonexistent tech was selected: ", tech);
 		throw BadTechIDException();
 	}
 
@@ -99,11 +107,24 @@ void TechTree::choose_tech(int tech) {
 	LOG_INFO("Now researching ", current_research->name);
 }
 
+int TechTree::get_current_research_id() {
+	if (!current_research) {
+		throw ResearchIdleException();
+	}
+	return current_research->id;
+}
+
 std::string TechTree::get_current_research_name() {
+	if (!current_research) {
+		throw ResearchIdleException();
+	}
 	return current_research->name;
 }
 
 float TechTree::get_current_research_progress() {
+	if (!current_research) {
+		throw ResearchIdleException();
+	}
 	return current_research->research_progress;
 }
 

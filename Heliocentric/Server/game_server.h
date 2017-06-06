@@ -29,6 +29,7 @@
 #include "unit_command.h"
 #include "trade_command.h"
 #include "settle_city_command.h"
+#include "research_command.h"
 
 #include "trade_data.h"
 
@@ -63,7 +64,7 @@ private:
 	bool updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>>& player_updates, std::vector<std::shared_ptr<SlotUpdate>>& slot_updates);
 	int lastResourceUpdateTick = 0;
 
-	std::unordered_map<UID, std::unique_ptr<Player>> players;
+	std::unordered_map<UID, std::shared_ptr<Player>> players;
 	std::unordered_map<UID, Slot*> slots;
 	std::unordered_map<UID, std::unique_ptr<GameObject>> game_objects;
 
@@ -141,6 +142,7 @@ private:
 	Player* extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p, bool retry=false);
 	void handleReceivePlayerClientToServerTransfer(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerClientToServerTransfer>);
 	void handleSettleCityCommand(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SettleCityCommand>);
+	void handleResearchCommand(SunNet::ChanneledSocketConnection_p, std::shared_ptr<ResearchCommand>);
 
 protected:
 	/**** Handlers for ChanneledServer ****/
