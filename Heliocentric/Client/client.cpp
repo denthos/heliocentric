@@ -982,12 +982,15 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		LOG_DEBUG("I am the sender of this trade deal");
 		// For now, we don't have to do anything if this player sent this trade deal.
 	}
-	else {
+	else if (this->player->getID() == deal->recipient) {
 		LOG_DEBUG("I am the receiver of this trade deal");
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
 		LOG_DEBUG("In trade data handler, the trade deal id is ", deal->trade_deal_id);
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
-		gui->showTradeHandlerUI(deal);
+		gui->showTradeHandlerUI(players[deal->sender], deal);
+	}
+	else {
+		LOG_ERR("Received Trade deal meant for someone else...");
 	}
 }
 

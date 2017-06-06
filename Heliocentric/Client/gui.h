@@ -52,9 +52,9 @@ public:
 	void showUnitUI(AttackableGameObject* unit);
 	void hideUnitUI();
 	void createTradeHandlerUI();
-	void showTradeHandlerUI(std::shared_ptr<TradeData> data);
+	void showTradeHandlerUI(std::shared_ptr<Player> sender, std::shared_ptr<TradeData> data);
 	void hideTradeHandlerUI();
-	void updateTradeHandlerUI(std::shared_ptr<TradeData> data);
+	void updateTradeHandlerUI(std::shared_ptr<Player> sender, std::shared_ptr<TradeData> data);
 
 	void showGameOverWindow(bool victorious);
 	void hideGameOverWindow();

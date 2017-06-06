@@ -125,12 +125,11 @@ void GUI::setFPS(double fps) {
 
 void GUI::addPlayer(std::shared_ptr<Player> new_player) {
 	players.push_back(new_player);
-	std::vector<std::string> player_names = {};
-	for (auto itr : players) {
-		LOG_INFO(itr->get_name());
-		player_names.push_back(itr->get_name());
-	}
+
+	std::vector<std::string> player_names(selectPartnerBox->items());
+	player_names.push_back(new_player->get_name());
 	selectPartnerBox->setItems(player_names);
+
 	this->performLayout();
 }
 
@@ -277,7 +276,10 @@ void GUI::createCustomTradeUI() {
 	formHelper->addWidget("Custom Trade Panel: ", tradePanel);
 
 	sendTradeButton = formHelper->addButton("Send", []() {});
-	closeTradeButton = formHelper->addButton("Close", []() {});
+
+	closeTradeButton = formHelper->addButton("Close", [this]() {
+		this->hideCustomTradeUI();
+	});
 
 	sendTradeButton->setCallback([this]() {
 		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(static_cast<Resources::Type>(offerResourceType->selectedIndex()))
@@ -285,10 +287,6 @@ void GUI::createCustomTradeUI() {
 		LOG_DEBUG("Sending Custom Trade to another player...");
 		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), static_cast<Resources::Type>(offerResourceType->selectedIndex()),
 			offerAmount->value(), static_cast<Resources::Type>(askForResourceType->selectedIndex()), askForAmount->value()));
-		this->hideCustomTradeUI();
-	});
-	closeTradeButton->setCallback([this]() {
-		LOG_DEBUG("Closing custom trade window.");
 		this->hideCustomTradeUI();
 	});
 
@@ -299,8 +297,10 @@ void GUI::updateCustomTradeUI() {
 	// set default trade partner to be first on player list
 	if (this->players.size() > 0)
 		this->trade_partner = this->players.at(0);
-	else
+	else {
 		LOG_ERR("Only one player is connected, trade function disabled.");
+		return;
+	}
 
 	// update names
 	std::vector<std::string> player_names = {};
@@ -354,8 +354,8 @@ void GUI::createTradeHandlerUI() {
 	tradeHandlerWindow->setVisible(false);
 }
 
-void GUI::showTradeHandlerUI(std::shared_ptr<TradeData> data) {
-	updateTradeHandlerUI(data);
+void GUI::showTradeHandlerUI(std::shared_ptr<Player> sender, std::shared_ptr<TradeData> data) {
+	updateTradeHandlerUI(sender, data);
 	tradeHandlerWindow->setVisible(true);
 }
 
@@ -363,14 +363,13 @@ void GUI::hideTradeHandlerUI() {
 	tradeHandlerWindow->setVisible(false);
 }
 
-void GUI::updateTradeHandlerUI(std::shared_ptr<TradeData> data) {
-	currentTradeData = data;
+void GUI::updateTradeHandlerUI(std::shared_ptr<Player> sender, std::shared_ptr<TradeData> data) {
 	std::ostringstream oss;
-	oss << "Player " << std::to_string(data->sender) << " is offering " << std::to_string(data->sell_amount)
-		<< " amount of " << Resources::toString(data->sell_type) << " for " << std::to_string(data->buy_amount)
-		<< " amount of " << Resources::toString(data->buy_type);
+	oss << sender->get_name() << " sends you " << std::to_string(data->sell_amount) << " " << Resources::toString(data->sell_type)
+		<< " if you send them " << std::to_string(data->buy_amount) << " " << Resources::toString(data->buy_type);
 	std::string output = oss.str();
 	tradeHandlerLabel->setCaption(output);
+	currentTradeData = data;
 	LOG_DEBUG("Creating trade caption when window is available");
 
 	// reorganize ui layout
