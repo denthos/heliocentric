@@ -7,66 +7,24 @@ PlayerIcon::PlayerIcon(Shader * shader)
 
 	//generate buffer info
 	// Vertex data
-	GLfloat points[] = {
-		0.0f,  0.0f // Top-left
+	float points[] = {
+		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0, // top-left
+		0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0, // top-right
+		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0, // bottom-right
+		-0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0  // bottom-left
 	};
-
+	
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0); //layout 0: position
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
-
-	glGenBuffers(1, &icon_info_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, icon_info_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Icon), NULL, GL_STREAM_DRAW);
-
-	glEnableVertexAttribArray(1); // layout 1: offset
-	glBindBuffer(GL_ARRAY_BUFFER, icon_info_buffer);
-	glVertexAttribPointer(
-		1,
-		3, // size : x + y + z 
-		GL_FLOAT, // type
-		GL_FALSE, // normalized?
-		sizeof(Icon), // stride
-		(void*)0 // array buffer offset
-	);
-
-	glEnableVertexAttribArray(2); //layout 2: color
-	glBindBuffer(GL_ARRAY_BUFFER, icon_info_buffer);
-	glVertexAttribPointer(
-		2,
-		4, // size : rgba
-		GL_FLOAT, // type
-		GL_FALSE,
-		sizeof(Icon),
-		(GLvoid*)offsetof(Icon, color)
-	);
-
-	glEnableVertexAttribArray(3); //layout 3: size
-	glBindBuffer(GL_ARRAY_BUFFER, icon_info_buffer);
-	glVertexAttribPointer(
-		3,
-		1, // size 
-		GL_FLOAT,
-		GL_FALSE,
-		sizeof(Icon),
-		(GLvoid*)offsetof(Icon, size)
-	);
-
-	glVertexAttribDivisor(0, 0); // particle center
-	glVertexAttribDivisor(1, 1); // offset: one per quad
-	glVertexAttribDivisor(2, 1); // color : one per quad -> 1
-	glVertexAttribDivisor(3, 1); // size : one per quad -> 1
-
-
-
-	//unbind buffers
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(2 * sizeof(float)));
 	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 
 
 	//TODO: initialize icon
@@ -101,8 +59,7 @@ void PlayerIcon::draw(const Camera & camera, const glm::mat4 & toWorld)
 	//bind texture
 	//texture.bind();
 	glBindVertexArray(VAO);
-
-	glDrawArraysInstanced(GL_POINTS, 0, 1, 1);
+	glDrawArrays(GL_POINTS, 0, 4);
 
 	glBindVertexArray(0);
 	//texture.unbind();

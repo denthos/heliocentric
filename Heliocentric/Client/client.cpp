@@ -35,6 +35,7 @@
 #include "instant_laser_attack.h"
 #include "selectable.h"
 #include "unit_spawner_update.h"
+#include "player_icon.h"
 
 #define ALLOWED_ACTIONS_PER_TICK 200
 
@@ -67,6 +68,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 Quad * quad; //texture sampler
 ParticleSystem* particles;
 ParticleSystem* laser_particles;
+PlayerIcon* icon;
 
 
 SkyboxMesh* skybox;
@@ -79,6 +81,7 @@ Shader * blurShader;
 Shader* diffuseShader;
 Shader* colorShader;
 Shader* particleShader;
+Shader* iconShader;
 
 GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
@@ -208,13 +211,14 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag");
 	//diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
+	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
 	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
-
+	icon = new PlayerIcon(iconShader);
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
 	// LOAD MODELS, IMPORTANT
@@ -424,15 +428,16 @@ void Client::display() {
 		newOctree->update();
 
 
-		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3
+		(4000.0f)));
+		icon->draw(*cameras[selectedCamera], glm::mat4(1.0f));
 
 		Octree * delOctree = octree;
 		octree = newOctree;
 		octree->draw(*cameras[selectedCamera]);
 		delete delOctree;
 
-		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
-		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
+		
 
 		// blur the things that glow
 		int blurs = 5; //TODO init to number of blur iterations
@@ -488,6 +493,8 @@ void Client::display() {
 		// draw the UI
 		gui->drawWidgets();
 
+		
+
 		glfwSwapBuffers(window);
 
 	}
@@ -521,8 +528,6 @@ void Client::update() {
 	cameras[selectedCamera]->update();
 	
 	gui->update();
-
-	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
 
