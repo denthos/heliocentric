@@ -4,6 +4,7 @@
 #include "trade_deal.h"
 #include "tech_tree.h"
 #include "player_color.h"
+#include <exception>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -11,6 +12,7 @@
 #include <typeindex>
 
 #define PLAYER_NAME_MAX_SIZE 16
+#define INITIAL_SETTLEMENT_LIMIT 1
 
 /* Forward declaration is necessary so compiler knows about GameObject. We cannot
 #include "game_object.h" since it #includes "player.h" */
@@ -34,6 +36,7 @@ public:
 	void research(float research_points); // Called by client
 
 	float get_research_points();
+	bool can_settle(); // tells if a player currently can settle another city
 
 	std::string get_name() const;
 	void set_name(std::string new_name);
@@ -77,12 +80,15 @@ public:
 
 	std::unordered_map<std::type_index, std::unordered_map<UID, GameObject*>> owned_objects; // TODO: move to private
 
+	class SettlementLimitReachedException : std::exception {};
+
 private:
 	PlayerManager* manager;
 	std::string name;
 	int player_score;
 	float research_points; // research points accumulated every tick
-  
+	int settlement_limit; // maximum number of cities a player can settle
+
 	TechTree tech_tree;
 	PlayerColor::Color color;
 

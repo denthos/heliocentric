@@ -20,6 +20,7 @@ Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Iden
 void Player::initialize() {
 	player_score = 10;
 	research_points = 0.1f;
+	settlement_limit = INITIAL_SETTLEMENT_LIMIT;
 
 	/* TEMP: For testing purpose */
 	// tech_tree.choose_tech(1);
@@ -109,6 +110,9 @@ float Player::get_research_points() {
 	return research_points;
 }
 
+bool Player::can_settle() {
+	return getOwnedObjects<City>().size() < settlement_limit;
+}
 
 void Player::acquire_object(GameObject* object) {
 	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));

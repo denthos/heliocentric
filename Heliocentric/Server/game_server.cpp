@@ -405,8 +405,13 @@ void GameServer::handleSettleCityCommand(SunNet::ChanneledSocketConnection_p sen
 	}
 
 	/* Bundle and send the update */
-	std::shared_ptr<CityCreationUpdate> city_creation_update = city_manager->add_city(owning_player, slot_iter->second, command->city_name);
-	this->addUpdateToSendQueue(city_creation_update);
+	try {
+		std::shared_ptr<CityCreationUpdate> city_creation_update = city_manager->add_city(owning_player, slot_iter->second, command->city_name);
+		this->addUpdateToSendQueue(city_creation_update);
+	}
+	catch (Player::SettlementLimitReachedException e) {
+		LOG_ERR("Player ", owning_player->getID(), " has reached settlement limit.");
+	}
 }
 
 void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerCommand> command) {
