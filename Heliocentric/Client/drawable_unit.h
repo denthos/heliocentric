@@ -34,7 +34,7 @@ public:
 
 	// explosion params
 	bool is_exploding;
-	virtual bool do_animation(const Shader & shader, const Camera & camera) const;
+	virtual bool do_animation(const Camera & camera) const;
 
 private:
 	DrawableUnitData data;

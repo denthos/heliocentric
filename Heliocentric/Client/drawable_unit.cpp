@@ -28,6 +28,8 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* l
     this->model = data.model;
     this->laser = laser;
     this->glow = false;
+	this->is_exploding = false;
+	this->explosion_counter = 0;
 
     BoundingBox bbox = getBoundingBox();
     glm::vec3 b_max = bbox.max;
@@ -45,6 +47,15 @@ void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 	shoot_sound->update(this->get_position());
+	if (explosion_counter < 50 && is_exploding == true) {
+		LOG_INFO("Explosion counter is ", explosion_counter);
+		explosion_counter += 1;
+	}
+	else if (is_exploding == true) {
+		LOG_INFO("Explosion counter stopped.");
+		explosion_counter = 0;
+		is_exploding = false;
+	}
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
@@ -65,7 +76,8 @@ void DrawableUnit::draw(const Camera & camera) const {
 	shader->unbind();
 
 	// unit explosion when dead
-	if (false) {
+	if (is_exploding) {
+		LOG_INFO("Is exploding");
 		glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), true);
 		
 		explosion->Update(camera);
@@ -79,7 +91,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 	}
 }
 
-bool DrawableUnit::do_animation(const Shader & shader, const Camera & camera) const {
+bool DrawableUnit::do_animation(const Camera & camera) const {
 	draw(camera);
 	return is_exploding;
 }

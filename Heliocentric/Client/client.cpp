@@ -268,7 +268,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE),
 		std::bind(&Client::mouseRightClickHandler, this, std::placeholders::_1, std::placeholders::_2));
 
-
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
 	try {
@@ -433,6 +432,27 @@ void Client::display() {
 		octree = newOctree;
 		octree->draw(*cameras[selectedCamera]);
 		delete delOctree;
+
+		// Deal with dead objects.
+		auto& dead_it = dead_units.begin();
+		while (dead_it != dead_units.end()) {
+			dead_it->second->update();
+			if (!dead_it->second->do_animation(*cameras[selectedCamera])) {
+				UID id = dead_it->first;
+				LOG_DEBUG("Deleting unit with id " + std::to_string(id));
+				dead_it++;
+
+				if (selection.size() > 0 && selection[0]->getID() == id) {
+					selection.erase(selection.begin());
+					units[id]->unselect(gui, this);
+				}
+
+				dead_units.erase(id);
+			}
+			else {
+				dead_it++;
+			}
+		}
 
 		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
 		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
@@ -954,12 +974,10 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	Handle unit death. We don't want to edit the units map in another thread,
 	so let's pop it in the main thread's queue
 	*/
-	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
+	LOG_INFO("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->is_dead()) {
-		if (selection.size() > 0 && selection[0]->getID() == update->id) {
-			selection.erase(selection.begin());
-			units[update->id]->unselect(gui, this);
-		}
+		units[update->id]->is_exploding = true;
+		dead_units.insert(std::make_pair(update->id, std::move(units[update->id])));
 		units.erase(update->id);
 	}
 }

@@ -108,6 +108,7 @@ const glm::mat4& Drawable::getToWorld() const {
 	return this->toWorld;
 }
 
-bool Drawable::do_animation(const Shader &, const Camera &) const {
+bool Drawable::do_animation(const Camera & camera) const {
+	LOG_INFO("INCORRECT, using drawable function!!");
 	return false;
 }
