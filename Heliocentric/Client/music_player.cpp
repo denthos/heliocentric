@@ -2,21 +2,28 @@
 #include "fileutils.h"
 #include "logging.h"
 
-MusicPlayer::MusicPlayer(SoundSystem* system) : system(system), stopped(false) {}
+MusicPlayer::MusicPlayer() : stopped(false) {
 
+	/* Initialize Fmod system */
+	result = FMOD::System_Create(&system);
+	result = system->getVersion(&version);
+	result = system->init(32, FMOD_INIT_NORMAL, extradriverdata);
+}
 
-MusicPlayer::~MusicPlayer() {}
+MusicPlayer::~MusicPlayer() {
+
+}
 
 void MusicPlayer::load_sound(std::string filename) {
 	LOG_DEBUG("Load audio file: ", filename);
-
 	FMOD::Sound* sound;
-	FMOD_RESULT create_result = system->getSystem()->createSound(filename.c_str(), FMOD_DEFAULT, 0, &sound);
-	if (create_result != FMOD_OK) {
-		throw MusicLoadException("Could not load music " + filename);
+	result = system->createSound(filename.c_str(), FMOD_DEFAULT, 0, &sound);
+  
+	if (result != FMOD_OK) {
+		throw SoundLoadError();
 	}
-
-	sound->setMode(FMOD_LOOP_OFF); // avoid auto-looping. We will swallow the err if happens here
+  
+	result = sound->setMode(FMOD_LOOP_OFF); // avoid auto-looping
 	sounds.push_back(sound);
 }
 
@@ -26,13 +33,11 @@ void MusicPlayer::play() {
 	bool channel_is_playing = false;
 
 	while (!stopped) {
-		channel->isPlaying(&channel_is_playing);
+		result = channel->isPlaying(&channel_is_playing);
 		if (!channel_is_playing) {
 			it = (it + 1) % num_sounds; // increment iterator and go back to 0 if reached the end
-			FMOD_RESULT play_result = system->getSystem()->playSound(sounds[it], 0, false, &channel);
-			if (play_result != FMOD_OK) {
-				throw MusicPlayException();
-			}
+			result = system->playSound(sounds[it], 0, false, &channel);
+			result = system->update();
 		}
 	}
 }

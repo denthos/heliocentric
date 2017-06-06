@@ -55,7 +55,6 @@ public:
 
 	bool projectileInMotion() const;
 	bool damaging() const;
-	void resetAttack();
 
 	/**
 	Attacks the target. This does attack logic instantly, so the

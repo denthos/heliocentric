@@ -1,8 +1,8 @@
 #include "unit_spawner.h"
 #include "unit_spawner_update.h"
 
-UnitSpawner::UnitSpawner(UID id, int production) :
-	currentProduction(NULL), currentlyProducing(false), currentProductionProgress(0), currentProductionProgressPercent(0), id(id), production(production) {
+UnitSpawner::UnitSpawner(UID id) :
+	currentProduction(NULL), currentlyProducing(false), currentProductionProgress(0), currentProductionProgressPercent(0), id(id) {
 	initialize();
 }
 
@@ -62,9 +62,7 @@ void UnitSpawner::popFromQueue() {
 
 bool UnitSpawner::produce() {
 	/* We are currently producing something. Let's increment it! */
-
-	this->currentProductionProgress += (1 + this->production);
-
+	this->currentProductionProgress++;
 	int progressPercent = (int)(((float) this->currentProductionProgress / (float) this->currentProduction->getBuildTime()) * 100);
 
 	/* Make the update */
@@ -109,12 +107,4 @@ const UnitType* UnitSpawner::getCurrentProduction() const {
 
 int UnitSpawner::getPercentCompletion() const {
 	return this->currentProductionProgressPercent;
-}
-
-void UnitSpawner::setProduction(int production) {
-	this->production = production;
-}
-
-int UnitSpawner::getProduction() const {
-	return production;
 }

@@ -125,6 +125,7 @@ void Unit::set_command(CommandType command) {
 	}
 }
 
+
 bool Unit::client_isAttacking() const {
 	return this->client_isattacking;
 }
@@ -132,7 +133,6 @@ bool Unit::client_isAttacking() const {
 void Unit::client_setAttacking(bool attacking) {
 	this->client_isattacking = attacking;
 }
-
 
 bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {
 	do_orient(target->get_position());
@@ -143,7 +143,6 @@ bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {
 
 
 glm::vec3 Unit::do_move() {
-	this->attack.resetAttack();
 	do_orient(destination);
 
 	// Move towards destination.

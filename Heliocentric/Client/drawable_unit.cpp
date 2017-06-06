@@ -19,22 +19,20 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 }
 
 
-DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ThreeDSoundSystem* sound_system) : 
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser) : 
 	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser) {
-    this->data = getDataMap().at(getType()->getIdentifier());
-    this->shader = shader;
+	this->data = getDataMap().at(getType()->getIdentifier());
+	this->shader = shader;
 
-    this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
-    this->model = data.model;
-    this->laser = laser;
-    this->glow = false;
+	this->toWorld = glm::translate(get_position()) * glm::scale(glm::vec3(data.scalingFactor));
+	this->model = data.model;
+	this->glow = false;
 
     BoundingBox bbox = getBoundingBox();
     glm::vec3 b_max = bbox.max;
     glm::vec3 b_min = bbox.min;
     float z_center = (b_max.z + b_min.z) / 2.0f;
     this->laser_offset = glm::vec3(0.0f, 60.0f, b_max.z - z_center);
-	this->shoot_sound = new Audio3DSound(sound_system, "Audio/laser1.wav");
 }
 
 DrawableUnit::~DrawableUnit() {
@@ -44,7 +42,6 @@ DrawableUnit::~DrawableUnit() {
 void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
-	shoot_sound->update(this->get_position());
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
@@ -56,6 +53,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), glow);
 	shader->bind();
 
+
     //color cities based on player color
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
     glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
@@ -65,7 +63,6 @@ void DrawableUnit::draw(const Camera & camera) const {
 	shader->unbind();
 
 	if (this->client_isattacking) {
-		shoot_sound->play(get_position());
 		laser->Update(camera);
 		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}
@@ -92,19 +89,22 @@ void DrawableUnit::updateRotationMatrix() {
 	}
 
 	float cosine = glm::clamp(glm::dot(old_orientation, orientation), -1.0f, 1.0f);
+
 	float denom = glm::length(old_orientation) * glm::length(orientation);
-	float cosine_ratio = cosine / denom;
 
-	float rotAngle = glm::acos(cosine_ratio);
-
-	/* 
-	It is entirely possible that something went wrong with our angle. If something
-	did go wrong, let's just bail out
-	*/
-	if (std::isnan(rotAngle)) {
+	/* If we are about to do bad division, just bail out*/
+	if (denom == 0) {
 		return;
 	}
 
+	float cosine_ratio = cosine / denom;
+
+	/* If we are about to do acos() on something outside its domain, bail out*/
+	if (cosine_ratio < -1 || cosine_ratio > 1) {
+		return;
+	}
+
+	float rotAngle = glm::acos(cosine / denom);
 	glm::vec3 cross = glm::cross(old_orientation, orientation);
 
 	if (cross.y < 0) {

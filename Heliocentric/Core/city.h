@@ -33,6 +33,7 @@ public:
 
 private:
 	std::string name;
+	int production;
 	int population;
 	Slot* slot;
 
