@@ -13,13 +13,6 @@ struct Particle {
 	float life;
 	float camDist;
 
-
-	//float elasticity, friction;
-	//acceleration;
-	//glm::vec3 force;
-	//float mass; , momentum, angle; 
-
-
 	//true if particle is further from camera
 	bool operator < (Particle &p);
 	bool isAlive();
