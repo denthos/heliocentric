@@ -1,6 +1,6 @@
 #include "client.h"
 
-#include <glad\glad.h>
+//#include <glad\glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
@@ -100,7 +100,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window, width, height);
+	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2), width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -255,8 +255,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
 
@@ -723,6 +721,10 @@ void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
 	this->channeled_send(&command);
 }
 
+void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {
+	this->channeled_send(deal.get());
+}
+
 void Client::handleF4Key(int key) {
 
 	auto unit_it = units.begin();
@@ -798,27 +800,13 @@ void Client::handleF10Key(int key) {
 	this->channeled_send(&deal);
 }
 
-void Client::handleF11Key(int key) {
-	// Accept the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_accept();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
-
-	TradeCommand command(deal_id, true);
-	this->channeled_send(&command);
-}
-
-void Client::handleF12Key(int key) {
-	// Decline the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_decline();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
-
-	TradeCommand command(deal_id, false);
+void Client::sendTradeCommand(UID trade_id, bool is_accepted) {
+	if (is_accepted)
+		player->trade_deal_accept(trade_id);
+	else
+		player->trade_deal_decline(trade_id);
+	LOG_DEBUG("Send trade command called");
+	TradeCommand command(trade_id, is_accepted);
 	this->channeled_send(&command);
 }
 
@@ -836,15 +824,15 @@ void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn
 
 	std::shared_ptr<Player> player_info;
 	if (player_it == players.end()) {
-		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
+		LOG_INFO("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
 		player_info = std::make_shared<Player>(update->name, update->player_id, update->color);
 		players[update->player_id] = player_info;
+		gui->addPlayer(player_info);
 	}
 	else {
 		player_info = player_it->second;
 		update->apply(player_info.get());
 	}
-
 	gui->updatePlayerLeaderboardValue(player_info.get());
 }
 
@@ -994,10 +982,15 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		LOG_DEBUG("I am the sender of this trade deal");
 		// For now, we don't have to do anything if this player sent this trade deal.
 	}
-	else {
+	else if (this->player->getID() == deal->recipient) {
 		LOG_DEBUG("I am the receiver of this trade deal");
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
+		LOG_DEBUG("In trade data handler, the trade deal id is ", deal->trade_deal_id);
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
+		gui->showTradeHandlerUI(players[deal->sender], deal);
+	}
+	else {
+		LOG_ERR("Received Trade deal meant for someone else...");
 	}
 }
 

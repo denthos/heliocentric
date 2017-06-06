@@ -147,10 +147,13 @@ int Player::get_resource_amount(Resources::Type resource_type) {
 	return owned_resources[resource_type];
 }
 
+void Player::set_resource_amount(Resources::Type resource_type, int resource_amount) {
+	owned_resources[resource_type] = resource_amount;
+}
+
 void Player::change_resource_amount(Resources::Type type, int delta) {
 	owned_resources[type] += delta;
 }
-
 
 const ResourceCollection& Player::getResources() const {
 	return this->owned_resources;

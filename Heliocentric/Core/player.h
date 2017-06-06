@@ -54,6 +54,7 @@ public:
 
 	const ResourceCollection& getResources() const;
 	int get_resource_amount(Resources::Type);
+	void set_resource_amount(Resources::Type, int);
 	void change_resource_amount(Resources::Type, int);
 
 	template <typename T>
