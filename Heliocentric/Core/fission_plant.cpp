@@ -1,5 +1,5 @@
 #include "fission_plant.h"
 
-FissionPlant::FissionPlant() : Building(2, 0) {
+FissionPlant::FissionPlant() : Building(FISSION_PLANT_PRODUCTION, 0) {
 
 }

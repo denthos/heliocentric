@@ -1,5 +1,5 @@
 #include "fusion_plant.h"
 
-FusionPlant::FusionPlant() : Building(5, 0) {
+FusionPlant::FusionPlant() : Building(FUSION_PLANT_PRODUCTION, 0) {
 
 }

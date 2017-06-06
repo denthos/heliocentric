@@ -6,11 +6,12 @@ class BuildingType : public Buildable {
 public:
 	enum TypeIdentifier {
 		FISSION_PLANT,
-		FUSION_PLANT
+		FUSION_PLANT,
+		RESEARCH_FACILITY
 	};
 
 	const static TypeIdentifier FIRST = FISSION_PLANT; // should always be the first in enum
-	const static int NUM_TYPES = 2;
+	const static int NUM_TYPES = 3;
 
 	static BuildingType* getByIdentifier(TypeIdentifier);
 
