@@ -442,7 +442,7 @@ void Client::display() {
 
 				if (selection.size() > 0 && selection[0]->getID() == id) {
 					selection.erase(selection.begin());
-					units[id]->unselect(gui, this);
+					dead_units[id]->unselect(gui, this);
 				}
 
 				dead_units.erase(id);
