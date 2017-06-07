@@ -261,6 +261,7 @@ void GUI::createCustomTradeUI() {
 	});
 	offerResourceType->setItems({});
 	offerResourceType->setCallback([this](int val) {
+		offerAmount->setMinMaxValues(0, this->player.get()->get_resource_amount(static_cast<Resources::Type>(val)));
 		offerAmount->setValue(this->player.get()->get_resource_amount(static_cast<Resources::Type>(val)));
 	});
 	askForAmount->setEditable(true);
@@ -270,9 +271,9 @@ void GUI::createCustomTradeUI() {
 	});
 	askForResourceType->setItems({});
 	askForResourceType->setCallback([this](int val) {
+		askForAmount->setMinMaxValues(0, this->trade_partner->get_resource_amount(static_cast<Resources::Type>(val)));
 		askForAmount->setValue(this->trade_partner->get_resource_amount(static_cast<Resources::Type>(val)));
 	});
-
 	formHelper->addWidget("Custom Trade Panel: ", tradePanel);
 
 	sendTradeButton = formHelper->addButton("Send", []() {});
@@ -285,9 +286,20 @@ void GUI::createCustomTradeUI() {
 		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(static_cast<Resources::Type>(offerResourceType->selectedIndex()))
 			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(static_cast<Resources::Type>(askForResourceType->selectedIndex())));
 		LOG_DEBUG("Sending Custom Trade to another player...");
+
+		// check valid amount
+		int player_curr_sell_amount = this->player->get_resource_amount(static_cast<Resources::Type>(offerResourceType->selectedIndex()));
+		int partner_curr_trade_amount = trade_partner->get_resource_amount(static_cast<Resources::Type>(askForResourceType->selectedIndex()));
+		if (offerAmount->value() > player_curr_sell_amount || askForAmount->value() > partner_curr_trade_amount ||
+			offerAmount->value() < 0 || askForAmount->value() < 0) {
+			this->performLayout();
+			return;
+		}
+		else
 		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), static_cast<Resources::Type>(offerResourceType->selectedIndex()),
 			offerAmount->value(), static_cast<Resources::Type>(askForResourceType->selectedIndex()), askForAmount->value()));
 		this->hideCustomTradeUI();
+		this->performLayout();
 	});
 
 	this->performLayout();
@@ -322,9 +334,9 @@ void GUI::updateCustomTradeUI() {
 
 	offerResourceType->setItems(my_resource_list);
 	askForResourceType->setItems(partner_resource_list);
-
+	offerAmount->setMinMaxValues(0, this->player->get_resource_amount(static_cast<Resources::Type>(0)));
+	askForAmount->setMinMaxValues(0, this->trade_partner->get_resource_amount(static_cast<Resources::Type>(0)));
 	this->performLayout();
-
 }
 
 void GUI::showCustomTradeUI() {
