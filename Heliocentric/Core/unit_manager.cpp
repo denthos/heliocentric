@@ -93,7 +93,7 @@ bool UnitManager::set_active(UID id) {
 
 void UnitManager::do_attack(UID attacker_id, std::shared_ptr<AttackableGameObject> enemy) {
 	if (!set_active(attacker_id)) {
-		LOG_ERR("Could not find attacking unit with ", attacker_id, "!");
+		LOG_ERR("Could not find attacking unit with UID ", attacker_id, "!");
 		return;
 	}
 	auto& attacker_itr = active_units.find(attacker_id);
