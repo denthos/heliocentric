@@ -28,8 +28,6 @@ public:
 	virtual bool hasBuildRequirements(const ResourceCollection& resources) const = 0;
 	virtual const ResourceCollection& getBuildRequirements() const = 0;
 
-	virtual int getBuildTime() const = 0;
-
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
 
@@ -75,8 +73,8 @@ public:
 		return this->buildRequirements;
 	}
 
-	int getBuildTime() const {
-		return this->buildTime;
+	int getProductionCost() const {
+		return this->productionCost;
 	}
 
 	int getBaseHealth() const {
@@ -93,7 +91,6 @@ public:
 
 private:
 	ResourceCollection buildRequirements;
-	int buildTime;
 	int baseHealth;
 
 	std::string typeName;

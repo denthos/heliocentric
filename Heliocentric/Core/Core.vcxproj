@@ -22,7 +22,9 @@
   <ItemGroup>
     <ClCompile Include="attack.cpp" />
     <ClCompile Include="base_command.cpp" />
+    <ClCompile Include="builder.cpp" />
     <ClCompile Include="building.cpp" />
+    <ClCompile Include="building_spawner.cpp" />
     <ClCompile Include="building_type..cpp" />
     <ClCompile Include="city_manager.cpp" />
     <ClCompile Include="city_creation_update.cpp" />
@@ -61,7 +63,10 @@
     <ClCompile Include="universe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="builder.h" />
     <ClInclude Include="building.h" />
+    <ClInclude Include="building_spawner.h" />
+    <ClInclude Include="building_spawner_update.h" />
     <ClInclude Include="building_type.h" />
     <ClInclude Include="fission_plant.h" />
     <ClInclude Include="fusion_plant.h" />

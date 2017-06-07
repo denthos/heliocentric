@@ -33,6 +33,14 @@ void City::set_population(int new_pop) {
 	population = new_pop;
 }
 
+int City::get_research_points() const {
+	return research_points;
+}
+
+void City::set_research_points(int new_rp) {
+	research_points = new_rp;
+}
+
 Slot* City::get_slot() {
 	return slot;
 }
@@ -115,7 +123,7 @@ std::string City::getName() const {
 	return name;
 }
 
-void City::spawnCompleteHandler(UnitType* type) {
+void City::spawnCompleteHandler(Buildable* type) {
 	/* 
 	This happens when we are ready to create a unit! We need to somehow tell the unit manager.
 	Let's do so through the city manager

@@ -433,21 +433,26 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 					return;
 				}
 
-				/* Now we are going to add the unit to the city's queue */
-				auto spawnUpdate = this->city_manager->spawnUnit(command);
-				this->addUpdateToSendQueue(spawnUpdate);
+				try {
+					/* Now we are going to add the unit to the city's queue */
+					auto spawnUpdate = this->city_manager->spawnUnit(command);
+					this->addUpdateToSendQueue(spawnUpdate);
 
-				/* Now we are going to decrement the player's resources */
-				std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
+					/* Now we are going to decrement the player's resources */
+					std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
 
-				for (auto& resource_pair : type->getBuildRequirements()) {
-					owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
-					playerResourceUpdates.push_back(
-						std::make_shared<PlayerUpdate>(owner->getID(), resource_pair.first, owner->get_resource_amount(resource_pair.first))
-					);
+					for (auto& resource_pair : type->getBuildRequirements()) {
+						owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
+						playerResourceUpdates.push_back(
+							std::make_shared<PlayerUpdate>(owner->getID(), resource_pair.first, owner->get_resource_amount(resource_pair.first))
+						);
+					}
+
+					this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
 				}
-
-				this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
+				catch (City::BadUIDException e) {
+					LOG_ERR("Invalid city Id sent to server");
+				}
 			});
 			break;
 		}
@@ -456,7 +461,16 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			Player* owner = this->extractPlayerFromConnection(sender);
 
 			this->addFunctionToProcessQueue([this, command, owner]() {
-				
+				BuildingType* type = BuildingType::getByIdentifier(command->createBuildingType);
+				/* Check tech tree */
+
+				try {
+					auto spawnUpdate = this->city_manager->spawnBuilding(command);
+					this->addUpdateToSendQueue(spawnUpdate);
+				}
+				catch (City::BadUIDException e) {
+					LOG_ERR("Invalid city Id sent to server");
+				}
 			});
 			break;
 		}

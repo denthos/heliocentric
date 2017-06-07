@@ -12,7 +12,7 @@ CityManager::CityManager(UnitManager* unit_manager) : unit_manager(unit_manager)
 
 void CityManager::doLogic() {
 	this->city_updates.clear();
-	this->spawner_updates.clear();
+	this->unit_spawner_updates.clear();
 	this->unit_creation_updates.clear();
 
 	/* Now we are going to look at all cities and see if we can update their spawners */
@@ -20,7 +20,7 @@ void CityManager::doLogic() {
 		City* city = city_pair.second.get();
 
 		if (city->progressSpawnAndCreateUpdate()) {
-			this->spawner_updates.insert(city->getSpawnUpdate());
+			this->unit_spawner_updates.insert(city->getSpawnUpdate());
 		}
 	}
 }
@@ -66,7 +66,7 @@ void CityManager::register_update(std::shared_ptr<CityUpdate> update) {
 }
 
 const std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>>& CityManager::getSpawnerUpdates() const {
-	return this->spawner_updates;
+	return this->unit_spawner_updates;
 }
 
 
@@ -77,8 +77,17 @@ const std::unordered_set<std::shared_ptr<UnitCreationUpdate>>& CityManager::getC
 std::shared_ptr<UnitSpawnerUpdate> CityManager::spawnUnit(std::shared_ptr<PlayerCommand> command) {
 	auto& city_pair = this->cities.find(command->initiator);
 	if (city_pair == this->cities.end()) {
-		LOG_ERR("Invalid city Id sent to server");
+		throw City::BadUIDException();
 	}
 
 	return city_pair->second->spawnUnit(command->createUnitType);
+}
+
+std::shared_ptr<BuildingSpawnerUpdate> CityManager::spawnBuilding(std::shared_ptr<PlayerCommand> command) {
+	auto& city_pair = this->cities.find(command->initiator);
+	if (city_pair == this->cities.end()) {
+		throw City::BadUIDException();
+	}
+
+	return city_pair->second->spawnBuilding(command->createBuildingType);
 }
