@@ -36,7 +36,6 @@
 #include "selectable.h"
 #include "unit_spawner_update.h"
 
-#define ALLOWED_ACTIONS_PER_TICK 1
 #define MAX_ACTIONS_WINDOW 10
 
 #define VERT_SHADER "Shaders/shader.vert"
@@ -396,7 +395,7 @@ void Client::createWindow(int width, int height) {
 }
 
 void Client::display() {
-	if (true) {
+	if (focused || frameCounter % 3 == 0) {
 		//first pass: render the scene as usual with the bloom framebuffer as the active frame buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -496,11 +495,12 @@ void Client::display() {
 
 	double currentTime = glfwGetTime();
 	frameCounter++;
-
+	if (currentTime - frameTimer >= 1.0) {
 		gui->setFPS(1000.0 / (double)(frameCounter - lastFrame));
 		lastFrame = frameCounter;
 		//frameTimer = currentTime;
 		frameTimer += 1.0;
+	}
 
 
 
@@ -536,7 +536,7 @@ void Client::update() {
 
 	if (action_counter > allowed_actions) {
 		LOG_DEBUG("Client performed ", action_counter, " actions. (Max: ", allowed_actions, ")");
-	}
+	} 
 
 	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
 		num_actions.erase(num_actions.begin());
