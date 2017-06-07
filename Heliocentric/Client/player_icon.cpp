@@ -8,10 +8,7 @@ PlayerIcon::PlayerIcon(Shader * shader)
 	//generate buffer info
 	// Vertex data
 	float points[] = {
-		-0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0, // top-left
-		0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0, // top-right
-		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0, // bottom-right
-		-0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0  // bottom-left
+		0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0, // top-left
 	};
 	
 	glGenBuffers(1, &VBO);
@@ -26,13 +23,7 @@ PlayerIcon::PlayerIcon(Shader * shader)
 	glBindVertexArray(0);
 
 
-
 	//TODO: initialize icon
-	icon.size = 10.0f;
-	icon.color = glm::vec4(1.0);
-	icon.pos = glm::vec3(0.0);
-	
-
 
 }
 
@@ -59,7 +50,7 @@ void PlayerIcon::draw(const Camera & camera, const glm::mat4 & toWorld)
 	//bind texture
 	//texture.bind();
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_POINTS, 0, 4);
+	glDrawArrays(GL_POINTS, 0, 1);
 
 	glBindVertexArray(0);
 	//texture.unbind();

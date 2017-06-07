@@ -35,7 +35,7 @@
 #include "instant_laser_attack.h"
 #include "selectable.h"
 #include "unit_spawner_update.h"
-#include "player_icon.h"
+
 
 #define ALLOWED_ACTIONS_PER_TICK 200
 
@@ -68,7 +68,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 Quad * quad; //texture sampler
 ParticleSystem* particles;
 ParticleSystem* laser_particles;
-PlayerIcon* icon;
+
 
 
 SkyboxMesh* skybox;
@@ -218,7 +218,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
 	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
-	icon = new PlayerIcon(iconShader);
+
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
 	// LOAD MODELS, IMPORTANT
@@ -430,7 +430,6 @@ void Client::display() {
 
 		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3
 		(4000.0f)));
-		icon->draw(*cameras[selectedCamera], glm::mat4(1.0f));
 
 		Octree * delOctree = octree;
 		octree = newOctree;
