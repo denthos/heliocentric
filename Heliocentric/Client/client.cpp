@@ -535,7 +535,7 @@ void Client::update() {
 
 
 	if (action_counter > allowed_actions) {
-		LOG_WARN("Client performed ", action_counter, "in a single tick. Lots of stuff is being sent...");
+		LOG_DEBUG("Client performed ", action_counter, " actions. (Max: ", allowed_actions, ")");
 	}
 
 	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
