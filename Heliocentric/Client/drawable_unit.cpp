@@ -64,7 +64,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), 0);
 	shader->unbind();
 
-	if (this->client_isattacking) {
+	if (this->client_isAttacking()) {
 		shoot_sound->play(get_position());
 		laser->Update(camera);
 		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
