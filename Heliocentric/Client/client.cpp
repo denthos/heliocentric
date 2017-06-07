@@ -527,7 +527,7 @@ void Client::update() {
 
 	int action_counter = 0;
 	bool has_more_updates = true;
-	while (has_more_updates && action_counter <= allowed_actions) {
+	while (has_more_updates && action_counter <= allowed_actions + 5) {
 		if (has_more_updates = this->poll()) {
 			action_counter++;
 		}
@@ -538,15 +538,11 @@ void Client::update() {
 		LOG_DEBUG("Client performed ", action_counter, " actions. (Max: ", allowed_actions, ")");
 	} 
 
+	num_actions.push_back(action_counter);
+
+
 	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
 		num_actions.erase(num_actions.begin());
-	}
-
-	if (has_more_updates) {
-		num_actions.push_back(action_counter + 1);
-	}
-	else {
-		num_actions.push_back(action_counter);
 	}
 	
 
