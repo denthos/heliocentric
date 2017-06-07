@@ -50,7 +50,6 @@ public:
 
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
-	void pop();                               // Pop all objects queued for destroy
 
 	const ResourceCollection& getResources() const;
 	int get_resource_amount(Resources::Type);
