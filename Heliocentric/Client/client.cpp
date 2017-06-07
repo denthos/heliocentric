@@ -522,12 +522,12 @@ void Client::update() {
 		allowed_actions = 100;
 	}
 
-	allowed_actions = std::max(1, allowed_actions);
+	allowed_actions = std::max(1, allowed_actions) + 5;
 
 
 	int action_counter = 0;
 	bool has_more_updates = true;
-	while (has_more_updates && action_counter <= allowed_actions + 5) {
+	while (has_more_updates && action_counter <= allowed_actions) {
 		if (has_more_updates = this->poll()) {
 			action_counter++;
 		}
