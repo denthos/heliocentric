@@ -121,17 +121,7 @@ void Player::acquire_object(GameObject* object) {
 }
 
 void Player::add_to_destroy(GameObject* object) {
-	objects_to_destroy.push_back(object);
-}
-
-void Player::pop() {
-	// loop through all objects for each type
-	for (GameObject* object : objects_to_destroy) {
-		owned_objects[std::type_index(typeid(*object))].erase(object->getID());
-	}
-
-	// clear out
-	objects_to_destroy.clear();
+	owned_objects[std::type_index(typeid(*object))].erase(object->getID());
 }
 
 std::unordered_map<unsigned int, GameObject*> Player::get_units() {

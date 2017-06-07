@@ -84,7 +84,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
 	}
 
-	if (this->client_isattacking) {
+	if (this->client_isAttacking()) {
 		shoot_sound->play(get_position());
 		laser->Update(camera);
 		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
