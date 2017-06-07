@@ -67,6 +67,10 @@ void DrawableUnit::draw(const Camera & camera) const {
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), glow);
 	shader->bind();
 
+	glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), is_exploding);
+	if (is_exploding) {
+		glUniform1f(glGetUniformLocation(shader->getPid(), "time"), (glfwGetTime() - explosion_start_time) * 0.25);
+	}
     //color cities based on player color
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
     glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
@@ -78,10 +82,13 @@ void DrawableUnit::draw(const Camera & camera) const {
 	// unit explosion when dead
 	if (is_exploding) {
 		LOG_INFO("Is exploding");
+		shader->bind();
 		glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), true);
+		glUniform1f(glGetUniformLocation(shader->getPid(), "time"), glfwGetTime() - explosion_start_time);
 		
 		explosion->Update(camera);
-		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
+		explosion->draw(camera, glm::scale(toWorld, glm::vec3(150.0f))); //needs to be shifted a bit, bigger pixels?
+		shader->unbind();
 	}
 
 	if (this->client_isAttacking()) {

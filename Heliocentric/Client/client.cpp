@@ -207,7 +207,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
-	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag");
+	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
 	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
@@ -965,6 +965,7 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	LOG_INFO("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->is_dead()) {
 		units[update->id]->is_exploding = true;
+		units[update->id]->explosion_start_time = glfwGetTime();
 		dead_units.insert(std::make_pair(update->id, std::move(units[update->id])));
 		units.erase(update->id);
 	}

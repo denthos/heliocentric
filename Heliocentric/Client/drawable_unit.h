@@ -34,6 +34,8 @@ public:
 
 	// explosion params
 	bool is_exploding;
+	float explosion_start_time;
+
 	virtual bool do_animation(const Camera & camera) const;
 
 private:
