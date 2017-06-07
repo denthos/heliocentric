@@ -36,7 +36,8 @@
 #include "selectable.h"
 #include "unit_spawner_update.h"
 
-#define ALLOWED_ACTIONS_PER_TICK 200
+#define ALLOWED_ACTIONS_PER_TICK 1
+#define MAX_ACTIONS_WINDOW 10
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -91,6 +92,8 @@ GLuint gaussian_color_buff[COLOR_BUFFERS];
 
 //multiple render targets to specify more than one frag shader output
 GLuint color_buff[COLOR_BUFFERS]; //2 color buffers to attach to frame buffer: 1 for regular scene, one for bright objects
+
+std::vector<int> num_actions;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
@@ -393,7 +396,7 @@ void Client::createWindow(int width, int height) {
 }
 
 void Client::display() {
-	if (focused || frameCounter % 3 == 0) {
+	if (true) {
 		//first pass: render the scene as usual with the bloom framebuffer as the active frame buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -493,12 +496,12 @@ void Client::display() {
 
 	double currentTime = glfwGetTime();
 	frameCounter++;
-	if (currentTime - frameTimer >= 1.0) {
+
 		gui->setFPS(1000.0 / (double)(frameCounter - lastFrame));
 		lastFrame = frameCounter;
 		//frameTimer = currentTime;
 		frameTimer += 1.0;
-	}
+
 
 
 	glfwPollEvents();
@@ -506,15 +509,46 @@ void Client::display() {
 
 void Client::update() {
 
-	int action_counter = 0;
-	bool has_more_updates = true;
-	while (has_more_updates && action_counter++ < ALLOWED_ACTIONS_PER_TICK) {
-		has_more_updates = this->poll();
+	int allowed_actions = 0;
+
+	for (int i = 0; i < num_actions.size(); i++) {
+		allowed_actions += num_actions[i];
+	}
+	
+	if (num_actions.size() > 0) {
+		allowed_actions /= num_actions.size();
+	}
+	else {
+		allowed_actions = 100;
 	}
 
-	if (action_counter >= ALLOWED_ACTIONS_PER_TICK) {
+	allowed_actions = std::max(1, allowed_actions);
+
+
+	int action_counter = 0;
+	bool has_more_updates = true;
+	while (has_more_updates && action_counter <= allowed_actions) {
+		if (has_more_updates = this->poll()) {
+			action_counter++;
+		}
+	}
+
+
+	if (action_counter > allowed_actions) {
 		LOG_WARN("Client performed ", action_counter, "in a single tick. Lots of stuff is being sent...");
 	}
+
+	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
+		num_actions.erase(num_actions.begin());
+	}
+
+	if (has_more_updates) {
+		num_actions.push_back(action_counter + 1);
+	}
+	else {
+		num_actions.push_back(action_counter);
+	}
+	
 
 	cameras[selectedCamera]->update();
 	
