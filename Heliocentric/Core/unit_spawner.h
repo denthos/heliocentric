@@ -25,13 +25,15 @@ private:
 
 	bool produce();
 	void popFromQueue();
+
 	UID id;
+	int production;
 
 protected:
 	virtual void spawnCompleteHandler(UnitType* type) = 0;
 
 public:
-	UnitSpawner(UID id);
+	UnitSpawner(UID id, int production);
 
 	const std::vector<UnitType*>& getUnitSpawnQueue();
 	std::shared_ptr<UnitSpawnerUpdate> spawnUnit(UnitType::TypeIdentifier);
@@ -42,4 +44,7 @@ public:
 	bool isProducing() const;
 	const UnitType* getCurrentProduction() const;
 	int getPercentCompletion() const;
+
+	void setProduction(int production);
+	int getProduction() const;
 };

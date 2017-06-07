@@ -22,11 +22,30 @@ Octree::Octree(glm::vec3 min, glm::vec3 max) : Octree(BoundingBox(min, max)) {
 }
 
 Octree::Octree(BoundingBox region) : region(region) {
-
+	initialize();
 }
 
 Octree::Octree(BoundingBox region, std::set<Drawable *> objects) : region(region), objects(objects) {
+	initialize();
+}
 
+void Octree::initialize() {
+	glm::vec3 dimensions = region.max - region.min;
+
+	if (dimensions.x * dimensions.y * dimensions.z <= MIN_VOLUME)
+		return;
+
+	glm::vec3 center = region.min + (dimensions / 2.0f);
+
+	//Create subdivided regions for each octant
+	octant[0] = BoundingBox(region.min, center);
+	octant[1] = BoundingBox(glm::vec3(center.x, region.min.y, region.min.z), glm::vec3(region.max.x, center.y, center.z));
+	octant[2] = BoundingBox(glm::vec3(center.x, region.min.y, center.z), glm::vec3(region.max.x, center.y, region.max.z));
+	octant[3] = BoundingBox(glm::vec3(region.min.x, region.min.y, center.z), glm::vec3(center.x, center.y, region.max.z));
+	octant[4] = BoundingBox(glm::vec3(region.min.x, center.y, region.min.z), glm::vec3(center.x, region.max.y, center.z));
+	octant[5] = BoundingBox(glm::vec3(center.x, center.y, region.min.z), glm::vec3(region.max.x, region.max.y, center.z));
+	octant[6] = BoundingBox(center, region.max);
+	octant[7] = BoundingBox(glm::vec3(region.min.x, center.y, center.z), glm::vec3(center.x, region.max.y, region.max.z));
 }
 
 Octree::~Octree() {
@@ -135,23 +154,7 @@ void Octree::update() {
 	if (objects.size() <= 1)
 		return;
 
-	glm::vec3 dimensions = region.max - region.min;
-
-	if (dimensions.x * dimensions.y * dimensions.z <= MIN_VOLUME)
-		return;
-
-	glm::vec3 center = region.min + (dimensions / 2.0f);
-
-	//Create subdivided regions for each octant
-	BoundingBox octant[8];
-	octant[0] = BoundingBox(region.min, center);
-	octant[1] = BoundingBox(glm::vec3(center.x, region.min.y, region.min.z), glm::vec3(region.max.x, center.y, center.z));
-	octant[2] = BoundingBox(glm::vec3(center.x, region.min.y, center.z), glm::vec3(region.max.x, center.y, region.max.z));
-	octant[3] = BoundingBox(glm::vec3(region.min.x, region.min.y, center.z), glm::vec3(center.x, center.y, region.max.z));
-	octant[4] = BoundingBox(glm::vec3(region.min.x, center.y, region.min.z), glm::vec3(center.x, region.max.y, center.z));
-	octant[5] = BoundingBox(glm::vec3(center.x, center.y, region.min.z), glm::vec3(region.max.x, region.max.y, center.z));
-	octant[6] = BoundingBox(center, region.max);
-	octant[7] = BoundingBox(glm::vec3(region.min.x, center.y, center.z), glm::vec3(center.x, region.max.y, region.max.z));
+	
 
 	std::set<Drawable *> objectLists[8];
 	std::vector<Drawable *> delist;

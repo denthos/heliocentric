@@ -238,6 +238,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<PlanetUpdate>(std::bind(&Client::planetUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerIDConfirmation>(std::bind(&Client::playerIdConfirmationHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<PlayerScoreUpdate>(std::bind(&Client::playerScoreUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<PlayerResearchUpdate>(std::bind(&Client::playerResearchUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<TradeData>(std::bind(&Client::tradeDataHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -256,6 +257,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -275,12 +278,15 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	frameTimer = glfwGetTime();
 	frameCounter = 0;
 
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Mars.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Venus.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Uranus.ogg");
-	musicPlayer.load_sound("Audio/Holst_The_Planets_Mercury.ogg");
-	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, &musicPlayer);
+	soundSystem = new ThreeDSoundSystem(*this->cameras[this->selectedCamera]);
+	musicPlayer = new MusicPlayer(soundSystem);
+
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Mars.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Jupiter.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Venus.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Uranus.ogg");
+	musicPlayer->load_sound("Audio/Holst_The_Planets_Mercury.ogg");
+	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, musicPlayer);
 }
 
 Client::~Client() {
@@ -298,7 +304,7 @@ Client::~Client() {
 	glfwEntry.erase(window);
 
 	/* Stop sound thread */
-	musicPlayer.stop();
+	musicPlayer->stop();
 	sound_thread.join();
 }
 
@@ -519,6 +525,8 @@ void Client::update() {
 	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
+
+	this->soundSystem->update(*this->cameras[this->selectedCamera]);
 }
 
 void Client::errorCallback(int error, const char * description) {
@@ -814,6 +822,14 @@ void Client::handleF12Key(int key) {
 	this->channeled_send(&command);
 }
 
+void Client::handleLeftBracketKey(int key) {
+	musicPlayer->volume_decrease();
+}
+
+void Client::handleRightBracketKey(int key) {
+	musicPlayer->volume_increase();
+}
+
 
 void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
 	auto& player_it = players.find(update->player_id);
@@ -843,8 +859,9 @@ void Client::playerUpdateHandler(SunNet::ChanneledSocketConnection_p socketConne
 }
 
 void Client::playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerScoreUpdate> update) {
+	LOG_DEBUG("Player score update received");
 	auto& player_it = players.find(update->id);
-	if (player_it == players.end()) {
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
 		return;
 	}
 
@@ -852,15 +869,27 @@ void Client::playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p socket
 	gui->updatePlayerLeaderboardValue(player_it->second.get());
 }
 
+void Client::playerResearchUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlayerResearchUpdate> update) {
+	LOG_DEBUG("Player research update received");
+	auto& player_it = players.find(update->id);
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
+		return;
+	}
+
+	update->apply(players[update->id].get());
+}
+
 void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitCreationUpdate> update) {
 	LOG_DEBUG("Unit creation update received");
 	auto& player_it = players.find(update->player_id);
-	Lib::assertNotEqual(player_it, players.end(), "Invalid player ID");
+	if (Lib::assertNotEqual(player_it, players.end(), "Invalid player ID") == false) {
+		return;
+	}
 
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles
+		colorShader, laser_particles, soundSystem
 	);
 
 	player_it->second->acquire_object(newUnit.get());
@@ -975,7 +1004,9 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 void Client::slotUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SlotUpdate> update) {
 	LOG_DEBUG("Received a slot update");
 	auto& slot_it = slots.find(update->id);
-	Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found");
+	if (Lib::assertNotEqual(slot_it, slots.end(), "Slot for update not found") == false) {
+		return;
+	}
 
 	update->apply(slot_it->second);
 }

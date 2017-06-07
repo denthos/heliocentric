@@ -40,6 +40,8 @@
 #include "slot_update.h"
 #include "game_over_update.h"
 #include "player_score_update.h"
+#include "player_research_update.h"
+#include "threed_sound_system.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -66,6 +68,7 @@ public:
 	void planetUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlanetUpdate>);
 	void playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerIDConfirmation>);
 	void playerScoreUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerScoreUpdate>);
+	void playerResearchUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerResearchUpdate>);
 	void tradeDataHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TradeData>);
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
@@ -89,7 +92,8 @@ private:
 
 	GLFWwindow * window;
 	GUI * gui;
-	MusicPlayer musicPlayer;
+	ThreeDSoundSystem* soundSystem;
+	MusicPlayer* musicPlayer;
 	unsigned int selectedCamera;
 	std::vector<Camera *> cameras;
 	std::vector<GameObject *> selection;
@@ -135,6 +139,7 @@ private:
 	void handleF10Key(int);
 	void handleF11Key(int);
 	void handleF12Key(int);
-
+	void handleLeftBracketKey(int);
+	void handleRightBracketKey(int);
 };
 

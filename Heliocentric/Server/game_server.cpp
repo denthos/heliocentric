@@ -76,7 +76,9 @@ void GameServer::handle_channeledclient_error(SunNet::ChanneledSocketConnection_
 void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnection_p client) {
 	/* A new client is connected! Assign them an ID */
 	LOG_DEBUG("A new client connected.");
-	std::unique_ptr<Player> player = std::make_unique<Player>(player_manager.get(), "PLAYER_NAME", this->nextPlayerColor);
+	std::shared_ptr<Player> player = std::make_shared<Player>(player_manager.get(), "PLAYER_NAME", this->nextPlayerColor);
+	/* Register this player to player manager. */
+	player_manager->register_player(player);
 
 	int nextColor = static_cast<int>(this->nextPlayerColor) + 1;
 	if (nextColor >= PlayerColor::NUM_COLORS) {
@@ -106,7 +108,7 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	LOG_DEBUG("Assigned id ", player->getID(), " to new player.. sending confirmation");
 	this->addUpdateToSendQueue(id_confirm, { client });
 
-	players[player->getID()] = std::move(player);
+	players[player->getID()] = player;
 }
 
 Player* GameServer::extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p sender, bool retrying) {
@@ -209,11 +211,6 @@ void GameServer::performUpdates() {
 	/* First, update the universe */
 	this->universe.doLogic();
 
-	/* TODO: Maybe needs to add player manager, or maybe not... */
-	for (auto& it : this->players) {
-		it.second->doLogic();
-	}
-
 	/* update player manager */
 	this->player_manager->doLogic();
 
@@ -231,6 +228,7 @@ void GameServer::performUpdates() {
 	this->addUpdateToSendQueue(city_manager->getCreationUpdates().begin(), city_manager->getCreationUpdates().end());
 
 	this->addUpdateToSendQueue(player_manager->getPlayerScoreUpdates().begin(), player_manager->getPlayerScoreUpdates().end());
+	this->addUpdateToSendQueue(player_manager->getPlayerResearchUpdates().begin(), player_manager->getPlayerResearchUpdates().end());
 
 	/* Give players resources based on their owned cities */
 	std::vector<std::shared_ptr<PlayerUpdate>> player_updates;

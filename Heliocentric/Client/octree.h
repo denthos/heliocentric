@@ -30,6 +30,7 @@ protected:
 
 	Octree * parent;
 	BoundingBox region;
+	BoundingBox octant[8];
 	std::set<Drawable *> objects;
 	Octree * children[8];
 	bool hasChildren = false;
@@ -37,4 +38,5 @@ protected:
 	bool shouldCull = false;
 
 	void drawNode(const Camera & camera);
+	void initialize();
 };
