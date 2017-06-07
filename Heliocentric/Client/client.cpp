@@ -36,7 +36,7 @@
 #include "selectable.h"
 #include "unit_spawner_update.h"
 
-#define MAX_ACTIONS_WINDOW 10
+#define MAX_ACTIONS_WINDOW 50
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
