@@ -1,6 +1,7 @@
+#define NOMINMAX
 #include "client.h"
 
-//#include <glad\glad.h>
+#include <glad\glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
@@ -9,6 +10,7 @@
 #include <soil.h>
 #include <thread>
 
+#include "research_command.h"
 #include "free_camera.h"
 #include "model_preloader.h"
 #include "orbital_camera.h"
@@ -36,7 +38,7 @@
 #include "selectable.h"
 #include "unit_spawner_update.h"
 
-#define ALLOWED_ACTIONS_PER_TICK 200
+#define MAX_ACTIONS_WINDOW 50
 
 #define VERT_SHADER "Shaders/shader.vert"
 #define FRAG_SHADER "Shaders/shader.frag"
@@ -94,6 +96,8 @@ GLuint gaussian_color_buff[COLOR_BUFFERS];
 //multiple render targets to specify more than one frag shader output
 GLuint color_buff[COLOR_BUFFERS]; //2 color buffers to attach to frame buffer: 1 for regular scene, one for bright objects
 
+std::vector<int> num_actions;
+
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
 	int width = config.get<int>("ScreenWidth");
@@ -102,7 +106,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2), width, height);
+	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2),
+				std::bind(&Client::beginResearchOnTechnology, this, std::placeholders::_1), width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -524,20 +529,48 @@ void Client::display() {
 	}
 
 
+
 	glfwPollEvents();
 }
 
 void Client::update() {
 
-	int action_counter = 0;
-	bool has_more_updates = true;
-	while (has_more_updates && action_counter++ < ALLOWED_ACTIONS_PER_TICK) {
-		has_more_updates = this->poll();
+	int allowed_actions = 0;
+
+	for (int i = 0; i < num_actions.size(); i++) {
+		allowed_actions += num_actions[i];
+	}
+	
+	if (num_actions.size() > 0) {
+		allowed_actions /= num_actions.size();
+	}
+	else {
+		allowed_actions = 100;
 	}
 
-	if (action_counter >= ALLOWED_ACTIONS_PER_TICK) {
-		LOG_WARN("Client performed ", action_counter, "in a single tick. Lots of stuff is being sent...");
+	allowed_actions = std::max(1, allowed_actions) + 5;
+
+
+	int action_counter = 0;
+	bool has_more_updates = true;
+	while (has_more_updates && action_counter <= allowed_actions) {
+		if (has_more_updates = this->poll()) {
+			action_counter++;
+		}
 	}
+
+
+	if (action_counter > allowed_actions) {
+		LOG_DEBUG("Client performed ", action_counter, " actions. (Max: ", allowed_actions, ")");
+	} 
+
+	num_actions.push_back(action_counter);
+
+
+	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
+		num_actions.erase(num_actions.begin());
+	}
+	
 
 	cameras[selectedCamera]->update();
 	
@@ -917,6 +950,16 @@ void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender
 
 	LOG_DEBUG(update->percent);
 	update->apply(spawner_it->second);
+}
+
+
+void Client::beginResearchOnTechnology(const Technology* tech) {
+	if (!tech) {
+		return;
+	}
+
+	ResearchCommand command(tech->getID());
+	this->channeled_send(&command);
 }
 
 void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {

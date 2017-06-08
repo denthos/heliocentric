@@ -11,6 +11,7 @@
 /** \file */
 
 #pragma once
+
 #include <Eigen/Core>
 #include <stdint.h>
 #include <array>
