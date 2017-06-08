@@ -37,6 +37,7 @@ public:
 	std::string getName() const;
 	std::string getDescription() const;
 	const std::vector<Technology*>& getChildren() const;
+	bool hasResearched() const;
 
 	Technology(int, float, std::string name, std::string desc);
 

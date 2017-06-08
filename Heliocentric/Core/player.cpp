@@ -6,6 +6,7 @@
 #include "city.h"
 #include "lib.h"
 #include "logging.h"
+#include "unit_type.h"
 #include <iostream>
 #include <string>
 
@@ -119,6 +120,11 @@ float Player::get_research_points() {
 
 bool Player::can_settle() {
 	return getOwnedObjects<City>().size() < settlement_limit;
+}
+
+
+bool Player::can_create_unit(UnitType* type) {
+	return (type->hasBuildRequirements(getResources()) && type->hasTechRequirements(getTechTree()));
 }
 
 void Player::acquire_object(GameObject* object) {
