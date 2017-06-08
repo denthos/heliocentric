@@ -3,29 +3,37 @@
 
 
 Technology::Technology(int tech, float research_points_required, std::string name, std::string desc) : 
-	id(tech), name(name), description(desc), researched(false), research_points_required(research_points_required) {
+	id(tech), name(name), description(desc), researched(false), research_points_required(research_points_required),
+	available(false), prereq_met(false) {
 }
 
 void Technology::research(float research_points) {
 	research_points_accumulated += research_points;
 	research_progress = 100 * (research_points_accumulated / research_points_required);
 	researched = research_points_accumulated >= research_points_required;
+
+	/* Set this tech to unavailable  */
+	if (researched) {
+		available = false;
+	}
 }
 
 bool Technology::is_available() {
-	/* Not available if this tech has already been researched. */
-	if (this->researched) {
-		return false;
-	}
-
-	/* Not available if any of its parents has not been researched yet. */
-	for (auto it : parents) {
-		if (!it->researched) {
-			return false;
+	/* Check prerequisites if not already met. */
+	if (!prereq_met) {
+		/* Not available if any of its parents has not been researched yet. */
+		for (auto it : parents) {
+			if (!it->researched) {
+				return false;
+			}
 		}
+
+		/* If all prereq checks passed, set this boolean to true and make this tech available. */
+		prereq_met = true;
+		available = true;
 	}
 
-	return true;
+	return available;
 }
 
 

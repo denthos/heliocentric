@@ -15,10 +15,6 @@
 
 #pragma once
 
-#ifdef max
-	#undef max
-#endif
-
 #include <nanogui/compat.h>
 #include <nanogui/widget.h>
 #include <sstream>
