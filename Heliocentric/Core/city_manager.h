@@ -38,4 +38,5 @@ public:
 	const std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>>& getSpawnerUpdates() const;
 	const std::unordered_set<std::shared_ptr<UnitCreationUpdate>>& getCreationUpdates() const;
 	void handleUnitSpawningComplete(UnitType* type, City* city);
+	void handleBuildingSpawningComplete(BuildingType* type, City* city);
 };

@@ -2,10 +2,14 @@
 
 class Buildable {
 public:
-	Buildable(int productionCost);
+	enum BuildType { BUILDING, UNIT };
+
+	Buildable(BuildType buildType, int productionCost);
 
 	virtual int getProductionCost() const = 0;
+	BuildType getBuildType();
 
 protected:
+	BuildType buildType;
 	int productionCost;
 };

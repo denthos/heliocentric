@@ -3,12 +3,11 @@
 #include <atomic>
 #include <memory>
 #include "builder.h"
-#include "unit_type.h"
 #include "identifiable.h"
 
 class UnitSpawnerUpdate;
 
-class UnitSpawner : virtual public Builder {
+class UnitSpawner : public virtual Builder {
 
 	friend class UnitSpawnerUpdate;
 
@@ -18,11 +17,11 @@ private:
 	std::shared_ptr<UnitSpawnerUpdate> update;
 	UID id;
 
-	Builder::BuildType produce();
-	Builder::BuildType popFromQueue();
+	Builder::ProductionType produce();
+	Builder::ProductionType popFromQueue();
 
 protected:
-	void spawnCompleteHandler(UnitType* type);
+	virtual void spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType) = 0;
 
 public:
 	UnitSpawner(UID id);

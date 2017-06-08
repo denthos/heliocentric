@@ -1,13 +1,16 @@
 #pragma once
 
 #include "buildable.h"
+#include "building_type.h"
+#include "unit_type.h"
+#include <exception>
 #include <vector>
 
 #define INITIAL_PRODUCTION 1
 
 class Builder {
 public:
-	enum BuildType {IDLE, BUILDING, UNIT};
+	enum ProductionType {IDLE, BUILDING, UNIT};
 
 	Builder();
 
@@ -19,17 +22,19 @@ public:
 	void set_production(int);
 	int get_production() const;
 
-	BuildType progressSpawnAndCreateUpdate();
+	ProductionType progressSpawnAndCreateUpdate();
+
+	class InvalidBuildTypeException : public std::exception {};
 
 protected:
 	/* These two functions deal with updates, so let subclasses implement them. */
-	virtual BuildType produce() = 0;
-	virtual BuildType popFromQueue() = 0;
+	virtual ProductionType produce() = 0;
+	virtual ProductionType popFromQueue() = 0;
 
 	std::vector<Buildable*> production_queue;
 
 	Buildable* currentProduction;
-	BuildType buildType;
+	ProductionType buildType;
 	bool currentlyProducing;
 	int currentProductionProgress;
 	int currentProductionProgressPercent;

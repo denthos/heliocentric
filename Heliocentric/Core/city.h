@@ -50,7 +50,7 @@ protected:
 	void send_update_to_manager(std::shared_ptr<CityUpdate> update);
 
 	/* Override for UnitSpawner */
-	void spawnCompleteHandler(Buildable* type);
+	void spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType);
 	
 	std::shared_ptr<CityUpdate> update;
 	std::shared_ptr<AttackableGameObject> target;

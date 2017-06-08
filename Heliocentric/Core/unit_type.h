@@ -40,8 +40,8 @@ private:
 template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
-	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName, int baseHealth) :
-		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth) {}
+	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int productionCost, std::string typeName, int baseHealth) :
+		Buildable(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), typeName(typeName), baseHealth(baseHealth) {}
 
 	std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
 		return std::make_shared<UnitClass>(position, owner, manager, this);

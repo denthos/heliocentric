@@ -2,11 +2,10 @@
 
 #include <memory>
 #include "builder.h"
-#include "building_type.h"
 #include "building_spawner_update.h"
 #include "identifiable.h"
 
-class BuildingSpawner : virtual public Builder {
+class BuildingSpawner : public virtual Builder {
 
 	friend class BuildingSpawnerUpdate;
 
@@ -16,11 +15,11 @@ private:
 	std::shared_ptr<BuildingSpawnerUpdate> update;
 	UID id;
 
-	Builder::BuildType produce();
-	Builder::BuildType popFromQueue();
+	Builder::ProductionType produce();
+	Builder::ProductionType popFromQueue();
 
 protected:
-	void spawnCompleteHandler(BuildingType* type);
+	virtual void spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType) = 0;
 
 public:
 	BuildingSpawner(UID id);

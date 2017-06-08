@@ -2,7 +2,6 @@
 #include "identifiable.h"
 #include "building_type.h"
 #include "building_spawner.h"
-
 class BuildingSpawnerUpdate {
 public:
 	enum UpdateType {

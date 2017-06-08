@@ -29,11 +29,11 @@ int Builder::get_production() const {
 	return this->production;
 }
 
-Builder::BuildType Builder::progressSpawnAndCreateUpdate() {
+Builder::ProductionType Builder::progressSpawnAndCreateUpdate() {
 	/* If there is something being processed, process it */
 	if (!currentlyProducing && !this->production_queue.empty()) {
 		/* There is not something processing. Let's start the processing! */
-		return this->popFromQueue();
+		Buildable::BuildType buildType = this->popFromQueue();
 	}
 	else if (currentlyProducing) {
 		/* We are currently producing something.. let's work on that. */

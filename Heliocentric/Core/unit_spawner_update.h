@@ -1,6 +1,7 @@
 #pragma once
 #include "identifiable.h"
 #include "unit_type.h"
+
 class UnitSpawnerUpdate {
 public:
 	enum UpdateType {

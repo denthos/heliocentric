@@ -3,12 +3,16 @@
 #include "unit_spawner.h"
 #include "planet.h"
 
+CityManager::CityManager(UnitManager* unit_manager) : unit_manager(unit_manager) {}
+
 void CityManager::handleUnitSpawningComplete(UnitType* type, City* city) {
 	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
 	unit_creation_updates.insert(unit_manager->add_unit(pos, type, city->get_player()));
 }
 
-CityManager::CityManager(UnitManager* unit_manager) : unit_manager(unit_manager) {}
+void CityManager::handleBuildingSpawningComplete(BuildingType* type, City* city) {
+
+}
 
 void CityManager::doLogic() {
 	this->city_updates.clear();
@@ -19,18 +23,18 @@ void CityManager::doLogic() {
 	for (auto& city_pair : get_cities()) {
 		City* city = city_pair.second.get();
 
-		Builder::BuildType buildType = city->progressSpawnAndCreateUpdate();
+		Builder::ProductionType buildType = city->progressSpawnAndCreateUpdate();
 		switch (buildType) {
-			case Builder::BuildType::IDLE:
+			case Builder::ProductionType::IDLE:
 				break;
-			case Builder::BuildType::BUILDING:
+			case Builder::ProductionType::BUILDING:
 				this->building_spawner_updates.insert(city->BuildingSpawner::getSpawnUpdate());
 				break;
-			case Builder::BuildType::UNIT:
+			case Builder::ProductionType::UNIT:
 				this->unit_spawner_updates.insert(city->UnitSpawner::getSpawnUpdate());
 				break;
 			default:
-				LOG_ERR("Invalid Builder build type.");
+				throw Builder::InvalidBuildTypeException();
 		}
 	}
 }
@@ -54,7 +58,7 @@ std::shared_ptr<CityCreationUpdate> CityManager::add_city(Player* player, Slot* 
 	slot->attachCity(new_city.get());
 	player->acquire_object(new_city.get());
 	auto city_creation_update = std::make_shared<CityCreationUpdate>(player->getID(), slot->getID(), new_city->getID(), new_city->getName(),
-		new_city->get_combat_defense(), new_city->get_health(), new_city->getProduction(), new_city->get_population());
+		new_city->get_combat_defense(), new_city->get_health(), new_city->get_production(), new_city->get_population());
 	LOG_DEBUG("Created city with UID <", new_city->getID(), ">");
 	cities.insert(std::make_pair(new_city->getID(), std::move(new_city)));
 	return city_creation_update;
