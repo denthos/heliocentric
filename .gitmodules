@@ -1,0 +1,3 @@
+[submodule "Heliocentric/packages/nanogui"]
+	path = Heliocentric/packages/nanogui
+	url = https://github.com/wjakob/nanogui
