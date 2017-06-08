@@ -534,7 +534,7 @@ void GUI::createUnitDisplay() {
 
 void GUI::updateCityWindow() {
 	if (cityWindow->visible()) {
-		unitSpawnWidget->updateSelection(selectedCity, this->player->getResources());
+		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
 	}
