@@ -50,8 +50,9 @@ std::unordered_map<UID, std::shared_ptr<Unit>>& UnitManager::get_active_units() 
 std::shared_ptr<UnitCreationUpdate> UnitManager::add_unit(glm::vec3 create_location, UnitType* type, Player* player) {
 	std::shared_ptr<Unit> new_unit = type->createUnit(create_location, player, this);
 
+	int personal_space = rand() % 100 - 50;
 	auto update = std::make_shared<UnitCreationUpdate>(new_unit->getID(),
-		create_location.x, create_location.y, create_location.z, player->getID(), 100, 100, type->getIdentifier());
+		create_location.x + personal_space, create_location.y, create_location.z, player->getID(), 100, 100, type->getIdentifier());
 
 	idle_units.insert(std::make_pair(new_unit->getID(), std::move(new_unit)));
 	return update;
