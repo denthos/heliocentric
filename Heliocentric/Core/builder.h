@@ -49,4 +49,7 @@ protected:
 	Buildable::BuildType popFromQueue();
 
 	virtual void spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType) = 0;
+
+private:
+	void initialize();
 };

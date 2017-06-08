@@ -3,7 +3,12 @@
 
 Builder::Builder() : currentProduction(NULL), currentlyProducing(false),
 	currentProductionProgress(0), currentProductionProgressPercent(0), production(INITIAL_PRODUCTION) {
+	initialize();
+}
 
+void Builder::initialize() {
+	this->update = std::make_shared<UnitSpawnerUpdate>();
+	this->update->id = id;
 }
 
 const std::vector<Buildable*>& Builder::getProductionQueue() {
