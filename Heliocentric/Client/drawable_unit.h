@@ -45,9 +45,9 @@ private:
 	glm::vec3 old_orientation;
 	ParticleSystem* laser;
 	ParticleSystem* explosion;
-	int explosion_counter;
+	float explosion_counter;
 	glm::vec3 laser_offset;
 	Audio3DSound* shoot_sound;
-
+	const double pi = 3.1415926535897;
 	bool glow;
 };

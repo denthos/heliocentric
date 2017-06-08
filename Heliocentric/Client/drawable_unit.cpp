@@ -29,7 +29,7 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* l
     this->laser = laser;
     this->glow = false;
 	this->is_exploding = false;
-	this->explosion_counter = 0;
+	this->explosion_counter = 0.0f;
 
     BoundingBox bbox = getBoundingBox();
     glm::vec3 b_max = bbox.max;
@@ -47,13 +47,13 @@ void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 	shoot_sound->update(this->get_position());
-	if (explosion_counter < 50 && is_exploding == true) {
+	if (explosion_counter < pi/2.0f && is_exploding == true) {
 		LOG_INFO("Explosion counter is ", explosion_counter);
-		explosion_counter += 1;
+		explosion_counter += pi/50.0f;
 	}
 	else if (is_exploding == true) {
 		LOG_INFO("Explosion counter stopped.");
-		explosion_counter = 0;
+		explosion_counter = 0.0f;
 		is_exploding = false;
 	}
 }
@@ -65,11 +65,10 @@ void DrawableUnit::draw(const Camera & camera) const {
 
 	//highlight selected unit
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), glow);
-	shader->bind();
 
-	glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), is_exploding);
 	if (is_exploding) {
-		glUniform1f(glGetUniformLocation(shader->getPid(), "time"), (float)(explosion_counter)/ 50.0f);
+		glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), is_exploding);
+		glUniform1f(glGetUniformLocation(shader->getPid(), "timer"), explosion_counter);
 	}
     //color cities based on player color
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
@@ -97,7 +96,8 @@ void DrawableUnit::draw(const Camera & camera) const {
 }
 
 bool DrawableUnit::do_animation(const Camera & camera) const {
-	draw(camera);
+	if (is_exploding)
+		draw(camera);
 	return is_exploding;
 }
 

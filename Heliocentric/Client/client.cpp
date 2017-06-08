@@ -1005,7 +1005,7 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	Handle unit death. We don't want to edit the units map in another thread,
 	so let's pop it in the main thread's queue
 	*/
-	LOG_INFO("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
+	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->is_dead()) {
 		units[update->id]->is_exploding = true;
 		units[update->id]->explosion_start_time = glfwGetTime();
