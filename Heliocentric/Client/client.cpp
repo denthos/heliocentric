@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "client.h"
 
 #include <glad\glad.h>
