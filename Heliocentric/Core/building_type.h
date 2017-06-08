@@ -15,6 +15,8 @@ public:
 	const static TypeIdentifier FIRST = FISSION_PLANT; // should always be the first in enum
 	const static int NUM_TYPES = 3;
 
+	BuildingType(BuildType buildType, int productionCost);
+
 	static BuildingType* getByIdentifier(TypeIdentifier);
 
 	virtual const std::string& getTypeName() const = 0;
@@ -28,7 +30,7 @@ template <typename BuildingClass>
 class BuildingTypeImpl : public BuildingType {
 public:
 	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName) :
-		Buildable(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName) {}
+		BuildingType(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName) {}
 
 	int getProductionCost() const {
 		return this->productionCost;

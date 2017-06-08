@@ -2,6 +2,10 @@
 #include "basic_unit.h"
 #include "heavy_unit.h"
 
+UnitType::UnitType(BuildType buildType, int productionCost) : Buildable(Buildable::BuildType::UNIT, productionCost) {
+
+}
+
 UnitType* UnitType::getByIdentifier(TypeIdentifier identifier) {
 	return unittypeMap[identifier];
 }

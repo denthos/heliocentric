@@ -21,7 +21,7 @@ City::City(UID id, Player* owner, Attack* attack, CityManager* manager, int def,
 }
 
 void City::initialize() {
-	this->update = std::make_shared<CityUpdate>(this->getID(), this->get_health());
+	this->update = std::make_shared<CityUpdate>(this->getID(), this->get_health(), this->get_production(), this->get_research_points());
 	this->target = nullptr;
 }
 

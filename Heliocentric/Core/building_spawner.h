@@ -2,7 +2,6 @@
 
 #include <memory>
 #include "builder.h"
-#include "identifiable.h"
 
 class BuildingSpawner : public virtual Builder {
 private:

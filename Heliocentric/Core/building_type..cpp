@@ -3,6 +3,10 @@
 #include "fusion_plant.h"
 #include "research_facility.h"
 
+BuildingType::BuildingType(BuildType buildType, int productionCost) : Buildable(Buildable::BuildType::BUILDING, productionCost) {
+
+}
+
 BuildingType* BuildingType::getByIdentifier(TypeIdentifier identifier) {
 	return buildingTypeMap[identifier];
 }

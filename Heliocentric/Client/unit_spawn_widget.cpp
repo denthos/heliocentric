@@ -46,8 +46,8 @@ void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, const ResourceCollec
 		createUnitProgress->setValue(0.0f);
 	}
 
-	productionLabel->setCaption("Production: " + std::to_string(spawner->getProduction()));
-	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getUnitSpawnQueue().size()));
+	productionLabel->setCaption("Production: " + std::to_string(spawner->get_production()));
+	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getProductionQueue().size()));
 }
 
 void UnitSpawnWidget::setCreateButtonCallback(std::function<void(UnitType*)> callback) {

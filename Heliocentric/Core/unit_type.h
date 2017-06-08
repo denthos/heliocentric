@@ -19,6 +19,8 @@ public:
 	const static TypeIdentifier FIRST = BASIC_UNIT; // should always be the first in enum
 	const static int NUM_TYPES = 2;
 
+	UnitType(BuildType buildType, int productionCost);
+
 	static UnitType* getByIdentifier(TypeIdentifier);
 
 	virtual std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) = 0;
@@ -41,7 +43,7 @@ template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
 	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int productionCost, std::string typeName, int baseHealth) :
-		Buildable(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), typeName(typeName), baseHealth(baseHealth) {}
+		UnitType(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), typeName(typeName), baseHealth(baseHealth) {}
 
 	std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
 		return std::make_shared<UnitClass>(position, owner, manager, this);

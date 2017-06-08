@@ -1,13 +1,15 @@
 #pragma once
 
+#include "identifiable.h"
 #include "buildable.h"
 #include "building_type.h"
 #include "unit_type.h"
-#include "unit_spawner_update.h"
 #include <exception>
 #include <vector>
 
 #define INITIAL_PRODUCTION 1
+
+class UnitSpawnerUpdate;
 
 class Builder {
 	friend class UnitSpawnerUpdate;

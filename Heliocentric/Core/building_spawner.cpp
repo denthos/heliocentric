@@ -1,4 +1,5 @@
 #include "building_spawner.h"
+#include "unit_spawner_update.h"
 #include "logging.h"
 
 BuildingSpawner::BuildingSpawner() : Builder() {

@@ -3,7 +3,6 @@
 #include <atomic>
 #include <memory>
 #include "builder.h"
-#include "identifiable.h"
 
 class UnitSpawner : public virtual Builder {
 private:

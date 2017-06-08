@@ -2,6 +2,7 @@
 #include "identifiable.h"
 #include "unit_type.h"
 #include "building_type.h"
+#include "builder.h"
 
 class UnitSpawnerUpdate {
 public:
@@ -28,6 +29,8 @@ public:
 			case Buildable::BuildType::UNIT:
 				type = (UnitType*) UnitType::getByIdentifier(unitType);
 				break;
+			default:
+				return;
 		}
 		
 		switch (updateType) {
