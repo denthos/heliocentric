@@ -80,6 +80,8 @@ public:
 
 	void setSelection(std::vector<GameObject*>);
 	void createUnitFromCity(DrawableCity* city, UnitType* unit_type);
+	void sendTradeDeal(std::shared_ptr<TradeData> deal);
+	void sendTradeCommand(UID trade_id, bool is_accepted);
 
 protected:
 	/**** Handlers for ChanneledClient ****/
@@ -137,8 +139,6 @@ private:
 	void handleF4Key(int);
 	void handleF6Key(int);
 	void handleF10Key(int);
-	void handleF11Key(int);
-	void handleF12Key(int);
 	void handleLeftBracketKey(int);
 	void handleRightBracketKey(int);
 };
