@@ -213,7 +213,17 @@ void GameServer::performUpdates() {
 
 	/* These updates should only be sent to the relevant players */
 	for (auto& spawner_update : city_manager->getSpawnerUpdates()) {
-		UID owner_id = city_manager->get_city(spawner_update->id)->get_player()->getID();
+		auto city = city_manager->get_city(spawner_update->id);
+		if (!city) {
+			continue;
+		}
+
+		auto player = city->get_player();
+		if (!player) {
+			continue;
+		}
+
+		UID owner_id = player->getID();
 		this->addUpdateToSendQueue(spawner_update, { owner_id });
 	}
 
