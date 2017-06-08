@@ -97,7 +97,7 @@ std::shared_ptr<UnitSpawnerUpdate> CityManager::spawnUnit(std::shared_ptr<Player
 	return city_pair->second->spawnUnit(command->createUnitType);
 }
 
-std::shared_ptr<BuildingSpawnerUpdate> CityManager::spawnBuilding(std::shared_ptr<PlayerCommand> command) {
+std::shared_ptr<UnitSpawnerUpdate> CityManager::spawnBuilding(std::shared_ptr<PlayerCommand> command) {
 	auto& city_pair = this->cities.find(command->initiator);
 	if (city_pair == this->cities.end()) {
 		throw City::BadUIDException();

@@ -1,6 +1,7 @@
 #pragma once
 #include "identifiable.h"
 #include "unit_type.h"
+#include "building_type.h"
 
 class UnitSpawnerUpdate {
 public:
@@ -12,12 +13,23 @@ public:
 	};
 
 	UpdateType updateType;
+	Buildable::BuildType buildType; // specifies which type of object is being built
+	BuildingType::TypeIdentifier buildingType;
 	UnitType::TypeIdentifier unitType;
 	int percent;
 	UID id;
 
-	void apply(UnitSpawner* spawner) {
-		UnitType* type = UnitType::getByIdentifier(unitType);
+	void apply(Builder* spawner) {
+		Buildable* type;
+		switch (buildType) {
+			case Buildable::BuildType::BUILDING:
+				type = (BuildingType*)BuildingType::getByIdentifier(buildingType);
+				break;
+			case Buildable::BuildType::UNIT:
+				type = (UnitType*) UnitType::getByIdentifier(unitType);
+				break;
+		}
+		
 		switch (updateType) {
 		case ADD_TO_QUEUE:
 			spawner->production_queue.push_back(type);

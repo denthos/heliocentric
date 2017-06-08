@@ -66,7 +66,6 @@
     <ClInclude Include="builder.h" />
     <ClInclude Include="building.h" />
     <ClInclude Include="building_spawner.h" />
-    <ClInclude Include="building_spawner_update.h" />
     <ClInclude Include="building_type.h" />
     <ClInclude Include="fission_plant.h" />
     <ClInclude Include="fusion_plant.h" />

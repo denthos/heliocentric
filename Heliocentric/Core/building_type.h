@@ -1,6 +1,8 @@
 #pragma once
 #include "buildable.h"
+#include "identifiable.h"
 #include <unordered_map>
+#include "building.h"
 
 class BuildingType : public Buildable {
 public:
@@ -15,8 +17,6 @@ public:
 
 	static BuildingType* getByIdentifier(TypeIdentifier);
 
-	virtual void createBuilding() = 0;
-
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
 
@@ -27,5 +27,23 @@ private:
 template <typename BuildingClass>
 class BuildingTypeImpl : public BuildingType {
 public:
+	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName) :
+		Buildable(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName) {}
 
+	int getProductionCost() const {
+		return this->productionCost;
+	}
+
+	const std::string& getTypeName() const {
+		return this->typeName;
+	}
+
+	TypeIdentifier getIdentifier() const {
+		return this->identifier;
+	}
+
+private:
+	std::string typeName;
+
+	TypeIdentifier identifier;
 };

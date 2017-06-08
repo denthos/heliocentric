@@ -239,9 +239,6 @@
     <ClInclude Include="building_spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="building_spawner_update.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
