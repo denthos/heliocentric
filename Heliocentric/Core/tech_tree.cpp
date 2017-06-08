@@ -95,7 +95,7 @@ void TechTree::build_tree() {
 	techs[TECH_2] = new Technology(TECH_2, 100.0f, "Tech 2", "Does a tech");
 	techs[TECH_3] = new Technology(TECH_3, 400.0f, "Heavy Unit", "Allows Spawning of a Heavy Unit");
 	techs[TECH_4] = new Technology(TECH_4, 400.0f, "Tech 4", "Does a tech");
-	techs[TECH_5] = new Technology(TECH_5, 400.0f, "Tech 5", "Does a tech");
+	techs[TECH_5] = new Technology(TECH_5, 400.0f, "Exploration Program", "Increases the city settlement limit.");
 	techs[TECH_6] = new Technology(TECH_6, 800.0f, "Tech 6", "Does a tech");
 
 	techs[TECH_1]->add_children({ techs[TECH_3], techs[TECH_4] });

@@ -50,6 +50,11 @@ void Player::research() {
 			this->research_update->research_points = this->research_points;
 			this->research_update->tech_id = current_tech->getID();
 			send_update_to_manager(this->research_update);
+
+			if (current_tech->hasResearched() && current_tech->getID() == TECH_5) {
+				// Increase the settlement limit
+				settlement_limit += 1;
+			}
 		}
 	}
 	catch (TechTree::ResearchIdleException) {
@@ -58,8 +63,13 @@ void Player::research() {
 }
 
 void Player::research(float research_points) {
-	Technology* dummy;
-	tech_tree.research(research_points, dummy);
+	Technology* current_tech;
+	if (tech_tree.research(research_points, current_tech) && current_tech->hasResearched()) {
+		if (current_tech->getID() == TECH_5) {
+			// Increase the settlement limit
+			settlement_limit += 1;
+		}
+	}
 }
 
 std::string Player::get_name() const {
