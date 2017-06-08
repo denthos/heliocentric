@@ -16,7 +16,9 @@ public:
 	float fov, nearDist, farDist, aspectRatio;
 	int width, height;
 	bool active;
-	glm::mat4 view, perspective, infinite_perspective;
+	glm::mat4 view, perspective, infinite_perspective, ortho;
+	glm::vec4 viewport;
+	glm::mat4 projection;
 
 	ViewFrustum viewFrustum;
 
@@ -27,6 +29,7 @@ public:
 	glm::mat4 calculateViewMatrix();
 	glm::mat4 calculatePerspectiveMatrix();
 	glm::mat4 calculateInfinitePerspectiveMatrix();
+	glm::mat4 calculateOrthoMatrix();
 	ViewFrustum calculateViewFrustum();
 	void setActive(bool);
 

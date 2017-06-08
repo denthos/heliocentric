@@ -1,5 +1,5 @@
 #include "player_icon.h"
-
+#include <math.h>
 PlayerIcon::PlayerIcon(Shader * shader)
 {
 	this->shader = shader;
@@ -31,21 +31,32 @@ PlayerIcon::~PlayerIcon()
 {
 }
 
+void PlayerIcon::update(const glm::vec3 & position)
+{
+	world_mat = glm::translate(glm::mat4(1.0f), position);
+}
 
-void PlayerIcon::draw(const Camera & camera, const glm::mat4 & toWorld)
+
+void PlayerIcon::draw(const Camera & camera)
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	shader->bind();
-	GLuint shaderID = shader->getPid();
+	GLuint shaderID = shader->getPid();  
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, &camera.perspective[0][0]);
+	//get clipping coordinates which are normalized between -1 and 1
+	glm::vec4 viewportProjection = (camera.perspective  * camera.view * world_mat * glm::vec4(glm::vec3(0.0), 1.0f));
+
+	
+	glm::vec3 offset = viewportProjection / viewportProjection.w;
+
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, &camera.perspective[0][0]); 
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_FALSE, &camera.view[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, &toWorld[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, &world_mat[0][0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "offset"), 1, &offset[0]);
 
-
-
+	std::cerr << "Screen coords" << offset.x << "," << offset.y << std::endl;
 
 	//bind texture
 	//texture.bind();

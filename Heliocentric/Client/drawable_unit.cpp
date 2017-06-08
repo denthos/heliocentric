@@ -29,6 +29,10 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* l
     this->laser = laser;
     this->glow = false;
 
+
+	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
+	icon = new PlayerIcon(iconShader);
+
     BoundingBox bbox = getBoundingBox();
     glm::vec3 b_max = bbox.max;
     glm::vec3 b_min = bbox.min;
@@ -45,9 +49,11 @@ void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 	shoot_sound->update(this->get_position());
+	icon->update(this->get_position());
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
+	icon->draw(camera);
     PlayerColor::Color player_color = this->get_player()->getColor();
     shader->bind();
     GLuint shaderID = shader->getPid();
@@ -67,7 +73,8 @@ void DrawableUnit::draw(const Camera & camera) const {
 	if (this->client_isattacking) {
 		shoot_sound->play(get_position());
 		laser->Update(camera);
-		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
+		//TODO uncomment or fix with master always shooting laser;
+		//laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "glm\glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 #include "shader.h"
 #include "texture.h"
 #include "camera.h"
@@ -14,8 +15,8 @@ class PlayerIcon {
 public:
 	PlayerIcon( Shader* shader); //init fields
 	~PlayerIcon();
-	
-	void draw(const Camera &camera, const glm::mat4 &toWorld);
+	void update(const glm::vec3 &position);
+	void draw(const Camera &camera);
 	glm::mat4 world_mat;
 
 private:

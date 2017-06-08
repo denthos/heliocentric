@@ -12,8 +12,11 @@ Camera::Camera() : Camera(glm::vec3(0.0f, 0.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 
 Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, float nearDist, float farDist, int width, int height, bool active) :
 	position(position), target(target), up(up), fov(fov), nearDist(nearDist), farDist(farDist), width(width), height(height), active(active) {
 	calculateViewMatrix();
+	calculateOrthoMatrix();
 	calculatePerspectiveMatrix();
 	calculateInfinitePerspectiveMatrix();
+	viewport = glm::vec4(0.0, 0.0, (float)width, (float)height);
+	projection = glm::frustum(-1.0f, 1.0f, -1.0f, 1.0f, nearDist, farDist);
 }
 
 void Camera::loadSettings(Lib::INIParser & config) {
@@ -40,6 +43,11 @@ glm::mat4 Camera::calculateInfinitePerspectiveMatrix()
 		infinite_perspective = glm::infinitePerspective((float)fov, aspectRatio, nearDist);
 	}
 	return infinite_perspective;
+}
+
+glm::mat4 Camera::calculateOrthoMatrix()
+{
+	return glm::ortho(0.0f, (float) width, 0.0f, (float) height, nearDist, farDist);
 }
 
 

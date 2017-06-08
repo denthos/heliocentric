@@ -8,6 +8,7 @@
 #include "unit_type.h"
 #include "particle_system.h"
 #include "audio_3d_sound.h"
+#include "player_icon.h"
 
 class GUI;
 class Client;
@@ -34,7 +35,8 @@ public:
 
 private:
 	DrawableUnitData data;
-
+	PlayerIcon* icon;
+	Shader* iconShader;
 	glm::mat4 rotation_matrix;
 	glm::vec3 old_orientation;
 	ParticleSystem* laser;
