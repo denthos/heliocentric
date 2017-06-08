@@ -19,7 +19,7 @@ vec4 explode(vec4 position, vec3 normal)
 	if(!explode_on){
 		return position;
     }
-    vec3 direction = normal * (timer / 2.0f) * magnitude; 
+    vec3 direction = normal * (time / 2.0f) * magnitude; 
     return position + vec4(direction, 0.0f);
 }
 
