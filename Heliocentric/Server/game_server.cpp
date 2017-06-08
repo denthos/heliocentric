@@ -428,7 +428,7 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			this->addFunctionToProcessQueue([this, command, owner]() {
 				//TODO: Make all managers know about other managers (eg playermanager) so that this is cleaner
 				UnitType* type = UnitType::getByIdentifier(command->createUnitType);
-				if (!type->hasBuildRequirements(owner->getResources())) {
+				if (!owner->can_create_unit(type)) {
 					// The player does not have the proper requirements. Bail out!
 					return;
 				}

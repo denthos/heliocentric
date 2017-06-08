@@ -25,6 +25,7 @@ public:
 
 
 	virtual bool hasBuildRequirements(const ResourceCollection& resources) const = 0;
+	virtual bool hasTechRequirements(const TechTree& tree) const = 0;
 	virtual const ResourceCollection& getBuildRequirements() const = 0;
 
 	virtual int getBuildTime() const = 0;
@@ -41,8 +42,8 @@ private:
 template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
-	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName, int baseHealth) :
-		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth) {}
+	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName, int baseHealth, std::vector<int> required_techs) :
+		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth), requiredTechs(required_techs) {}
 
 	std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
 		return std::make_shared<UnitClass>(position, owner, manager, this);
@@ -63,6 +64,16 @@ public:
 			}
 
 			if (resource_iter != resources.end() && resource_iter->second < required_resources) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	virtual bool hasTechRequirements(const TechTree& tree) const {
+		for (int required_tech_id : this->requiredTechs) {
+			if (!tree.getTechById(required_tech_id)->hasResearched()) {
 				return false;
 			}
 		}
@@ -92,6 +103,7 @@ public:
 
 private:
 	ResourceCollection buildRequirements;
+	std::vector<int> requiredTechs;
 	int buildTime;
 	int baseHealth;
 
