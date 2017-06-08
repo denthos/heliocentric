@@ -69,7 +69,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 
 	glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), is_exploding);
 	if (is_exploding) {
-		glUniform1f(glGetUniformLocation(shader->getPid(), "time"), (float)(explosion_counter)/ 100.0f);
+		glUniform1f(glGetUniformLocation(shader->getPid(), "time"), (float)(explosion_counter)/ 50.0f);
 	}
     //color cities based on player color
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
