@@ -7,6 +7,8 @@
 
 class Builder {
 public:
+	enum BuildType {IDLE, BUILDING, UNIT};
+
 	Builder();
 
 	const std::vector<Buildable*>& getProductionQueue();
@@ -17,16 +19,17 @@ public:
 	void set_production(int);
 	int get_production() const;
 
-	bool progressSpawnAndCreateUpdate();
+	BuildType progressSpawnAndCreateUpdate();
 
 protected:
 	/* These two functions deal with updates, so let subclasses implement them. */
-	virtual bool produce() = 0;
-	virtual void popFromQueue() = 0;
+	virtual BuildType produce() = 0;
+	virtual BuildType popFromQueue() = 0;
 
 	std::vector<Buildable*> production_queue;
 
 	Buildable* currentProduction;
+	BuildType buildType;
 	bool currentlyProducing;
 	int currentProductionProgress;
 	int currentProductionProgressPercent;

@@ -6,7 +6,7 @@
 #include "building_spawner_update.h"
 #include "identifiable.h"
 
-class BuildingSpawner : public Builder {
+class BuildingSpawner : virtual public Builder {
 
 	friend class BuildingSpawnerUpdate;
 
@@ -16,8 +16,8 @@ private:
 	std::shared_ptr<BuildingSpawnerUpdate> update;
 	UID id;
 
-	bool produce();
-	void popFromQueue();
+	Builder::BuildType produce();
+	Builder::BuildType popFromQueue();
 
 protected:
 	void spawnCompleteHandler(BuildingType* type);

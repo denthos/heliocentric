@@ -8,7 +8,7 @@
 
 class UnitSpawnerUpdate;
 
-class UnitSpawner : public Builder {
+class UnitSpawner : virtual public Builder {
 
 	friend class UnitSpawnerUpdate;
 
@@ -18,8 +18,8 @@ private:
 	std::shared_ptr<UnitSpawnerUpdate> update;
 	UID id;
 
-	bool produce();
-	void popFromQueue();
+	Builder::BuildType produce();
+	Builder::BuildType popFromQueue();
 
 protected:
 	void spawnCompleteHandler(UnitType* type);

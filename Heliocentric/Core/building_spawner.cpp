@@ -23,7 +23,7 @@ std::shared_ptr<BuildingSpawnerUpdate> BuildingSpawner::spawnBuilding(BuildingTy
 	return update;
 }
 
-void BuildingSpawner::popFromQueue() {
+Builder::BuildType BuildingSpawner::popFromQueue() {
 	/* Take the item from the production queue and begin processing */
 	BuildingType* itemToProcess = (BuildingType*) this->production_queue.front();
 	this->production_queue.erase(this->production_queue.begin());
@@ -35,9 +35,11 @@ void BuildingSpawner::popFromQueue() {
 	/* Make the update */
 	this->update->updateType = BuildingSpawnerUpdate::UpdateType::POP_FROM_QUEUE;
 	this->update->buildingType = itemToProcess->getIdentifier();
+
+	return Builder::BuildType::BUILDING;
 }
 
-bool BuildingSpawner::produce() {
+Builder::BuildType BuildingSpawner::produce() {
 	/* We are currently producing something. Let's increment it! */
 
 	this->currentProductionProgress += (1 + this->production);
@@ -61,15 +63,15 @@ bool BuildingSpawner::produce() {
 		this->currentProductionProgress = 0;
 		this->currentProductionProgressPercent = 0;
 
-		return true;
+		return Builder::BuildType::BUILDING;
 	}
 	else if (progressPercent > currentProductionProgressPercent) {
 		currentProductionProgressPercent = progressPercent;
 		LOG_DEBUG(progressPercent);
-		return true;
+		return Builder::BuildType::BUILDING;
 	}
 
-	return false;
+	return Builder::BuildType::IDLE;
 }
 
 std::shared_ptr<BuildingSpawnerUpdate> BuildingSpawner::getSpawnUpdate() {

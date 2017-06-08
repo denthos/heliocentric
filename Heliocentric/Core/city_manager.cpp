@@ -19,8 +19,18 @@ void CityManager::doLogic() {
 	for (auto& city_pair : get_cities()) {
 		City* city = city_pair.second.get();
 
-		if (city->progressSpawnAndCreateUpdate()) {
-			this->unit_spawner_updates.insert(city->getSpawnUpdate());
+		Builder::BuildType buildType = city->progressSpawnAndCreateUpdate();
+		switch (buildType) {
+			case Builder::BuildType::IDLE:
+				break;
+			case Builder::BuildType::BUILDING:
+				this->building_spawner_updates.insert(city->BuildingSpawner::getSpawnUpdate());
+				break;
+			case Builder::BuildType::UNIT:
+				this->unit_spawner_updates.insert(city->UnitSpawner::getSpawnUpdate());
+				break;
+			default:
+				LOG_ERR("Invalid Builder build type.");
 		}
 	}
 }

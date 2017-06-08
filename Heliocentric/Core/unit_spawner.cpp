@@ -23,7 +23,7 @@ std::shared_ptr<UnitSpawnerUpdate> UnitSpawner::spawnUnit(UnitType::TypeIdentifi
 	return update;
 }
 
-void UnitSpawner::popFromQueue() {
+Builder::BuildType UnitSpawner::popFromQueue() {
 	/* Take the item from the production queue and begin processing */
 	UnitType* itemToProcess = (UnitType*) this->production_queue.front();
 	this->production_queue.erase(this->production_queue.begin());
@@ -35,9 +35,11 @@ void UnitSpawner::popFromQueue() {
 	/* Make the update */
 	this->update->updateType = UnitSpawnerUpdate::UpdateType::POP_FROM_QUEUE;
 	this->update->unitType = itemToProcess->getIdentifier();
+
+	return Builder::BuildType::UNIT;
 }
 
-bool UnitSpawner::produce() {
+Builder::BuildType UnitSpawner::produce() {
 	/* We are currently producing something. Let's increment it! */
 
 	this->currentProductionProgress += (1 + this->production);
@@ -61,15 +63,15 @@ bool UnitSpawner::produce() {
 		this->currentProductionProgress = 0;
 		this->currentProductionProgressPercent = 0;
 
-		return true;
+		return Builder::BuildType::UNIT;
 	}
 	else if (progressPercent > currentProductionProgressPercent) {
 		currentProductionProgressPercent = progressPercent;
 		LOG_DEBUG(progressPercent);
-		return true;
+		return Builder::BuildType::UNIT;
 	}
 
-	return false;
+	return Builder::BuildType::IDLE;
 }
 
 std::shared_ptr<UnitSpawnerUpdate> UnitSpawner::getSpawnUpdate() {

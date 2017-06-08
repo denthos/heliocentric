@@ -1,6 +1,6 @@
 #include "builder.h"
 
-Builder::Builder() : currentProduction(NULL), currentlyProducing(false),
+Builder::Builder() : currentProduction(NULL), buildType(IDLE), currentlyProducing(false),
 	currentProductionProgress(0), currentProductionProgressPercent(0), production(INITIAL_PRODUCTION) {
 
 }
@@ -29,12 +29,11 @@ int Builder::get_production() const {
 	return this->production;
 }
 
-bool Builder::progressSpawnAndCreateUpdate() {
+Builder::BuildType Builder::progressSpawnAndCreateUpdate() {
 	/* If there is something being processed, process it */
 	if (!currentlyProducing && !this->production_queue.empty()) {
 		/* There is not something processing. Let's start the processing! */
-		this->popFromQueue();
-		return true;
+		return this->popFromQueue();
 	}
 	else if (currentlyProducing) {
 		/* We are currently producing something.. let's work on that. */
@@ -42,6 +41,6 @@ bool Builder::progressSpawnAndCreateUpdate() {
 	}
 	else {
 		/* The production queue is empty and we are not currently working on something. We can do nothing!*/
-		return false;
+		return IDLE;
 	}
 }
