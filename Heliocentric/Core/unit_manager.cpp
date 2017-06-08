@@ -52,7 +52,7 @@ std::shared_ptr<UnitCreationUpdate> UnitManager::add_unit(glm::vec3 create_locat
 
 	int personal_space = rand() % 100 - 50;
 	auto update = std::make_shared<UnitCreationUpdate>(new_unit->getID(),
-		create_location.x + personal_space, create_location.y, create_location.z, player->getID(), 100, 100, type->getIdentifier());
+		create_location.x, create_location.y, create_location.z, player->getID(), new_unit->get_combat_defense(), new_unit->get_health(), type->getIdentifier());
 
 	idle_units.insert(std::make_pair(new_unit->getID(), std::move(new_unit)));
 	return update;

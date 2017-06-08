@@ -34,6 +34,7 @@ public:
 	virtual TypeIdentifier getIdentifier() const = 0;
 
 	virtual int getBaseHealth() const = 0;
+	virtual int getBaseDefense() const = 0;
 
 private:
 	static std::unordered_map<UnitType::TypeIdentifier, UnitType*> unittypeMap;
@@ -42,15 +43,31 @@ private:
 template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
-	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName, int baseHealth, std::vector<int> required_techs) :
-		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth), requiredTechs(required_techs) {}
+	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName, int baseHealth, int baseDefense, std::vector<int> required_techs) :
+		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth), baseDefense(baseDefense), requiredTechs(required_techs) {}
 
 	std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
-		return std::make_shared<UnitClass>(position, owner, manager, this);
+		std::shared_ptr<UnitClass> unit = std::make_shared<UnitClass>(position, owner, manager, this);
+		applyChangesToUnit(unit, owner);
+		return unit;
 	}
 
 	std::shared_ptr<Unit> createUnit(UID id, glm::vec3 position, Player* owner, UnitManager* manager) {
-		return std::make_shared<UnitClass>(id, position, owner, manager, this);
+		std::shared_ptr<UnitClass> unit = std::make_shared<UnitClass>(id, position, owner, manager, this);
+		applyChangesToUnit(unit, owner);
+		return unit;
+	}
+
+	void applyChangesToUnit(std::shared_ptr<Unit> unit, Player* owner) {
+		/* Let's see if the user researched increased armor */
+		const Technology* armor_tech = owner->getTechTree().getTechById(TECH_1);
+		if (!armor_tech) {
+			return;
+		}
+
+		if (armor_tech->hasResearched()) {
+			unit->set_combat_defense(unit->get_combat_defense() + 10);
+		}
 	}
 
 	bool hasBuildRequirements(const ResourceCollection& resources) const {
@@ -93,6 +110,10 @@ public:
 		return this->baseHealth;
 	}
 
+	int getBaseDefense() const {
+		return this->baseDefense;
+	}
+
 	const std::string& getTypeName() const {
 		return this->typeName;
 	}
@@ -106,6 +127,7 @@ private:
 	std::vector<int> requiredTechs;
 	int buildTime;
 	int baseHealth;
+	int baseDefense;
 
 	std::string typeName;
 
