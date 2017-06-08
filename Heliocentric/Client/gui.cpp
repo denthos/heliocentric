@@ -178,6 +178,12 @@ void GUI::setFPS(double fps) {
 	this->fpsDisplay->setCaption(oss.str());
 }
 
+void GUI::setTimer(double timer) {
+	std::ostringstream oss;
+	oss << "Timer: " << clock();
+	this->timerDisplay->setCaption(oss.str());
+}
+
 void GUI::addPlayer(std::shared_ptr<Player> new_player) {
 	players.push_back(new_player);
 
@@ -257,6 +263,9 @@ void GUI::createPlayerOverlay() {
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", FONT, FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+	timerDisplay = new Label(playerOverlay, "Timer: ", FONT, FONT_SIZE);
+	timerDisplay->setTooltip("Time Remaining... Hurry!");
+	timerDisplay->setFixedWidth(10 * PIXELS_PER_CHARACTER);
 	fpsDisplay = new Label(playerOverlay, "FPS: ", FONT, FONT_SIZE);
 	fpsDisplay->setTooltip("Frames per second");
 	fpsDisplay->setFixedWidth(9 * PIXELS_PER_CHARACTER);

@@ -504,7 +504,7 @@ void Client::display() {
 		//frameTimer = currentTime;
 		frameTimer += 1.0;
 	}
-
+	gui->setTimer(currentTime);
 
 
 	glfwPollEvents();

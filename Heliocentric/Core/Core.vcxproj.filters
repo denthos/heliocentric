@@ -212,6 +212,9 @@
     <ClInclude Include="research_command.h">
       <Filter>Commands</Filter>
     </ClInclude>
+    <ClInclude Include="time_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -369,6 +372,9 @@
     </ClCompile>
     <ClCompile Include="research_command.cpp">
       <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="time_update.cpp">
+      <Filter>Updates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
