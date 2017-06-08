@@ -1,6 +1,6 @@
 #include "client.h"
 
-//#include <glad\glad.h>
+#include <glad\glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <functional>
@@ -9,6 +9,7 @@
 #include <soil.h>
 #include <thread>
 
+#include "research_command.h"
 #include "free_camera.h"
 #include "model_preloader.h"
 #include "orbital_camera.h"
@@ -102,7 +103,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2), width, height);
+	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2),
+				std::bind(&Client::beginResearchOnTechnology, this, std::placeholders::_1), width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -924,6 +926,16 @@ void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender
 
 	LOG_DEBUG(update->percent);
 	update->apply(spawner_it->second);
+}
+
+
+void Client::beginResearchOnTechnology(const Technology* tech) {
+	if (!tech) {
+		return;
+	}
+
+	ResearchCommand command(tech->getID());
+	this->channeled_send(&command);
 }
 
 void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {

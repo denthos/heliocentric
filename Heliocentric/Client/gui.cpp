@@ -17,8 +17,9 @@
 #define FONT_FILE "Fonts/Courier.ttf"
 #define MAX_RESOURCE_CHARACTERS 9
 
-GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tradeCallback, std::function<void(UID, bool)> tradeHandlerCallback, int screenWidth, int screenHeight) : 
+GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tradeCallback, std::function<void(UID, bool)> tradeHandlerCallback, std::function<void(const Technology*)> techResearchCallback, int screenWidth, int screenHeight) : 
 	Screen(), tradeCallback(tradeCallback), tradeHandlerCallback(tradeHandlerCallback), screenWidth(screenWidth), screenHeight(screenHeight) {
+
 	this->initialize(window, false);
 
 	// load placeholder image
@@ -45,6 +46,8 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
 	this->createUnitDisplay();
+	this->createTechTreePreviewWindow();
+	this->createTechTreeWindow(techResearchCallback);
 
 	this->setVisible(true);
 	this->performLayout();
@@ -52,22 +55,74 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	setScreenSize(screenWidth, screenHeight);
 }
 
-void GUI::update() {
-	if (player) {
-		for (std::pair<Resources::Type, Label *> resourceLabel : resourceLabels) {
-			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
-		}
-	}
 
+void GUI::update() {
+	updatePlayerOverlay();
 	updateCityWindow();
 	updateUnitWindow();
+	updateTechTreePreviewWindow();
+	updateTechTreeWindow();
 }
-
 
 
 GUI::~GUI()
 {
 	delete unit_window;
+}
+
+void GUI::updatePlayerOverlay() {
+	if (player) {
+		for (std::pair<Resources::Type, Label *> resourceLabel : resourceLabels) {
+			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
+		}
+	}
+}
+
+void GUI::createTechTreePreviewWindow() {
+	this->techPreviewWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 100, screenHeight - 200), "Technology");
+
+	std::function<void()> previewCallback = std::bind(&GUI::showChooseTechWindow, this);
+	this->techPreviewWidget = new TechPreviewWidget(techPreviewWindow, previewCallback);
+	formHelper->addWidget("", techPreviewWidget);
+}
+
+void GUI::createTechTreeWindow(std::function<void(const Technology*)> techResearchCallback) {
+	this->techTreeWindow = formHelper->addWindow(Eigen::Vector2i(0, 0), "Research");
+	this->techTreeWidget = new TechTreeWidget(techTreeWindow, [this, techResearchCallback](const Technology* tech) {
+		this->techTreeWindow->performLayout(nvgContext());
+		techResearchCallback(tech);
+	});
+	formHelper->addWidget("", techTreeWidget);
+
+	Button* closeButton = new Button(techTreeWindow->buttonPanel(), "X");
+	closeButton->setCallback([this]() {
+		techTreeWindow->setVisible(false);
+	});
+
+	techTreeWindow->setVisible(false);
+}
+
+
+void GUI::updateTechTreePreviewWindow() {
+	if (this->techPreviewWindow->visible()) {
+		this->techPreviewWidget->updatePreview(&player->getTechTree());
+	}
+}
+
+void GUI::showChooseTechWindow() {
+	techTreeWidget->updateTechTreeWidget(&player->getTechTree());
+	techTreeWindow->setSize(Eigen::Vector2i(techTreeWidget->width(), techTreeWidget->height() + 20));
+	techTreeWindow->performLayout(nvgContext());
+	techTreeWindow->setVisible(true);
+	techTreeWindow->center();
+}
+
+void GUI::updateTechTreeWindow() {
+	// Only do things if we are looking at the tech tree window
+	if (techTreeWindow->visible()) {
+		techTreeWidget->updateTechTreeWidget(&player->getTechTree());
+		techTreeWindow->performLayout(nvgContext());
+	}
 }
 
 void GUI::updateUnitWindow() {

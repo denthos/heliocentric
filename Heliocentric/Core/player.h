@@ -51,6 +51,8 @@ public:
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
 
+	TechTree& getTechTree();
+
 	const ResourceCollection& getResources() const;
 	int get_resource_amount(Resources::Type);
 	void set_resource_amount(Resources::Type, int);
@@ -93,6 +95,7 @@ private:
 	PlayerColor::Color color;
 
 	std::shared_ptr<PlayerScoreUpdate> score_update;
+	std::shared_ptr<PlayerResearchUpdate> research_update;
 	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
 	void send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update);
   
