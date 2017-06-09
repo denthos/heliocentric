@@ -2,6 +2,7 @@
 #include "fission_plant.h"
 #include "fusion_plant.h"
 #include "research_facility.h"
+#include "hadron_collider.h"
 #include "fortress.h"
 
 BuildingType::BuildingType(BuildType buildType, int productionCost) : Buildable(Buildable::BuildType::BUILDING, productionCost) {
@@ -22,10 +23,15 @@ std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> BuildingType::bu
 		BuildingType::TypeIdentifier::FUSION_PLANT,
 		new BuildingTypeImpl<FusionPlant>(TypeIdentifier::FUSION_PLANT, FUSION_PLANT_COST, "Fusion Power Plant", 0, FUSION_PLANT_PRODUCTION, 0)
 	},
-	
+
 	{
 		BuildingType::TypeIdentifier::RESEARCH_FACILITY,
 		new BuildingTypeImpl<ResearchFacility>(TypeIdentifier::RESEARCH_FACILITY, RESEARCH_FACILITY_COST, "Research Facility", 0, 0, RESEARCH_FACILITY_SCIENCE)
+	},
+
+	{
+		BuildingType::TypeIdentifier::HADRON_COLLIDER,
+		new BuildingTypeImpl<HadronCollider>(TypeIdentifier::HADRON_COLLIDER, HADRON_COLLIDER_COST, "Hadron Collider", 0, HADRON_COLLIDER_PRODUCTION, HADRON_COLLIDER_SCIENCE)
 	},
 
 	{
