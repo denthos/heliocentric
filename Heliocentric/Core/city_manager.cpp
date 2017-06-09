@@ -57,7 +57,7 @@ std::shared_ptr<CityCreationUpdate> CityManager::add_city(Player* player, Slot* 
 		throw Player::SettlementLimitReachedException();
 	}
 
-	std::shared_ptr<City> new_city = std::make_shared<City>(player, new InstantLaserAttack(), this, 100, 100, 0, 0, slot, name);
+	std::shared_ptr<City> new_city = std::make_shared<City>(player, new InstantLaserAttack(), this, 100, 500, 0, 0, slot, name);
 	slot->attachCity(new_city.get());
 	player->acquire_object(new_city.get());
 	auto city_creation_update = std::make_shared<CityCreationUpdate>(player->getID(), slot->getID(), new_city->getID(), new_city->getName(),
