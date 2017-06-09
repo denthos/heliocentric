@@ -24,7 +24,6 @@ public:
 	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system, PlayerIcon* icon);
 
 	~DrawableUnit();
-	virtual void update();
 	virtual void draw(const Camera & camera) const;
 	void select(GUI*, Client*);
 	void unselect(GUI*, Client*);
@@ -39,6 +38,8 @@ public:
 	float explosion_start_time;
 
 	virtual bool do_animation(const Camera & camera) const;
+protected:
+	virtual void update();
 
 private:
 	DrawableUnitData data;
@@ -51,6 +52,11 @@ private:
 	float explosion_counter;
 	glm::vec3 laser_offset;
 	Audio3DSound* shoot_sound;
+	Audio3DSound* explode_sound;
 	const float pi = glm::pi<float>();
 	bool glow;
+
+
+	bool client_oldisattacking;
+	bool justbeganattack;
 };

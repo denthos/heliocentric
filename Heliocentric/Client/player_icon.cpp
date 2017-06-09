@@ -36,7 +36,7 @@ PlayerIcon::~PlayerIcon()
 
 void PlayerIcon::update(const glm::vec3 & position)
 {
-	world_mat = glm::translate(glm::mat4(1.0f), position + unit_offset);
+	world_mat = glm::translate(glm::mat4(1.0f), position + glm::vec3(0.0f, 30.0f, 0.0f));
 }
 
 
@@ -56,7 +56,8 @@ void PlayerIcon::draw(const Camera & camera)
 		glm::vec3 offset = viewportProjection / viewportProjection.w;
 
 		glUniform4fv(glGetUniformLocation(shaderID, "player_color"), 1, &color[0]);
-		glUniform3fv(glGetUniformLocation(shaderID, "offset"), 1, &offset[0]);
+		glUniform3fv(glGetUniformLocation(shaderID, "icon_offset"), 1, &offset[0]);
+		glUniform1f(glGetUniformLocation(shaderID, "size"), size);
 
 
 		//bind texture
@@ -74,5 +75,10 @@ void PlayerIcon::draw(const Camera & camera)
 void PlayerIcon::setColor(glm::vec4 color)
 {
 	this->color = color;
+}
+
+void PlayerIcon::setSize(float size)
+{
+	this->size = size;
 }
 

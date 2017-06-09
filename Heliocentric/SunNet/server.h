@@ -39,10 +39,6 @@ namespace SunNet {
 		SocketConnection_p server_connection;
 
 		PollService poll_service;
-		std::thread poll_thread;
-
-		/* We are going to edit the poll service while its running. */
-		std::mutex poll_service_mutex;
 
 		std::string address;
 		std::string port;
@@ -73,65 +69,7 @@ namespace SunNet {
 		std::function<SocketConnection_p()> connection_create_func;
 
 
-		/**
-		The polling function to be executed by the polling thread. It polls all
-		connected clients and calls hooks depending on the status of the
-		clients
-		*/
-		void poll() {
-			while (this->state == SERVE) {
-				SocketCollection_p ready_sockets;
-				{
-					std::lock_guard<std::mutex> lock(this->poll_service_mutex);
-					ready_sockets = poll_service.poll();
-				}
 
-				if (ready_sockets->size() == 0) {
-					/* CHECKPOINT */
-					if (this->state == DESTRUCTING) break;
-					this->handle_poll_timeout();
-					continue;
-				}
-
-				for (auto socket_it = ready_sockets->begin(); socket_it != ready_sockets->end(); ++socket_it) {
-					if (socket_it->connection == this->server_connection) {
-						if (socket_it->status == SOCKET_STATUS_ERROR) {
-							/* CHECKPOINT */
-							if (this->state == DESTRUCTING) break;
-							this->handle_server_connection_error();
-						}
-						else if (socket_it->status == SOCKET_STATUS_DISCONNECT) {
-							/* CHECKPOINT */
-							if (this->state == DESTRUCTING) break;
-							this->handle_server_disconnect();
-						}
-						else {
-							/* CHECKPOINT */
-							if (this->state == DESTRUCTING) break;
-							this->handle_connection_request();
-						}
-					}
-					else {
-						if (socket_it->status == SOCKET_STATUS_ERROR) {
-							/* CHECKPOINT */
-							if (this->state == DESTRUCTING) break;
-							this->handle_client_error(socket_it->connection);
-						}
-						else if (socket_it->status == SOCKET_STATUS_DISCONNECT) {
-
-							/* CHECKPOINT */
-							if (this->state == DESTRUCTING) break;
-							this->handle_client_disconnect(socket_it->connection);
-						}
-						else{
-							/* CHECKPOINT */
-							if (this->state == DESTRUCTING) break;
-							this->handle_ready_to_read(socket_it->connection);
-						}
-					}
-				}
-			}
-		}
 
 
 	protected:
@@ -139,19 +77,16 @@ namespace SunNet {
 		Adds a socket to the poll service, esp. useful when a new client connects.
 		*/
 		void addToPollService(SocketConnection_p socket) {
-			std::lock_guard<std::mutex> lock(this->poll_service_mutex);
 			this->poll_service.add_socket(socket);
 		}
 
 		/**
 		Removes a socket from the poll service, esp. useful when a client disconnects */
 		void removeFromPollService(SocketConnection_p socket) {
-			std::lock_guard<std::mutex> lock(this->poll_service_mutex);
 			this->poll_service.remove_socket(socket);
 		}
 
 		void clearPollService() {
-			std::lock_guard<std::mutex> lock(this->poll_service_mutex);
 			this->poll_service.clear_sockets();
 		}
 
@@ -207,13 +142,66 @@ namespace SunNet {
 			this->state = DESTRUCTING;
 
 
-			/* Join the poll thread if necessary. Cross our fingers that no virtual functions are called. */
-			if (this->poll_thread.joinable()) {
-				this->poll_thread.join();
-			}
-
 			/* AXE THE CONNECTION, MY LORD! */
 			this->server_connection.reset();
+		}
+
+		/**
+		The polling function to be executed by the polling thread. It polls all
+		connected clients and calls hooks depending on the status of the
+		clients
+		*/
+		bool poll() {
+			if (this->state != SERVE) {
+				return false;
+			}
+			SocketCollection_p ready_sockets = this->poll_service.poll();
+
+			if (ready_sockets->size() == 0) {
+				/* CHECKPOINT */
+				if (this->state == DESTRUCTING) return false;
+				this->handle_poll_timeout();
+				return false;
+			}
+
+			for (auto socket_it = ready_sockets->begin(); socket_it != ready_sockets->end(); ++socket_it) {
+				if (socket_it->connection == this->server_connection) {
+					if (socket_it->status == SOCKET_STATUS_ERROR) {
+						/* CHECKPOINT */
+						if (this->state == DESTRUCTING) return false;
+						this->handle_server_connection_error();
+					}
+					else if (socket_it->status == SOCKET_STATUS_DISCONNECT) {
+						/* CHECKPOINT */
+						if (this->state == DESTRUCTING) return false;
+						this->handle_server_disconnect();
+					}
+					else {
+						/* CHECKPOINT */
+						if (this->state == DESTRUCTING) return false;
+						this->handle_connection_request();
+					}
+				}
+				else {
+					if (socket_it->status == SOCKET_STATUS_ERROR) {
+						/* CHECKPOINT */
+						if (this->state == DESTRUCTING) return false;
+						this->handle_client_error(socket_it->connection);
+					}
+					else if (socket_it->status == SOCKET_STATUS_DISCONNECT) {
+
+						/* CHECKPOINT */
+						if (this->state == DESTRUCTING) return false;
+						this->handle_client_disconnect(socket_it->connection);
+					}
+					else {
+						/* CHECKPOINT */
+						if (this->state == DESTRUCTING) return false;
+						this->handle_ready_to_read(socket_it->connection);
+					}
+				}
+			}
+			return true;
 		}
 
 		/**
@@ -241,7 +229,6 @@ namespace SunNet {
 		*/
 		void serve() {
 			this->state_transition({ OPEN }, SERVE);
-			this->poll_thread = std::thread(&Server<TSocketConnection>::poll, this);
 		}
 
 
@@ -259,12 +246,6 @@ namespace SunNet {
 			Also no rush. The polling thread will not bail out at any checkpoints.
 			The user is properly closing us, so let's take our sweet time :)
 			*/
-			if (std::this_thread::get_id() != this->poll_thread.get_id()) {
-				if (this->poll_thread.joinable()) {
-					this->poll_thread.join();
-				}
-			}
-
 			this->clearPollService();
 
 			/* KILL THE CONNECTION! */

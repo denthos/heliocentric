@@ -154,8 +154,6 @@ void Octree::update() {
 	if (objects.size() <= 1)
 		return;
 
-	
-
 	std::set<Drawable *> objectLists[8];
 	std::vector<Drawable *> delist;
 

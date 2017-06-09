@@ -16,7 +16,7 @@ Audio3DSound::Audio3DSound(ThreeDSoundSystem* system, std::string filepath) : sy
 
 }
 
-void Audio3DSound::play(glm::vec3 pos) {
+void Audio3DSound::playOnce(glm::vec3 pos) {
 	if (this->channel) {
 		bool is_playing;
 		this->channel->isPlaying(&is_playing);

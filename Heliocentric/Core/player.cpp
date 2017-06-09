@@ -146,10 +146,6 @@ bool Player::can_create_unit(UnitType* type) {
 	return (type->hasBuildRequirements(getResources()) && type->hasTechRequirements(getTechTree()));
 }
 
-void Player::add_to_destroy(GameObject* object) {
-	owned_objects[std::type_index(typeid(*object))].erase(object->getID());
-}
-
 std::unordered_map<unsigned int, GameObject*> Player::get_units() {
 	return getOwnedObjects<Unit>();
 }
