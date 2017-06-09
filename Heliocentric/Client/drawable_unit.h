@@ -48,6 +48,6 @@ private:
 	float explosion_counter;
 	glm::vec3 laser_offset;
 	Audio3DSound* shoot_sound;
-	const double pi = glm::pi<float>();
+	const float pi = glm::pi<float>();
 	bool glow;
 };
