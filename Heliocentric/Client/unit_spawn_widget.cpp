@@ -33,10 +33,10 @@ void UnitSpawnWidget::createProductionLabel() {
 	productionLabel = new Label(this, "Production: 999");
 }
 
-void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, const ResourceCollection& resources) {
+void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, Player* player) {
 
 	for (auto& button : createUnitButtons) {
-		button->updateCreateButton(resources);
+		button->updateCreateButton(player);
 	}
 
 	if (spawner->isProducing()) {

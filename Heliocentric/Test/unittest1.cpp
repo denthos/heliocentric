@@ -49,8 +49,6 @@ namespace Test
             sylvia.acquire_object(battleship3);
 
             sylvia.add_to_destroy(battleship1);
-            sylvia.pop();
-
             Assert::AreEqual(2, (int)sylvia.get_units().size());
             Assert::AreEqual(id2, sylvia.get_unit(id2)->getID());
             Assert::AreEqual(id3, sylvia.get_unit(id3)->getID());
@@ -73,8 +71,6 @@ namespace Test
 
             sylvia.add_to_destroy(battleship1);
             sylvia.add_to_destroy(battleship3);
-
-            sylvia.pop();
 
             Assert::AreEqual(1, (int) sylvia.get_units().size());
             Assert::IsNull(sylvia.get_unit(id1));

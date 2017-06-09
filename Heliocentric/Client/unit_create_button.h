@@ -8,7 +8,7 @@ using namespace nanogui;
 class UnitCreateButton : public Button {
 public:
 	UnitCreateButton(Widget* parent, UnitType* unit_type);
-	void updateCreateButton(const ResourceCollection& resources);
+	void updateCreateButton(Player* player);
 	void setCallback(std::function<void(UnitType*)> callback);
 
 private:
