@@ -136,6 +136,7 @@ private:
 	void handleEscapeKey(int);
 	void handleF1Key(int);
 	void handleF2Key(int);
+	void handleF3Key(int);
 	void handleF4Key(int);
 	void handleF6Key(int);
 	void handleF10Key(int);
