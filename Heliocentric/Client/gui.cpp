@@ -616,7 +616,7 @@ void GUI::hideCityUI() {
 }
 
 void GUI::createHelpWindow() {
-	helpWindow = formHelper->addWindow(Eigen::Vector2i(800, 120), "Help");
+	helpWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 800), "Help");
 	Button* helpButton = formHelper->addButton("Open", [this]() {showHelpDetailWindow(); });
 	std::string icon_image_directory = std::string(ICON_IMAGE_DIRECTORY);
 	std::vector<std::pair<int, std::string>> help_icons = loadImageDirectory(nvgContext(), icon_image_directory);
@@ -649,6 +649,15 @@ void GUI::createHelpWindow() {
 	TextBox* rightBracKey = new TextBox(hotKeyPanel, "]");
 	Label* rightBracKeyLabel = new Label(hotKeyPanel, "Increase Volume", LARGE_FONT, STANDARD_FONT_SIZE);
 	formHelper->addWidget("HOT KEYS", hotKeyPanel);
+	Widget* techPanel = new Widget(helpDetailWindow);
+	techPanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Minimum, 10, 10));
+	Label* explainTech1 = new Label(techPanel, "1) STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech2 = new Label(techPanel, "2) Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech3 = new Label(techPanel, "3) HEAVY UNIT. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech4 = new Label(techPanel, "4) Tech 4. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech5 = new Label(techPanel, "5) Exploration Program. Increase city settlement limit by 1. Unlocked by Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech6 = new Label(techPanel, "6) SECRECT.", LARGE_FONT, LARGE_FONT_SIZE);
+	formHelper->addWidget("RESEARCH TECHS", techPanel);
 	this->performLayout();
 
 	hideHelpDetailWindow();
