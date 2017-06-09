@@ -16,5 +16,6 @@ public:
 
 	DrawablePlanet(const Planet & planet, Shader * shader, Shader * slotShader);
 	~DrawablePlanet();
+protected:
 	virtual void update();
 };

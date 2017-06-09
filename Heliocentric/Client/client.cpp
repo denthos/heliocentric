@@ -449,7 +449,7 @@ void Client::display() {
 		// Deal with dead objects.
 		auto& dead_it = dead_units.begin();
 		while (dead_it != dead_units.end()) {
-			dead_it->second->update();
+			dead_it->second->performUpdate(true);
 			if (!dead_it->second->do_animation(*cameras[selectedCamera])) {
 				UID id = dead_it->first;
 				if (selection.size() > 0 && selection[0]->getID() == id) {
@@ -573,6 +573,14 @@ void Client::update() {
 
 	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
 		num_actions.erase(num_actions.begin());
+	}
+
+	for (auto it = planets.begin(); it != planets.end(); ++it) {
+		it->second->performUpdate();
+	}
+
+	for (auto it = units.begin(); it != units.end(); ++it) {
+		it->second->performUpdate();
 	}
 	
 
@@ -1024,7 +1032,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	//LOG_DEBUG("Unit update received");
 	update->apply(units[update->id].get());
-	units[update->id]->update();
+	units[update->id]->mark_for_update();
 
 	/*
 	Handle unit death. We don't want to edit the units map in another thread,
@@ -1061,7 +1069,7 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
 	DrawablePlanet* planet = planets[update->id].get();
 	update->apply(planet);
-	planet->update();
+	planet->mark_for_update();
 }
 
 void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> deal) {

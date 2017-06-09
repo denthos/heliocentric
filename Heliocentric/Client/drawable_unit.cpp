@@ -20,7 +20,8 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 
 
 DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system, PlayerIcon* icon) : 
-	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser), explosion(explosion), icon(icon) {
+	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser), explosion(explosion), icon(icon)
+	client_oldisattacking(false), justbeganattack(false) {
     this->data = getDataMap().at(getType()->getIdentifier());
     this->shader = shader;
 
@@ -38,7 +39,8 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* l
     glm::vec3 b_min = bbox.min;
     float z_center = (b_max.z + b_min.z) / 2.0f;
     this->laser_offset = glm::vec3(0.0f, 60.0f, b_max.z - z_center);
-	this->shoot_sound = new Audio3DSound(sound_system, "Audio/laser1.wav");
+	this->shoot_sound = new Audio3DSound(sound_system, "Audio/laser2.wav");
+	this->explode_sound = new Audio3DSound(sound_system, "Audio/explosion.wav");
 }
 
 DrawableUnit::~DrawableUnit() {
@@ -49,6 +51,7 @@ void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 	shoot_sound->update(this->get_position());
+	explode_sound->update(this->get_position());
 	if (explosion_counter < pi/2.0f && is_exploding == true) {
 		LOG_INFO("Explosion counter is ", explosion_counter);
 		explosion_counter += pi/50.0f;
@@ -58,6 +61,14 @@ void DrawableUnit::update() {
 		explosion_counter = 0.0f;
 		is_exploding = false;
 	}
+
+	if (client_isattacking && !client_oldisattacking) {
+		justbeganattack = true;
+	}
+	else {
+		justbeganattack = false;
+	}
+	client_oldisattacking = client_isattacking;
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
@@ -65,7 +76,6 @@ void DrawableUnit::draw(const Camera & camera) const {
 	icon->setColor(glm::vec4(PlayerColor::colorToRGBVec(this->get_player()->getColor()), 1.0f));
 	icon->update(toWorld[3]);
 	icon->draw(camera);
-
     PlayerColor::Color player_color = this->get_player()->getColor();
     shader->bind();
     GLuint shaderID = shader->getPid();
@@ -76,6 +86,10 @@ void DrawableUnit::draw(const Camera & camera) const {
 	if (is_exploding) {
 		glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), is_exploding);
 		glUniform1f(glGetUniformLocation(shader->getPid(), "timer"), explosion_counter);
+
+		if (explosion_counter > 0.0f && explosion_counter < 0.5f) {
+			explode_sound->playOnce(get_position());
+		}
 	}
     //color cities based on player color
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
@@ -89,21 +103,24 @@ void DrawableUnit::draw(const Camera & camera) const {
 	// unit explosion when dead
 	if (is_exploding) {
 		LOG_INFO("Is exploding");
-		
 		explosion->Update(camera);
 		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
-	
 	}
 
 	if (this->client_isAttacking()) {
-		shoot_sound->play(get_position());
 		laser->Update(camera);
 		//TODO uncomment or fix with master always shooting laser;
 		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}
+
+	if (justbeganattack) {
+		LOG_INFO("JUST BEGAN!");
+		shoot_sound->playOnce(get_position());
+	}
+
 }
 
-bool DrawableUnit::do_animation(const Camera & camera) const {
+bool DrawableUnit::do_animation(const Camera & camera) const{
 	if (is_exploding)
 		draw(camera);
 	return is_exploding;
