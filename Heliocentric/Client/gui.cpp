@@ -59,6 +59,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 void GUI::update() {
 	updatePlayerOverlay();
 	updateCityWindow();
+	updateSlotWindow();
 	updateUnitWindow();
 	updateTechTreePreviewWindow();
 	updateTechTreeWindow();
@@ -528,6 +529,13 @@ void GUI::updateCityWindow() {
 		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
+	}
+}
+
+
+void GUI::updateSlotWindow() {
+	if (slotWindow->visible()) {
+		slotButton->setEnabled(player->can_settle());
 	}
 }
 

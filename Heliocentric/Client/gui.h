@@ -112,6 +112,7 @@ private:
 	UnitSpawnWidget* unitSpawnWidget;
 	SlotInfoPanel* citySlotInfoPanel;
 	void updateCityWindow();
+	void updateSlotWindow();
 
 	ref<Window> gameOverWindow;
 	Label* gameOverLabel;

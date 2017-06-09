@@ -20,7 +20,7 @@ Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Iden
 
 void Player::initialize() {
 	player_score = 10;
-	research_points = 0.1f;
+	research_points = 100.0f;
 	settlement_limit = INITIAL_SETTLEMENT_LIMIT;
 
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
@@ -135,12 +135,6 @@ bool Player::can_settle() {
 
 bool Player::can_create_unit(UnitType* type) {
 	return (type->hasBuildRequirements(getResources()) && type->hasTechRequirements(getTechTree()));
-}
-
-void Player::acquire_object(GameObject* object) {
-	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
-	// update object members
-	object->set_player(this);
 }
 
 void Player::add_to_destroy(GameObject* object) {
