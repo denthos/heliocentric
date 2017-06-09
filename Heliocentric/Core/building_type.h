@@ -6,7 +6,7 @@
 
 #define FISSION_PLANT_PRODUCTION 2
 #define FUSION_PLANT_PRODUCTION 5
-#define RESEARCH_FACILITY_SCIENCE 5
+#define RESEARCH_FACILITY_SCIENCE 1
 
 class BuildingType : public Buildable {
 public:
