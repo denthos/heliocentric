@@ -109,6 +109,6 @@ const glm::mat4& Drawable::getToWorld() const {
 }
 
 bool Drawable::do_animation(const Camera & camera) const {
-	LOG_INFO("INCORRECT, using drawable function!!");
+	LOG_DEBUG("INCORRECT, using drawable function!!");
 	return false;
 }

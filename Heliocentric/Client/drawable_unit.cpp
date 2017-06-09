@@ -50,11 +50,11 @@ void DrawableUnit::update() {
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 	shoot_sound->update(this->get_position());
 	if (explosion_counter < pi/2.0f && is_exploding == true) {
-		LOG_INFO("Explosion counter is ", explosion_counter);
+		LOG_DEBUG("Explosion counter is ", explosion_counter);
 		explosion_counter += pi/50.0f;
 	}
 	else if (is_exploding == true) {
-		LOG_INFO("Explosion counter stopped.");
+		LOG_DEBUG("Explosion counter stopped.");
 		explosion_counter = 0.0f;
 		is_exploding = false;
 	}
@@ -89,7 +89,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 
 	// unit explosion when dead
 	if (is_exploding) {
-		LOG_INFO("Is exploding");
+		LOG_DEBUG("Is exploding");
 		
 		explosion->Update(camera);
 		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?

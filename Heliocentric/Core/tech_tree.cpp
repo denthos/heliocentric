@@ -135,7 +135,7 @@ void TechTree::choose_tech(int tech) {
 	}
 
 	current_research = techs[tech];
-	LOG_INFO("Now researching ", current_research->name);
+	LOG_DEBUG("Now researching ", current_research->name);
 }
 
 bool TechTree::is_researching() {
