@@ -15,8 +15,8 @@ UnitCreateButton::UnitCreateButton(Widget* parent, UnitType* type) :
 	this->setTooltip(infoDisplay.str());
 }
 
-void UnitCreateButton::updateCreateButton(const ResourceCollection& resources) {
-	this->setEnabled(type->hasBuildRequirements(resources));
+void UnitCreateButton::updateCreateButton(Player* player) {
+	this->setEnabled(player->can_create_unit(type));
 }
 
 void UnitCreateButton::setCallback(std::function<void(UnitType*)> callback) {
