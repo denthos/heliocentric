@@ -11,7 +11,6 @@ UnitCreateButton::UnitCreateButton(Widget* parent, UnitType* type) :
 		infoDisplay << Resources::toString(resource_pair.first) << ": " << resource_pair.second << std::endl;
 	}
 
-	// TODO: make this tooltip display instantaneous and pretteir
 	this->setTooltip(infoDisplay.str());
 }
 

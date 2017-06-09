@@ -532,7 +532,7 @@ void GUI::createCityDisplay() {
 	cityInfoWidget = new AttackableGameObjectWidget(cityWindow);
 	formHelper->addWidget("", cityInfoWidget);
 
-	formHelper->addGroup("Unit Management");
+	formHelper->addGroup("Production");
 	unitSpawnWidget = new UnitSpawnWidget(cityWindow);
 	formHelper->addWidget("", unitSpawnWidget);
 
@@ -590,7 +590,7 @@ void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
 }
 
-void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
+void GUI::displayCityUI(City* city, std::function<void(Buildable*)> unitCreateCallback) {
 	selectedCity = city;
 	cityWindow->setTitle(city->getName());
 	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);

@@ -466,10 +466,24 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 
 				BuildingType* type = BuildingType::getByIdentifier(command->createBuildingType);
 				/* Check tech tree */
+				if (!type->hasBuildRequirements(owner->getResources())) {
+					return;
+				}
 
 				try {
 					auto spawnUpdate = this->city_manager->spawnBuilding(command);
 					this->addUpdateToSendQueue(spawnUpdate);
+
+					std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
+
+					for (auto& resource_pair : type->getBuildRequirements()) {
+						owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
+						playerResourceUpdates.push_back(
+							std::make_shared<PlayerUpdate>(owner->getID(), resource_pair.first, owner->get_resource_amount(resource_pair.first))
+						);
+					}
+
+					this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
 				}
 				catch (City::BadUIDException e) {
 					LOG_ERR("Invalid city Id sent to server");

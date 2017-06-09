@@ -766,17 +766,33 @@ void Client::handleF2Key(int key) {
 }
 
 
-void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
+void Client::createUnitFromCity(DrawableCity* city, Buildable* unit_type) {
 	/* First, let's check to see if the client-side player has enough resources */
-	if (!unit_type->hasBuildRequirements(this->player->getResources())) {
-		/* Cannot create the unit due to lack of sufficient resources */
-		return;
+	if (unit_type->getBuildType() == Buildable::UNIT) {
+		UnitType* unitt = dynamic_cast<UnitType*>(unit_type);
+		if (!unitt) {
+			return;
+		}
+
+		if (!player->can_create_unit(unitt)) {
+			return;
+		}
+
+		glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
+		PlayerCommand command(pos.x, pos.y, pos.z, unitt->getIdentifier(), city->getID());
+		this->channeled_send(&command);
+	}
+	else {
+		BuildingType* buildingt = dynamic_cast<BuildingType*>(unit_type);
+		if (!buildingt) {
+			return;
+		}
+
+		PlayerCommand command(buildingt->getIdentifier(), city->getID());
+		this->channeled_send(&command);
 	}
 
-	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
-	PlayerCommand command(pos.x, pos.y, pos.z, unit_type->getIdentifier(), city->getID());
 
-	this->channeled_send(&command);
 }
 
 void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {

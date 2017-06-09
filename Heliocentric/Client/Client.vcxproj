@@ -216,6 +216,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClInclude Include="assimp_geometry.h" />
     <ClInclude Include="audio_3d_sound.h" />
     <ClInclude Include="bounding_box.h" />
+    <ClInclude Include="building_create_button.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="collision.h" />
@@ -274,6 +275,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClCompile Include="assimp_geometry.cpp" />
     <ClCompile Include="audio_3d_sound.cpp" />
     <ClCompile Include="bounding_box.cpp" />
+    <ClCompile Include="building_create_button.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
     <ClCompile Include="gui.cpp" />

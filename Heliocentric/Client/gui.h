@@ -45,7 +45,7 @@ public:
 	void hideSlotUI();
 
 
-	void displayCityUI(City* city, std::function<void(UnitType*)> createUnitCallback);
+	void displayCityUI(City* city, std::function<void(Buildable*)> createUnitCallback);
 	void hideCityUI();
 
 	void createTradeDisplay();
