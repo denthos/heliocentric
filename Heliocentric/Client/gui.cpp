@@ -12,8 +12,10 @@
 
 #define RESOURCE_IMAGE_DIRECTORY "Images/Resources"
 #define PIXELS_PER_CHARACTER 14
-#define FONT "courier"
-#define FONT_SIZE 26
+#define LARGE_FONT "courier"
+#define LARGE_FONT_SIZE 26
+#define STANDARD_FONT "sans"
+#define STANDARD_FONT_SIZE 20
 #define FONT_FILE "Fonts/Courier.ttf"
 #define MAX_RESOURCE_CHARACTERS 9
 
@@ -33,7 +35,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	formHelper = new FormHelper(this);
 
 	// load font
-	nvgCreateFont(this->mNVGContext, FONT, FONT_FILE);
+	nvgCreateFont(this->mNVGContext, LARGE_FONT, FONT_FILE);
 
 	this->createUidDisplay();
 	this->createSlotDisplay();
@@ -82,7 +84,7 @@ void GUI::createTechTreePreviewWindow() {
 	this->techPreviewWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 100, screenHeight - 200), "Technology");
 
 	std::function<void()> previewCallback = std::bind(&GUI::showChooseTechWindow, this);
-	this->techPreviewWidget = new TechPreviewWidget(techPreviewWindow, previewCallback);
+	this->techPreviewWidget = new TechPreviewWidget(techPreviewWindow, STANDARD_FONT, STANDARD_FONT_SIZE, previewCallback);
 	formHelper->addWidget("", techPreviewWidget);
 }
 
@@ -173,9 +175,11 @@ void GUI::setPlayer(std::shared_ptr<Player> player) {
 }
 
 void GUI::setFPS(double fps) {
+#ifdef _DEBUG
 	std::ostringstream oss;
 	oss << "FPS: " << (int)fps;
 	this->fpsDisplay->setCaption(oss.str());
+#endif
 }
 
 void GUI::addPlayer(std::shared_ptr<Player> new_player) {
@@ -189,12 +193,14 @@ void GUI::addPlayer(std::shared_ptr<Player> new_player) {
 }
 
 void GUI::createUidDisplay() {
+#ifdef _DEBUG
 	int ivar = 0;
 	uidWindow = formHelper->addWindow(Eigen::Vector2i(10, 40), "Selected Object");
 
 	uidDisplay = formHelper->addVariable("UID:", ivar);
 	uidDisplay->setTooltip("UID of the selected object.");
 	uidDisplay->setEditable(false);
+#endif
 }
 
 void GUI::createSlotDisplay() {
@@ -249,17 +255,20 @@ void GUI::createPlayerOverlay() {
 		resourceImage->setTooltip(resourceName);
 		resourceImage->setFixedSize(Eigen::Vector2i(25, 25));
 		resourceImage->setFixedOffset(true); //DONT DRAG THE ICONS
-		Label * resourceLabel = new Label(playerOverlay, "0", FONT, FONT_SIZE);
+		Label * resourceLabel = new Label(playerOverlay, "0", LARGE_FONT, LARGE_FONT_SIZE);
 		resourceLabel->setTooltip(resourceName);
 		resourceLabel->setFixedWidth(MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER);
 		resourceLabels[i] = std::make_pair((Resources::Type)i, resourceLabel);
 	}
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
-	fpsSpacer = new Label(playerOverlay, "", FONT, FONT_SIZE);
+	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
-	fpsDisplay = new Label(playerOverlay, "FPS: ", FONT, FONT_SIZE);
+
+#ifdef _DEBUG
+	fpsDisplay = new Label(playerOverlay, "FPS: ", LARGE_FONT, LARGE_FONT_SIZE);
 	fpsDisplay->setTooltip("Frames per second");
 	fpsDisplay->setFixedWidth(9 * PIXELS_PER_CHARACTER);
+#endif
 }
 
 void GUI::createTradeDisplay() {
@@ -389,7 +398,7 @@ void GUI::showCustomTradeUI() {
 
 void GUI::createTradeHandlerUI() {
 	tradeHandlerWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "You have an offer!");
-	tradeHandlerLabel = new Label(tradeHandlerWindow, "holder", FONT, FONT_SIZE);
+	tradeHandlerLabel = new Label(tradeHandlerWindow, "holder", LARGE_FONT, LARGE_FONT_SIZE);
 	formHelper->addWidget("", tradeHandlerLabel);
 	Button* acceptBtn = formHelper->addButton("Accept", []() {});
 	Button* declineBtn = formHelper->addButton("Decline", []() {});
@@ -438,7 +447,7 @@ void GUI::hideCustomTradeUI() {
 
 void GUI::createGameOverWindow() {
 	gameOverWindow = formHelper->addWindow(Eigen::Vector2i(0, 0), "GAME OVER");
-	gameOverLabel = new Label(gameOverWindow, "YOU ARE VICTORIOUS!", FONT, FONT_SIZE);
+	gameOverLabel = new Label(gameOverWindow, "YOU ARE VICTORIOUS!", LARGE_FONT, LARGE_FONT_SIZE);
 
 	formHelper->addWidget("", gameOverLabel);
 	gameOverWindow->center();
@@ -458,9 +467,12 @@ void GUI::hideGameOverWindow() {
 
 void GUI::createLeaderboardWindow() {
 	this->leaderboardWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 140), "Leaderboard");
-	this->leaderboardWidget = new LeaderboardWidget(leaderboardWindow);
+	this->leaderboardWindow->setFontSize(STANDARD_FONT_SIZE);
+
+	this->leaderboardWidget = new LeaderboardWidget(leaderboardWindow, STANDARD_FONT, STANDARD_FONT_SIZE);
 	this->leaderboardWindow->setWidth(this->leaderboardWidget->width());
 	formHelper->addWidget("", leaderboardWidget);
+
 	this->leaderboardWindow->performLayout(nvgContext());
 }
 
@@ -489,7 +501,9 @@ void GUI::selectSelection(Client* client, std::vector<GameObject*>& new_selectio
 			selectable_object->select(this, client);
 		}
 
+#ifdef _DEBUG
 		uidDisplay->setValue(single_object->getID());
+#endif
 	}
 
 }
