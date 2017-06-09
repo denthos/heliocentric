@@ -62,12 +62,16 @@ public:
 	void applyChangesToUnit(std::shared_ptr<Unit> unit, Player* owner) {
 		/* Let's see if the user researched increased armor */
 		const Technology* armor_tech = owner->getTechTree().getTechById(TECH_1);
-		if (!armor_tech) {
-			return;
+		const Technology* advanced_warfare_tech = owner->getTechTree().getTechById(TECH_4);
+
+		if (armor_tech && armor_tech->hasResearched()) {
+			unit->set_combat_defense(unit->get_combat_defense() + 10);
 		}
 
-		if (armor_tech->hasResearched()) {
-			unit->set_combat_defense(unit->get_combat_defense() + 10);
+		if (advanced_warfare_tech && advanced_warfare_tech->hasResearched()) {
+			unit->set_combat_defense(unit->get_combat_defense() + 20);
+			unit->set_movement_speed_max(unit->get_movement_speed_max() + 1.0f);
+			unit->set_health(unit->get_health() + 200);
 		}
 	}
 

@@ -128,6 +128,7 @@ private:
 	std::pair<Resources::Type, Label *> resourceLabels[Resources::NUM_RESOURCES];
 	Label * fpsSpacer;
 	Label * researchPointsDisplay;
+	ImageView* researchImage;
 	Label * timerDisplay;
 	Label * fpsDisplay;
 

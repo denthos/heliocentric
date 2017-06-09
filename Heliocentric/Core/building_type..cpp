@@ -27,12 +27,14 @@ std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> BuildingType::bu
 	
 	{
 		BuildingType::TypeIdentifier::RESEARCH_FACILITY,
-		new BuildingTypeImpl<ResearchFacility>(TypeIdentifier::RESEARCH_FACILITY, RESEARCH_FACILITY_COST, "Research Facility", 0, 0, RESEARCH_FACILITY_SCIENCE)
+		new BuildingTypeImpl<ResearchFacility>(TypeIdentifier::RESEARCH_FACILITY, RESEARCH_FACILITY_COST, "Research Facility", 0, RESEARCH_FACILITY_SCIENCE,
+		ResourceCollection {{Resources::GOLD, 50}, {Resources::TITANIUM, 100}})
 	},
 
 	{
 		BuildingType::TypeIdentifier::FORTRESS,
-		new BuildingTypeImpl<Fortress>(TypeIdentifier::FORTRESS, FORTRESS_COST, "Fortress", FORTRESS_ARMOR, 0, 0)
+		new BuildingTypeImpl<Fortress>(TypeIdentifier::FORTRESS, FORTRESS_COST, "Fortress", FORTRESS_ARMOR, 0, 0,
+		ResourceCollection {{Resources::TITANIUM, 50}})
 	}
 
 };
