@@ -1,6 +1,6 @@
 #pragma once
 
-#include "building_type.h"
+class BuildingType;
 
 class Building {
 public:
