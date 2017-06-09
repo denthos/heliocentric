@@ -42,6 +42,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	this->createTradeDisplay();
 	this->createCustomTradeUI();
 	this->createTradeHandlerUI();
+	this->createHelpWindow();
 	
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
@@ -584,5 +585,32 @@ void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCal
 
 void GUI::hideCityUI() {
 	cityWindow->setVisible(false);
+}
+
+void GUI::createHelpWindow() {
+	helpWindow = formHelper->addWindow(Eigen::Vector2i(800, 120), "Help");
+	Button* helpButton = formHelper->addButton("Open", [this]() {showHelpDetailWindow(); });
+	helpDetailWindow = formHelper->addWindow(Eigen::Vector2i(500, 120), "Help Window");
+	Button* closeHelpButton = new Button(helpDetailWindow->buttonPanel(), "X");
+	closeHelpButton->setCallback([this]() {
+		hideHelpDetailWindow();
+	});
+
+	formHelper->addGroup("Hotkey Info");
+	Widget* hotKeyWidget = new Widget(helpDetailWindow);
+	formHelper->addWidget("Hot Key Widget", hotKeyWidget);
+	TextBox* cameraKey = new TextBox(hotKeyWidget, "`");
+	Label* cameraKeyLabel = new Label(hotKeyWidget, "Swap camera views");
+
+	hideHelpDetailWindow();
+}
+
+void GUI::showHelpDetailWindow() {
+	helpDetailWindow->setVisible(true);
+	helpWindow->setVisible(false);
+}
+void GUI::hideHelpDetailWindow() {
+	helpWindow->setVisible(true);
+	helpDetailWindow->setVisible(false);
 }
 

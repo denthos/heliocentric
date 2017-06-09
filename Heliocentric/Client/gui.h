@@ -89,6 +89,9 @@ private:
 	void createUnitDisplay();
 	void createTechTreePreviewWindow();
 	void createTechTreeWindow(std::function<void(const Technology*)> techResearchCallback);
+	void createHelpWindow();
+	void showHelpDetailWindow();
+	void hideHelpDetailWindow();
 
 	std::pair<int, std::string> placeholderImage;
 
@@ -154,4 +157,8 @@ private:
 	ComboBox* offerResourceType;
 	IntBox<int>* askForAmount;
 	ComboBox* askForResourceType;
+
+	// help window
+	ref<Window> helpWindow;
+	ref<Window> helpDetailWindow;
 };
