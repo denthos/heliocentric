@@ -94,7 +94,7 @@ void TechTree::build_tree() {
 	techs[TECH_1] = new Technology(TECH_1, 100.0f, "Steel Plating", "New Units are Spawned with More Defense");
 	techs[TECH_2] = new Technology(TECH_2, 100.0f, "Advanced Mining", "Provides 25% chance of extracting additional resources from each occupied slot.");
 	techs[TECH_3] = new Technology(TECH_3, 400.0f, "Heavy Unit", "Allows Spawning of a Heavy Unit");
-	techs[TECH_4] = new Technology(TECH_4, 400.0f, "Tech 4", "Does a tech");
+	techs[TECH_4] = new Technology(TECH_4, 400.0f, "Advanced Warfare", "Improves new unit's combat defense, health, and speed.");
 	techs[TECH_5] = new Technology(TECH_5, 400.0f, "Exploration Program", "Increases the city settlement limit (+1).");
 	techs[TECH_6] = new Technology(TECH_6, 800.0f, "Tech 6", "Does a tech");
 
