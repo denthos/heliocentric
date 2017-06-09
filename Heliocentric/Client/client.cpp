@@ -69,6 +69,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 Quad * quad; //texture sampler
 ParticleSystem* particles;
 ParticleSystem* laser_particles;
+ParticleSystem* explosion_particles;
 
 
 SkyboxMesh* skybox;
@@ -81,6 +82,7 @@ Shader * blurShader;
 Shader* diffuseShader;
 Shader* colorShader;
 Shader* particleShader;
+Shader* unitShader;
 
 GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
@@ -210,8 +212,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
-	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag");
-	//diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
+	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
@@ -219,6 +221,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
 	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
+	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
@@ -267,7 +270,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE),
 		std::bind(&Client::mouseRightClickHandler, this, std::placeholders::_1, std::placeholders::_2));
-
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -433,6 +435,23 @@ void Client::display() {
 		octree = newOctree;
 		octree->draw(*cameras[selectedCamera]);
 		delete delOctree;
+
+		// Deal with dead objects.
+		auto& dead_it = dead_units.begin();
+		while (dead_it != dead_units.end()) {
+			dead_it->second->update();
+			if (!dead_it->second->do_animation(*cameras[selectedCamera])) {
+				UID id = dead_it->first;
+				if (selection.size() > 0 && selection[0]->getID() == id) {
+					selection.erase(selection.begin());
+					dead_units[id]->unselect(gui, this);
+				}
+				dead_it = dead_units.erase(dead_it);
+			}
+			else {
+				dead_it++;
+			}
+		}
 
 		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
 		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
@@ -910,7 +929,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles, soundSystem
+		colorShader, laser_particles, explosion_particles, soundSystem
 	);
 
 	player_it->second->acquire_object(newUnit.get());
@@ -984,10 +1003,9 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	*/
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->is_dead()) {
-		if (selection.size() > 0 && selection[0]->getID() == update->id) {
-			selection.erase(selection.begin());
-			units[update->id]->unselect(gui, this);
-		}
+		units[update->id]->is_exploding = true;
+		units[update->id]->explosion_start_time = glfwGetTime();
+		dead_units.insert(std::make_pair(update->id, std::move(units[update->id])));
 		units.erase(update->id);
 	}
 }
