@@ -249,6 +249,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<GameOverUpdate>(std::bind(&Client::gameOverUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<UnitSpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<TimeUpdate>(std::bind(&Client::timeUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
 	if (cameraSwitchKey >= 97 && cameraSwitchKey <= 122) cameraSwitchKey -= 32;
@@ -504,8 +505,6 @@ void Client::display() {
 		//frameTimer = currentTime;
 		frameTimer += 1.0;
 	}
-	gui->setTimer(currentTime);
-
 
 	glfwPollEvents();
 }
@@ -929,6 +928,10 @@ void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender
 	update->apply(spawner_it->second);
 }
 
+void Client::timeUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TimeUpdate> update) {
+	LOG_DEBUG("Setting timer to", update->time);
+	gui->setTimer(update->time);
+}
 
 void Client::beginResearchOnTechnology(const Technology* tech) {
 	if (!tech) {

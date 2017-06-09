@@ -230,6 +230,7 @@ void GameServer::performUpdates() {
 
 	this->addUpdateToSendQueue(player_manager->getPlayerScoreUpdates().begin(), player_manager->getPlayerScoreUpdates().end());
 	this->addUpdateToSendQueue(player_manager->getPlayerResearchUpdates().begin(), player_manager->getPlayerResearchUpdates().end());
+	this->addUpdateToSendQueue(this->game->timeUpdate);
 
 	/* Give players resources based on their owned cities */
 	std::vector<std::shared_ptr<PlayerUpdate>> player_updates;

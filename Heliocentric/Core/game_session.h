@@ -1,5 +1,6 @@
 #pragma once
 #include "player.h"
+#include "time_update.h"
 
 class GameServer;
 
@@ -18,6 +19,7 @@ private:
 
 	bool game_running;
 	UID winner;
+	std::shared_ptr<TimeUpdate> timeUpdate;
 
 	// Enabled victory conditions
 	bool time_victory;

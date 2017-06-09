@@ -3,8 +3,6 @@
 
 class TimeUpdate {
 public:
-	TimeUpdate(std::clock_t time);
-
-private:
-	std::clock_t time;
+	TimeUpdate(int time);
+	int time;
 };
