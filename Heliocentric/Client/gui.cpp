@@ -107,7 +107,7 @@ void GUI::createTechTreeWindow(std::function<void(const Technology*)> techResear
 
 
 void GUI::updateTechTreePreviewWindow() {
-	if (this->techPreviewWindow->visible()) {
+	if (this->techPreviewWindow->visible() && player) {
 		this->techPreviewWidget->updatePreview(&player->getTechTree());
 	}
 }
