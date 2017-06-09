@@ -20,12 +20,14 @@
 #include "trade_command.h"
 #include "settle_city_command.h"
 #include "unit_spawner_update.h"
+#include "research_command.h"
 
 #include "game_over_update.h"
 
 #include "trade_deal.h"
 #include "slot_update.h"
 #include "research_command.h"
+#include "time_update.h"
 
 void initializeChannels() {
 	using channels = SunNet::Channels;
@@ -46,6 +48,7 @@ void initializeChannels() {
 	channels::addNewChannel<TradeCommand>();
 	channels::addNewChannel<SettleCityCommand>();
 	channels::addNewChannel<SlotUpdate>();
+	channels::addNewChannel<ResearchCommand>();
 
 	channels::addNewChannel<TradeData>();
 	channels::addNewChannel<GameOverUpdate>();
@@ -53,4 +56,5 @@ void initializeChannels() {
 	channels::addNewChannel<PlayerScoreUpdate>();
 	channels::addNewChannel<PlayerResearchUpdate>();
 	channels::addNewChannel<ResearchCommand>();
+	channels::addNewChannel<TimeUpdate>();
 }

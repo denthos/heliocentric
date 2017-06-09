@@ -3,14 +3,14 @@
 #include <nanogui\nanogui.h>
 #include "resources.h"
 #include "unit_create_button.h"
-#include "unit_spawner.h"
+#include "builder.h"
 using namespace nanogui;
 
 class UnitSpawnWidget : public Widget {
 public:
 	UnitSpawnWidget(Widget* parent);
 
-	void updateSelection(UnitSpawner* spawner, Player* player);
+	void updateSelection(Builder* spawner, Player* player);
 	void setCreateButtonCallback(std::function<void(UnitType*)> callback);
 
 private:

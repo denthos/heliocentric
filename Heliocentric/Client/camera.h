@@ -18,6 +18,7 @@ public:
 	bool active;
 	glm::mat4 view, perspective, infinite_perspective;
 
+
 	ViewFrustum viewFrustum;
 
 	Camera();

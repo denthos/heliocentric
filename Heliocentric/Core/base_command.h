@@ -12,8 +12,8 @@ the command.
 class BaseCommand {
 public:
 	/* This enum should include all possible commands that a player can send. */
-	enum CommandType { CMD_ATTACK, CMD_BUILD, CMD_CREATE, CMD_DELETE,
-	                   CMD_MOVE, CMD_PURCHASE, CMD_SETTLE_CITY, CMD_SLEEP,
+	enum CommandType { CMD_ATTACK, CMD_BUILD, CMD_CREATE_BUILDING, CMD_CREATE_UNIT,
+	                   CMD_DELETE, CMD_MOVE, CMD_PURCHASE, CMD_SETTLE_CITY, CMD_SLEEP,
 	                   CMD_TRADE_ACCEPT, CMD_TRADE_DECLINE, CMD_TRADE
 	};
 
