@@ -30,6 +30,7 @@ public:
 	virtual bool hasBuildRequirements(const ResourceCollection& resources) const = 0;
 	virtual bool hasTechRequirements(const TechTree& tree) const = 0;
 	virtual const ResourceCollection& getBuildRequirements() const = 0;
+	virtual const std::string& getDescription() const = 0;
 
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
@@ -44,8 +45,9 @@ private:
 template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
-	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int productionCost, std::string typeName, int baseHealth, int baseDefense, std::vector<int> required_techs) :
-		UnitType(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), typeName(typeName), baseHealth(baseHealth), baseDefense(baseDefense), requiredTechs(required_techs) {}
+	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int productionCost, std::string typeName, int baseHealth, int baseDefense, std::vector<int> required_techs, std::string desc) :
+		UnitType(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), typeName(typeName), baseHealth(baseHealth), baseDefense(baseDefense), requiredTechs(required_techs),
+		description(desc) {}
 
 	std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
 		std::shared_ptr<UnitClass> unit = std::make_shared<UnitClass>(position, owner, manager, this);
@@ -112,6 +114,11 @@ public:
 		return this->productionCost;
 	}
 
+
+	const std::string& getDescription() const {
+		return this->description;
+	}
+
 	int getBaseHealth() const {
 		return this->baseHealth;
 	}
@@ -135,6 +142,7 @@ private:
 	int baseDefense;
 
 	std::string typeName;
+	std::string description;
 
 	TypeIdentifier identifier;
 

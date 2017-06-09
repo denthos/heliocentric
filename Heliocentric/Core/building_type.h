@@ -20,18 +20,18 @@ public:
 		FISSION_PLANT,
 		FUSION_PLANT,
 		RESEARCH_FACILITY,
-		HADRON_COLLIDER,
 		FORTRESS
 	};
 
 	const static TypeIdentifier FIRST = FISSION_PLANT; // should always be the first in enum
-	const static int NUM_TYPES = 3;
+	const static int NUM_TYPES = 4;
 
 	BuildingType(BuildType buildType, int productionCost);
 
 	static BuildingType* getByIdentifier(TypeIdentifier);
 
 	virtual const std::string& getTypeName() const = 0;
+	virtual const std::string& getDescription() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
 
 	virtual int getArmor() const = 0;
@@ -47,13 +47,18 @@ private:
 template <typename BuildingClass>
 class BuildingTypeImpl : public BuildingType {
 public:
-	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName, int armor, int production, int research_points, ResourceCollection build_req) :
+	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName, int armor, int production, int research_points, ResourceCollection build_req, std::string desc) :
 		BuildingType(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName), armor(armor), production(production), research_points(research_points),
-		buildRequirements(build_req)
+		buildRequirements(build_req), description(desc)
 		{}
 
 	int getProductionCost() const {
 		return this->productionCost;
+	}
+
+
+	const std::string& getDescription() const {
+		return this->description;
 	}
 
 	const std::string& getTypeName() const {
@@ -104,6 +109,7 @@ private:
 	int research_points;
 
 	std::string typeName;
+	std::string description;
 
 	TypeIdentifier identifier;
 	ResourceCollection buildRequirements;

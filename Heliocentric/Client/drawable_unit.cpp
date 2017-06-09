@@ -12,7 +12,7 @@
 const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUnit::getDataMap() {
 	static std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData> dataMap {
 		{UnitType::BASIC_UNIT, DrawableUnitData {Model::getInstance(ROCKET_MODEL), 0.1f}},
-		{UnitType::HEAVY_UNIT, DrawableUnitData {Model::getInstance(BEAR_MODEL), 0.8f}}
+		{UnitType::HEAVY_UNIT, DrawableUnitData {Model::getInstance(BEAR_MODEL), 0.6f}}
 	};
 
     return dataMap;
