@@ -29,6 +29,7 @@
 #include "unit_command.h"
 #include "trade_command.h"
 #include "settle_city_command.h"
+#include "research_command.h"
 
 #include "trade_data.h"
 
@@ -141,6 +142,7 @@ private:
 	Player* extractPlayerFromConnection(SunNet::ChanneledSocketConnection_p, bool retry=false);
 	void handleReceivePlayerClientToServerTransfer(SunNet::ChanneledSocketConnection_p, std::shared_ptr<PlayerClientToServerTransfer>);
 	void handleSettleCityCommand(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SettleCityCommand>);
+	void handleResearchCommand(SunNet::ChanneledSocketConnection_p, std::shared_ptr<ResearchCommand>);
 
 protected:
 	/**** Handlers for ChanneledServer ****/

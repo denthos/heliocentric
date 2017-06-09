@@ -19,8 +19,8 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 }
 
 
-DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ThreeDSoundSystem* sound_system) : 
-	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser) {
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system) : 
+	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser), explosion(explosion) {
     this->data = getDataMap().at(getType()->getIdentifier());
     this->shader = shader;
 
@@ -28,6 +28,8 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* l
     this->model = data.model;
     this->laser = laser;
     this->glow = false;
+	this->is_exploding = false;
+	this->explosion_counter = 0.0f;
 
 
 	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
@@ -51,7 +53,15 @@ void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 	shoot_sound->update(this->get_position());
-	
+	if (explosion_counter < pi/2.0f && is_exploding == true) {
+		LOG_INFO("Explosion counter is ", explosion_counter);
+		explosion_counter += pi/50.0f;
+	}
+	else if (is_exploding == true) {
+		LOG_INFO("Explosion counter stopped.");
+		explosion_counter = 0.0f;
+		is_exploding = false;
+	}
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
@@ -63,22 +73,41 @@ void DrawableUnit::draw(const Camera & camera) const {
 
 	//highlight selected unit
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), glow);
-	shader->bind();
 
+	if (is_exploding) {
+		glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), is_exploding);
+		glUniform1f(glGetUniformLocation(shader->getPid(), "timer"), explosion_counter);
+	}
     //color cities based on player color
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
     glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
     Drawable::draw(camera);
 
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), 0);
+	glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), false);
 	shader->unbind();
 
-	if (this->client_isattacking) {
+	// unit explosion when dead
+	if (is_exploding) {
+		LOG_INFO("Is exploding");
+		
+		explosion->Update(camera);
+		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
+	
+	}
+
+	if (this->client_isAttacking()) {
 		shoot_sound->play(get_position());
 		laser->Update(camera);
 		//TODO uncomment or fix with master always shooting laser;
 		//laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}
+}
+
+bool DrawableUnit::do_animation(const Camera & camera) const {
+	if (is_exploding)
+		draw(camera);
+	return is_exploding;
 }
 
 

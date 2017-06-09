@@ -4,6 +4,7 @@
 #include "trade_deal.h"
 #include "tech_tree.h"
 #include "player_color.h"
+#include <exception>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -11,6 +12,7 @@
 #include <typeindex>
 
 #define PLAYER_NAME_MAX_SIZE 16
+#define INITIAL_SETTLEMENT_LIMIT 1
 
 /* Forward declaration is necessary so compiler knows about GameObject. We cannot
 #include "game_object.h" since it #includes "player.h" */
@@ -20,6 +22,7 @@ class NewPlayerInfoUpdate;
 class PlayerScoreUpdate;
 class PlayerResearchUpdate;
 class PlayerManager;
+class UnitType;
 
 class Player : public Identifiable {
 public:
@@ -34,6 +37,8 @@ public:
 	void research(float research_points); // Called by client
 
 	float get_research_points();
+	bool can_settle(); // tells if a player currently can settle another city
+	bool can_create_unit(UnitType* type);
 
 	std::string get_name() const;
 	void set_name(std::string new_name);
@@ -47,10 +52,12 @@ public:
 
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
-	void pop();                               // Pop all objects queued for destroy
+
+	TechTree& getTechTree();
 
 	const ResourceCollection& getResources() const;
 	int get_resource_amount(Resources::Type);
+	void set_resource_amount(Resources::Type, int);
 	void change_resource_amount(Resources::Type, int);
 
 	template <typename T>
@@ -77,16 +84,20 @@ public:
 
 	std::unordered_map<std::type_index, std::unordered_map<UID, GameObject*>> owned_objects; // TODO: move to private
 
+	class SettlementLimitReachedException : std::exception {};
+
 private:
 	PlayerManager* manager;
 	std::string name;
 	int player_score;
 	float research_points; // research points accumulated every tick
-  
+	int settlement_limit; // maximum number of cities a player can settle
+
 	TechTree tech_tree;
 	PlayerColor::Color color;
 
 	std::shared_ptr<PlayerScoreUpdate> score_update;
+	std::shared_ptr<PlayerResearchUpdate> research_update;
 	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
 	void send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update);
   

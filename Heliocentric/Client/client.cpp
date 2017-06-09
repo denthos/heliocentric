@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "client.h"
 
 #include <glad\glad.h>
@@ -9,6 +10,7 @@
 #include <soil.h>
 #include <thread>
 
+#include "research_command.h"
 #include "free_camera.h"
 #include "model_preloader.h"
 #include "orbital_camera.h"
@@ -35,7 +37,6 @@
 #include "instant_laser_attack.h"
 #include "selectable.h"
 #include "unit_spawner_update.h"
-
 
 #define ALLOWED_ACTIONS_PER_TICK 200
 
@@ -68,6 +69,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 Quad * quad; //texture sampler
 ParticleSystem* particles;
 ParticleSystem* laser_particles;
+ParticleSystem* explosion_particles;
 
 
 
@@ -82,6 +84,7 @@ Shader* diffuseShader;
 Shader* colorShader;
 Shader* particleShader;
 Shader* iconShader;
+Shader* unitShader;
 
 GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
@@ -95,6 +98,8 @@ GLuint gaussian_color_buff[COLOR_BUFFERS];
 //multiple render targets to specify more than one frag shader output
 GLuint color_buff[COLOR_BUFFERS]; //2 color buffers to attach to frame buffer: 1 for regular scene, one for bright objects
 
+std::vector<int> num_actions;
+
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
 	int width = config.get<int>("ScreenWidth");
@@ -103,7 +108,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
 
-	gui = new GUI(window, width, height);
+	gui = new GUI(window, std::bind(&Client::sendTradeDeal, this, std::placeholders::_1), std::bind(&Client::sendTradeCommand, this, std::placeholders::_1, std::placeholders::_2),
+				std::bind(&Client::beginResearchOnTechnology, this, std::placeholders::_1), width, height);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		LOG_ERR("Failed to initialize OpenGL context");
@@ -208,8 +214,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
-	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag");
-	//diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
+	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
@@ -218,6 +224,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
 	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
+	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
 
@@ -259,8 +266,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F11, std::bind(&Client::handleF11Key, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F12, std::bind(&Client::handleF12Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
 
@@ -268,7 +273,6 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE),
 		std::bind(&Client::mouseRightClickHandler, this, std::placeholders::_1, std::placeholders::_2));
-
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -436,7 +440,23 @@ void Client::display() {
 		octree->draw(*cameras[selectedCamera]);
 		delete delOctree;
 
-		
+		// Deal with dead objects.
+		auto& dead_it = dead_units.begin();
+		while (dead_it != dead_units.end()) {
+			dead_it->second->update();
+			if (!dead_it->second->do_animation(*cameras[selectedCamera])) {
+				UID id = dead_it->first;
+				if (selection.size() > 0 && selection[0]->getID() == id) {
+					selection.erase(selection.begin());
+					dead_units[id]->unselect(gui, this);
+				}
+				dead_it = dead_units.erase(dead_it);
+			}
+			else {
+				dead_it++;
+			}
+		}
+
 
 		// blur the things that glow
 		int blurs = 5; //TODO init to number of blur iterations
@@ -509,20 +529,48 @@ void Client::display() {
 	}
 
 
+
 	glfwPollEvents();
 }
 
 void Client::update() {
 
-	int action_counter = 0;
-	bool has_more_updates = true;
-	while (has_more_updates && action_counter++ < ALLOWED_ACTIONS_PER_TICK) {
-		has_more_updates = this->poll();
+	int allowed_actions = 0;
+
+	for (int i = 0; i < num_actions.size(); i++) {
+		allowed_actions += num_actions[i];
+	}
+	
+	if (num_actions.size() > 0) {
+		allowed_actions /= num_actions.size();
+	}
+	else {
+		allowed_actions = 100;
 	}
 
-	if (action_counter >= ALLOWED_ACTIONS_PER_TICK) {
-		LOG_WARN("Client performed ", action_counter, "in a single tick. Lots of stuff is being sent...");
+	allowed_actions = std::max(1, allowed_actions) + 5;
+
+
+	int action_counter = 0;
+	bool has_more_updates = true;
+	while (has_more_updates && action_counter <= allowed_actions) {
+		if (has_more_updates = this->poll()) {
+			action_counter++;
+		}
 	}
+
+
+	if (action_counter > allowed_actions) {
+		LOG_DEBUG("Client performed ", action_counter, " actions. (Max: ", allowed_actions, ")");
+	} 
+
+	num_actions.push_back(action_counter);
+
+
+	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
+		num_actions.erase(num_actions.begin());
+	}
+	
 
 	cameras[selectedCamera]->update();
 	
@@ -727,6 +775,10 @@ void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
 	this->channeled_send(&command);
 }
 
+void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {
+	this->channeled_send(deal.get());
+}
+
 void Client::handleF4Key(int key) {
 
 	auto unit_it = units.begin();
@@ -802,27 +854,13 @@ void Client::handleF10Key(int key) {
 	this->channeled_send(&deal);
 }
 
-void Client::handleF11Key(int key) {
-	// Accept the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_accept();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
-
-	TradeCommand command(deal_id, true);
-	this->channeled_send(&command);
-}
-
-void Client::handleF12Key(int key) {
-	// Decline the first trade deal in player's pending map
-	UID deal_id = player->trade_deal_decline();
-	if (deal_id == 0) {
-		LOG_ERR("No pending trade deal found");
-		return;
-	}
-
-	TradeCommand command(deal_id, false);
+void Client::sendTradeCommand(UID trade_id, bool is_accepted) {
+	if (is_accepted)
+		player->trade_deal_accept(trade_id);
+	else
+		player->trade_deal_decline(trade_id);
+	LOG_DEBUG("Send trade command called");
+	TradeCommand command(trade_id, is_accepted);
 	this->channeled_send(&command);
 }
 
@@ -840,15 +878,15 @@ void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn
 
 	std::shared_ptr<Player> player_info;
 	if (player_it == players.end()) {
-		LOG_DEBUG("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
+		LOG_INFO("Received information about new player (ID: ", update->player_id, " NAME: ", update->name, ")");
 		player_info = std::make_shared<Player>(update->name, update->player_id, update->color);
 		players[update->player_id] = player_info;
+		gui->addPlayer(player_info);
 	}
 	else {
 		player_info = player_it->second;
 		update->apply(player_info.get());
 	}
-
 	gui->updatePlayerLeaderboardValue(player_info.get());
 }
 
@@ -893,7 +931,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles, soundSystem
+		colorShader, laser_particles, explosion_particles, soundSystem
 	);
 
 	player_it->second->acquire_object(newUnit.get());
@@ -910,6 +948,16 @@ void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender
 
 	LOG_DEBUG(update->percent);
 	update->apply(spawner_it->second);
+}
+
+
+void Client::beginResearchOnTechnology(const Technology* tech) {
+	if (!tech) {
+		return;
+	}
+
+	ResearchCommand command(tech->getID());
+	this->channeled_send(&command);
 }
 
 void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<CityCreationUpdate> update) {
@@ -957,10 +1005,9 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	*/
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->is_dead()) {
-		if (selection.size() > 0 && selection[0]->getID() == update->id) {
-			selection.erase(selection.begin());
-			units[update->id]->unselect(gui, this);
-		}
+		units[update->id]->is_exploding = true;
+		units[update->id]->explosion_start_time = glfwGetTime();
+		dead_units.insert(std::make_pair(update->id, std::move(units[update->id])));
 		units.erase(update->id);
 	}
 }
@@ -998,10 +1045,15 @@ void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::s
 		LOG_DEBUG("I am the sender of this trade deal");
 		// For now, we don't have to do anything if this player sent this trade deal.
 	}
-	else {
+	else if (this->player->getID() == deal->recipient) {
 		LOG_DEBUG("I am the receiver of this trade deal");
 		/* Create a TradeDeal from TradeData and store it into player's pending trade deals */
+		LOG_DEBUG("In trade data handler, the trade deal id is ", deal->trade_deal_id);
 		player->receive_trade_deal(std::make_shared<TradeDeal>(deal, deal->trade_deal_id));
+		gui->showTradeHandlerUI(players[deal->sender], deal);
+	}
+	else {
+		LOG_ERR("Received Trade deal meant for someone else...");
 	}
 }
 

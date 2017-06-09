@@ -20,7 +20,7 @@ struct DrawableUnitData {
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ThreeDSoundSystem* sound_system);
+	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system);
 
 	~DrawableUnit();
 	virtual void update();
@@ -33,6 +33,12 @@ public:
 	void updateRotationMatrix();
 	glm::mat4 getRotationMatrix() const;
 
+	// explosion params
+	bool is_exploding;
+	float explosion_start_time;
+
+	virtual bool do_animation(const Camera & camera) const;
+
 private:
 	DrawableUnitData data;
 	PlayerIcon* icon;
@@ -40,8 +46,10 @@ private:
 	glm::mat4 rotation_matrix;
 	glm::vec3 old_orientation;
 	ParticleSystem* laser;
+	ParticleSystem* explosion;
+	float explosion_counter;
 	glm::vec3 laser_offset;
 	Audio3DSound* shoot_sound;
-
+	const float pi = glm::pi<float>();
 	bool glow;
 };
