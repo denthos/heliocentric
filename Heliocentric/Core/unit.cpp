@@ -37,8 +37,8 @@ Unit::CommandType Unit::do_logic() {
 	case UNIT_ATTACK:
 		if (!do_attack(this->target)) {
 			this->target.reset();
-			//this->attack.resetAttack();
-			//this->send_update_to_manager(this->make_update());
+			this->attack.resetAttack();
+			this->send_update_to_manager(this->make_update());
 			currentCommand = UNIT_IDLE;
 		}
 		break;
