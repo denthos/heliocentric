@@ -14,7 +14,7 @@
 #define HADRON_COLLIDER_PRODUCTION 2
 #define HADRON_COLLIDER_SCIENCE 2
 #define HADRON_COLLIDER_COST 500
-#define FORTRESS_ARMOR 20
+#define FORTRESS_ARMOR 100
 #define FORTRESS_COST 150
 
 class BuildingType : public Buildable {
