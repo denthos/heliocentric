@@ -9,10 +9,10 @@
 
 #define INITIAL_PRODUCTION 1
 
-class UnitSpawnerUpdate;
+class SpawnerUpdate;
 
 class Builder {
-	friend class UnitSpawnerUpdate;
+	friend class SpawnerUpdate;
 
 public:
 	enum ProductionType {IDLE, BUILDING, UNIT};
@@ -28,15 +28,15 @@ public:
 	int get_production() const;
 
 	ProductionType progressSpawnAndCreateUpdate();
-	std::shared_ptr<UnitSpawnerUpdate> getSpawnUpdate();
+	std::shared_ptr<SpawnerUpdate> getSpawnUpdate();
 
-	std::shared_ptr<UnitSpawnerUpdate> spawnBuilding(BuildingType::TypeIdentifier);
-	std::shared_ptr<UnitSpawnerUpdate> spawnUnit(UnitType::TypeIdentifier);
+	std::shared_ptr<SpawnerUpdate> spawnBuilding(BuildingType::TypeIdentifier);
+	std::shared_ptr<SpawnerUpdate> spawnUnit(UnitType::TypeIdentifier);
 
 	class InvalidBuildTypeException : public std::exception {};
 
 protected:
-	std::shared_ptr<UnitSpawnerUpdate> update;
+	std::shared_ptr<SpawnerUpdate> update;
 	UID id;
 
 	std::vector<Buildable*> production_queue;

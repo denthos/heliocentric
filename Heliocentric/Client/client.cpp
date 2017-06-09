@@ -257,7 +257,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<GameOverUpdate>(std::bind(&Client::gameOverUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
-	this->subscribe<UnitSpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<TimeUpdate>(std::bind(&Client::timeUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
@@ -960,7 +960,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 }
 
 
-void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitSpawnerUpdate> update) {
+void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SpawnerUpdate> update) {
 	auto& spawner_it = this->spawners.find(update->id);
 	if (spawner_it == this->spawners.end()) {
 		LOG_ERR("Invalid spawner id ", update->id);

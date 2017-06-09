@@ -179,9 +179,6 @@
     <ClInclude Include="heavy_unit.h">
       <Filter>Units</Filter>
     </ClInclude>
-    <ClInclude Include="unit_spawner_update.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
     <ClInclude Include="player_color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -234,6 +231,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="time_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="spawner_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
   </ItemGroup>

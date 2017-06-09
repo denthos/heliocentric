@@ -4,7 +4,7 @@
 #include "building_type.h"
 #include "builder.h"
 
-class UnitSpawnerUpdate {
+class SpawnerUpdate {
 public:
 	enum UpdateType {
 		ADD_TO_QUEUE,

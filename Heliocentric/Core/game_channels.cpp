@@ -52,7 +52,7 @@ void initializeChannels() {
 
 	channels::addNewChannel<TradeData>();
 	channels::addNewChannel<GameOverUpdate>();
-	channels::addNewChannel<UnitSpawnerUpdate>();
+	channels::addNewChannel<SpawnerUpdate>();
 	channels::addNewChannel<PlayerScoreUpdate>();
 	channels::addNewChannel<PlayerResearchUpdate>();
 	channels::addNewChannel<ResearchCommand>();

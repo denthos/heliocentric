@@ -7,7 +7,7 @@ Builder::Builder(UID id) : id(id), currentProduction(NULL), currentlyProducing(f
 }
 
 void Builder::initialize() {
-	this->update = std::make_shared<UnitSpawnerUpdate>();
+	this->update = std::make_shared<SpawnerUpdate>();
 	this->update->id = id;
 }
 
@@ -57,7 +57,7 @@ Builder::ProductionType Builder::progressSpawnAndCreateUpdate() {
 	}
 }
 
-std::shared_ptr<UnitSpawnerUpdate> Builder::getSpawnUpdate() {
+std::shared_ptr<SpawnerUpdate> Builder::getSpawnUpdate() {
 	return this->update;
 }
 
@@ -72,7 +72,7 @@ Buildable::BuildType Builder::popFromQueue() {
 	this->currentProductionProgress = 0;
 
 	/* Make the update */
-	this->update->updateType = UnitSpawnerUpdate::UpdateType::POP_FROM_QUEUE;
+	this->update->updateType = SpawnerUpdate::UpdateType::POP_FROM_QUEUE;
 	this->update->buildType = buildType;
 	switch (buildType) {
 	case Buildable::BuildType::BUILDING:
@@ -96,7 +96,7 @@ Builder::ProductionType Builder::produce() {
 	switch (buildType) {
 	case Buildable::BuildType::BUILDING:
 		/* Make the update */
-		this->update->updateType = UnitSpawnerUpdate::UpdateType::PROGRESS_UPDATE;
+		this->update->updateType = SpawnerUpdate::UpdateType::PROGRESS_UPDATE;
 		this->update->buildType = buildType;
 		this->update->buildingType = ((BuildingType*) this->currentProduction)->getIdentifier();
 		this->update->percent = progressPercent;
@@ -104,7 +104,7 @@ Builder::ProductionType Builder::produce() {
 		/* Are we finished? If so, we aren't producing anymore! */
 		if (this->currentProductionProgress >= this->currentProduction->getProductionCost()) {
 
-			this->update->updateType = UnitSpawnerUpdate::UpdateType::SPAWN_COMPLETE;
+			this->update->updateType = SpawnerUpdate::UpdateType::SPAWN_COMPLETE;
 			spawnCompleteHandler(this->currentProduction, Builder::ProductionType::BUILDING);
 
 			/* We need to reset stuff */
@@ -123,7 +123,7 @@ Builder::ProductionType Builder::produce() {
 		break;
 	case Buildable::BuildType::UNIT:
 		/* Make the update */
-		this->update->updateType = UnitSpawnerUpdate::UpdateType::PROGRESS_UPDATE;
+		this->update->updateType = SpawnerUpdate::UpdateType::PROGRESS_UPDATE;
 		this->update->buildType = buildType;
 		this->update->unitType = ((UnitType*) this->currentProduction)->getIdentifier();
 		this->update->percent = progressPercent;
@@ -131,7 +131,7 @@ Builder::ProductionType Builder::produce() {
 		/* Are we finished? If so, we aren't producing anymore! */
 		if (this->currentProductionProgress >= this->currentProduction->getProductionCost()) {
 
-			this->update->updateType = UnitSpawnerUpdate::UpdateType::SPAWN_COMPLETE;
+			this->update->updateType = SpawnerUpdate::UpdateType::SPAWN_COMPLETE;
 			spawnCompleteHandler(this->currentProduction, Builder::ProductionType::UNIT);
 
 			/* We need to reset stuff */
@@ -153,10 +153,10 @@ Builder::ProductionType Builder::produce() {
 	return Builder::ProductionType::IDLE;
 }
 
-std::shared_ptr<UnitSpawnerUpdate> Builder::spawnBuilding(BuildingType::TypeIdentifier type) {
-	auto update = std::make_shared<UnitSpawnerUpdate>();
+std::shared_ptr<SpawnerUpdate> Builder::spawnBuilding(BuildingType::TypeIdentifier type) {
+	auto update = std::make_shared<SpawnerUpdate>();
 	update->percent = 0;
-	update->updateType = UnitSpawnerUpdate::UpdateType::ADD_TO_QUEUE;
+	update->updateType = SpawnerUpdate::UpdateType::ADD_TO_QUEUE;
 	update->buildingType = type;
 	update->id = id;
 
@@ -166,10 +166,10 @@ std::shared_ptr<UnitSpawnerUpdate> Builder::spawnBuilding(BuildingType::TypeIden
 	return update;
 }
 
-std::shared_ptr<UnitSpawnerUpdate> Builder::spawnUnit(UnitType::TypeIdentifier type) {
-	auto update = std::make_shared<UnitSpawnerUpdate>();
+std::shared_ptr<SpawnerUpdate> Builder::spawnUnit(UnitType::TypeIdentifier type) {
+	auto update = std::make_shared<SpawnerUpdate>();
 	update->percent = 0;
-	update->updateType = UnitSpawnerUpdate::UpdateType::ADD_TO_QUEUE;
+	update->updateType = SpawnerUpdate::UpdateType::ADD_TO_QUEUE;
 	update->unitType = type;
 	update->id = id;
 
