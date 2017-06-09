@@ -28,8 +28,12 @@ int main() {
 	// Set up callback functions
 
 	while (client.isRunning()) {
+		auto time = std::chrono::system_clock::now();
 		client.display();
 		client.update();
+
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - time);
+		while ((duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - time)).count() < 15);
 	}
 
 	client.disconnect();

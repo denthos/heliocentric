@@ -10,7 +10,7 @@ class UnitSpawnWidget : public Widget {
 public:
 	UnitSpawnWidget(Widget* parent);
 
-	void updateSelection(Builder* spawner, const ResourceCollection& resources);
+	void updateSelection(Builder* spawner, Player* player);
 	void setCreateButtonCallback(std::function<void(UnitType*)> callback);
 
 private:

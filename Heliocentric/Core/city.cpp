@@ -103,6 +103,9 @@ void City::extractResourcesFromSlotAndCreateUpdates(std::vector<std::shared_ptr<
 
 
 	for (auto& resource_pair : get_slot()->getResources()) {
+		if (resource_pair.second <= 0) {
+			continue;
+		}
 
 		/* Change the player's resource count */
 		player->change_resource_amount(resource_pair.first, 1);

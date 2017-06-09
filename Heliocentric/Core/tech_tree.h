@@ -22,8 +22,11 @@ friend class TechTree;
 
 private:
 	int id;
+	std::string description;
 	std::string name;
 	bool researched;
+	bool available;
+	bool prereq_met;
 	float research_points_required;
 	float research_points_accumulated;
 	float research_progress; // percentage of research points accumulated
@@ -31,7 +34,14 @@ private:
 	std::vector<Technology*> children;
 
 public:
-	Technology(int, float);
+
+	int getID() const;
+	std::string getName() const;
+	std::string getDescription() const;
+	const std::vector<Technology*>& getChildren() const;
+	bool hasResearched() const;
+
+	Technology(int, float, std::string name, std::string desc);
 
 	/**
 	Called by tech tree, which delegates funtionalities to this method.
@@ -58,13 +68,14 @@ private:
 	/* TODO: Potential race condition? Might need a lock on current_research. */
 	Technology* current_research; // The selected tech that is being researched
 	static const std::unordered_map<int, std::string> tech_name_map;
-	std::unordered_map<int, Technology*> techs;
 	std::vector<Technology*> available_techs;
 
 	void build_tree();
 	void set_research_idle();
+	std::unordered_map<int, Technology*> techs;
 
 public:
+	const Technology* getTechById(int id) const;
 	TechTree();
 	~TechTree();
 
@@ -73,7 +84,7 @@ public:
 	@param research_points Reserch points being accumulated each time this method is called.
 	@return False if no research is selected. True otherwise.
 	*/
-	bool research(float);
+	bool TechTree::research(float research_points, Technology*& current);
 
 	/**
 	Chooses a tech as currently researching tech.
@@ -98,6 +109,8 @@ public:
 	@return progress of current research.
 	*/
 	float get_current_research_progress();
+
+	bool is_researching();
 
 	/**
 	Gets all the available techs, which are techs with all prerequisites satisfied and

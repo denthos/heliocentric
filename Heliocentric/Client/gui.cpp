@@ -17,8 +17,9 @@
 #define FONT_FILE "Fonts/Courier.ttf"
 #define MAX_RESOURCE_CHARACTERS 9
 
-GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tradeCallback, std::function<void(UID, bool)> tradeHandlerCallback, int screenWidth, int screenHeight) : 
+GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tradeCallback, std::function<void(UID, bool)> tradeHandlerCallback, std::function<void(const Technology*)> techResearchCallback, int screenWidth, int screenHeight) : 
 	Screen(), tradeCallback(tradeCallback), tradeHandlerCallback(tradeHandlerCallback), screenWidth(screenWidth), screenHeight(screenHeight) {
+
 	this->initialize(window, false);
 
 	// load placeholder image
@@ -45,6 +46,8 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
 	this->createUnitDisplay();
+	this->createTechTreePreviewWindow();
+	this->createTechTreeWindow(techResearchCallback);
 
 	this->setVisible(true);
 	this->performLayout();
@@ -52,22 +55,74 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	setScreenSize(screenWidth, screenHeight);
 }
 
-void GUI::update() {
-	if (player) {
-		for (std::pair<Resources::Type, Label *> resourceLabel : resourceLabels) {
-			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
-		}
-	}
 
+void GUI::update() {
+	updatePlayerOverlay();
 	updateCityWindow();
 	updateUnitWindow();
+	updateTechTreePreviewWindow();
+	updateTechTreeWindow();
 }
-
 
 
 GUI::~GUI()
 {
 	delete unit_window;
+}
+
+void GUI::updatePlayerOverlay() {
+	if (player) {
+		for (std::pair<Resources::Type, Label *> resourceLabel : resourceLabels) {
+			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
+		}
+	}
+}
+
+void GUI::createTechTreePreviewWindow() {
+	this->techPreviewWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 100, screenHeight - 200), "Technology");
+
+	std::function<void()> previewCallback = std::bind(&GUI::showChooseTechWindow, this);
+	this->techPreviewWidget = new TechPreviewWidget(techPreviewWindow, previewCallback);
+	formHelper->addWidget("", techPreviewWidget);
+}
+
+void GUI::createTechTreeWindow(std::function<void(const Technology*)> techResearchCallback) {
+	this->techTreeWindow = formHelper->addWindow(Eigen::Vector2i(0, 0), "Research");
+	this->techTreeWidget = new TechTreeWidget(techTreeWindow, [this, techResearchCallback](const Technology* tech) {
+		this->techTreeWindow->performLayout(nvgContext());
+		techResearchCallback(tech);
+	});
+	formHelper->addWidget("", techTreeWidget);
+
+	Button* closeButton = new Button(techTreeWindow->buttonPanel(), "X");
+	closeButton->setCallback([this]() {
+		techTreeWindow->setVisible(false);
+	});
+
+	techTreeWindow->setVisible(false);
+}
+
+
+void GUI::updateTechTreePreviewWindow() {
+	if (this->techPreviewWindow->visible()) {
+		this->techPreviewWidget->updatePreview(&player->getTechTree());
+	}
+}
+
+void GUI::showChooseTechWindow() {
+	techTreeWidget->updateTechTreeWidget(&player->getTechTree());
+	techTreeWindow->setSize(Eigen::Vector2i(techTreeWidget->width(), techTreeWidget->height() + 20));
+	techTreeWindow->performLayout(nvgContext());
+	techTreeWindow->setVisible(true);
+	techTreeWindow->center();
+}
+
+void GUI::updateTechTreeWindow() {
+	// Only do things if we are looking at the tech tree window
+	if (techTreeWindow->visible()) {
+		techTreeWidget->updateTechTreeWidget(&player->getTechTree());
+		techTreeWindow->performLayout(nvgContext());
+	}
 }
 
 void GUI::updateUnitWindow() {
@@ -261,6 +316,7 @@ void GUI::createCustomTradeUI() {
 	});
 	offerResourceType->setItems({});
 	offerResourceType->setCallback([this](int val) {
+		offerAmount->setMinMaxValues(0, this->player.get()->get_resource_amount(static_cast<Resources::Type>(val)));
 		offerAmount->setValue(this->player.get()->get_resource_amount(static_cast<Resources::Type>(val)));
 	});
 	askForAmount->setEditable(true);
@@ -270,9 +326,9 @@ void GUI::createCustomTradeUI() {
 	});
 	askForResourceType->setItems({});
 	askForResourceType->setCallback([this](int val) {
+		askForAmount->setMinMaxValues(0, this->trade_partner->get_resource_amount(static_cast<Resources::Type>(val)));
 		askForAmount->setValue(this->trade_partner->get_resource_amount(static_cast<Resources::Type>(val)));
 	});
-
 	formHelper->addWidget("Custom Trade Panel: ", tradePanel);
 
 	sendTradeButton = formHelper->addButton("Send", []() {});
@@ -282,12 +338,10 @@ void GUI::createCustomTradeUI() {
 	});
 
 	sendTradeButton->setCallback([this]() {
-		LOG_DEBUG("Player " + std::to_string(this->player->getID()) + " is offering " + std::to_string(offerAmount->value()) + " amount of " + Resources::toString(static_cast<Resources::Type>(offerResourceType->selectedIndex()))
-			+ " to player " + std::to_string(this->trade_partner->getID()) + " for " + std::to_string(askForAmount->value()) + " amount of " + Resources::toString(static_cast<Resources::Type>(askForResourceType->selectedIndex())));
-		LOG_DEBUG("Sending Custom Trade to another player...");
 		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), static_cast<Resources::Type>(offerResourceType->selectedIndex()),
 			offerAmount->value(), static_cast<Resources::Type>(askForResourceType->selectedIndex()), askForAmount->value()));
 		this->hideCustomTradeUI();
+		this->performLayout();
 	});
 
 	this->performLayout();
@@ -322,9 +376,9 @@ void GUI::updateCustomTradeUI() {
 
 	offerResourceType->setItems(my_resource_list);
 	askForResourceType->setItems(partner_resource_list);
-
+	offerAmount->setMinMaxValues(0, this->player->get_resource_amount(static_cast<Resources::Type>(0)));
+	askForAmount->setMinMaxValues(0, this->trade_partner->get_resource_amount(static_cast<Resources::Type>(0)));
 	this->performLayout();
-
 }
 
 void GUI::showCustomTradeUI() {
@@ -471,7 +525,7 @@ void GUI::createUnitDisplay() {
 
 void GUI::updateCityWindow() {
 	if (cityWindow->visible()) {
-		unitSpawnWidget->updateSelection(selectedCity, this->player->getResources());
+		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
 	}

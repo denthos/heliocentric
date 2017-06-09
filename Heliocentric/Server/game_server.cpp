@@ -348,8 +348,7 @@ void GameServer::run() {
 	this->open();
 	this->serve();
 
-	std::clock_t tick_start_time;
-	std::clock_t tick_elapsed_time;
+	std::chrono::time_point<std::chrono::system_clock> tick_start_time;
 
 	while (server_running) {
 		/* Temporary solution to stop server from terminating after game ends */
@@ -357,7 +356,7 @@ void GameServer::run() {
 			continue;
 		}
 
-		tick_start_time = std::clock();
+		tick_start_time = std::chrono::system_clock::now();
 
 		game->increment_time(tick_duration);
 
@@ -366,12 +365,13 @@ void GameServer::run() {
 		sendUpdates();
 		endGameIfGameOver();
 
-		tick_elapsed_time = std::clock() - tick_start_time;
-		if (tick_elapsed_time > tick_duration) {
-			LOG_WARN("Tick processing took ", tick_elapsed_time - tick_duration, "ms longer than expected");
-		}
+		auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - tick_start_time);
 
-		while ((tick_elapsed_time = std::clock() - tick_start_time) < tick_duration);
+		if (elapsed_time.count() > tick_duration) {
+			LOG_WARN("Tick processing took ", elapsed_time.count() - tick_duration, "ms longer than expected");
+		}
+		
+		while ((elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - tick_start_time)).count() < tick_duration);
 	}
 	LOG_DEBUG("Server exited safely");
 }
@@ -428,7 +428,7 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			this->addFunctionToProcessQueue([this, command, owner]() {
 				//TODO: Make all managers know about other managers (eg playermanager) so that this is cleaner
 				UnitType* type = UnitType::getByIdentifier(command->createUnitType);
-				if (!type->hasBuildRequirements(owner->getResources())) {
+				if (!owner->can_create_unit(type)) {
 					// The player does not have the proper requirements. Bail out!
 					return;
 				}

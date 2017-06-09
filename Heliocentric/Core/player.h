@@ -22,6 +22,7 @@ class NewPlayerInfoUpdate;
 class PlayerScoreUpdate;
 class PlayerResearchUpdate;
 class PlayerManager;
+class UnitType;
 
 class Player : public Identifiable {
 public:
@@ -37,6 +38,7 @@ public:
 
 	float get_research_points();
 	bool can_settle(); // tells if a player currently can settle another city
+	bool can_create_unit(UnitType* type);
 
 	std::string get_name() const;
 	void set_name(std::string new_name);
@@ -50,7 +52,8 @@ public:
 
 	void acquire_object(GameObject* object);
 	void add_to_destroy(GameObject* object);         // Add a game object to destroy
-	void pop();                               // Pop all objects queued for destroy
+
+	TechTree& getTechTree();
 
 	const ResourceCollection& getResources() const;
 	int get_resource_amount(Resources::Type);
@@ -94,6 +97,7 @@ private:
 	PlayerColor::Color color;
 
 	std::shared_ptr<PlayerScoreUpdate> score_update;
+	std::shared_ptr<PlayerResearchUpdate> research_update;
 	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
 	void send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update);
   

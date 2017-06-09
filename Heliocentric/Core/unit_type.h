@@ -28,12 +28,14 @@ public:
 
 
 	virtual bool hasBuildRequirements(const ResourceCollection& resources) const = 0;
+	virtual bool hasTechRequirements(const TechTree& tree) const = 0;
 	virtual const ResourceCollection& getBuildRequirements() const = 0;
 
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
 
 	virtual int getBaseHealth() const = 0;
+	virtual int getBaseDefense() const = 0;
 
 private:
 	static std::unordered_map<UnitType::TypeIdentifier, UnitType*> unittypeMap;
@@ -42,15 +44,31 @@ private:
 template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
-	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int productionCost, std::string typeName, int baseHealth) :
-		UnitType(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), typeName(typeName), baseHealth(baseHealth) {}
+	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int productionCost, std::string typeName, int baseHealth, int baseDefense, std::vector<int> required_techs) :
+		UnitType(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth), baseDefense(baseDefense), requiredTechs(required_techs) {}
 
 	std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
-		return std::make_shared<UnitClass>(position, owner, manager, this);
+		std::shared_ptr<UnitClass> unit = std::make_shared<UnitClass>(position, owner, manager, this);
+		applyChangesToUnit(unit, owner);
+		return unit;
 	}
 
 	std::shared_ptr<Unit> createUnit(UID id, glm::vec3 position, Player* owner, UnitManager* manager) {
-		return std::make_shared<UnitClass>(id, position, owner, manager, this);
+		std::shared_ptr<UnitClass> unit = std::make_shared<UnitClass>(id, position, owner, manager, this);
+		applyChangesToUnit(unit, owner);
+		return unit;
+	}
+
+	void applyChangesToUnit(std::shared_ptr<Unit> unit, Player* owner) {
+		/* Let's see if the user researched increased armor */
+		const Technology* armor_tech = owner->getTechTree().getTechById(TECH_1);
+		if (!armor_tech) {
+			return;
+		}
+
+		if (armor_tech->hasResearched()) {
+			unit->set_combat_defense(unit->get_combat_defense() + 10);
+		}
 	}
 
 	bool hasBuildRequirements(const ResourceCollection& resources) const {
@@ -71,6 +89,16 @@ public:
 		return true;
 	}
 
+	virtual bool hasTechRequirements(const TechTree& tree) const {
+		for (int required_tech_id : this->requiredTechs) {
+			if (!tree.getTechById(required_tech_id)->hasResearched()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	const ResourceCollection& getBuildRequirements() const {
 		return this->buildRequirements;
 	}
@@ -83,6 +111,10 @@ public:
 		return this->baseHealth;
 	}
 
+	int getBaseDefense() const {
+		return this->baseDefense;
+	}
+
 	const std::string& getTypeName() const {
 		return this->typeName;
 	}
@@ -93,7 +125,9 @@ public:
 
 private:
 	ResourceCollection buildRequirements;
+	std::vector<int> requiredTechs;
 	int baseHealth;
+	int baseDefense;
 
 	std::string typeName;
 

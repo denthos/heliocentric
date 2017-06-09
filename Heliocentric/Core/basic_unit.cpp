@@ -3,7 +3,7 @@
 #include "unit_type.h"
 
 BasicUnit::BasicUnit(glm::vec3 position, Player* owner, UnitManager* manager, UnitType* type) :
-	Unit(position, owner, new InstantLaserAttack(), manager, 100, type->getBaseHealth(), 2.0f, type) {}
+	Unit(position, owner, new InstantLaserAttack(), manager, type->getBaseDefense(), type->getBaseHealth(), 2.0f, type) {}
 
 BasicUnit::BasicUnit(UID id, glm::vec3 position, Player* owner, UnitManager* manager, UnitType* type) :
-	Unit(id, position, owner, new InstantLaserAttack(), manager, 100, type->getBaseHealth(), 2.0f, type) {}
+	Unit(id, position, owner, new InstantLaserAttack(), manager, type->getBaseDefense(), type->getBaseHealth(), 2.0f, type) {}
