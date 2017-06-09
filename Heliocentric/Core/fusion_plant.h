@@ -4,5 +4,5 @@
 
 class FusionPlant : public Building {
 public:
-	FusionPlant();
+	FusionPlant(BuildingType* type);
 };

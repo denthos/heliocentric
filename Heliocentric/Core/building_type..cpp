@@ -14,11 +14,11 @@ BuildingType* BuildingType::getByIdentifier(TypeIdentifier identifier) {
 std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> BuildingType::buildingTypeMap = {
 	{
 		BuildingType::TypeIdentifier::FISSION_PLANT,
-		new BuildingTypeImpl<FissionPlant>(TypeIdentifier::FISSION_PLANT, 100, "Fission Power Plant")
+		new BuildingTypeImpl<FissionPlant>(TypeIdentifier::FISSION_PLANT, 100, "Fission Power Plant", FISSION_PLANT_PRODUCTION, 0)
 	},
 
 	{
 		BuildingType::TypeIdentifier::FUSION_PLANT,
-		new BuildingTypeImpl<FusionPlant>(TypeIdentifier::FUSION_PLANT, 200, "Fusion Power Plant")
+		new BuildingTypeImpl<FusionPlant>(TypeIdentifier::FUSION_PLANT, 200, "Fusion Power Plant", FUSION_PLANT_PRODUCTION, 0)
 	}
 };

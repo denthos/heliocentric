@@ -4,5 +4,5 @@
 
 class FissionPlant : public Building {
 public:
-	FissionPlant();
+	FissionPlant(BuildingType* type);
 };

@@ -4,5 +4,5 @@
 
 class ResearchFacility : public Building {
 public:
-	ResearchFacility();
+	ResearchFacility(BuildingType* type);
 };

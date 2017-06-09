@@ -11,7 +11,10 @@ void CityManager::handleUnitSpawningComplete(UnitType* type, City* city) {
 }
 
 void CityManager::handleBuildingSpawningComplete(BuildingType* type, City* city) {
-
+	LOG_DEBUG("Building spawning complete... Sending CityUpdate");
+	std::shared_ptr<CityUpdate> update = std::make_shared<CityUpdate>(city->getID(), city->get_health(),
+		city->get_production() + type->getProduction(), city->get_research_points() + type->getResearchPoints());
+	city_updates.insert(update);
 }
 
 void CityManager::doLogic() {

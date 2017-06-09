@@ -1,5 +1,5 @@
 #include "building.h"
 
-Building::Building(int production, int research_points) : production(production), research_points(research_points) {
+Building::Building(BuildingType* type) : production(type->getProduction()), research_points(type->getResearchPoints()) {
 
 }

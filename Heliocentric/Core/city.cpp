@@ -124,10 +124,6 @@ std::string City::getName() const {
 }
 
 void City::spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType) {
-	/* 
-	This happens when we are ready to create a unit! We need to somehow tell the unit manager.
-	Let's do so through the city manager
-	*/
 	switch (buildType) {
 		case Builder::ProductionType::IDLE:
 			LOG_ERR("Spawn completed but city was not producing anything...");
@@ -136,6 +132,10 @@ void City::spawnCompleteHandler(Buildable* type, Builder::ProductionType buildTy
 			manager->handleBuildingSpawningComplete((BuildingType*) type, this);
 			break;
 		case Builder::ProductionType::UNIT:
+			/*
+			This happens when we are ready to create a unit! We need to somehow tell the unit manager.
+			Let's do so through the city manager
+			*/
 			manager->handleUnitSpawningComplete((UnitType*) type, this);
 			break;
 		default:

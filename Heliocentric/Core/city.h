@@ -48,7 +48,7 @@ protected:
 	virtual void handle_counter(std::shared_ptr<AttackableGameObject> opponent);
 	void send_update_to_manager(std::shared_ptr<CityUpdate> update);
 
-	/* Override for UnitSpawner */
+	/* Override for Builder */
 	void spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType);
 	
 	std::shared_ptr<CityUpdate> update;
