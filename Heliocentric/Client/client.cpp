@@ -215,7 +215,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
-	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
+	colorShader = new Shader("Shaders/geoshader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
 	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
