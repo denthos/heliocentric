@@ -36,7 +36,7 @@
 #include "trade_deal.h"
 #include "instant_laser_attack.h"
 #include "selectable.h"
-#include "unit_spawner_update.h"
+#include "spawner_update.h"
 #include "player_icon.h"
 
 #define MAX_ACTIONS_WINDOW 50
