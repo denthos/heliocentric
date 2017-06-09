@@ -37,6 +37,7 @@
 #include "instant_laser_attack.h"
 #include "selectable.h"
 #include "unit_spawner_update.h"
+#include "player_icon.h"
 
 #define MAX_ACTIONS_WINDOW 50
 
@@ -268,6 +269,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_T, std::bind(&Client::handleTKey, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -870,6 +872,11 @@ void Client::handleLeftBracketKey(int key) {
 
 void Client::handleRightBracketKey(int key) {
 	musicPlayer->volume_increase();
+}
+
+void Client::handleTKey(int key)
+{
+	PlayerIcon::drawIcons = !PlayerIcon::drawIcons;
 }
 
 

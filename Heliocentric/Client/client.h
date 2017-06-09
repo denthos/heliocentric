@@ -144,5 +144,6 @@ private:
 	void handleF10Key(int);
 	void handleLeftBracketKey(int);
 	void handleRightBracketKey(int);
+	void handleTKey(int);
 };
 

@@ -1,5 +1,8 @@
 #include "player_icon.h"
 #include <math.h>
+
+bool PlayerIcon::drawIcons = false;
+
 PlayerIcon::PlayerIcon(Shader * shader)
 {
 	this->shader = shader;
@@ -51,7 +54,7 @@ void PlayerIcon::draw(const Camera & camera)
 	
 	glm::vec3 offset = viewportProjection / viewportProjection.w;
 
-	glUniform3fv(glGetUniformLocation(shaderID, "player_color"), 1, &color[0]);
+	glUniform4fv(glGetUniformLocation(shaderID, "player_color"), 1, &color[0]);
 	glUniform3fv(glGetUniformLocation(shaderID, "offset"), 1, &offset[0]);
 
 
@@ -71,8 +74,3 @@ void PlayerIcon::setColor(glm::vec4 color)
 	this->color = color;
 }
 
-void PlayerIcon::toggleIcons()
-{
-	PlayerIcon::drawIcons = !PlayerIcon::drawIcons;
-		 
-}
