@@ -95,6 +95,7 @@ protected:
 private:
 	std::thread sound_thread;
 
+	float exposure;
 	GLFWwindow * window;
 	GUI * gui;
 	ThreeDSoundSystem* soundSystem;
@@ -147,5 +148,7 @@ private:
 	void handleLeftBracketKey(int);
 	void handleRightBracketKey(int);
 	void handleTKey(int);
+	void handleUpKey(int);
+	void handleDownKey(int);
 };
 

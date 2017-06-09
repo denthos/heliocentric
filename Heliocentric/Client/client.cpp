@@ -274,6 +274,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_T, std::bind(&Client::handleTKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_UP, std::bind(&Client::handleUpKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_DOWN, std::bind(&Client::handleDownKey, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -301,6 +303,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	musicPlayer->load_sound("Audio/Holst_The_Planets_Uranus.ogg");
 	musicPlayer->load_sound("Audio/Holst_The_Planets_Mercury.ogg");
 	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, musicPlayer);
+
+	exposure = 2.0f;
 }
 
 Client::~Client() {
@@ -510,9 +514,9 @@ void Client::display() {
 		glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
 		glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
 		glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
-		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
+		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), exposure);
 		quad->draw();
-
+		
 		quadShader->unbind();
 
 		// draw the UI
@@ -907,6 +911,16 @@ void Client::handleRightBracketKey(int key) {
 void Client::handleTKey(int key)
 {
 	PlayerIcon::drawIcons = !PlayerIcon::drawIcons;
+}
+
+void Client::handleUpKey(int)
+{
+	exposure = glm::clamp(exposure + 0.1f, 1.0f, 5.0f);
+}
+
+void Client::handleDownKey(int)
+{
+	exposure = glm::clamp(exposure - 0.1f, 1.0f, 5.0f);
 }
 
 
