@@ -109,6 +109,7 @@ void GUI::createTechTreeWindow(std::function<void(const Technology*)> techResear
 void GUI::updateTechTreePreviewWindow() {
 	if (this->techPreviewWindow->visible() && player) {
 		this->techPreviewWidget->updatePreview(&player->getTechTree());
+		techPreviewWindow->performLayout(nvgContext());
 	}
 }
 
@@ -131,6 +132,7 @@ void GUI::updateTechTreeWindow() {
 void GUI::updateUnitWindow() {
 	if (selectedUnit) {
 		unit_info_widget->updateSelection(selectedUnit);
+		unit_window->performLayout(nvgContext());
 	}
 }
 
@@ -555,6 +557,7 @@ void GUI::updateCityWindow() {
 		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
+		cityWindow->performLayout(nvgContext());
 	}
 }
 
@@ -571,6 +574,7 @@ void GUI::updateSlotWindow() {
 
 		}
 		slotButton->setEnabled(player->can_settle());
+		slotWindow->performLayout(nvgContext());
 	}
 }
 
