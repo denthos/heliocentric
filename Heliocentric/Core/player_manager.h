@@ -15,7 +15,6 @@ private:
 	std::vector<std::shared_ptr<Player>> players;
 	std::unordered_set<std::shared_ptr<PlayerScoreUpdate>> player_score_updates;
 	std::unordered_set<std::shared_ptr<PlayerResearchUpdate>> player_research_updates;
-	std::unordered_set<std::shared_ptr<TimeUpdate>> player_time_updates;
 
 public:
 	PlayerManager();
