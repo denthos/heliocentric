@@ -81,7 +81,7 @@ void AttackableGameObjectWidget::updateSelection(AttackableGameObject * selected
 		health_percentage = (int)(health * 100.0f);
 	}
 	else {
-		health = ((float)selected->get_health() / 500.0f);
+		health = ((float)selected->get_health() / 800.0f);
 		health_percentage = (int)(health * 100.0f);
 	}
 
