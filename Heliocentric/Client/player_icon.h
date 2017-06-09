@@ -6,6 +6,7 @@
 #include "camera.h"
 
 
+
 class PlayerIcon {
 public:
 	PlayerIcon( Shader* shader); //init fields
@@ -14,8 +15,10 @@ public:
 	void draw(const Camera &camera);
 	glm::mat4 world_mat;
 	void setColor(glm::vec4 color);
+	void toggleIcons();
 
 private:
+	static bool drawIcons;
 	Shader * shader;
 	GLuint VBO, VAO, icon_info_buffer;
 	glm::vec4 color;

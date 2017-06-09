@@ -70,3 +70,9 @@ void PlayerIcon::setColor(glm::vec4 color)
 {
 	this->color = color;
 }
+
+void PlayerIcon::toggleIcons()
+{
+	PlayerIcon::drawIcons = !PlayerIcon::drawIcons;
+		 
+}
