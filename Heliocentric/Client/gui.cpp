@@ -596,11 +596,14 @@ void GUI::createHelpWindow() {
 		hideHelpDetailWindow();
 	});
 
-	formHelper->addGroup("Hotkey Info");
 	Widget* hotKeyWidget = new Widget(helpDetailWindow);
-	formHelper->addWidget("Hot Key Widget", hotKeyWidget);
+	hotKeyWidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 0, 1));
 	TextBox* cameraKey = new TextBox(hotKeyWidget, "`");
 	Label* cameraKeyLabel = new Label(hotKeyWidget, "Swap camera views");
+	Label* gameGoalLabel = new Label(hotKeyWidget, "GAME GOAL");
+	Label* explainGameGoal = new Label(hotKeyWidget, "My game goal is bla bla bla");
+	formHelper->addWidget("Hot Key Widget", hotKeyWidget);
+	this->performLayout();
 
 	hideHelpDetailWindow();
 }
