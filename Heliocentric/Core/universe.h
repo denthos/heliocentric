@@ -18,13 +18,15 @@ private:
 	std::unique_ptr<Planet> createPlanet(PlanetArgs... args) {
 		auto planet = std::make_unique<Planet>(args...);
 
-		Slot* left_slot = new Slot(planet.get(), SphericalCoordinate(90, 0));
-		planet->get_slots().insert(std::make_pair(left_slot->getID(), left_slot));
+		if (planet->getName() != "Sun") {
+			Slot* left_slot = new Slot(planet.get(), SphericalCoordinate(90, 0));
+			planet->get_slots().insert(std::make_pair(left_slot->getID(), left_slot));
 
-		Slot* right_slot = new Slot(planet.get(), SphericalCoordinate(90, 180));
-		planet->get_slots().insert(std::make_pair(right_slot->getID(), right_slot));
+			Slot* right_slot = new Slot(planet.get(), SphericalCoordinate(90, 180));
+			planet->get_slots().insert(std::make_pair(right_slot->getID(), right_slot));
 
-		planet->distributeResourcesAmongstSlots();
+			planet->distributeResourcesAmongstSlots();
+		}
 		return planet;
 	}
 
