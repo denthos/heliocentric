@@ -391,7 +391,7 @@
     <ClCompile Include="city_manager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="building_type..cpp">
+    <ClCompile Include="building_type.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="buildable.cpp">

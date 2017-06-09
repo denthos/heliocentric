@@ -37,8 +37,7 @@ GameServer::~GameServer() {
 	Let's be a good citizen. When we are closing, let's _gracefully_ close
 	all the player connections ^^
 	*/
-	auto connections = Lib::key_acquire(this->connections);
-	for (auto& connection : connections.get().first) {
+	for (auto& connection : connections.first) {
 		connection.second.reset();
 	}
 }
@@ -49,21 +48,15 @@ std::shared_ptr<AttackableGameObject> GameServer::get_attackable(UID uid) const 
 }
 
 
-void GameServer::addFunctionToProcessQueue(std::function<void()> work) {
-	auto& process_queue = Lib::key_acquire(this->update_process_queue);
-	process_queue.get().push(work);
-}
-
 void GameServer::handleClientDisconnect(SunNet::ChanneledSocketConnection_p client) {
 	/* If a client wishes to disconnect, we just drop them entirely. */
 	LOG_DEBUG("Disconnecting client");
-	auto connections = Lib::key_acquire(this->connections);
-	auto id_it = connections.get().second.find(client);
-	if (id_it != connections.get().second.end()) {
+	auto id_it = connections.second.find(client);
+	if (id_it != connections.second.end()) {
 		//TODO: Properly erase the player. For now, we won't erase him since it breaks things
 		//players.erase(id_it->second);
-		connections.get().first.erase(id_it->second);
-		connections.get().second.erase(id_it);
+		connections.first.erase(id_it->second);
+		connections.second.erase(id_it);
 	}
 }
 
@@ -91,9 +84,8 @@ void GameServer::handle_channeledclient_connect(SunNet::ChanneledSocketConnectio
 	this->nextPlayerColor = static_cast<PlayerColor::Color>(nextColor);
 
 	{
-		auto connections = Lib::key_acquire(this->connections);
-		connections.get().first[player->getID()] = client;
-		connections.get().second[client] = player->getID();
+		connections.first[player->getID()] = client;
+		connections.second[client] = player->getID();
 	}
 
 	/* 
@@ -115,10 +107,9 @@ Player* GameServer::extractPlayerFromConnection(SunNet::ChanneledSocketConnectio
 	UID player_id;
 	{
 		/* First, let's extract the player id from the connection */
-		auto connections = Lib::key_acquire(this->connections);
-		auto& player_id_it = connections.get().second.find(sender);
+		auto& player_id_it = connections.second.find(sender);
 
-		if (player_id_it == connections.get().second.end()) {
+		if (player_id_it == connections.second.end()) {
 			if (retrying) {
 				/*
 				Okay. We've had this problem once and we tried to reconnect the user. Something is seriously
@@ -199,15 +190,6 @@ void GameServer::performUpdates() {
 		return;
 	}
 
-	/* Perform queued updates */
-	{
-		auto& process_queue = Lib::key_acquire(this->update_process_queue);
-		while (!process_queue.get().empty()) {
-			process_queue.get().front()();
-			process_queue.get().pop();
-		}
-	}
-
 	/* First, update the universe */
 	this->universe.doLogic();
 
@@ -226,10 +208,30 @@ void GameServer::performUpdates() {
 	this->addUpdateToSendQueue(city_manager->get_updates().begin(), city_manager->get_updates().end());
 	this->addUpdateToSendQueue(city_manager->getCreationUpdates().begin(), city_manager->getCreationUpdates().end());
 
-	this->addUpdateToSendQueue(city_manager->getSpawnerUpdates().begin(), city_manager->getSpawnerUpdates().end());
 
 	this->addUpdateToSendQueue(player_manager->getPlayerScoreUpdates().begin(), player_manager->getPlayerScoreUpdates().end());
-	this->addUpdateToSendQueue(player_manager->getPlayerResearchUpdates().begin(), player_manager->getPlayerResearchUpdates().end());
+
+	/* These updates should only be sent to the relevant players */
+	for (auto& spawner_update : city_manager->getSpawnerUpdates()) {
+		auto city = city_manager->get_city(spawner_update->id);
+		if (!city) {
+			continue;
+		}
+
+		auto player = city->get_player();
+		if (!player) {
+			continue;
+		}
+
+		UID owner_id = player->getID();
+		this->addUpdateToSendQueue(spawner_update, { owner_id });
+	}
+
+	for (auto& research_update : player_manager->getPlayerResearchUpdates()) {
+		UID owner_id = research_update->id;
+		this->addUpdateToSendQueue(research_update, { owner_id });
+	}
+
 	this->addUpdateToSendQueue(this->game->timeUpdate);
 
 	/* Give players resources based on their owned cities */
@@ -264,9 +266,8 @@ bool GameServer::updatePlayerResources(std::vector<std::shared_ptr<PlayerUpdate>
 }
 
 void GameServer::sendUpdates() {
-	auto update_queue = Lib::key_acquire(this->updates_to_send);
-	while (!update_queue.get().empty()) {
-		auto& update = update_queue.get().front();
+	while (!updates_to_send.empty()) {
+		auto& update = updates_to_send.front();
 		{
 			/* 
 			If the update is intended to be sent to a particular person, send it to them.
@@ -278,14 +279,13 @@ void GameServer::sendUpdates() {
 				}
 			}
 			else {
-				auto connections = Lib::key_acquire(this->connections);
-				for (auto& player_conn : connections.get().first) {
+				for (auto& player_conn : connections.first) {
 					update.send_function(player_conn.second);
 				}
 			}
 		}
 
-		update_queue.get().pop();
+		updates_to_send.pop();
 	}
 }
 
@@ -362,6 +362,12 @@ void GameServer::run() {
 		game->increment_time(tick_duration);
 
 		// Add server logic
+
+		bool has_more_updates = true;
+		while (has_more_updates) {
+			has_more_updates = this->poll();
+		}
+
 		performUpdates();
 		sendUpdates();
 		endGameIfGameOver();
@@ -384,8 +390,7 @@ void GameServer::shut_down() {
 
 void GameServer::handleGamePause(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<DebugPause> pause) {
 	{
-		auto connections = Lib::key_acquire(this->connections);
-		LOG_DEBUG("Game paused by connection ", connections.get().second[sender]);
+		LOG_DEBUG("Game paused by connection ", connections.second[sender]);
 	}
 	this->server_paused = !this->server_paused;
 }
@@ -426,7 +431,6 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			Player* owner = this->extractPlayerFromConnection(sender);
 
-			this->addFunctionToProcessQueue([this, command, owner]() {
 				//TODO: Make all managers know about other managers (eg playermanager) so that this is cleaner
 				UnitType* type = UnitType::getByIdentifier(command->createUnitType);
 				if (!owner->can_create_unit(type)) {
@@ -454,25 +458,36 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 				catch (City::BadUIDException e) {
 					LOG_ERR("Invalid city Id sent to server");
 				}
-			});
 			break;
 		}
 		case PlayerCommand::CMD_CREATE_BUILDING : {
 			LOG_DEBUG("Player command type: CMD_CREATE_BUILDING.");
 			Player* owner = this->extractPlayerFromConnection(sender);
 
-			this->addFunctionToProcessQueue([this, command, owner]() {
 				BuildingType* type = BuildingType::getByIdentifier(command->createBuildingType);
 				/* Check tech tree */
+				if (!type->hasBuildRequirements(owner->getResources())) {
+					return;
+				}
 
 				try {
 					auto spawnUpdate = this->city_manager->spawnBuilding(command);
 					this->addUpdateToSendQueue(spawnUpdate);
+
+					std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
+
+					for (auto& resource_pair : type->getBuildRequirements()) {
+						owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
+						playerResourceUpdates.push_back(
+							std::make_shared<PlayerUpdate>(owner->getID(), resource_pair.first, owner->get_resource_amount(resource_pair.first))
+						);
+					}
+
+					this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
 				}
 				catch (City::BadUIDException e) {
 					LOG_ERR("Invalid city Id sent to server");
 				}
-			});
 			break;
 		}
 		case PlayerCommand::CMD_TRADE: {
@@ -483,10 +498,9 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 			SunNet::ChanneledSocketConnection_p recipient;
 			{
 				/* These operations need to be locked */
-				auto connections = Lib::key_acquire(this->connections);
 
-				auto& recipient_iter = connections.get().first.find(command->trade_recipient);
-				if (recipient_iter == connections.get().first.end()) {
+				auto& recipient_iter = connections.first.find(command->trade_recipient);
+				if (recipient_iter == connections.first.end()) {
 					/* UID does not correspond to a player */
 					LOG_ERR("Invalid player UID.");
 					return;
@@ -513,21 +527,18 @@ void GameServer::handleUnitCommand(SunNet::ChanneledSocketConnection_p sender, s
 	LOG_DEBUG("Received a unit command.");
 
 	/* This currently only handles attack and move commands */
+	std::shared_ptr<AttackableGameObject> target;
 	switch (command->command_type) {
 		case UnitCommand::CMD_ATTACK:
 			LOG_DEBUG("Unit command type: CMD_ATTACK");
-			this->addFunctionToProcessQueue([this, command]() {
-				std::shared_ptr<AttackableGameObject> target = get_attackable(command.get()->target);
-				if (target)
-					unit_manager->do_attack(command.get()->initiator, target);
-			});
+			target = get_attackable(command.get()->target);
+			if (target)
+				unit_manager->do_attack(command.get()->initiator, target);
 			break;
 		case UnitCommand::CMD_MOVE:
 			LOG_DEBUG("Unit command type: CMD_MOVE");
 			// TODO: Delegate to UnitManager
-			this->addFunctionToProcessQueue([this, command]() {
-				unit_manager->do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
-			});
+			unit_manager->do_move(command.get()->initiator, command.get()->destination_x, command.get()->destination_y, command.get()->destination_z);
 			break;
 		default:
 			LOG_ERR("Invalid unit command.");
@@ -557,35 +568,33 @@ void GameServer::handleTradeCommand(SunNet::ChanneledSocketConnection_p sender, 
 
 	switch (command->command_type) {
 		case TradeCommand::CMD_TRADE_ACCEPT: {
-			this->addFunctionToProcessQueue([this, recipient, command, trade_deal]() {
-				recipient->trade_deal_accept(command->initiator);
+			recipient->trade_deal_accept(command->initiator);
 
-				int sender_sell_amount = this->players[trade_deal->get_sender()]->get_resource_amount(trade_deal->get_sell_type());
-				int sender_buy_amount = this->players[trade_deal->get_sender()]->get_resource_amount(trade_deal->get_buy_type());
-				int receiver_sell_amount = this->players[trade_deal->get_recipient()]->get_resource_amount(trade_deal->get_sell_type());
-				int receiver_buy_amount = this->players[trade_deal->get_recipient()]->get_resource_amount(trade_deal->get_buy_type());
+			int sender_sell_amount = this->players[trade_deal->get_sender()]->get_resource_amount(trade_deal->get_sell_type());
+			int sender_buy_amount = this->players[trade_deal->get_sender()]->get_resource_amount(trade_deal->get_buy_type());
+			int receiver_sell_amount = this->players[trade_deal->get_recipient()]->get_resource_amount(trade_deal->get_sell_type());
+			int receiver_buy_amount = this->players[trade_deal->get_recipient()]->get_resource_amount(trade_deal->get_buy_type());
 
-				// update server
-				this->players[trade_deal->get_sender()]->set_resource_amount(trade_deal->get_sell_type(), sender_sell_amount - trade_deal->get_sell_amount());
-				this->players[trade_deal->get_sender()]->set_resource_amount(trade_deal->get_buy_type(), trade_deal->get_buy_amount() + sender_buy_amount);
-				this->players[trade_deal->get_recipient()]->set_resource_amount(trade_deal->get_sell_type(), trade_deal->get_sell_amount() + receiver_sell_amount);
-				this->players[trade_deal->get_recipient()]->set_resource_amount(trade_deal->get_buy_type(), receiver_buy_amount - trade_deal->get_buy_amount());
+			// update server
+			this->players[trade_deal->get_sender()]->set_resource_amount(trade_deal->get_sell_type(), sender_sell_amount - trade_deal->get_sell_amount());
+			this->players[trade_deal->get_sender()]->set_resource_amount(trade_deal->get_buy_type(), trade_deal->get_buy_amount() + sender_buy_amount);
+			this->players[trade_deal->get_recipient()]->set_resource_amount(trade_deal->get_sell_type(), trade_deal->get_sell_amount() + receiver_sell_amount);
+			this->players[trade_deal->get_recipient()]->set_resource_amount(trade_deal->get_buy_type(), receiver_buy_amount - trade_deal->get_buy_amount());
 
-				// send update to client
-				std::shared_ptr<PlayerUpdate> sender_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
-					trade_deal->get_sell_type(), sender_sell_amount - trade_deal->get_sell_amount());
-				std::shared_ptr<PlayerUpdate> sender_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
-					trade_deal->get_buy_type(), trade_deal->get_buy_amount() + sender_buy_amount);
-				std::shared_ptr<PlayerUpdate> recipient_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
-					trade_deal->get_sell_type(), trade_deal->get_sell_amount() + receiver_sell_amount);
-				std::shared_ptr<PlayerUpdate> recipient_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
-					trade_deal->get_buy_type(), receiver_buy_amount - trade_deal->get_buy_amount());
+			// send update to client
+			std::shared_ptr<PlayerUpdate> sender_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
+				trade_deal->get_sell_type(), sender_sell_amount - trade_deal->get_sell_amount());
+			std::shared_ptr<PlayerUpdate> sender_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_sender(),
+				trade_deal->get_buy_type(), trade_deal->get_buy_amount() + sender_buy_amount);
+			std::shared_ptr<PlayerUpdate> recipient_sell_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
+				trade_deal->get_sell_type(), trade_deal->get_sell_amount() + receiver_sell_amount);
+			std::shared_ptr<PlayerUpdate> recipient_buy_update = std::make_shared<PlayerUpdate>(trade_deal->get_recipient(),
+				trade_deal->get_buy_type(), receiver_buy_amount - trade_deal->get_buy_amount());
 
-				this->addUpdateToSendQueue(sender_sell_update);
-				this->addUpdateToSendQueue(recipient_sell_update);
-				this->addUpdateToSendQueue(sender_buy_update);
-				this->addUpdateToSendQueue(recipient_buy_update);
-			});
+			this->addUpdateToSendQueue(sender_sell_update);
+			this->addUpdateToSendQueue(recipient_sell_update);
+			this->addUpdateToSendQueue(sender_buy_update);
+			this->addUpdateToSendQueue(recipient_buy_update);
 		}
 		case TradeCommand::CMD_TRADE_DECLINE: {
 			recipient->trade_deal_decline(command->initiator);
@@ -616,8 +625,7 @@ void GameServer::handleTradeData(SunNet::ChanneledSocketConnection_p sender, std
 		/* Put the TradeDeal to recipient's pending deals */
 		players[deal->recipient]->receive_trade_deal(trade_deal);
 		
-		auto connections = Lib::key_acquire(this->connections);
-		SunNet::ChanneledSocketConnection_p recipient = (connections.get().first)[deal->recipient]; // find recipient by ID
+		SunNet::ChanneledSocketConnection_p recipient = (connections.first)[deal->recipient]; // find recipient by ID
 
 		/* Send this deal to both sender and recipient. Sender thus knows about the trade deal's ID. */
 		this->addUpdateToSendQueue(deal, { sender, recipient });

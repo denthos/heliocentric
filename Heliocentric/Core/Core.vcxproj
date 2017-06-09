@@ -24,7 +24,7 @@
     <ClCompile Include="base_command.cpp" />
     <ClCompile Include="builder.cpp" />
     <ClCompile Include="building.cpp" />
-    <ClCompile Include="building_type..cpp" />
+    <ClCompile Include="building_type.cpp" />
     <ClCompile Include="city_manager.cpp" />
     <ClCompile Include="city_creation_update.cpp" />
     <ClCompile Include="city_update.cpp" />

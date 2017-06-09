@@ -11,6 +11,7 @@
 #include <string>
 
 #define RESOURCE_IMAGE_DIRECTORY "Images/Resources"
+#define ICON_IMAGE_DIRECTORY "Images/Icons"
 #define PIXELS_PER_CHARACTER 14
 #define LARGE_FONT "courier"
 #define LARGE_FONT_SIZE 26
@@ -44,6 +45,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	this->createTradeDisplay();
 	this->createCustomTradeUI();
 	this->createTradeHandlerUI();
+	this->createHelpWindow();
 	
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
@@ -107,8 +109,9 @@ void GUI::createTechTreeWindow(std::function<void(const Technology*)> techResear
 
 
 void GUI::updateTechTreePreviewWindow() {
-	if (this->techPreviewWindow->visible()) {
+	if (this->techPreviewWindow->visible() && player) {
 		this->techPreviewWidget->updatePreview(&player->getTechTree());
+		techPreviewWindow->performLayout(nvgContext());
 	}
 }
 
@@ -131,6 +134,7 @@ void GUI::updateTechTreeWindow() {
 void GUI::updateUnitWindow() {
 	if (selectedUnit) {
 		unit_info_widget->updateSelection(selectedUnit);
+		unit_window->performLayout(nvgContext());
 	}
 }
 
@@ -158,6 +162,7 @@ void GUI::setScreenSize(int width, int height) {
 	if (playerOverlay) {
 		playerOverlay->setSize(Eigen::Vector2i(screenWidth, 35));
 
+		/*
 		std::ostringstream spacerCaption;
 		// spaceToFill = max width - resource images/labels - fps label - margins
 		int spaceToFill = screenWidth - (Resources::NUM_RESOURCES * (6 + 25 + (MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER))) - (3 + (9 * PIXELS_PER_CHARACTER)) - 20;
@@ -165,6 +170,7 @@ void GUI::setScreenSize(int width, int height) {
 			spacerCaption << "a";
 		}
 		fpsSpacer->setCaption(spacerCaption.str());
+		*/
 
 		playerOverlay->performLayout(nvgContext());
 	}
@@ -276,12 +282,30 @@ void GUI::createPlayerOverlay() {
 		resourceLabel->setFixedWidth(MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER);
 		resourceLabels[i] = std::make_pair((Resources::Type)i, resourceLabel);
 	}
+
+	/*
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+	*/
+
+	int research_img = placeholderImage.first;
+	for (std::pair<int, std::string> icon : icons) {
+			if (icon.second.compare(resourceImageDirectory + "/" + "Research") == 0) {
+				research_img = icon.first;
+				break;
+			}
+		}
+
+	researchImage = new ImageView(playerOverlay, research_img);
+	researchImage->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
+	researchImage->setFixedSize(Eigen::Vector2i(25, 25));
+	researchImage->setFixedOffset(true);
+
 	researchPointsDisplay = new Label(playerOverlay, "0", LARGE_FONT, LARGE_FONT_SIZE);
 	researchPointsDisplay->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
 	researchPointsDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
+
 	timerDisplay = new Label(playerOverlay, "Timer: ", LARGE_FONT, LARGE_FONT_SIZE);
 	timerDisplay->setTooltip("Time Remaining... Hurry!");
 	timerDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
@@ -541,7 +565,7 @@ void GUI::createCityDisplay() {
 	cityInfoWidget = new AttackableGameObjectWidget(cityWindow);
 	formHelper->addWidget("", cityInfoWidget);
 
-	formHelper->addGroup("Unit Management");
+	formHelper->addGroup("Production");
 	unitSpawnWidget = new UnitSpawnWidget(cityWindow);
 	formHelper->addWidget("", unitSpawnWidget);
 
@@ -564,6 +588,7 @@ void GUI::updateCityWindow() {
 		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
+		cityWindow->performLayout(nvgContext());
 	}
 }
 
@@ -580,6 +605,7 @@ void GUI::updateSlotWindow() {
 
 		}
 		slotButton->setEnabled(player->can_settle());
+		slotWindow->performLayout(nvgContext());
 	}
 }
 
@@ -599,7 +625,7 @@ void GUI::hideSlotUI() {
 	slotWindow->setVisible(false);
 }
 
-void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCallback) {
+void GUI::displayCityUI(City* city, std::function<void(Buildable*)> unitCreateCallback) {
 	selectedCity = city;
 	cityWindow->setTitle(city->getName());
 	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
@@ -619,5 +645,62 @@ void GUI::displayCityUI(City* city, std::function<void(UnitType*)> unitCreateCal
 
 void GUI::hideCityUI() {
 	cityWindow->setVisible(false);
+}
+
+void GUI::createHelpWindow() {
+	helpWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 800), "Help");
+	Button* helpButton = formHelper->addButton("Open", [this]() {showHelpDetailWindow(); });
+	std::string icon_image_directory = std::string(ICON_IMAGE_DIRECTORY);
+	std::vector<std::pair<int, std::string>> help_icons = loadImageDirectory(nvgContext(), icon_image_directory);
+	helpButton->setIcon(0);
+	helpDetailWindow = formHelper->addWindow(Eigen::Vector2i(500, 120), "Help Window");
+	Button* closeHelpButton = new Button(helpDetailWindow->buttonPanel(), "X");
+	closeHelpButton->setCallback([this]() {
+		hideHelpDetailWindow();
+	});
+	//helpDetailWindow->setFixedWidth(200);
+	Widget* gameGoalPanel = new Widget(helpDetailWindow);
+	gameGoalPanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 10));
+	Label* explainGameGoal = new Label(gameGoalPanel, "Gain the most scores within the time restraint!", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("GOAL", gameGoalPanel);
+	Widget* gameObjectivePanel = new Widget(helpDetailWindow);
+	gameObjectivePanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 10));
+	Label* explainGameGoal1 = new Label(gameObjectivePanel, "1) Kill an enemy UNIT or CITY to gain points equivalent to their ATTACK.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal2 = new Label(gameObjectivePanel, "2) Create city to excavate resources.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal3 = new Label(gameObjectivePanel, "3) Perform RESEARCH to upgrade unit and cities.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal4 = new Label(gameObjectivePanel, "4) TRADE with another player for unique RESOURCES.", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("OBJECTIVES", gameObjectivePanel);
+	Widget* hotKeyPanel = new Widget(helpDetailWindow);
+	hotKeyPanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 10, 10));
+	TextBox* cameraKey = new TextBox(hotKeyPanel, "`");
+	Label* cameraKeyLabel = new Label(hotKeyPanel, "Swap camera views", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* escKey = new TextBox(hotKeyPanel, "Esc");
+	Label* escKeyLabel = new Label(hotKeyPanel, "Exit game", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* leftBracKey = new TextBox(hotKeyPanel, "[");
+	Label* leftBracKeyLabel = new Label(hotKeyPanel, "Decrease Volume", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* rightBracKey = new TextBox(hotKeyPanel, "]");
+	Label* rightBracKeyLabel = new Label(hotKeyPanel, "Increase Volume", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("HOT KEYS", hotKeyPanel);
+	Widget* techPanel = new Widget(helpDetailWindow);
+	techPanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Minimum, 10, 10));
+	Label* explainTech1 = new Label(techPanel, "1) STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech2 = new Label(techPanel, "2) Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech3 = new Label(techPanel, "3) HEAVY UNIT. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech4 = new Label(techPanel, "4) Tech 4. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech5 = new Label(techPanel, "5) Exploration Program. Increase city settlement limit by 1. Unlocked by Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech6 = new Label(techPanel, "6) SECRECT.", LARGE_FONT, LARGE_FONT_SIZE);
+	formHelper->addWidget("RESEARCH TECHS", techPanel);
+	this->performLayout();
+
+	hideHelpDetailWindow();
+}
+
+void GUI::showHelpDetailWindow() {
+	helpDetailWindow->setVisible(true);
+	helpWindow->setVisible(false);
+}
+void GUI::hideHelpDetailWindow() {
+	helpWindow->setVisible(true);
+	helpDetailWindow->setVisible(false);
 }
 

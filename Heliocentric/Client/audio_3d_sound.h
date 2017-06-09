@@ -9,7 +9,7 @@ public:
 
 	class SoundLoadError : public std::exception {};
 
-	void play(glm::vec3 pos);
+	void playOnce(glm::vec3 pos);
 	void update(glm::vec3 pos);
 
 private:
