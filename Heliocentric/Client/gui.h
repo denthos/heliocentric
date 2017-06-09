@@ -36,6 +36,7 @@ public:
 
 	void setPlayer(std::shared_ptr<Player>);
 	void setFPS(double);
+	void setTimer(int);
 
 	void unselectSelection(Client*, std::vector<GameObject*>& old_selection);
 	void selectSelection(Client*, std::vector<GameObject*>& old_selection);
@@ -125,6 +126,7 @@ private:
 	std::shared_ptr<Player> trade_partner;
 	std::pair<Resources::Type, Label *> resourceLabels[Resources::NUM_RESOURCES];
 	Label * fpsSpacer;
+	Label * timerDisplay;
 	Label * fpsDisplay;
 
 	Window* leaderboardWindow;
@@ -157,6 +159,7 @@ private:
 	ComboBox* offerResourceType;
 	IntBox<int>* askForAmount;
 	ComboBox* askForResourceType;
+	int time;
 
 	// help window
 	ref<Window> helpWindow;

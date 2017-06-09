@@ -8,6 +8,7 @@
 #include "unit_type.h"
 #include "particle_system.h"
 #include "audio_3d_sound.h"
+#include "player_icon.h"
 
 class GUI;
 class Client;
@@ -15,11 +16,12 @@ class Client;
 struct DrawableUnitData {
 	Model* model;
 	float scalingFactor;
+	PlayerIcon* icon;
 };
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system);
+	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system, PlayerIcon* icon);
 
 	~DrawableUnit();
 	virtual void update();
@@ -40,7 +42,8 @@ public:
 
 private:
 	DrawableUnitData data;
-
+	PlayerIcon* icon;
+	Shader* iconShader;
 	glm::mat4 rotation_matrix;
 	glm::vec3 old_orientation;
 	ParticleSystem* laser;

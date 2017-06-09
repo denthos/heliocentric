@@ -19,8 +19,8 @@ const std::unordered_map<UnitType::TypeIdentifier, DrawableUnitData>& DrawableUn
 }
 
 
-DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system) : 
-	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser), explosion(explosion) {
+DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system, PlayerIcon* icon) : 
+	Unit(unit), rotation_matrix(glm::mat4(1.0f)), old_orientation(glm::vec3(0.0f, 0.0f, 1.0f)), laser(laser), explosion(explosion), icon(icon) {
     this->data = getDataMap().at(getType()->getIdentifier());
     this->shader = shader;
 
@@ -30,6 +30,8 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* l
     this->glow = false;
 	this->is_exploding = false;
 	this->explosion_counter = 0.0f;
+
+
 
     BoundingBox bbox = getBoundingBox();
     glm::vec3 b_max = bbox.max;
@@ -59,6 +61,11 @@ void DrawableUnit::update() {
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
+
+	icon->setColor(glm::vec4(PlayerColor::colorToRGBVec(this->get_player()->getColor()), 1.0f));
+	icon->update(toWorld[3]);
+	icon->draw(camera);
+
     PlayerColor::Color player_color = this->get_player()->getColor();
     shader->bind();
     GLuint shaderID = shader->getPid();
@@ -91,6 +98,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 	if (this->client_isAttacking()) {
 		shoot_sound->play(get_position());
 		laser->Update(camera);
+		//TODO uncomment or fix with master always shooting laser;
 		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}
 }

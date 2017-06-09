@@ -43,6 +43,7 @@
 #include "player_research_update.h"
 #include "threed_sound_system.h"
 #include "tech_tree.h"
+#include "time_update.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -75,7 +76,7 @@ public:
 	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
 	void gameOverUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<GameOverUpdate>);
 	void unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitSpawnerUpdate>);
-
+	void timeUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TimeUpdate>);
 
 	void createCityForSlot(DrawableSlot*, std::string);
 
@@ -145,5 +146,6 @@ private:
 	void handleF10Key(int);
 	void handleLeftBracketKey(int);
 	void handleRightBracketKey(int);
+	void handleTKey(int);
 };
 

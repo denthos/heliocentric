@@ -233,6 +233,9 @@
     <ClInclude Include="builder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="time_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -408,6 +411,9 @@
     </ClCompile>
     <ClCompile Include="builder.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="time_update.cpp">
+      <Filter>Updates</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

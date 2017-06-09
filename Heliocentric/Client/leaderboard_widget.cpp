@@ -1,12 +1,10 @@
 #include "leaderboard_widget.h"
 #include "player_color.h"
 
-#define FONT "courier"
-#define FONT_SIZE 16
-
-LeaderboardWidget::LeaderboardWidget(Widget* parent) : Widget(parent) {
+LeaderboardWidget::LeaderboardWidget(Widget* parent, std::string font, int font_size) :
+	Widget(parent), font(font), font_size(font_size) {
 	this->setLayout(new GridLayout(Orientation::Horizontal, 1, Alignment::Fill));
-	this->setWidth(150);
+	this->setWidth(200);
 }
 
 LeaderboardWidget::~LeaderboardWidget() {
@@ -24,10 +22,10 @@ std::string LeaderboardWidget::formatScoreEntry(const Player* player) {
 }
 
 Label* LeaderboardWidget::createNewLabel(const Player* player) {
-	this->setHeight(this->height() + 20);
+	this->setHeight(this->height() + 30);
 	std::string defaultLabel = "________________: _____";
 
-	Label* playerLabel = new Label(this, defaultLabel);
+	Label* playerLabel = new Label(this, defaultLabel, font, font_size);
 
 	glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player->getColor());
 	playerLabel->setColor(Color(Eigen::Vector3f(rgbVec.x, rgbVec.y, rgbVec.z)));

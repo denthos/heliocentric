@@ -46,6 +46,7 @@
     <ClCompile Include="new_player_info_update.cpp" />
     <ClCompile Include="resources.cpp" />
     <ClCompile Include="slot_update.cpp" />
+    <ClCompile Include="time_update.cpp" />
     <ClCompile Include="trade_command.cpp" />
     <ClCompile Include="trade_data.cpp" />
     <ClCompile Include="settle_city_command.cpp" />
@@ -67,6 +68,7 @@
     <ClInclude Include="fission_plant.h" />
     <ClInclude Include="fusion_plant.h" />
     <ClInclude Include="game_over_update.h" />
+    <ClInclude Include="time_update.h" />
     <ClInclude Include="heavy_unit.h" />
     <ClInclude Include="player_manager.h" />
     <ClInclude Include="player_research_update.h" />
