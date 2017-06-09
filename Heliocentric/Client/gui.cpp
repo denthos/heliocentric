@@ -273,7 +273,7 @@ void GUI::createPlayerOverlay() {
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
-	timerDisplay = new Label(playerOverlay, "Timer: ", FONT, FONT_SIZE);
+	timerDisplay = new Label(playerOverlay, "Timer: ", LARGE_FONT, LARGE_FONT_SIZE);
 	timerDisplay->setTooltip("Time Remaining... Hurry!");
 	timerDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
 
