@@ -162,6 +162,7 @@ void GUI::setScreenSize(int width, int height) {
 	if (playerOverlay) {
 		playerOverlay->setSize(Eigen::Vector2i(screenWidth, 35));
 
+		/*
 		std::ostringstream spacerCaption;
 		// spaceToFill = max width - resource images/labels - fps label - margins
 		int spaceToFill = screenWidth - (Resources::NUM_RESOURCES * (6 + 25 + (MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER))) - (3 + (9 * PIXELS_PER_CHARACTER)) - 20;
@@ -169,6 +170,7 @@ void GUI::setScreenSize(int width, int height) {
 			spacerCaption << "a";
 		}
 		fpsSpacer->setCaption(spacerCaption.str());
+		*/
 
 		playerOverlay->performLayout(nvgContext());
 	}
@@ -299,9 +301,11 @@ void GUI::createPlayerOverlay() {
 	researchPointsDisplay->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
 	researchPointsDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
 
+	/*
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+	*/
 
 	timerDisplay = new Label(playerOverlay, "Timer: ", LARGE_FONT, LARGE_FONT_SIZE);
 	timerDisplay->setTooltip("Time Remaining... Hurry!");
@@ -585,6 +589,7 @@ void GUI::updateCityWindow() {
 		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
+		cityWindow->setHeight(this->screenHeight);
 		cityWindow->performLayout(nvgContext());
 	}
 }
@@ -616,6 +621,7 @@ void GUI::displaySlotUI(Slot* slot, std::function<void(std::string)> createCityC
 	slotInfoPanel->updateDisplay(slot);
 
 	slotWindow->setVisible(true);
+	slotWindow->setPosition(Eigen::Vector2i(10, 120));
 }
 
 void GUI::hideSlotUI() {
@@ -638,6 +644,9 @@ void GUI::displayCityUI(City* city, std::function<void(Buildable*)> unitCreateCa
 	else {
 		unitSpawnWidget->setVisible(false);
 	}
+
+	cityWindow->setHeight(this->screenHeight);
+	cityWindow->setPosition(Eigen::Vector2i(10, 120));
 }
 
 void GUI::hideCityUI() {
