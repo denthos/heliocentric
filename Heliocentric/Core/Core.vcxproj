@@ -34,6 +34,7 @@
     <ClCompile Include="fortress.cpp" />
     <ClCompile Include="fusion_plant.cpp" />
     <ClCompile Include="game_channels.cpp" />
+    <ClCompile Include="hadron_collider.cpp" />
     <ClCompile Include="heavy_unit.cpp" />
     <ClCompile Include="player_manager.cpp" />
     <ClCompile Include="player_color.cpp" />
@@ -70,6 +71,7 @@
     <ClInclude Include="fortress.h" />
     <ClInclude Include="fusion_plant.h" />
     <ClInclude Include="game_over_update.h" />
+    <ClInclude Include="hadron_collider.h" />
     <ClInclude Include="time_update.h" />
     <ClInclude Include="heavy_unit.h" />
     <ClInclude Include="player_manager.h" />

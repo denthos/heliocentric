@@ -11,6 +11,9 @@
 #define FUSION_PLANT_COST 200
 #define RESEARCH_FACILITY_SCIENCE 1
 #define RESEARCH_FACILITY_COST 100
+#define HADRON_COLLIDER_PRODUCTION 2
+#define HADRON_COLLIDER_SCIENCE 2
+#define HADRON_COLLIDER_COST 500
 #define FORTRESS_ARMOR 20
 #define FORTRESS_COST 150
 
@@ -20,11 +23,12 @@ public:
 		FISSION_PLANT,
 		FUSION_PLANT,
 		RESEARCH_FACILITY,
-		FORTRESS
+		FORTRESS,
+		HADRON_COLLIDER
 	};
 
 	const static TypeIdentifier FIRST = FISSION_PLANT; // should always be the first in enum
-	const static int NUM_TYPES = 4;
+	const static int NUM_TYPES = 5;
 
 	BuildingType(BuildType buildType, int productionCost);
 

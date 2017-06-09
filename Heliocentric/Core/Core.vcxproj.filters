@@ -239,6 +239,9 @@
     <ClInclude Include="fortress.h">
       <Filter>Buildings</Filter>
     </ClInclude>
+    <ClInclude Include="hadron_collider.h">
+      <Filter>Buildings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -419,6 +422,9 @@
       <Filter>Updates</Filter>
     </ClCompile>
     <ClCompile Include="fortress.cpp">
+      <Filter>Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="hadron_collider.cpp">
       <Filter>Buildings</Filter>
     </ClCompile>
   </ItemGroup>

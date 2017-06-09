@@ -3,6 +3,7 @@
 #include "fusion_plant.h"
 #include "research_facility.h"
 #include "fortress.h"
+#include "hadron_collider.h"
 
 BuildingType::BuildingType(BuildType buildType, int productionCost) : Buildable(Buildable::BuildType::BUILDING, productionCost) {
 
@@ -39,6 +40,13 @@ std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> BuildingType::bu
 		new BuildingTypeImpl<Fortress>(TypeIdentifier::FORTRESS, FORTRESS_COST, "Fortress", FORTRESS_ARMOR, 0, 0,
 		ResourceCollection {{Resources::TITANIUM, 50}},
 		"Increases city health")
+	},
+
+	{
+		BuildingType::TypeIdentifier::HADRON_COLLIDER,
+		new BuildingTypeImpl<HadronCollider>(TypeIdentifier::HADRON_COLLIDER, HADRON_COLLIDER_COST, "Hadron Collider", 0, HADRON_COLLIDER_PRODUCTION, HADRON_COLLIDER_SCIENCE,
+		ResourceCollection {{Resources::NANOMATERIAL, 50}, {Resources::GOLD, 50}, {Resources::ALUMINUM, 50}},
+		"Boosts city production and research speed")
 	}
 
 };
