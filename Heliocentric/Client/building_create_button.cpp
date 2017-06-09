@@ -26,9 +26,5 @@ void BuildingCreateButton::updateCreateButton(Player* player) {
 }
 
 void BuildingCreateButton::setCallback(std::function<void(BuildingType*)> callback) {
-	Button::setCallback([this, callback]() {
-		this->setEnabled(false);
-		this->setTooltip("Can only construct one " + type->getTypeName());
-		callback(this->type);
-	}); 
+	Button::setCallback(std::bind(callback, this->type));
 }

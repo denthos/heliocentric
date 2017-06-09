@@ -8,7 +8,7 @@
 #include "city_creation_update.h"
 #include "instant_laser_attack.h"
 #include "new_player_info_update.h"
-#include "unit_spawner_update.h"
+#include "spawner_update.h"
 
 #include "game_over_update.h"
 

@@ -1,5 +1,5 @@
 #include "city_update.h"
-#include "unit_spawner_update.h"
+#include "spawner_update.h"
 
 CityUpdate::CityUpdate(UID id, int health, int production, int research_points) :
 	id(id), health(health), production(production), research_points(research_points) {}

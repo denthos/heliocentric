@@ -36,7 +36,7 @@
 #include "trade_deal.h"
 #include "instant_laser_attack.h"
 #include "selectable.h"
-#include "unit_spawner_update.h"
+#include "spawner_update.h"
 #include "player_icon.h"
 
 #define MAX_ACTIONS_WINDOW 50
@@ -257,7 +257,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<GameOverUpdate>(std::bind(&Client::gameOverUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
-	this->subscribe<UnitSpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<TimeUpdate>(std::bind(&Client::timeUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
@@ -820,7 +820,7 @@ void Client::handleF3Key(int key) {
 
 	UID cityID = cities.begin()->first;
 	LOG_DEBUG("Add Fission Plant to production queue of city with ID ", cityID);
-	PlayerCommand command(BuildingType::TypeIdentifier::FISSION_PLANT, cityID);
+	PlayerCommand command(BuildingType::TypeIdentifier::RESEARCH_FACILITY, cityID);
 	this->channeled_send(&command);
 }
 
@@ -999,7 +999,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 }
 
 
-void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitSpawnerUpdate> update) {
+void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SpawnerUpdate> update) {
 	auto& spawner_it = this->spawners.find(update->id);
 	if (spawner_it == this->spawners.end()) {
 		LOG_ERR("Invalid spawner id ", update->id);
@@ -1045,6 +1045,8 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	if (newCity->get_player()->getID() == player->getID()) {
 		setSelection({ newCity });
 	}
+
+	gui->setResearchPoints(player->get_research_points());
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
@@ -1095,6 +1097,9 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		}
 		cities.erase(update->id);
 	}
+
+	/* Update research points display after handling city death. */
+	gui->setResearchPoints(player->get_research_points());
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {

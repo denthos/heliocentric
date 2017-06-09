@@ -75,7 +75,7 @@ public:
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
 	void gameOverUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<GameOverUpdate>);
-	void unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitSpawnerUpdate>);
+	void unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SpawnerUpdate>);
 	void timeUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TimeUpdate>);
 
 	void createCityForSlot(DrawableSlot*, std::string);

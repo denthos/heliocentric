@@ -20,7 +20,6 @@ Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Iden
 
 void Player::initialize() {
 	player_score = 10;
-	research_points = 0.1f;
 	settlement_limit = INITIAL_SETTLEMENT_LIMIT;
 
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
@@ -36,7 +35,7 @@ void Player::initialize() {
 	owned_resources[Resources::URANIUM] = 100;
 
 	this->score_update = std::make_shared<PlayerScoreUpdate>(getID(), this->get_player_score());	
-	this->research_update = std::make_shared<PlayerResearchUpdate>(getID(), 0, this->research_points);
+	this->research_update = std::make_shared<PlayerResearchUpdate>(getID(), 0, this->get_research_points());
 }
 
 int Player::get_settlement_limit() {
@@ -50,8 +49,8 @@ void Player::choose_research(int id) {
 void Player::research() {
 	try {
 		Technology* current_tech;
-		if (tech_tree.research(this->research_points, current_tech)) {
-			this->research_update->research_points = this->research_points;
+		if (tech_tree.research(this->get_research_points(), current_tech)) {
+			this->research_update->research_points = this->get_research_points();
 			this->research_update->tech_id = current_tech->getID();
 			send_update_to_manager(this->research_update);
 
@@ -128,7 +127,13 @@ void Player::send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update
 	}
 }
 
-float Player::get_research_points() {
+int Player::get_research_points() {
+	int research_points = 0;
+	std::unordered_map<UID, GameObject*> cities = getOwnedObjects<City>();
+	for (auto it = cities.begin(); it != cities.end(); it++) {
+		research_points += ((City*) it->second)->get_research_points();
+	}
+	LOG_DEBUG("Player Research Points: ", research_points);
 	return research_points;
 }
 

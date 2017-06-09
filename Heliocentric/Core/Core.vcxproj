@@ -76,7 +76,7 @@
     <ClInclude Include="buildable.h" />
     <ClInclude Include="research_facility.h" />
     <ClInclude Include="research_command.h" />
-    <ClInclude Include="unit_spawner_update.h" />
+    <ClInclude Include="spawner_update.h" />
     <ClInclude Include="unit_type.h" />
     <ClInclude Include="attack.h" />
     <ClInclude Include="base_command.h" />

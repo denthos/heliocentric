@@ -80,7 +80,7 @@ void CityManager::register_update(std::shared_ptr<CityUpdate> update) {
 
 }
 
-const std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>>& CityManager::getSpawnerUpdates() const {
+const std::unordered_set<std::shared_ptr<SpawnerUpdate>>& CityManager::getSpawnerUpdates() const {
 	return this->unit_spawner_updates;
 }
 
@@ -89,7 +89,7 @@ const std::unordered_set<std::shared_ptr<UnitCreationUpdate>>& CityManager::getC
 	return this->unit_creation_updates;
 }
 
-std::shared_ptr<UnitSpawnerUpdate> CityManager::spawnUnit(std::shared_ptr<PlayerCommand> command) {
+std::shared_ptr<SpawnerUpdate> CityManager::spawnUnit(std::shared_ptr<PlayerCommand> command) {
 	auto& city_pair = this->cities.find(command->initiator);
 	if (city_pair == this->cities.end()) {
 		throw City::BadUIDException();
@@ -98,7 +98,7 @@ std::shared_ptr<UnitSpawnerUpdate> CityManager::spawnUnit(std::shared_ptr<Player
 	return city_pair->second->spawnUnit(command->createUnitType);
 }
 
-std::shared_ptr<UnitSpawnerUpdate> CityManager::spawnBuilding(std::shared_ptr<PlayerCommand> command) {
+std::shared_ptr<SpawnerUpdate> CityManager::spawnBuilding(std::shared_ptr<PlayerCommand> command) {
 	auto& city_pair = this->cities.find(command->initiator);
 	if (city_pair == this->cities.end()) {
 		throw City::BadUIDException();

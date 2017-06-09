@@ -23,5 +23,10 @@ std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> BuildingType::bu
 		new BuildingTypeImpl<FusionPlant>(TypeIdentifier::FUSION_PLANT, 1000, "Fusion Power Plant", FUSION_PLANT_PRODUCTION, 0,
 		ResourceCollection {{Resources::URANIUM, 200}, {Resources::NANOMATERIAL, 100}, {Resources::GOLD, 75}})
 	},
-
+	
+	{
+		BuildingType::TypeIdentifier::RESEARCH_FACILITY,
+		new BuildingTypeImpl<ResearchFacility>(TypeIdentifier::RESEARCH_FACILITY, 100, "Research Facility", 0, RESEARCH_FACILITY_SCIENCE,
+		ResourceCollection {{Resources::GOLD, 50}, {Resources::TITANIUM, 100}})
+	}
 };

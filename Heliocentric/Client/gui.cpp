@@ -162,6 +162,7 @@ void GUI::setScreenSize(int width, int height) {
 	if (playerOverlay) {
 		playerOverlay->setSize(Eigen::Vector2i(screenWidth, 35));
 
+		/*
 		std::ostringstream spacerCaption;
 		// spaceToFill = max width - resource images/labels - fps label - margins
 		int spaceToFill = screenWidth - (Resources::NUM_RESOURCES * (6 + 25 + (MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER))) - (3 + (9 * PIXELS_PER_CHARACTER)) - 20;
@@ -169,6 +170,7 @@ void GUI::setScreenSize(int width, int height) {
 			spacerCaption << "a";
 		}
 		fpsSpacer->setCaption(spacerCaption.str());
+		*/
 
 		playerOverlay->performLayout(nvgContext());
 	}
@@ -185,6 +187,12 @@ void GUI::setFPS(double fps) {
 	oss << "FPS: " << (int)fps;
 	this->fpsDisplay->setCaption(oss.str());
 #endif
+}
+
+void GUI::setResearchPoints(int researchPoints) {
+	std::ostringstream oss;
+	oss << researchPoints;
+	this->researchPointsDisplay->setCaption(oss.str());
 }
 
 void GUI::setTimer(int timer) {
@@ -274,9 +282,27 @@ void GUI::createPlayerOverlay() {
 		resourceLabel->setFixedWidth(MAX_RESOURCE_CHARACTERS * PIXELS_PER_CHARACTER);
 		resourceLabels[i] = std::make_pair((Resources::Type)i, resourceLabel);
 	}
+
+	/*
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+	*/
+	int research_img = placeholderImage.first;
+	for (std::pair<int, std::string> icon : icons) {
+			if (icon.second.compare(resourceImageDirectory + "/" + "Research") == 0) {
+				research_img = icon.first;
+				break;
+			}
+		}
+
+	researchImage = new ImageView(playerOverlay, research_img);
+	researchImage->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
+	researchImage->setFixedSize(Eigen::Vector2i(25, 25));
+	researchImage->setFixedOffset(true);
+	researchPointsDisplay = new Label(playerOverlay, "0", LARGE_FONT, LARGE_FONT_SIZE);
+	researchPointsDisplay->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
+	researchPointsDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
 
 	timerDisplay = new Label(playerOverlay, "Timer: ", LARGE_FONT, LARGE_FONT_SIZE);
 	timerDisplay->setTooltip("Time Remaining... Hurry!");

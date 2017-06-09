@@ -7,7 +7,7 @@
 
 #define FISSION_PLANT_PRODUCTION 2
 #define FUSION_PLANT_PRODUCTION 5
-#define RESEARCH_FACILITY_SCIENCE 5
+#define RESEARCH_FACILITY_SCIENCE 1
 
 class BuildingType : public Buildable {
 public:
@@ -18,7 +18,7 @@ public:
 	};
 
 	const static TypeIdentifier FIRST = FISSION_PLANT; // should always be the first in enum
-	const static int NUM_TYPES = 2;
+	const static int NUM_TYPES = 3;
 
 	BuildingType(BuildType buildType, int productionCost);
 

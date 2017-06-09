@@ -36,6 +36,7 @@ public:
 
 	void setPlayer(std::shared_ptr<Player>);
 	void setFPS(double);
+	void setResearchPoints(int researchPoints);
 	void setTimer(int);
 
 	void unselectSelection(Client*, std::vector<GameObject*>& old_selection);
@@ -126,6 +127,8 @@ private:
 	std::shared_ptr<Player> trade_partner;
 	std::pair<Resources::Type, Label *> resourceLabels[Resources::NUM_RESOURCES];
 	Label * fpsSpacer;
+	Label * researchPointsDisplay;
+	ImageView* researchImage;
 	Label * timerDisplay;
 	Label * fpsDisplay;
 
