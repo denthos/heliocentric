@@ -102,7 +102,7 @@ void City::extractResourcesFromSlotAndCreateUpdates(std::vector<std::shared_ptr<
 		return;
 	}
 
-	int extract_amount = (this->player->getTechTree().getTechById(TECH_2) && rand() % 4 == 0) ? 2 : 1;
+	int extract_amount = (this->player->getTechTree().getTechById(TECH_2) && rand() % 4 == 0) ? 4 : 2;
 	LOG_DEBUG("Player <", this->player->getID(), "> extract twice: ", extract_amount);
 
 	for (auto& resource_pair : get_slot()->getResources()) {
