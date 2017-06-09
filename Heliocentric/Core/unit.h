@@ -87,6 +87,7 @@ public:
 
 	bool client_isAttacking() const;
 	void client_setAttacking(bool);
+
 	virtual bool do_attack(std::shared_ptr<AttackableGameObject>);
 
 
@@ -143,6 +144,7 @@ protected:
 	UnitManager* manager;
 	const UnitType* type;
 	glm::vec3 orientation;
+
 	bool client_isattacking;
 
 	void initialize();

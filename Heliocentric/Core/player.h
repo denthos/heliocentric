@@ -57,7 +57,11 @@ public:
 		// update object members
 		object->set_player(this);
 	}
-	void add_to_destroy(GameObject* object);         // Add a game object to destroy
+
+	template <typename T>
+	void add_to_destroy(T* object) {
+		owned_objects[typeid(T)].erase(object->getID());
+	}
 
 	TechTree& getTechTree();
 
@@ -106,7 +110,6 @@ private:
 	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
 	void send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update);
   
-	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns
 	// std::queue<std::shared_ptr<TradeDeal>> active_trade_deals; // All active trade deals that involves this player, not implemented yet
 	std::unordered_map<UID, std::shared_ptr<TradeDeal>> pending_trade_deals; // All pending trade deals waiting to be accepted or declined

@@ -14,16 +14,19 @@ BuildingType* BuildingType::getByIdentifier(TypeIdentifier identifier) {
 std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> BuildingType::buildingTypeMap = {
 	{
 		BuildingType::TypeIdentifier::FISSION_PLANT,
-		new BuildingTypeImpl<FissionPlant>(TypeIdentifier::FISSION_PLANT, 100, "Fission Power Plant", FISSION_PLANT_PRODUCTION, 0)
+		new BuildingTypeImpl<FissionPlant>(TypeIdentifier::FISSION_PLANT, 500, "Fission Power Plant", FISSION_PLANT_PRODUCTION, 0, 
+		ResourceCollection {{Resources::URANIUM, 100}, {Resources::GOLD, 50}})
 	},
 
 	{
 		BuildingType::TypeIdentifier::FUSION_PLANT,
-		new BuildingTypeImpl<FusionPlant>(TypeIdentifier::FUSION_PLANT, 200, "Fusion Power Plant", FUSION_PLANT_PRODUCTION, 0)
+		new BuildingTypeImpl<FusionPlant>(TypeIdentifier::FUSION_PLANT, 1000, "Fusion Power Plant", FUSION_PLANT_PRODUCTION, 0,
+		ResourceCollection {{Resources::URANIUM, 200}, {Resources::NANOMATERIAL, 100}, {Resources::GOLD, 75}})
 	},
 	
 	{
 		BuildingType::TypeIdentifier::RESEARCH_FACILITY,
-		new BuildingTypeImpl<ResearchFacility>(TypeIdentifier::RESEARCH_FACILITY, 100, "Research Facility", 0, RESEARCH_FACILITY_SCIENCE)
+		new BuildingTypeImpl<ResearchFacility>(TypeIdentifier::RESEARCH_FACILITY, 100, "Research Facility", 0, RESEARCH_FACILITY_SCIENCE,
+		ResourceCollection {{Resources::GOLD, 50}, {Resources::TITANIUM, 100}});
 	}
 };

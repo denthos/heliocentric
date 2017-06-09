@@ -1,6 +1,7 @@
 #pragma once
 #include "buildable.h"
 #include "identifiable.h"
+#include "resources.h"
 #include <unordered_map>
 #include "building.h"
 
@@ -17,7 +18,7 @@ public:
 	};
 
 	const static TypeIdentifier FIRST = FISSION_PLANT; // should always be the first in enum
-	const static int NUM_TYPES = 3;
+	const static int NUM_TYPES = 2;
 
 	BuildingType(BuildType buildType, int productionCost);
 
@@ -28,6 +29,8 @@ public:
 
 	virtual int getProduction() const = 0;
 	virtual int getResearchPoints() const = 0;
+	virtual bool hasBuildRequirements(const ResourceCollection& resources) const = 0;
+	virtual const ResourceCollection& getBuildRequirements() const = 0;
 
 private:
 	static std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> buildingTypeMap;
@@ -36,8 +39,10 @@ private:
 template <typename BuildingClass>
 class BuildingTypeImpl : public BuildingType {
 public:
-	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName, int production, int research_points) :
-		BuildingType(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName), production(production), research_points(research_points) {}
+	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName, int production, int research_points, ResourceCollection build_req) :
+		BuildingType(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName), production(production), research_points(research_points),
+		buildRequirements(build_req)
+		{}
 
 	int getProductionCost() const {
 		return this->productionCost;
@@ -59,6 +64,28 @@ public:
 		return this->research_points;
 	}
 
+	bool hasBuildRequirements(const ResourceCollection& resources) const {
+		for (auto& resource_pair : this->buildRequirements) {
+
+			int required_resources = resource_pair.second;
+			auto resource_iter = resources.find(resource_pair.first);
+
+			if (resource_iter == resources.end() && required_resources > 0) {
+				return false;
+			}
+
+			if (resource_iter != resources.end() && resource_iter->second < required_resources) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	const ResourceCollection& getBuildRequirements() const {
+		return this->buildRequirements;
+	}
+
 private:
 	int production;
 	int research_points;
@@ -66,4 +93,5 @@ private:
 	std::string typeName;
 
 	TypeIdentifier identifier;
+	ResourceCollection buildRequirements;
 };
