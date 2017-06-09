@@ -20,7 +20,7 @@ Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Iden
 
 void Player::initialize() {
 	player_score = 10;
-	research_points = 100.0f;
+	research_points = 0.1f;
 	settlement_limit = INITIAL_SETTLEMENT_LIMIT;
 
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
