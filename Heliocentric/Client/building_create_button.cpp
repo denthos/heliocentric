@@ -6,7 +6,8 @@ BuildingCreateButton::BuildingCreateButton(Widget* parent, BuildingType* type) :
 	this->setCaption(type->getTypeName());
 	std::ostringstream infoDisplay;
 
-	infoDisplay << type->getTypeName() << std::endl;
+	infoDisplay << type->getDescription() << std::endl;
+
 	for (auto& resource_pair : type->getBuildRequirements()) {
 		infoDisplay << Resources::toString(resource_pair.first) << ": " << resource_pair.second << std::endl;
 	}

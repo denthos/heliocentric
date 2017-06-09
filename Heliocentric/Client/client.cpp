@@ -820,7 +820,7 @@ void Client::handleF3Key(int key) {
 
 	UID cityID = cities.begin()->first;
 	LOG_DEBUG("Add Fission Plant to production queue of city with ID ", cityID);
-	PlayerCommand command(BuildingType::TypeIdentifier::RESEARCH_FACILITY, cityID);
+	PlayerCommand command(BuildingType::TypeIdentifier::FORTRESS, cityID);
 	this->channeled_send(&command);
 }
 

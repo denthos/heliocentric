@@ -13,6 +13,7 @@ protected:
 	*/
 	Building(BuildingType* type);
 
+	int armor;
 	int production;
 	int research_points;
 };

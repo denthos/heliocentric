@@ -288,6 +288,7 @@ void GUI::createPlayerOverlay() {
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
 	*/
+
 	int research_img = placeholderImage.first;
 	for (std::pair<int, std::string> icon : icons) {
 			if (icon.second.compare(resourceImageDirectory + "/" + "Research") == 0) {
@@ -300,6 +301,7 @@ void GUI::createPlayerOverlay() {
 	researchImage->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
 	researchImage->setFixedSize(Eigen::Vector2i(25, 25));
 	researchImage->setFixedOffset(true);
+
 	researchPointsDisplay = new Label(playerOverlay, "0", LARGE_FONT, LARGE_FONT_SIZE);
 	researchPointsDisplay->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
 	researchPointsDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);

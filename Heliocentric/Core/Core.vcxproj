@@ -24,13 +24,14 @@
     <ClCompile Include="base_command.cpp" />
     <ClCompile Include="builder.cpp" />
     <ClCompile Include="building.cpp" />
-    <ClCompile Include="building_type..cpp" />
+    <ClCompile Include="building_type.cpp" />
     <ClCompile Include="city_manager.cpp" />
     <ClCompile Include="city_creation_update.cpp" />
     <ClCompile Include="city_update.cpp" />
     <ClCompile Include="config_parser.cpp" />
     <ClCompile Include="fileutils.cpp" />
     <ClCompile Include="fission_plant.cpp" />
+    <ClCompile Include="fortress.cpp" />
     <ClCompile Include="fusion_plant.cpp" />
     <ClCompile Include="game_channels.cpp" />
     <ClCompile Include="heavy_unit.cpp" />
@@ -66,6 +67,7 @@
     <ClInclude Include="building.h" />
     <ClInclude Include="building_type.h" />
     <ClInclude Include="fission_plant.h" />
+    <ClInclude Include="fortress.h" />
     <ClInclude Include="fusion_plant.h" />
     <ClInclude Include="game_over_update.h" />
     <ClInclude Include="time_update.h" />
