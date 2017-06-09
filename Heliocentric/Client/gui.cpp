@@ -183,6 +183,15 @@ void GUI::setFPS(double fps) {
 #endif
 }
 
+void GUI::setTimer(int timer) {
+	if (timer == time || timer < 0)
+		return;
+	std::ostringstream oss;
+	oss << "Timer: " << timer;
+	this->timerDisplay->setCaption(oss.str());
+	time = timer;
+}
+
 void GUI::addPlayer(std::shared_ptr<Player> new_player) {
 	players.push_back(new_player);
 
@@ -264,6 +273,9 @@ void GUI::createPlayerOverlay() {
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+	timerDisplay = new Label(playerOverlay, "Timer: ", FONT, FONT_SIZE);
+	timerDisplay->setTooltip("Time Remaining... Hurry!");
+	timerDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
 
 #ifdef _DEBUG
 	fpsDisplay = new Label(playerOverlay, "FPS: ", LARGE_FONT, LARGE_FONT_SIZE);
@@ -274,7 +286,7 @@ void GUI::createPlayerOverlay() {
 
 void GUI::createTradeDisplay() {
 	LOG_DEBUG("Creating trade display");
-	tradeWindow = formHelper->addWindow(Eigen::Vector2i(800, 500), "Trade Deal");
+	tradeWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 500), "Trade Deal");
 	createTradeButton = formHelper->addButton("Establish Trade", []() {});
 
 	createTradeButton->setCallback([this]() {
@@ -284,6 +296,10 @@ void GUI::createTradeDisplay() {
 
 void GUI::createCustomTradeUI() {
 	customTradeWindow = formHelper->addWindow(Eigen::Vector2i(100, 100), "Customize Trade Window");
+	closeTradeButton = new Button(customTradeWindow->buttonPanel(), "X");
+	closeTradeButton->setCallback([this]() {
+		this->hideCustomTradeUI();
+	});
 	customTradeWindow->setVisible(false);
 	customTradeWindow->center();
 	
@@ -342,10 +358,6 @@ void GUI::createCustomTradeUI() {
 	formHelper->addWidget("Custom Trade Panel: ", tradePanel);
 
 	sendTradeButton = formHelper->addButton("Send", []() {});
-
-	closeTradeButton = formHelper->addButton("Close", [this]() {
-		this->hideCustomTradeUI();
-	});
 
 	sendTradeButton->setCallback([this]() {
 		this->tradeCallback(std::make_shared<TradeData>(this->player->getID(), trade_partner->getID(), static_cast<Resources::Type>(offerResourceType->selectedIndex()),
