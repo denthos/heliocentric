@@ -11,6 +11,7 @@
 #include <string>
 
 #define RESOURCE_IMAGE_DIRECTORY "Images/Resources"
+#define ICON_IMAGE_DIRECTORY "Images/Icons"
 #define PIXELS_PER_CHARACTER 14
 #define LARGE_FONT "courier"
 #define LARGE_FONT_SIZE 26
@@ -44,6 +45,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 	this->createTradeDisplay();
 	this->createCustomTradeUI();
 	this->createTradeHandlerUI();
+	this->createHelpWindow();
 	
 	this->createGameOverWindow();
 	this->createLeaderboardWindow();
@@ -275,6 +277,7 @@ void GUI::createPlayerOverlay() {
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+
 	timerDisplay = new Label(playerOverlay, "Timer: ", LARGE_FONT, LARGE_FONT_SIZE);
 	timerDisplay->setTooltip("Time Remaining... Hurry!");
 	timerDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
@@ -614,5 +617,62 @@ void GUI::displayCityUI(City* city, std::function<void(Buildable*)> unitCreateCa
 
 void GUI::hideCityUI() {
 	cityWindow->setVisible(false);
+}
+
+void GUI::createHelpWindow() {
+	helpWindow = formHelper->addWindow(Eigen::Vector2i(screenWidth - 200, 800), "Help");
+	Button* helpButton = formHelper->addButton("Open", [this]() {showHelpDetailWindow(); });
+	std::string icon_image_directory = std::string(ICON_IMAGE_DIRECTORY);
+	std::vector<std::pair<int, std::string>> help_icons = loadImageDirectory(nvgContext(), icon_image_directory);
+	helpButton->setIcon(0);
+	helpDetailWindow = formHelper->addWindow(Eigen::Vector2i(500, 120), "Help Window");
+	Button* closeHelpButton = new Button(helpDetailWindow->buttonPanel(), "X");
+	closeHelpButton->setCallback([this]() {
+		hideHelpDetailWindow();
+	});
+	//helpDetailWindow->setFixedWidth(200);
+	Widget* gameGoalPanel = new Widget(helpDetailWindow);
+	gameGoalPanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 10));
+	Label* explainGameGoal = new Label(gameGoalPanel, "Gain the most scores within the time restraint!", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("GOAL", gameGoalPanel);
+	Widget* gameObjectivePanel = new Widget(helpDetailWindow);
+	gameObjectivePanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 10));
+	Label* explainGameGoal1 = new Label(gameObjectivePanel, "1) Kill an enemy UNIT or CITY to gain points equivalent to their ATTACK.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal2 = new Label(gameObjectivePanel, "2) Create city to excavate resources.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal3 = new Label(gameObjectivePanel, "3) Perform RESEARCH to upgrade unit and cities.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal4 = new Label(gameObjectivePanel, "4) TRADE with another player for unique RESOURCES.", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("OBJECTIVES", gameObjectivePanel);
+	Widget* hotKeyPanel = new Widget(helpDetailWindow);
+	hotKeyPanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 10, 10));
+	TextBox* cameraKey = new TextBox(hotKeyPanel, "`");
+	Label* cameraKeyLabel = new Label(hotKeyPanel, "Swap camera views", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* escKey = new TextBox(hotKeyPanel, "Esc");
+	Label* escKeyLabel = new Label(hotKeyPanel, "Exit game", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* leftBracKey = new TextBox(hotKeyPanel, "[");
+	Label* leftBracKeyLabel = new Label(hotKeyPanel, "Decrease Volume", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* rightBracKey = new TextBox(hotKeyPanel, "]");
+	Label* rightBracKeyLabel = new Label(hotKeyPanel, "Increase Volume", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("HOT KEYS", hotKeyPanel);
+	Widget* techPanel = new Widget(helpDetailWindow);
+	techPanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Minimum, 10, 10));
+	Label* explainTech1 = new Label(techPanel, "1) STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech2 = new Label(techPanel, "2) Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech3 = new Label(techPanel, "3) HEAVY UNIT. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech4 = new Label(techPanel, "4) Tech 4. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech5 = new Label(techPanel, "5) Exploration Program. Increase city settlement limit by 1. Unlocked by Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech6 = new Label(techPanel, "6) SECRECT.", LARGE_FONT, LARGE_FONT_SIZE);
+	formHelper->addWidget("RESEARCH TECHS", techPanel);
+	this->performLayout();
+
+	hideHelpDetailWindow();
+}
+
+void GUI::showHelpDetailWindow() {
+	helpDetailWindow->setVisible(true);
+	helpWindow->setVisible(false);
+}
+void GUI::hideHelpDetailWindow() {
+	helpWindow->setVisible(true);
+	helpDetailWindow->setVisible(false);
 }
 
