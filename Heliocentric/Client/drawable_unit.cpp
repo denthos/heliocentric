@@ -63,6 +63,7 @@ void DrawableUnit::update() {
 void DrawableUnit::draw(const Camera & camera) const {
 
 	icon->setColor(glm::vec4(PlayerColor::colorToRGBVec(this->get_player()->getColor()), 1.0f));
+	icon->setSize(0.01);
 	icon->update(toWorld[3]);
 	icon->draw(camera);
 
