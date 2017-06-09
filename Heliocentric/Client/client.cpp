@@ -456,6 +456,7 @@ void Client::display() {
 					selection.erase(selection.begin());
 					dead_units[id]->unselect(gui, this);
 				}
+				player->add_to_destroy<Unit>(dead_it->second.get());
 				dead_it = dead_units.erase(dead_it);
 			}
 			else {
@@ -1065,7 +1066,7 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		Slot* slot = cities[update->id]->get_slot();
 
 		slot->detachCity();
-		owner->add_to_destroy(cities[update->id].get());
+		owner->add_to_destroy<City>(cities[update->id].get());
 		if (selection.size() > 0 && selection[0]->getID() == update->id) {
 			selection.erase(selection.begin());
 			cities[update->id]->unselect(gui, this);
