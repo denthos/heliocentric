@@ -23,23 +23,9 @@ void CityManager::doLogic() {
 	for (auto& city_pair : get_cities()) {
 		City* city = city_pair.second.get();
 
-		this->unit_spawner_updates.insert(city->getSpawnUpdate());
-
-		/**
-		Builder::ProductionType buildType = city->progressSpawnAndCreateUpdate();
-		switch (buildType) {
-			case Builder::ProductionType::IDLE:
-				break;
-			case Builder::ProductionType::BUILDING:
-				this->building_spawner_updates.insert(city->BuildingSpawner::getSpawnUpdate());
-				break;
-			case Builder::ProductionType::UNIT:
-				this->unit_spawner_updates.insert(city->UnitSpawner::getSpawnUpdate());
-				break;
-			default:
-				throw Builder::InvalidBuildTypeException();
+		if (city->progressSpawnAndCreateUpdate() != Builder::ProductionType::IDLE) {
+			this->unit_spawner_updates.insert(city->getSpawnUpdate());
 		}
-		*/
 	}
 }
 

@@ -15,7 +15,6 @@ private:
 	std::unordered_map<UID, std::shared_ptr<City>> cities;
 	std::unordered_set<std::shared_ptr<CityUpdate>> city_updates;
 	std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>> unit_spawner_updates;
-	std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>> building_spawner_updates;
 	std::unordered_set<std::shared_ptr<UnitCreationUpdate>> unit_creation_updates;
 
 	UnitManager* unit_manager;
