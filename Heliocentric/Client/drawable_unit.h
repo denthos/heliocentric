@@ -16,11 +16,12 @@ class Client;
 struct DrawableUnitData {
 	Model* model;
 	float scalingFactor;
+	PlayerIcon* icon;
 };
 
 class DrawableUnit : public Unit, public Drawable, public Selectable {
 public:
-	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system);
+	DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* laser, ParticleSystem* explosion, ThreeDSoundSystem* sound_system, PlayerIcon* icon);
 
 	~DrawableUnit();
 	virtual void update();

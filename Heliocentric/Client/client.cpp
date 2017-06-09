@@ -72,8 +72,6 @@ ParticleSystem* particles;
 ParticleSystem* laser_particles;
 ParticleSystem* explosion_particles;
 
-
-
 SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
@@ -86,6 +84,8 @@ Shader* colorShader;
 Shader* particleShader;
 Shader* iconShader;
 Shader* unitShader;
+
+PlayerIcon* player_icon;
 
 GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
@@ -228,6 +228,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
+
+	player_icon = new PlayerIcon(iconShader);
 
 	// LOAD MODELS, IMPORTANT
 	ModelPreloader::preload();
@@ -938,7 +940,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles, explosion_particles, soundSystem
+		colorShader, laser_particles, explosion_particles, soundSystem, player_icon
 	);
 
 	player_it->second->acquire_object(newUnit.get());
