@@ -183,6 +183,12 @@ void GUI::setFPS(double fps) {
 #endif
 }
 
+void GUI::setResearchPoints(int researchPoints) {
+	std::ostringstream oss;
+	oss << researchPoints;
+	this->researchPointsDisplay->setCaption(oss.str());
+}
+
 void GUI::setTimer(int timer) {
 	if (timer == time || timer < 0)
 		return;
@@ -273,6 +279,9 @@ void GUI::createPlayerOverlay() {
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+	researchPointsDisplay = new Label(playerOverlay, "0", LARGE_FONT, LARGE_FONT_SIZE);
+	researchPointsDisplay->setTooltip("Total amount of research points you have. The more you have the faster you unlock new techs.");
+	researchPointsDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
 	timerDisplay = new Label(playerOverlay, "Timer: ", LARGE_FONT, LARGE_FONT_SIZE);
 	timerDisplay->setTooltip("Time Remaining... Hurry!");
 	timerDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);

@@ -1006,6 +1006,8 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	if (newCity->get_player()->getID() == player->getID()) {
 		setSelection({ newCity });
 	}
+
+	gui->setResearchPoints(player->get_research_points());
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
@@ -1056,6 +1058,9 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		}
 		cities.erase(update->id);
 	}
+
+	/* Update research points display after handling city death. */
+	gui->setResearchPoints(player->get_research_points());
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {

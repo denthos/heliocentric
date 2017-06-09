@@ -1,6 +1,7 @@
 #pragma once
 
 #define CITY_NAME_SIZE 16
+#define CITY_INITIAL_RESEARCH_POINTS 1
 
 #include "attackable_game_object.h"
 #include "slot.h"

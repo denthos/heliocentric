@@ -37,7 +37,7 @@ public:
 	void research(float research_points); // Called by client
 	int get_settlement_limit();
 
-	float get_research_points();
+	int get_research_points();
 	bool can_settle(); // tells if a player currently can settle another city
 	bool can_create_unit(UnitType* type);
 
@@ -96,7 +96,6 @@ private:
 	PlayerManager* manager;
 	std::string name;
 	int player_score;
-	float research_points; // research points accumulated every tick
 	int settlement_limit; // maximum number of cities a player can settle
 
 	TechTree tech_tree;
