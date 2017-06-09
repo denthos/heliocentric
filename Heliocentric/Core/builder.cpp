@@ -90,7 +90,7 @@ Builder::ProductionType Builder::produce() {
 	Buildable::BuildType buildType = this->currentProduction->getBuildType();
 
 	/* We are currently producing something. Let's increment it! */
-	this->currentProductionProgress += (1 + this->production);
+	this->currentProductionProgress += this->production;
 	int progressPercent = (int)(((float) this->currentProductionProgress / (float) this->currentProduction->getProductionCost()) * 100);
 
 	switch (buildType) {
@@ -105,7 +105,7 @@ Builder::ProductionType Builder::produce() {
 		if (this->currentProductionProgress >= this->currentProduction->getProductionCost()) {
 
 			this->update->updateType = UnitSpawnerUpdate::UpdateType::SPAWN_COMPLETE;
-			spawnCompleteHandler((BuildingType*)this->currentProduction, Builder::ProductionType::BUILDING);
+			spawnCompleteHandler(this->currentProduction, Builder::ProductionType::BUILDING);
 
 			/* We need to reset stuff */
 			this->currentlyProducing = false;
@@ -132,7 +132,7 @@ Builder::ProductionType Builder::produce() {
 		if (this->currentProductionProgress >= this->currentProduction->getProductionCost()) {
 
 			this->update->updateType = UnitSpawnerUpdate::UpdateType::SPAWN_COMPLETE;
-			spawnCompleteHandler((UnitType*)this->currentProduction, Builder::ProductionType::UNIT);
+			spawnCompleteHandler(this->currentProduction, Builder::ProductionType::UNIT);
 
 			/* We need to reset stuff */
 			this->currentlyProducing = false;

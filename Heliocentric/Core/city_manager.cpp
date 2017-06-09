@@ -12,8 +12,16 @@ void CityManager::handleUnitSpawningComplete(UnitType* type, City* city) {
 
 void CityManager::handleBuildingSpawningComplete(BuildingType* type, City* city) {
 	LOG_DEBUG("Building spawning complete... Sending CityUpdate");
+	int new_production = city->get_production() + type->getProduction();
+	int new_research_points = city->get_research_points() + type->getResearchPoints();
+
+	/* Update city on server */
+	city->set_production(new_production);
+	city->set_research_points(new_research_points);
+
+	/* Send update to client */
 	std::shared_ptr<CityUpdate> update = std::make_shared<CityUpdate>(city->getID(), city->get_health(),
-		city->get_production() + type->getProduction(), city->get_research_points() + type->getResearchPoints());
+		new_production, new_research_points);
 	city_updates.insert(update);
 }
 
