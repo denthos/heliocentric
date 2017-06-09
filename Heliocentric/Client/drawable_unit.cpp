@@ -100,7 +100,7 @@ void DrawableUnit::draw(const Camera & camera) const {
 		shoot_sound->play(get_position());
 		laser->Update(camera);
 		//TODO uncomment or fix with master always shooting laser;
-		//laser->draw(camera, glm::translate(toWorld, this->laser_offset));
+		laser->draw(camera, glm::translate(toWorld, this->laser_offset));
 	}
 }
 

@@ -42,31 +42,33 @@ void PlayerIcon::update(const glm::vec3 & position)
 
 void PlayerIcon::draw(const Camera & camera)
 {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (drawIcons) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	shader->bind();
-	GLuint shaderID = shader->getPid();  
+		shader->bind();
+		GLuint shaderID = shader->getPid();
 
-	//get clipping coordinates which are normalized between -1 and 1
-	glm::vec4 viewportProjection = (camera.perspective  * camera.view * world_mat * glm::vec4(glm::vec3(0.0), 1.0f));
-
-	
-	glm::vec3 offset = viewportProjection / viewportProjection.w;
-
-	glUniform4fv(glGetUniformLocation(shaderID, "player_color"), 1, &color[0]);
-	glUniform3fv(glGetUniformLocation(shaderID, "offset"), 1, &offset[0]);
+		//get clipping coordinates which are normalized between -1 and 1
+		glm::vec4 viewportProjection = (camera.perspective  * camera.view * world_mat * glm::vec4(glm::vec3(0.0), 1.0f));
 
 
-	//bind texture
-	//texture.bind();
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_POINTS, 0, 1);
+		glm::vec3 offset = viewportProjection / viewportProjection.w;
 
-	glBindVertexArray(0);
-	//texture.unbind();
+		glUniform4fv(glGetUniformLocation(shaderID, "player_color"), 1, &color[0]);
+		glUniform3fv(glGetUniformLocation(shaderID, "offset"), 1, &offset[0]);
 
-	shader->unbind();
+
+		//bind texture
+		//texture.bind();
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_POINTS, 0, 1);
+
+		glBindVertexArray(0);
+		//texture.unbind();
+
+		shader->unbind();
+	}
 }
 
 void PlayerIcon::setColor(glm::vec4 color)
