@@ -74,7 +74,7 @@ void DrawableUnit::draw(const Camera & camera) const {
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
     glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
     Drawable::draw(camera);
-
+	shader->bind();
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), 0);
 	glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), false);
 	shader->unbind();
