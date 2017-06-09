@@ -535,6 +535,15 @@ void GUI::updateCityWindow() {
 
 void GUI::updateSlotWindow() {
 	if (slotWindow->visible()) {
+		if (player->can_settle() != slotButton->enabled()) {
+			if (player->can_settle()) {
+				slotButton->setTooltip("");
+			}
+			else {
+				slotButton->setTooltip("Reached settlement limit (" + std::to_string(player->get_settlement_limit()) + ")");
+			}
+
+		}
 		slotButton->setEnabled(player->can_settle());
 	}
 }

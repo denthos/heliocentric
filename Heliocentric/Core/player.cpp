@@ -39,6 +39,10 @@ void Player::initialize() {
 	this->research_update = std::make_shared<PlayerResearchUpdate>(getID(), 0, this->research_points);
 }
 
+int Player::get_settlement_limit() {
+	return settlement_limit;
+}
+
 void Player::choose_research(int id) {
 	tech_tree.choose_tech(id);
 }

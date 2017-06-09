@@ -35,6 +35,7 @@ public:
 	void choose_research(int id); // Set current research by tech id
 	void research(); // Called by server
 	void research(float research_points); // Called by client
+	int get_settlement_limit();
 
 	float get_research_points();
 	bool can_settle(); // tells if a player currently can settle another city
