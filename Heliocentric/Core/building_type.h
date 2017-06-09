@@ -5,15 +5,22 @@
 #include "building.h"
 
 #define FISSION_PLANT_PRODUCTION 2
+#define FISSION_PLANT_COST 100
 #define FUSION_PLANT_PRODUCTION 5
+#define FUSION_PLANT_COST 200
 #define RESEARCH_FACILITY_SCIENCE 1
+#define RESEARCH_FACILITY_COST 100
+#define FORTRESS_ARMOR 20
+#define FORTRESS_COST 150
 
 class BuildingType : public Buildable {
 public:
 	enum TypeIdentifier {
 		FISSION_PLANT,
 		FUSION_PLANT,
-		RESEARCH_FACILITY
+		RESEARCH_FACILITY,
+		HADRON_COLLIDER,
+		FORTRESS
 	};
 
 	const static TypeIdentifier FIRST = FISSION_PLANT; // should always be the first in enum
