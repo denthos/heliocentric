@@ -12,7 +12,7 @@
 #include <typeindex>
 
 #define PLAYER_NAME_MAX_SIZE 16
-#define INITIAL_SETTLEMENT_LIMIT 1
+#define INITIAL_SETTLEMENT_LIMIT 2
 
 /* Forward declaration is necessary so compiler knows about GameObject. We cannot
 #include "game_object.h" since it #includes "player.h" */
