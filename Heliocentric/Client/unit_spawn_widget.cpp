@@ -33,7 +33,7 @@ void UnitSpawnWidget::createProductionLabel() {
 	productionLabel = new Label(this, "Production: 999");
 }
 
-void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, Player* player) {
+void UnitSpawnWidget::updateSelection(Builder* spawner, Player* player) {
 
 	for (auto& button : createUnitButtons) {
 		button->updateCreateButton(player);
@@ -46,8 +46,8 @@ void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, Player* player) {
 		createUnitProgress->setValue(0.0f);
 	}
 
-	productionLabel->setCaption("Production: " + std::to_string(spawner->getProduction()));
-	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getUnitSpawnQueue().size()));
+	productionLabel->setCaption("Production: " + std::to_string(spawner->get_production()));
+	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getProductionQueue().size()));
 }
 
 void UnitSpawnWidget::setCreateButtonCallback(std::function<void(UnitType*)> callback) {

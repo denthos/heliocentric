@@ -4,7 +4,7 @@
 #include "selectable.h"
 #include "city.h"
 #include "resources.h"
-#include "unit_spawner.h"
+#include "builder.h"
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -59,6 +59,7 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 void GUI::update() {
 	updatePlayerOverlay();
 	updateCityWindow();
+	updateSlotWindow();
 	updateUnitWindow();
 	updateTechTreePreviewWindow();
 	updateTechTreeWindow();
@@ -540,6 +541,22 @@ void GUI::updateCityWindow() {
 		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
+	}
+}
+
+
+void GUI::updateSlotWindow() {
+	if (slotWindow->visible()) {
+		if (player->can_settle() != slotButton->enabled()) {
+			if (player->can_settle()) {
+				slotButton->setTooltip("");
+			}
+			else {
+				slotButton->setTooltip("Reached settlement limit (" + std::to_string(player->get_settlement_limit()) + ")");
+			}
+
+		}
+		slotButton->setEnabled(player->can_settle());
 	}
 }
 

@@ -421,8 +421,8 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 
 	/* This currently only handles create command */
 	switch (command->command_type) {
-		case PlayerCommand::CMD_CREATE: {
-			LOG_DEBUG("Player command type: CMD_CREATE.");
+		case PlayerCommand::CMD_CREATE_UNIT: {
+			LOG_DEBUG("Player command type: CMD_CREATE_UNIT.");
 			/* We need to use the creation_command's ID to create a unit. For now, let's just create a unit */
 			Player* owner = this->extractPlayerFromConnection(sender);
 
@@ -434,21 +434,44 @@ void GameServer::handlePlayerCommand(SunNet::ChanneledSocketConnection_p sender,
 					return;
 				}
 
-				/* Now we are going to add the unit to the city's queue */
-				auto spawnUpdate = this->city_manager->spawnUnit(command);
-				this->addUpdateToSendQueue(spawnUpdate);
+				try {
+					/* Now we are going to add the unit to the city's queue */
+					auto spawnUpdate = this->city_manager->spawnUnit(command);
+					this->addUpdateToSendQueue(spawnUpdate);
 
-				/* Now we are going to decrement the player's resources */
-				std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
+					/* Now we are going to decrement the player's resources */
+					std::vector<std::shared_ptr<PlayerUpdate>> playerResourceUpdates;
 
-				for (auto& resource_pair : type->getBuildRequirements()) {
-					owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
-					playerResourceUpdates.push_back(
-						std::make_shared<PlayerUpdate>(owner->getID(), resource_pair.first, owner->get_resource_amount(resource_pair.first))
-					);
+					for (auto& resource_pair : type->getBuildRequirements()) {
+						owner->change_resource_amount(resource_pair.first, -1 * resource_pair.second);
+						playerResourceUpdates.push_back(
+							std::make_shared<PlayerUpdate>(owner->getID(), resource_pair.first, owner->get_resource_amount(resource_pair.first))
+						);
+					}
+
+					this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
 				}
+				catch (City::BadUIDException e) {
+					LOG_ERR("Invalid city Id sent to server");
+				}
+			});
+			break;
+		}
+		case PlayerCommand::CMD_CREATE_BUILDING : {
+			LOG_DEBUG("Player command type: CMD_CREATE_BUILDING.");
+			Player* owner = this->extractPlayerFromConnection(sender);
 
-				this->addUpdateToSendQueue(playerResourceUpdates.begin(), playerResourceUpdates.end());
+			this->addFunctionToProcessQueue([this, command, owner]() {
+				BuildingType* type = BuildingType::getByIdentifier(command->createBuildingType);
+				/* Check tech tree */
+
+				try {
+					auto spawnUpdate = this->city_manager->spawnBuilding(command);
+					this->addUpdateToSendQueue(spawnUpdate);
+				}
+				catch (City::BadUIDException e) {
+					LOG_ERR("Invalid city Id sent to server");
+				}
 			});
 			break;
 		}

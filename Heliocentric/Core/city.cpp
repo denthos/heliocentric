@@ -6,7 +6,7 @@
 #include "city_manager.h"
 
 City::City(Player* owner, Attack* attack, CityManager* manager, int def, int heal, int pr, int pop, Slot* assigned_slot, std::string name) :
-	AttackableGameObject(assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID(), pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
+	AttackableGameObject(assigned_slot->get_position(), owner, attack, def, heal), Builder(getID()), population(pop), slot(assigned_slot), name(name), manager(manager) {
 
 	initialize();
 
@@ -14,14 +14,14 @@ City::City(Player* owner, Attack* attack, CityManager* manager, int def, int hea
 
 
 City::City(UID id, Player* owner, Attack* attack, CityManager* manager, int def, int heal, int pr, int pop, Slot* assigned_slot, std::string name) :
-	AttackableGameObject(id, assigned_slot->get_position(), owner, attack, def, heal), UnitSpawner(getID(), pr), population(pop), slot(assigned_slot), name(name), manager(manager) {
+	AttackableGameObject(id, assigned_slot->get_position(), owner, attack, def, heal), Builder(getID()), population(pop), slot(assigned_slot), name(name), manager(manager) {
 
 	initialize();
 
 }
 
 void City::initialize() {
-	this->update = std::make_shared<CityUpdate>(this->getID(), this->get_health());
+	this->update = std::make_shared<CityUpdate>(this->getID(), this->get_health(), this->get_production(), this->get_research_points());
 	this->target = nullptr;
 }
 
@@ -31,6 +31,14 @@ int City::get_population() const {
 
 void City::set_population(int new_pop) {
 	population = new_pop;
+}
+
+int City::get_research_points() const {
+	return research_points;
+}
+
+void City::set_research_points(int new_rp) {
+	research_points = new_rp;
 }
 
 Slot* City::get_slot() {
@@ -118,11 +126,23 @@ std::string City::getName() const {
 	return name;
 }
 
-void City::spawnCompleteHandler(UnitType* type) {
-	/* 
-	This happens when we are ready to create a unit! We need to somehow tell the unit manager.
-	Let's do so through the city manager
-	*/
-	manager->handleUnitSpawningComplete(type, this);
+void City::spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType) {
+	switch (buildType) {
+		case Builder::ProductionType::IDLE:
+			LOG_ERR("Spawn completed but city was not producing anything...");
+			break;
+		case Builder::ProductionType::BUILDING:
+			manager->handleBuildingSpawningComplete((BuildingType*) type, this);
+			break;
+		case Builder::ProductionType::UNIT:
+			/*
+			This happens when we are ready to create a unit! We need to somehow tell the unit manager.
+			Let's do so through the city manager
+			*/
+			manager->handleUnitSpawningComplete((UnitType*) type, this);
+			break;
+		default:
+			throw Builder::InvalidBuildTypeException();
+	}
 }
 

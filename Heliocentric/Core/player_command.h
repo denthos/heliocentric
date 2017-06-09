@@ -3,6 +3,7 @@
 #include "base_command.h"
 #include "resources.h"
 #include "unit_type.h"
+#include "building_type.h"
 
 /**
 This class works as a medium for client-to-server communication by carrying
@@ -23,6 +24,7 @@ public:
 	float create_location_y;
 	float create_location_z;
 	UnitType::TypeIdentifier createUnitType;
+	BuildingType::TypeIdentifier createBuildingType;
 
 	UID trade_recipient;
 	Resources::Type trade_selling;
@@ -36,7 +38,7 @@ public:
 	// here so we can change them based on the player's technologies
 
 	/**
-	Constructor for a CMD_CREATE type command, which is a temporary command
+	Constructor for a CMD_CREATE_UNIT type command, which is a temporary command
 	used to create a unit for testing.
 	@param create_location_x x-axis of the location where the unit should be created.
 	@param create_location_y y-axis of the location where the unit should be created.
@@ -44,6 +46,8 @@ public:
 	@param create_type The UnitType::TypeIdentifier of the unit created
 	*/
 	PlayerCommand(float, float, float, UnitType::TypeIdentifier create_type, UID cityID);
+
+	PlayerCommand(BuildingType::TypeIdentifier create_type, UID cityID);
 
 	PlayerCommand(UID, Resources::Type, int);
 };

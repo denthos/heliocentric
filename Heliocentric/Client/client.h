@@ -120,7 +120,8 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
 	std::unordered_map<UID, DrawableSlot*> slots;
-	std::unordered_map<UID, UnitSpawner*> spawners;
+	std::unordered_map<UID, Builder*> spawners;
+	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> dead_units;
 
 	std::shared_ptr<Player> player;
 
@@ -139,6 +140,7 @@ private:
 	void handleEscapeKey(int);
 	void handleF1Key(int);
 	void handleF2Key(int);
+	void handleF3Key(int);
 	void handleF4Key(int);
 	void handleF6Key(int);
 	void handleF10Key(int);
