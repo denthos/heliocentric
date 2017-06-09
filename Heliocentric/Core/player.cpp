@@ -58,6 +58,9 @@ void Player::research() {
 				// Increase the settlement limit
 				settlement_limit += 1;
 			}
+			else if (current_tech->hasResearched() && current_tech->getID() == TECH_6) {
+				this->increase_player_score(1000);
+			}
 		}
 	}
 	catch (TechTree::ResearchIdleException) {
@@ -71,6 +74,9 @@ void Player::research(float research_points) {
 		if (current_tech->getID() == TECH_5) {
 			// Increase the settlement limit
 			settlement_limit += 1;
+		}
+		else if (current_tech->getID() == TECH_6) {
+			this->increase_player_score(1000);
 		}
 	}
 }
