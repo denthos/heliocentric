@@ -932,7 +932,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 		colorShader, laser_particles, explosion_particles, soundSystem
 	);
 
-	player_it->second->acquire_object(newUnit.get());
+	player_it->second->acquire_object<Unit>(newUnit.get());
 	units.insert(std::make_pair(update->id, std::move(newUnit)));
 }
 
@@ -970,7 +970,9 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 	City city(update->city_id, owner, new InstantLaserAttack(), nullptr, update->defense, update->health, update->production, update->population, slot_iter->second, update->name);
 	DrawableCity* newCity = new DrawableCity(city, colorShader);
 	slot_iter->second->attachCity(newCity);
-	owner->acquire_object(newCity);
+	LOG_DEBUG("Player's before settlement count: ", player->getOwnedObjects<DrawableCity>().size());
+	owner->acquire_object<City>(newCity);
+	LOG_DEBUG("After settlement count: ", player->getOwnedObjects<DrawableCity>().size());
 	cities.insert(std::make_pair(newCity->getID(), newCity));
 	spawners.insert(std::make_pair(newCity->getID(), newCity));
 

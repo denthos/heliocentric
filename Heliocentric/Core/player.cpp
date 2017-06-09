@@ -39,6 +39,10 @@ void Player::initialize() {
 	this->research_update = std::make_shared<PlayerResearchUpdate>(getID(), 0, this->research_points);
 }
 
+int Player::get_settlement_limit() {
+	return settlement_limit;
+}
+
 void Player::choose_research(int id) {
 	tech_tree.choose_tech(id);
 }
@@ -50,6 +54,11 @@ void Player::research() {
 			this->research_update->research_points = this->research_points;
 			this->research_update->tech_id = current_tech->getID();
 			send_update_to_manager(this->research_update);
+
+			if (current_tech->hasResearched() && current_tech->getID() == TECH_5) {
+				// Increase the settlement limit
+				settlement_limit += 1;
+			}
 		}
 	}
 	catch (TechTree::ResearchIdleException) {
@@ -58,8 +67,13 @@ void Player::research() {
 }
 
 void Player::research(float research_points) {
-	Technology* dummy;
-	tech_tree.research(research_points, dummy);
+	Technology* current_tech;
+	if (tech_tree.research(research_points, current_tech) && current_tech->hasResearched()) {
+		if (current_tech->getID() == TECH_5) {
+			// Increase the settlement limit
+			settlement_limit += 1;
+		}
+	}
 }
 
 std::string Player::get_name() const {
@@ -125,12 +139,6 @@ bool Player::can_settle() {
 
 bool Player::can_create_unit(UnitType* type) {
 	return (type->hasBuildRequirements(getResources()) && type->hasTechRequirements(getTechTree()));
-}
-
-void Player::acquire_object(GameObject* object) {
-	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
-	// update object members
-	object->set_player(this);
 }
 
 void Player::add_to_destroy(GameObject* object) {
