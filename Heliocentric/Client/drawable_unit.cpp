@@ -32,6 +32,8 @@ DrawableUnit::DrawableUnit(const Unit & unit, Shader * shader, ParticleSystem* l
 
 	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
 	icon = new PlayerIcon(iconShader);
+	PlayerColor::Color playercolor = this->get_player()->getColor();
+	icon->setColor(glm::vec4(PlayerColor::colorToRGBVec(playercolor), 1.0f));
 
     BoundingBox bbox = getBoundingBox();
     glm::vec3 b_max = bbox.max;
@@ -49,10 +51,11 @@ void DrawableUnit::update() {
 	this->updateRotationMatrix();
 	this->toWorld = glm::translate(get_position()) * getRotationMatrix() * glm::scale(glm::vec3(data.scalingFactor));
 	shoot_sound->update(this->get_position());
-	icon->update(this->get_position());
+	
 }
 
 void DrawableUnit::draw(const Camera & camera) const {
+	icon->update(toWorld[3]);
 	icon->draw(camera);
     PlayerColor::Color player_color = this->get_player()->getColor();
     shader->bind();

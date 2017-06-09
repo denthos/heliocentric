@@ -8,7 +8,7 @@ PlayerIcon::PlayerIcon(Shader * shader)
 	//generate buffer info
 	// Vertex data
 	float points[] = {
-		0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0, // top-left
+		0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0, // top-left
 	};
 	
 	glGenBuffers(1, &VBO);
@@ -33,7 +33,7 @@ PlayerIcon::~PlayerIcon()
 
 void PlayerIcon::update(const glm::vec3 & position)
 {
-	world_mat = glm::translate(glm::mat4(1.0f), position);
+	world_mat = glm::translate(glm::mat4(1.0f), position + unit_offset);
 }
 
 
@@ -51,12 +51,9 @@ void PlayerIcon::draw(const Camera & camera)
 	
 	glm::vec3 offset = viewportProjection / viewportProjection.w;
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, &camera.perspective[0][0]); 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_FALSE, &camera.view[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, &world_mat[0][0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "player_color"), 1, &color[0]);
 	glUniform3fv(glGetUniformLocation(shaderID, "offset"), 1, &offset[0]);
 
-	std::cerr << "Screen coords" << offset.x << "," << offset.y << std::endl;
 
 	//bind texture
 	//texture.bind();
@@ -67,4 +64,9 @@ void PlayerIcon::draw(const Camera & camera)
 	//texture.unbind();
 
 	shader->unbind();
+}
+
+void PlayerIcon::setColor(glm::vec4 color)
+{
+	this->color = color;
 }
