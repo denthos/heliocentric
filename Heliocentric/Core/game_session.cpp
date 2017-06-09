@@ -2,7 +2,7 @@
 #include "math.h"
 #include "logging.h"
 
-GameSession::GameSession() : time_limit(60), time_elapsed(0.00f), game_running(true), winner(INVALID_ID), time_victory(true),
+GameSession::GameSession() : time_limit(900), time_elapsed(0.00f), game_running(true), winner(INVALID_ID), time_victory(true),
 domination_victory(false), economic_victory(false), science_victory(false) {
 	timeUpdate = std::make_shared<TimeUpdate>(time_elapsed);
 }
