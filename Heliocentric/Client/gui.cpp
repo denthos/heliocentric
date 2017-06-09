@@ -11,6 +11,7 @@
 #include <string>
 
 #define RESOURCE_IMAGE_DIRECTORY "Images/Resources"
+#define ICON_IMAGE_DIRECTORY "Images/Icons"
 #define PIXELS_PER_CHARACTER 14
 #define LARGE_FONT "courier"
 #define LARGE_FONT_SIZE 26
@@ -274,6 +275,7 @@ void GUI::createPlayerOverlay() {
 	playerOverlay->theme()->mTextColor = playerOverlay->theme()->mWindowFillFocused;
 	fpsSpacer = new Label(playerOverlay, "", LARGE_FONT, LARGE_FONT_SIZE);
 	playerOverlay->theme()->mTextColor = fontColor;
+
 	timerDisplay = new Label(playerOverlay, "Timer: ", LARGE_FONT, LARGE_FONT_SIZE);
 	timerDisplay->setTooltip("Time Remaining... Hurry!");
 	timerDisplay->setFixedWidth(12 * PIXELS_PER_CHARACTER);
@@ -616,19 +618,37 @@ void GUI::hideCityUI() {
 void GUI::createHelpWindow() {
 	helpWindow = formHelper->addWindow(Eigen::Vector2i(800, 120), "Help");
 	Button* helpButton = formHelper->addButton("Open", [this]() {showHelpDetailWindow(); });
+	std::string icon_image_directory = std::string(ICON_IMAGE_DIRECTORY);
+	std::vector<std::pair<int, std::string>> help_icons = loadImageDirectory(nvgContext(), icon_image_directory);
+	helpButton->setIcon(0);
 	helpDetailWindow = formHelper->addWindow(Eigen::Vector2i(500, 120), "Help Window");
 	Button* closeHelpButton = new Button(helpDetailWindow->buttonPanel(), "X");
 	closeHelpButton->setCallback([this]() {
 		hideHelpDetailWindow();
 	});
-
-	Widget* hotKeyWidget = new Widget(helpDetailWindow);
-	hotKeyWidget->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 0, 1));
-	TextBox* cameraKey = new TextBox(hotKeyWidget, "`");
-	Label* cameraKeyLabel = new Label(hotKeyWidget, "Swap camera views");
-	Label* gameGoalLabel = new Label(hotKeyWidget, "GAME GOAL");
-	Label* explainGameGoal = new Label(hotKeyWidget, "My game goal is bla bla bla");
-	formHelper->addWidget("Hot Key Widget", hotKeyWidget);
+	//helpDetailWindow->setFixedWidth(200);
+	Widget* gameGoalPanel = new Widget(helpDetailWindow);
+	gameGoalPanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 10));
+	Label* explainGameGoal = new Label(gameGoalPanel, "Gain the most scores within the time restraint!", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("GOAL", gameGoalPanel);
+	Widget* gameObjectivePanel = new Widget(helpDetailWindow);
+	gameObjectivePanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Middle, 10, 10));
+	Label* explainGameGoal1 = new Label(gameObjectivePanel, "1) Kill an enemy UNIT or CITY to gain points equivalent to their ATTACK.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal2 = new Label(gameObjectivePanel, "2) Create city to excavate resources.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal3 = new Label(gameObjectivePanel, "3) Perform RESEARCH to upgrade unit and cities.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainGameGoal4 = new Label(gameObjectivePanel, "4) TRADE with another player for unique RESOURCES.", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("OBJECTIVES", gameObjectivePanel);
+	Widget* hotKeyPanel = new Widget(helpDetailWindow);
+	hotKeyPanel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 10, 10));
+	TextBox* cameraKey = new TextBox(hotKeyPanel, "`");
+	Label* cameraKeyLabel = new Label(hotKeyPanel, "Swap camera views", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* escKey = new TextBox(hotKeyPanel, "Esc");
+	Label* escKeyLabel = new Label(hotKeyPanel, "Exit game", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* leftBracKey = new TextBox(hotKeyPanel, "[");
+	Label* leftBracKeyLabel = new Label(hotKeyPanel, "Decrease Volume", LARGE_FONT, STANDARD_FONT_SIZE);
+	TextBox* rightBracKey = new TextBox(hotKeyPanel, "]");
+	Label* rightBracKeyLabel = new Label(hotKeyPanel, "Increase Volume", LARGE_FONT, STANDARD_FONT_SIZE);
+	formHelper->addWidget("HOT KEYS", hotKeyPanel);
 	this->performLayout();
 
 	hideHelpDetailWindow();
