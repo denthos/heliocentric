@@ -442,15 +442,11 @@ void Client::display() {
 			dead_it->second->update();
 			if (!dead_it->second->do_animation(*cameras[selectedCamera])) {
 				UID id = dead_it->first;
-				LOG_DEBUG("Deleting unit with id " + std::to_string(id));
-				dead_it++;
-
 				if (selection.size() > 0 && selection[0]->getID() == id) {
 					selection.erase(selection.begin());
 					dead_units[id]->unselect(gui, this);
 				}
-
-				dead_units.erase(id);
+				dead_it = dead_units.erase(dead_it);
 			}
 			else {
 				dead_it++;
