@@ -681,10 +681,10 @@ void GUI::createHelpWindow() {
 	Widget* techPanel = new Widget(helpDetailWindow);
 	techPanel->setLayout(new BoxLayout(Orientation::Vertical, Alignment::Minimum, 10, 10));
 	Label* explainTech1 = new Label(techPanel, "1) STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
-	Label* explainTech2 = new Label(techPanel, "2) Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech2 = new Label(techPanel, "2) ADVANCED MINING. 25% chance of extracting more resources.", LARGE_FONT, STANDARD_FONT_SIZE);
 	Label* explainTech3 = new Label(techPanel, "3) HEAVY UNIT. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
-	Label* explainTech4 = new Label(techPanel, "4) Tech 4. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
-	Label* explainTech5 = new Label(techPanel, "5) Exploration Program. Increase city settlement limit by 1. Unlocked by Tech 2.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech4 = new Label(techPanel, "4) ADVANCED WARFARE. Unlocked by STEEL PLATING.", LARGE_FONT, STANDARD_FONT_SIZE);
+	Label* explainTech5 = new Label(techPanel, "5) EXPLORATION PROGRAM. Increase city settlement limit by 1. Unlocked by ADVANCED MINING.", LARGE_FONT, STANDARD_FONT_SIZE);
 	Label* explainTech6 = new Label(techPanel, "6) SECRECT.", LARGE_FONT, LARGE_FONT_SIZE);
 	formHelper->addWidget("RESEARCH TECHS", techPanel);
 	this->performLayout();
