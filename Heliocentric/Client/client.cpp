@@ -215,7 +215,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
-	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
+	colorShader = new Shader("Shaders/geoshader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
 	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
 	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
@@ -274,6 +274,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_T, std::bind(&Client::handleTKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_UP, std::bind(&Client::handleUpKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_DOWN, std::bind(&Client::handleDownKey, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -301,6 +303,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	musicPlayer->load_sound("Audio/Holst_The_Planets_Uranus.ogg");
 	musicPlayer->load_sound("Audio/Holst_The_Planets_Mercury.ogg");
 	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, musicPlayer);
+
+	exposure = 2.0f;
 }
 
 Client::~Client() {
@@ -456,6 +460,7 @@ void Client::display() {
 					selection.erase(selection.begin());
 					dead_units[id]->unselect(gui, this);
 				}
+				player->add_to_destroy<Unit>(dead_it->second.get());
 				dead_it = dead_units.erase(dead_it);
 			}
 			else {
@@ -510,9 +515,9 @@ void Client::display() {
 		glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
 		glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
 		glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
-		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
+		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), exposure);
 		quad->draw();
-
+		
 		quadShader->unbind();
 
 		// draw the UI
@@ -774,17 +779,33 @@ void Client::handleF2Key(int key) {
 }
 
 
-void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
+void Client::createUnitFromCity(DrawableCity* city, Buildable* unit_type) {
 	/* First, let's check to see if the client-side player has enough resources */
-	if (!unit_type->hasBuildRequirements(this->player->getResources())) {
-		/* Cannot create the unit due to lack of sufficient resources */
-		return;
+	if (unit_type->getBuildType() == Buildable::UNIT) {
+		UnitType* unitt = dynamic_cast<UnitType*>(unit_type);
+		if (!unitt) {
+			return;
+		}
+
+		if (!player->can_create_unit(unitt)) {
+			return;
+		}
+
+		glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
+		PlayerCommand command(pos.x, pos.y, pos.z, unitt->getIdentifier(), city->getID());
+		this->channeled_send(&command);
+	}
+	else {
+		BuildingType* buildingt = dynamic_cast<BuildingType*>(unit_type);
+		if (!buildingt) {
+			return;
+		}
+
+		PlayerCommand command(buildingt->getIdentifier(), city->getID());
+		this->channeled_send(&command);
 	}
 
-	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
-	PlayerCommand command(pos.x, pos.y, pos.z, unit_type->getIdentifier(), city->getID());
 
-	this->channeled_send(&command);
 }
 
 void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {
@@ -901,6 +922,16 @@ void Client::handleTKey(int key)
 	PlayerIcon::drawIcons = !PlayerIcon::drawIcons;
 }
 
+void Client::handleUpKey(int)
+{
+	exposure = glm::clamp(exposure + 0.1f, 1.0f, 5.0f);
+}
+
+void Client::handleDownKey(int)
+{
+	exposure = glm::clamp(exposure - 0.1f, 1.0f, 5.0f);
+}
+
 
 void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
 	auto& player_it = players.find(update->player_id);
@@ -1003,7 +1034,7 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 
 	Player* owner = player_iter->second.get();
 	City city(update->city_id, owner, new InstantLaserAttack(), nullptr, update->defense, update->health, update->production, update->population, slot_iter->second, update->name);
-	DrawableCity* newCity = new DrawableCity(city, colorShader);
+	DrawableCity* newCity = new DrawableCity(city, colorShader, player_icon);
 	slot_iter->second->attachCity(newCity);
 	LOG_DEBUG("Player's before settlement count: ", player->getOwnedObjects<DrawableCity>().size());
 	owner->acquire_object<City>(newCity);
@@ -1057,7 +1088,7 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		Slot* slot = cities[update->id]->get_slot();
 
 		slot->detachCity();
-		owner->add_to_destroy(cities[update->id].get());
+		owner->add_to_destroy<City>(cities[update->id].get());
 		if (selection.size() > 0 && selection[0]->getID() == update->id) {
 			selection.erase(selection.begin());
 			cities[update->id]->unselect(gui, this);

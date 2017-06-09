@@ -89,6 +89,10 @@ public:
 		return true;
 	}
 
+	const ResourceCollection& getBuildRequirements() const {
+		return this->buildRequirements;
+	}
+
 	virtual bool hasTechRequirements(const TechTree& tree) const {
 		for (int required_tech_id : this->requiredTechs) {
 			if (!tree.getTechById(required_tech_id)->hasResearched()) {
@@ -99,9 +103,6 @@ public:
 		return true;
 	}
 
-	const ResourceCollection& getBuildRequirements() const {
-		return this->buildRequirements;
-	}
 
 	int getProductionCost() const {
 		return this->productionCost;

@@ -81,7 +81,7 @@ public:
 	void createCityForSlot(DrawableSlot*, std::string);
 
 	void setSelection(std::vector<GameObject*>);
-	void createUnitFromCity(DrawableCity* city, UnitType* unit_type);
+	void createUnitFromCity(DrawableCity* city, Buildable* unit_type);
 	void beginResearchOnTechnology(const Technology* tech);
 	void sendTradeDeal(std::shared_ptr<TradeData> deal);
 	void sendTradeCommand(UID trade_id, bool is_accepted);
@@ -95,6 +95,7 @@ protected:
 private:
 	std::thread sound_thread;
 
+	float exposure;
 	GLFWwindow * window;
 	GUI * gui;
 	ThreeDSoundSystem* soundSystem;
@@ -147,5 +148,7 @@ private:
 	void handleLeftBracketKey(int);
 	void handleRightBracketKey(int);
 	void handleTKey(int);
+	void handleUpKey(int);
+	void handleDownKey(int);
 };
 

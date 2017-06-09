@@ -45,7 +45,7 @@ public:
 	void hideSlotUI();
 
 
-	void displayCityUI(City* city, std::function<void(UnitType*)> createUnitCallback);
+	void displayCityUI(City* city, std::function<void(Buildable*)> createUnitCallback);
 	void hideCityUI();
 
 	void createTradeDisplay();
@@ -90,6 +90,9 @@ private:
 	void createUnitDisplay();
 	void createTechTreePreviewWindow();
 	void createTechTreeWindow(std::function<void(const Technology*)> techResearchCallback);
+	void createHelpWindow();
+	void showHelpDetailWindow();
+	void hideHelpDetailWindow();
 
 	std::pair<int, std::string> placeholderImage;
 
@@ -157,4 +160,8 @@ private:
 	IntBox<int>* askForAmount;
 	ComboBox* askForResourceType;
 	int time;
+
+	// help window
+	ref<Window> helpWindow;
+	ref<Window> helpDetailWindow;
 };

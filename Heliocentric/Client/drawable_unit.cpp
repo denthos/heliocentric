@@ -53,11 +53,11 @@ void DrawableUnit::update() {
 	shoot_sound->update(this->get_position());
 	explode_sound->update(this->get_position());
 	if (explosion_counter < pi/2.0f && is_exploding == true) {
-		LOG_INFO("Explosion counter is ", explosion_counter);
+		LOG_DEBUG("Explosion counter is ", explosion_counter);
 		explosion_counter += pi/50.0f;
 	}
 	else if (is_exploding == true) {
-		LOG_INFO("Explosion counter stopped.");
+		LOG_DEBUG("Explosion counter stopped.");
 		explosion_counter = 0.0f;
 		is_exploding = false;
 	}
@@ -74,6 +74,7 @@ void DrawableUnit::update() {
 void DrawableUnit::draw(const Camera & camera) const {
 
 	icon->setColor(glm::vec4(PlayerColor::colorToRGBVec(this->get_player()->getColor()), 1.0f));
+	icon->setSize(0.01);
 	icon->update(toWorld[3]);
 	icon->draw(camera);
     PlayerColor::Color player_color = this->get_player()->getColor();
@@ -95,14 +96,14 @@ void DrawableUnit::draw(const Camera & camera) const {
     glm::vec3 rgbVec = PlayerColor::colorToRGBVec(player_color);
     glUniform3f(glGetUniformLocation(shaderID, "m_color"), rgbVec.x, rgbVec.y, rgbVec.z);
     Drawable::draw(camera);
-
+	shader->bind();
 	glUniform1i(glGetUniformLocation(shader->getPid(), "glow"), 0);
 	glUniform1i(glGetUniformLocation(shader->getPid(), "explode_on"), false);
 	shader->unbind();
 
 	// unit explosion when dead
 	if (is_exploding) {
-		LOG_INFO("Is exploding");
+		LOG_DEBUG("Is exploding");
 		explosion->Update(camera);
 		explosion->draw(camera, glm::scale(toWorld, glm::vec3(20.0f))); //needs to be shifted a bit, bigger pixels?
 	}
