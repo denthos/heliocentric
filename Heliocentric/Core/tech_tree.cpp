@@ -91,12 +91,12 @@ void TechTree::build_tree() {
 	tech 2 leads to tech 5
 	tech 3, 4 and 5 leads to tech 6
 	*/
-	techs[TECH_1] = new Technology(TECH_1, 100.0f, "Steel Plating", "New Units are Spawned with More Defense");
-	techs[TECH_2] = new Technology(TECH_2, 100.0f, "Advanced Mining", "Provides 25% chance of extracting additional resources from each occupied slot.");
-	techs[TECH_3] = new Technology(TECH_3, 400.0f, "Heavy Unit", "Allows Spawning of a Heavy Unit");
-	techs[TECH_4] = new Technology(TECH_4, 400.0f, "Tech 4", "Does a tech");
-	techs[TECH_5] = new Technology(TECH_5, 400.0f, "Exploration Program", "Increases the city settlement limit (+1).");
-	techs[TECH_6] = new Technology(TECH_6, 800.0f, "Tech 6", "Does a tech");
+	techs[TECH_1] = new Technology(TECH_1, 600.0f, "Steel Plating", "New Units are Spawned with More Defense");
+	techs[TECH_2] = new Technology(TECH_2, 600.0f, "Advanced Mining", "Provides 25% chance of extracting additional resources from each occupied slot.");
+	techs[TECH_3] = new Technology(TECH_3, 2400.0f, "Heavy Unit", "Allows Spawning of a Heavy Unit");
+	techs[TECH_4] = new Technology(TECH_4, 2400.0f, "Tech 4", "Does a tech");
+	techs[TECH_5] = new Technology(TECH_5, 2400.0f, "Exploration Program", "Increases the city settlement limit (+1).");
+	techs[TECH_6] = new Technology(TECH_6, 4800.0f, "Tech 6", "Does a tech");
 
 	techs[TECH_1]->add_children({ techs[TECH_3], techs[TECH_4] });
 	techs[TECH_2]->add_children({ techs[TECH_5] });

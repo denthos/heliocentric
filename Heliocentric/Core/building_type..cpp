@@ -27,6 +27,6 @@ std::unordered_map<BuildingType::TypeIdentifier, BuildingType*> BuildingType::bu
 	{
 		BuildingType::TypeIdentifier::RESEARCH_FACILITY,
 		new BuildingTypeImpl<ResearchFacility>(TypeIdentifier::RESEARCH_FACILITY, 100, "Research Facility", 0, RESEARCH_FACILITY_SCIENCE,
-		ResourceCollection {{Resources::GOLD, 50}, {Resources::TITANIUM, 100}});
+		ResourceCollection {{Resources::GOLD, 50}, {Resources::TITANIUM, 100}})
 	}
 };
