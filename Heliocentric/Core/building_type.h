@@ -26,6 +26,7 @@ public:
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
 
+	virtual int getArmor() const = 0;
 	virtual int getProduction() const = 0;
 	virtual int getResearchPoints() const = 0;
 
@@ -36,8 +37,8 @@ private:
 template <typename BuildingClass>
 class BuildingTypeImpl : public BuildingType {
 public:
-	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName, int production, int research_points) :
-		BuildingType(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName), production(production), research_points(research_points) {}
+	BuildingTypeImpl(TypeIdentifier ident, int productionCost, std::string typeName, int armor, int production, int research_points) :
+		BuildingType(Buildable::BuildType::BUILDING, productionCost), identifier(ident), typeName(typeName), armor(armor), production(production), research_points(research_points) {}
 
 	int getProductionCost() const {
 		return this->productionCost;
@@ -51,6 +52,10 @@ public:
 		return this->identifier;
 	}
 
+	int getArmor() const {
+		return this->armor;
+	}
+
 	int getProduction() const {
 		return this->production;
 	}
@@ -60,6 +65,7 @@ public:
 	}
 
 private:
+	int armor;
 	int production;
 	int research_points;
 
