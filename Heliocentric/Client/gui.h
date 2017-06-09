@@ -113,6 +113,8 @@ private:
 
 	City* selectedCity = NULL;
 	ref<Window> cityWindow;
+	Eigen::Vector2i cityWindowSize;
+	bool cityWindowSizeSet = false;
 	AttackableGameObjectWidget* cityInfoWidget;
 	UnitSpawnWidget* unitSpawnWidget;
 	SlotInfoPanel* citySlotInfoPanel;

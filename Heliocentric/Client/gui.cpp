@@ -589,7 +589,6 @@ void GUI::updateCityWindow() {
 		unitSpawnWidget->updateSelection(selectedCity, this->player.get());
 		cityInfoWidget->updateSelection(selectedCity);
 		citySlotInfoPanel->updateDisplay(selectedCity->get_slot());
-		cityWindow->setHeight(this->screenHeight);
 		cityWindow->performLayout(nvgContext());
 	}
 }
@@ -636,17 +635,28 @@ void GUI::displayCityUI(City* city, std::function<void(Buildable*)> unitCreateCa
 	updateCityWindow();
 	cityWindow->setVisible(true);
 
+	unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
+
 	/* Only show the spawn ui if the owner clicked the city */
 	if (this->player->getID() == city->get_player()->getID()) {
 		unitSpawnWidget->setVisible(true);
-		unitSpawnWidget->setCreateButtonCallback(unitCreateCallback);
 	}
 	else {
 		unitSpawnWidget->setVisible(false);
 	}
 
-	cityWindow->setHeight(this->screenHeight);
+	cityWindow->performLayout(nvgContext());
+
+	if (!cityWindowSizeSet) {
+		cityWindowSize = cityWindow->size();
+		cityWindowSizeSet = true;
+	}
+	else {
+		cityWindow->setSize(cityWindowSize);
+	}
+
 	cityWindow->setPosition(Eigen::Vector2i(10, 120));
+	cityWindow->performLayout(nvgContext());
 }
 
 void GUI::hideCityUI() {

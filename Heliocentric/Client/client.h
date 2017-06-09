@@ -94,6 +94,7 @@ protected:
 
 private:
 	std::thread sound_thread;
+	int width, height;
 
 	float exposure;
 	GLFWwindow * window;

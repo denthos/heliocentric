@@ -103,8 +103,8 @@ std::vector<int> num_actions;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
-	int width = config.get<int>("ScreenWidth");
-	int height = config.get<int>("ScreenHeight");
+	width = config.get<int>("ScreenWidth");
+	height = config.get<int>("ScreenHeight");
 
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
