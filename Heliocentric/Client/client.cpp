@@ -260,6 +260,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
@@ -775,6 +776,18 @@ void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
 
 void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {
 	this->channeled_send(deal.get());
+}
+
+void Client::handleF3Key(int key) {
+	if (cities.begin() == cities.end()) {
+		LOG_DEBUG("No city established yet...");
+		return;
+	}
+
+	UID cityID = cities.begin()->first;
+	LOG_DEBUG("Add Fission Plant to production queue of city with ID ", cityID);
+	PlayerCommand command(BuildingType::TypeIdentifier::FISSION_PLANT, cityID);
+	this->channeled_send(&command);
 }
 
 void Client::handleF4Key(int key) {

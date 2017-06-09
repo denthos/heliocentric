@@ -1,4 +1,5 @@
 #pragma once
+#include "buildable.h"
 #include "resources.h"
 #include "identifiable.h"
 #include <glm/vec3.hpp>
@@ -8,15 +9,17 @@
 class Player;
 class UnitManager;
 
-class UnitType{
+class UnitType : public Buildable {
 public:
 	enum TypeIdentifier {
 		BASIC_UNIT,
 		HEAVY_UNIT
 	};
 
-	const static TypeIdentifier FIRST = BASIC_UNIT;
+	const static TypeIdentifier FIRST = BASIC_UNIT; // should always be the first in enum
 	const static int NUM_TYPES = 2;
+
+	UnitType(BuildType buildType, int productionCost);
 
 	static UnitType* getByIdentifier(TypeIdentifier);
 
@@ -27,8 +30,6 @@ public:
 	virtual bool hasBuildRequirements(const ResourceCollection& resources) const = 0;
 	virtual bool hasTechRequirements(const TechTree& tree) const = 0;
 	virtual const ResourceCollection& getBuildRequirements() const = 0;
-
-	virtual int getBuildTime() const = 0;
 
 	virtual const std::string& getTypeName() const = 0;
 	virtual TypeIdentifier getIdentifier() const = 0;
@@ -43,8 +44,8 @@ private:
 template <typename UnitClass>
 class UnitTypeImpl : public UnitType {
 public:
-	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int buildTime, std::string typeName, int baseHealth, int baseDefense, std::vector<int> required_techs) :
-		identifier(ident), buildRequirements(buildRequirements), buildTime(buildTime), typeName(typeName), baseHealth(baseHealth), baseDefense(baseDefense), requiredTechs(required_techs) {}
+	UnitTypeImpl(TypeIdentifier ident, ResourceCollection buildRequirements, int productionCost, std::string typeName, int baseHealth, int baseDefense, std::vector<int> required_techs) :
+		UnitType(Buildable::BuildType::UNIT, productionCost), identifier(ident), buildRequirements(buildRequirements), typeName(typeName), baseHealth(baseHealth), baseDefense(baseDefense), requiredTechs(required_techs) {}
 
 	std::shared_ptr<Unit> createUnit(glm::vec3 position, Player* owner, UnitManager* manager) {
 		std::shared_ptr<UnitClass> unit = std::make_shared<UnitClass>(position, owner, manager, this);
@@ -102,8 +103,8 @@ public:
 		return this->buildRequirements;
 	}
 
-	int getBuildTime() const {
-		return this->buildTime;
+	int getProductionCost() const {
+		return this->productionCost;
 	}
 
 	int getBaseHealth() const {
@@ -125,7 +126,6 @@ public:
 private:
 	ResourceCollection buildRequirements;
 	std::vector<int> requiredTechs;
-	int buildTime;
 	int baseHealth;
 	int baseDefense;
 
