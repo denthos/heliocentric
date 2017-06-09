@@ -1,6 +1,7 @@
 #include "city.h"
 #include "player_update.h"
 #include "slot_update.h"
+#include <stdlib.h>
 #include <iostream>
 #include <string>
 #include "city_manager.h"
@@ -101,18 +102,23 @@ void City::extractResourcesFromSlotAndCreateUpdates(std::vector<std::shared_ptr<
 		return;
 	}
 
+	int extract_amount = (this->player->getTechTree().getTechById(TECH_2) && rand() % 4 == 0) ? 2 : 1;
+	LOG_DEBUG("Player <", this->player->getID(), "> extract twice: ", extract_amount);
 
 	for (auto& resource_pair : get_slot()->getResources()) {
 		if (resource_pair.second <= 0) {
 			continue;
 		}
 
+		/* Don't take twice if only 1 of the resource remains. */
+		int extract_amount_min = std::min(extract_amount, resource_pair.second);
+
 		/* Change the player's resource count */
-		player->change_resource_amount(resource_pair.first, 1);
+		player->change_resource_amount(resource_pair.first, extract_amount_min);
 		int player_new_resource_count = player->get_resource_amount(resource_pair.first);
 
 		/* Change the slot's resource count */
-		slot->changeResourceCount(resource_pair.first, resource_pair.second - 1);
+		slot->changeResourceCount(resource_pair.first, resource_pair.second - extract_amount_min);
 
 		/* Make the player update */
 		player_updates.push_back(std::make_shared<PlayerUpdate>(player->getID(), resource_pair.first, player_new_resource_count));
