@@ -5,13 +5,12 @@
 #include "attackable_game_object.h"
 #include "slot.h"
 #include "player.h"
-#include "unit_spawner.h"
-#include "building_spawner.h"
+#include "builder.h"
 
 class CityUpdate;
 class CityManager;
 
-class City : public AttackableGameObject, public UnitSpawner, public BuildingSpawner {
+class City : public AttackableGameObject, public Builder {
 public:
 	friend CityUpdate;
 

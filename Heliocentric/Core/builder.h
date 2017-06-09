@@ -17,7 +17,7 @@ class Builder {
 public:
 	enum ProductionType {IDLE, BUILDING, UNIT};
 
-	Builder();
+	Builder(UID id);
 
 	const std::vector<Buildable*>& getProductionQueue();
 
@@ -29,6 +29,9 @@ public:
 
 	ProductionType progressSpawnAndCreateUpdate();
 	std::shared_ptr<UnitSpawnerUpdate> getSpawnUpdate();
+
+	std::shared_ptr<UnitSpawnerUpdate> spawnBuilding(BuildingType::TypeIdentifier);
+	std::shared_ptr<UnitSpawnerUpdate> spawnUnit(UnitType::TypeIdentifier);
 
 	class InvalidBuildTypeException : public std::exception {};
 

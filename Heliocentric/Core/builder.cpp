@@ -1,7 +1,7 @@
 #include "builder.h"
 #include "unit_spawner_update.h"
 
-Builder::Builder() : currentProduction(NULL), currentlyProducing(false),
+Builder::Builder(UID id) : id(id), currentProduction(NULL), currentlyProducing(false),
 	currentProductionProgress(0), currentProductionProgressPercent(0), production(INITIAL_PRODUCTION) {
 	initialize();
 }
@@ -151,4 +151,30 @@ Builder::ProductionType Builder::produce() {
 	}
 
 	return Builder::ProductionType::IDLE;
+}
+
+std::shared_ptr<UnitSpawnerUpdate> Builder::spawnBuilding(BuildingType::TypeIdentifier type) {
+	auto update = std::make_shared<UnitSpawnerUpdate>();
+	update->percent = 0;
+	update->updateType = UnitSpawnerUpdate::UpdateType::ADD_TO_QUEUE;
+	update->buildingType = type;
+	update->id = id;
+
+	/* Spawning a unit involves just putting it in the queue */
+	this->production_queue.push_back(BuildingType::getByIdentifier(type));
+
+	return update;
+}
+
+std::shared_ptr<UnitSpawnerUpdate> Builder::spawnUnit(UnitType::TypeIdentifier type) {
+	auto update = std::make_shared<UnitSpawnerUpdate>();
+	update->percent = 0;
+	update->updateType = UnitSpawnerUpdate::UpdateType::ADD_TO_QUEUE;
+	update->unitType = type;
+	update->id = id;
+
+	/* Spawning a unit involves just putting it in the queue */
+	this->production_queue.push_back(UnitType::getByIdentifier(type));
+
+	return update;
 }

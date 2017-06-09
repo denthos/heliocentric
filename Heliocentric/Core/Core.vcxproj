@@ -24,7 +24,6 @@
     <ClCompile Include="base_command.cpp" />
     <ClCompile Include="builder.cpp" />
     <ClCompile Include="building.cpp" />
-    <ClCompile Include="building_spawner.cpp" />
     <ClCompile Include="building_type..cpp" />
     <ClCompile Include="city_manager.cpp" />
     <ClCompile Include="city_creation_update.cpp" />
@@ -57,7 +56,6 @@
     <ClCompile Include="player_command.cpp" />
     <ClCompile Include="unit_command.cpp" />
     <ClCompile Include="unit_manager.cpp" />
-    <ClCompile Include="unit_spawner.cpp" />
     <ClCompile Include="unit_type.cpp" />
     <ClCompile Include="unit_update.cpp" />
     <ClCompile Include="universe.cpp" />
@@ -65,7 +63,6 @@
   <ItemGroup>
     <ClInclude Include="builder.h" />
     <ClInclude Include="building.h" />
-    <ClInclude Include="building_spawner.h" />
     <ClInclude Include="building_type.h" />
     <ClInclude Include="fission_plant.h" />
     <ClInclude Include="fusion_plant.h" />
@@ -77,7 +74,6 @@
     <ClInclude Include="buildable.h" />
     <ClInclude Include="research_facility.h" />
     <ClInclude Include="research_command.h" />
-    <ClInclude Include="unit_spawner.h" />
     <ClInclude Include="unit_spawner_update.h" />
     <ClInclude Include="unit_type.h" />
     <ClInclude Include="attack.h" />

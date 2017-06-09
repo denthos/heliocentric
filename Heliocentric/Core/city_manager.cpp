@@ -1,6 +1,6 @@
 #include "city_manager.h"
 #include "instant_laser_attack.h"
-#include "unit_spawner.h"
+#include "builder.h"
 #include "planet.h"
 
 CityManager::CityManager(UnitManager* unit_manager) : unit_manager(unit_manager) {}
@@ -23,6 +23,9 @@ void CityManager::doLogic() {
 	for (auto& city_pair : get_cities()) {
 		City* city = city_pair.second.get();
 
+		this->unit_spawner_updates.insert(city->getSpawnUpdate());
+
+		/**
 		Builder::ProductionType buildType = city->progressSpawnAndCreateUpdate();
 		switch (buildType) {
 			case Builder::ProductionType::IDLE:
@@ -36,6 +39,7 @@ void CityManager::doLogic() {
 			default:
 				throw Builder::InvalidBuildTypeException();
 		}
+		*/
 	}
 }
 

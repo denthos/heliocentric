@@ -182,9 +182,6 @@
     <ClInclude Include="unit_spawner_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
-    <ClInclude Include="unit_spawner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="player_color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -234,9 +231,6 @@
       <Filter>Commands</Filter>
     </ClInclude>
     <ClInclude Include="builder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="building_spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -370,9 +364,6 @@
     <ClCompile Include="heavy_unit.cpp">
       <Filter>Units</Filter>
     </ClCompile>
-    <ClCompile Include="unit_spawner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="player_color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -416,9 +407,6 @@
       <Filter>Commands</Filter>
     </ClCompile>
     <ClCompile Include="builder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="building_spawner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

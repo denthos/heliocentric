@@ -117,7 +117,7 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
 	std::unordered_map<UID, DrawableSlot*> slots;
-	std::unordered_map<UID, UnitSpawner*> spawners;
+	std::unordered_map<UID, Builder*> spawners;
 
 	std::shared_ptr<Player> player;
 
