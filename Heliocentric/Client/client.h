@@ -42,6 +42,7 @@
 #include "player_score_update.h"
 #include "player_research_update.h"
 #include "threed_sound_system.h"
+#include "tech_tree.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -80,6 +81,7 @@ public:
 
 	void setSelection(std::vector<GameObject*>);
 	void createUnitFromCity(DrawableCity* city, UnitType* unit_type);
+	void beginResearchOnTechnology(const Technology* tech);
 	void sendTradeDeal(std::shared_ptr<TradeData> deal);
 	void sendTradeCommand(UID trade_id, bool is_accepted);
 

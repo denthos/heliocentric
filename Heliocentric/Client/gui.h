@@ -12,6 +12,8 @@
 #include "slot_info_panel.h"
 #include "unit_type.h"
 #include "unit_create_button.h"
+#include "tech_preview_widget.h"
+#include "tech_tree_widget.h"
 
 #include <nanogui\nanogui.h>
 #include <unordered_map>
@@ -24,7 +26,8 @@ class GUI : public Screen {
 public:
 
 	
-	GUI(GLFWwindow *, std::function<void(std::shared_ptr<TradeData>)> tradeButtonCallback, std::function<void(UID, bool)> tradeHandlerCallback, int screenWidth, int screenHeight);
+	GUI(GLFWwindow *, std::function<void(std::shared_ptr<TradeData>)> tradeButtonCallback, std::function<void(UID, bool)> tradeHandlerCallback, 
+			std::function<void(const Technology*)> techResearchCallback, int screenWidth, int screenHeight);
 	~GUI();
 
 	void update();
@@ -61,8 +64,11 @@ public:
 	void updatePlayerLeaderboardValue(const Player* player);
 	void addPlayer(std::shared_ptr<Player> new_player);
 
+	void showChooseTechWindow();
+
 private:
 	int screenWidth, screenHeight;
+	void updatePlayerOverlay();
 
 	AttackableGameObject* selectedUnit = NULL;
 	void updateUnitWindow();
@@ -81,6 +87,8 @@ private:
 	void createGameOverWindow();
 	void createLeaderboardWindow();
 	void createUnitDisplay();
+	void createTechTreePreviewWindow();
+	void createTechTreeWindow(std::function<void(const Technology*)> techResearchCallback);
 
 	std::pair<int, std::string> placeholderImage;
 
@@ -117,6 +125,14 @@ private:
 
 	Window* leaderboardWindow;
 	LeaderboardWidget* leaderboardWidget;
+
+	Window* techPreviewWindow;
+	TechPreviewWidget* techPreviewWidget;
+	void updateTechTreePreviewWindow();
+
+	Window* techTreeWindow;
+	TechTreeWidget* techTreeWidget;
+	void updateTechTreeWindow();
 
 	// Everything Trade
 	ref<Window> tradeWindow;

@@ -1,19 +1,9 @@
 #include "tech_tree.h"
 #include "logging.h"
 
-/* TODO: Should load from config file */
-std::unordered_map<int, std::string> tech_name_map = {
-	{1, "Tech 1"},
-	{2, "Tech 2"},
-	{3, "Tech 3"},
-	{4, "Tech 4"},
-	{5, "Tech 5"},
-	{6, "Tech 6"}
-};
 
-Technology::Technology(int tech, float research_points_required) : id(tech),
-	researched(false), research_points_required(research_points_required) {
-	this->name = tech_name_map[tech];
+Technology::Technology(int tech, float research_points_required, std::string name, std::string desc) : 
+	id(tech), name(name), description(desc), researched(false), research_points_required(research_points_required) {
 }
 
 void Technology::research(float research_points) {
@@ -38,6 +28,23 @@ bool Technology::is_available() {
 	return true;
 }
 
+
+int Technology::getID() const {
+	return id;
+}
+
+std::string Technology::getName() const {
+	return name;
+}
+
+std::string Technology::getDescription() const {
+	return description;
+}
+
+const std::vector<Technology*>& Technology::getChildren() const {
+	return children;
+}
+
 void Technology::add_children(std::vector<Technology*> children) {
 	for (auto it : children) {
 		this->children.push_back(it);
@@ -51,6 +58,16 @@ TechTree::TechTree() {
 	set_research_idle();
 }
 
+const Technology* TechTree::getTechById(int id) const {
+	auto& tech_it = techs.find(id);
+	if (tech_it == techs.end()) {
+		return nullptr;
+	}
+	else {
+		return tech_it->second;
+	}
+}
+
 TechTree::~TechTree() {
 
 }
@@ -62,12 +79,12 @@ void TechTree::build_tree() {
 	tech 2 leads to tech 5
 	tech 3, 4 and 5 leads to tech 6
 	*/
-	techs[TECH_1] = new Technology(TECH_1, 100.0f);
-	techs[TECH_2] = new Technology(TECH_2, 100.0f);
-	techs[TECH_3] = new Technology(TECH_3, 400.0f);
-	techs[TECH_4] = new Technology(TECH_4, 400.0f);
-	techs[TECH_5] = new Technology(TECH_5, 400.0f);
-	techs[TECH_6] = new Technology(TECH_6, 800.0f);
+	techs[TECH_1] = new Technology(TECH_1, 100.0f, "Tech 1", "Does a tech");
+	techs[TECH_2] = new Technology(TECH_2, 100.0f, "Tech 2", "Does a tech");
+	techs[TECH_3] = new Technology(TECH_3, 400.0f, "Tech 3", "Does a tech");
+	techs[TECH_4] = new Technology(TECH_4, 400.0f, "Tech 4", "Does a tech");
+	techs[TECH_5] = new Technology(TECH_5, 400.0f, "Tech 5", "Does a tech");
+	techs[TECH_6] = new Technology(TECH_6, 800.0f, "Tech 6", "Does a tech");
 
 	techs[TECH_1]->add_children({ techs[TECH_3], techs[TECH_4] });
 	techs[TECH_2]->add_children({ techs[TECH_5] });
@@ -80,7 +97,7 @@ void TechTree::set_research_idle() {
 	current_research = nullptr;
 }
 
-bool TechTree::research(float research_points) {
+bool TechTree::research(float research_points, Technology*& current) {
 	if (current_research == nullptr) {
 		/* Maybe somehow notify the player that they don't have a tech selected instead of spamming the console */
 		return false;
@@ -88,8 +105,10 @@ bool TechTree::research(float research_points) {
 	else {
 		current_research->research(research_points);
 
+		current = current_research;
+
 		if (current_research->researched) {
-			LOG_DEBUG(current_research->name + " is unlocked");
+			LOG_INFO(current_research->name + " is unlocked");
 			set_research_idle();
 		}
 	}
@@ -105,6 +124,10 @@ void TechTree::choose_tech(int tech) {
 
 	current_research = techs[tech];
 	LOG_INFO("Now researching ", current_research->name);
+}
+
+bool TechTree::is_researching() {
+	return (current_research != nullptr);
 }
 
 int TechTree::get_current_research_id() {
