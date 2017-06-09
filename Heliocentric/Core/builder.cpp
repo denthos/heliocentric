@@ -1,5 +1,5 @@
 #include "builder.h"
-#include "unit_spawner_update.h"
+#include "spawner_update.h"
 
 Builder::Builder(UID id) : id(id), currentProduction(NULL), currentlyProducing(false),
 	currentProductionProgress(0), currentProductionProgressPercent(0), production(INITIAL_PRODUCTION) {

@@ -19,7 +19,7 @@
 #include "unit_command.h"
 #include "trade_command.h"
 #include "settle_city_command.h"
-#include "unit_spawner_update.h"
+#include "spawner_update.h"
 #include "research_command.h"
 
 #include "game_over_update.h"
