@@ -37,6 +37,7 @@
 #include "instant_laser_attack.h"
 #include "selectable.h"
 #include "unit_spawner_update.h"
+#include "player_icon.h"
 
 #define MAX_ACTIONS_WINDOW 50
 
@@ -71,7 +72,6 @@ ParticleSystem* particles;
 ParticleSystem* laser_particles;
 ParticleSystem* explosion_particles;
 
-
 SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
 Shader* textureShader;
@@ -82,7 +82,10 @@ Shader * blurShader;
 Shader* diffuseShader;
 Shader* colorShader;
 Shader* particleShader;
+Shader* iconShader;
 Shader* unitShader;
+
+PlayerIcon* player_icon;
 
 GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
@@ -215,6 +218,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
 	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
+	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
@@ -224,6 +228,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
+
+	player_icon = new PlayerIcon(iconShader);
 
 	// LOAD MODELS, IMPORTANT
 	ModelPreloader::preload();
@@ -266,6 +272,7 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_T, std::bind(&Client::handleTKey, this, std::placeholders::_1));
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -430,7 +437,8 @@ void Client::display() {
 		newOctree->update();
 
 
-		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3
+		(4000.0f)));
 
 		Octree * delOctree = octree;
 		octree = newOctree;
@@ -454,8 +462,6 @@ void Client::display() {
 			}
 		}
 
-		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
-		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
 
 		// blur the things that glow
 		int blurs = 5; //TODO init to number of blur iterations
@@ -510,6 +516,8 @@ void Client::display() {
 
 		// draw the UI
 		gui->drawWidgets();
+
+		
 
 		glfwSwapBuffers(window);
 
@@ -572,8 +580,6 @@ void Client::update() {
 	cameras[selectedCamera]->update();
 	
 	gui->update();
-
-	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
 
@@ -883,6 +889,11 @@ void Client::handleRightBracketKey(int key) {
 	musicPlayer->volume_increase();
 }
 
+void Client::handleTKey(int key)
+{
+	PlayerIcon::drawIcons = !PlayerIcon::drawIcons;
+}
+
 
 void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
 	auto& player_it = players.find(update->player_id);
@@ -942,7 +953,7 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles, explosion_particles, soundSystem
+		colorShader, laser_particles, explosion_particles, soundSystem, player_icon
 	);
 
 	player_it->second->acquire_object<Unit>(newUnit.get());

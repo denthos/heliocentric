@@ -172,14 +172,8 @@
     <ClInclude Include="gui_utilities.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="leaderboard_widget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="unit_window.h">
       <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="leaderboard_widget.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="music_player.h">
       <Filter>Header Files</Filter>
@@ -212,7 +206,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="attackable_gameobject_widget.h">
-          <Filter>GUI</Filter>
+      <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="leaderboard_widget.h">
           <Filter>GUI</Filter>
@@ -225,6 +219,9 @@
     </ClInclude>
     <ClInclude Include="technology_button.h">
       <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="player_icon.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -342,14 +339,8 @@
     <ClCompile Include="slot_info_panel.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="leaderboard_widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="unit_window.cpp">
       <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="leaderboard_widget.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="music_player.cpp">
       <Filter>Source Files</Filter>
@@ -382,7 +373,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="attackable_gameobject_widget.cpp">
-     <Filter>GUI</Filter>
+      <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="leaderboard_widget.cpp">
      <Filter>GUI</Filter>
@@ -398,6 +389,9 @@
     </ClCompile>
     <ClCompile Include="technology_button.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="player_icon.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
