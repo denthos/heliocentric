@@ -1,10 +1,10 @@
 #include "tech_preview_widget.h"
 #include "tech_tree.h"
 
-TechPreviewWidget::TechPreviewWidget(Widget* parent, std::function<void()> chooseTechButtonCallback) : 
-	Widget(parent), chooseTechButtonCallback(chooseTechButtonCallback) {
+TechPreviewWidget::TechPreviewWidget(Widget* parent, std::string font, int font_size, std::function<void()> chooseTechButtonCallback) : 
+	Widget(parent), chooseTechButtonCallback(chooseTechButtonCallback), font(font), font_size(font_size) {
 	this->setLayout(new GridLayout(Orientation::Horizontal, 1, Alignment::Fill));
-	this->setWidth(100);
+	this->setWidth(150);
 	this->setHeight(500);
 
 	createCurrentTechLabel();
@@ -13,7 +13,7 @@ TechPreviewWidget::TechPreviewWidget(Widget* parent, std::function<void()> choos
 }
 
 void TechPreviewWidget::createCurrentTechLabel() {
-	currentTechLabel = new Label(this, "Researching:DB PROGRAMMING");
+	currentTechLabel = new Label(this, "Researching:DB PROGRAMMING", font, font_size);
 }
 
 void TechPreviewWidget::createProgressBar() {
