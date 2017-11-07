@@ -5,7 +5,7 @@ sockets and allows action on ones which are ready to read
 */
 #pragma once
 
-#include "socket_connection.hpp"
+#include "socket_connection.h"
 #include "socket_collection.h"
 #include <vector>
 #include <unordered_map>
@@ -52,7 +52,7 @@ namespace SunNet {
 		*/
 		template <class Iter>
 		void add_sockets(Iter& begin, Iter& end) {
-			for (auto it = begin, it != end; ++it) {
+			for (auto it = begin; it != end; ++it) {
 				this->add_socket(*it);
 			}
 		}

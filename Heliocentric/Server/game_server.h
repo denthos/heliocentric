@@ -12,7 +12,7 @@
 #include "player.h"
 #include "identifiable.h"
 #include "channeled_server.h"
-#include "tcp_socket_connection.hpp"
+#include "tcp_socket_connection.h"
 #include "locked_item.h"
 #include "player_update.h"
 #include "planet_update.h"

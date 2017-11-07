@@ -1,4 +1,4 @@
-#include "tcp_socket_connection.hpp"
+#include "tcp_socket_connection.h"
 #include "channeled_client.h"
 #include "channeled_server.h"
 
@@ -35,7 +35,7 @@ protected:
 
 public:
 	TestServer(std::string address, std::string port, int queue_size) :
-		ChanneledServer<SunNet::TCPSocketConnection>(address, port, queue_size, 1000 * 2) {}
+		ChanneledServer<SunNet::TCPSocketConnection>(address, port, queue_size, 50) {}
 };
 
 class TestClient : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
@@ -87,6 +87,7 @@ void client_callback(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr
 }
 
 int main(int argc, char* argv[]) {
+  std::cout << "[MAIN] About to print infinite messages" << std::endl;
 
 	SunNet::Channels::addNewChannel<GeneralMessage>();
 
@@ -94,17 +95,35 @@ int main(int argc, char* argv[]) {
 	server.open();
 	server.serve();
 
+  std::cout << "[MAIN] Server serving..." << std::endl;
+
 	server.subscribe<GeneralMessage>(server_callback);
 
-	TestClient client(1000 * 2);
+	TestClient client(50);
 	client.connect("127.0.0.1", "9876");
 	client.subscribe<GeneralMessage>(client_callback);
+
+  std::cout << "[MAIN] Client connected..." << std::endl;
 
 	GeneralMessage msg;
 	msg.msg = 1337;
 	msg.msg2 = 8888;
 
 	client.channeled_send<GeneralMessage>(&msg);
+  std::cout << "[MAIN] Client sent message" << std::endl;
+
+  while (true) {
+    bool has_more_updates = true;
+    while (has_more_updates) {
+      has_more_updates = server.poll();
+    }
+
+    has_more_updates = true;
+    while (has_more_updates) {
+      has_more_updates = client.poll();
+    }
+  }
+
 
 	std::string dummy;
 	std::getline(std::cin, dummy);

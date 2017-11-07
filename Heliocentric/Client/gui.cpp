@@ -57,6 +57,10 @@ GUI::GUI(GLFWwindow * window, std::function<void(std::shared_ptr<TradeData>)> tr
 
 
 void GUI::update() {
+	// We definitely shouldn't update the UI if there's no player involved
+	if (!player) {
+		return;
+	}
 	updatePlayerOverlay();
 	updateCityWindow();
 	updateUnitWindow();
@@ -71,10 +75,8 @@ GUI::~GUI()
 }
 
 void GUI::updatePlayerOverlay() {
-	if (player) {
-		for (std::pair<Resources::Type, Label *> resourceLabel : resourceLabels) {
-			resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
-		}
+	for (std::pair<Resources::Type, Label *> resourceLabel : resourceLabels) {
+		resourceLabel.second->setCaption(std::to_string((int)player->get_resource_amount(resourceLabel.first)));
 	}
 }
 

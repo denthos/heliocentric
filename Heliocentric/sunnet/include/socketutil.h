@@ -26,6 +26,8 @@ typedef ULONG NUM_POLL_DESCRIPTORS;
 #include <netinet/in.h>
 #include <errno.h>
 #include <poll.h>
+#include <netdb.h>
+#include <unistd.h>
 
 #define SOCKET_API_NOT_INITIALIZED -1
 

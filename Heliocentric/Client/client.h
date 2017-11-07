@@ -20,7 +20,7 @@
 #include "planet_update.h"
 #include "player_id_confirmation.h"
 #include "channeled_client.h"
-#include "tcp_socket_connection.hpp"
+#include "tcp_socket_connection.h"
 #include "universe.h"
 #include "unit_manager.h"
 #include "music_player.h"

@@ -175,9 +175,6 @@
     <ClInclude Include="leaderboard_widget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="unit_window.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
     <ClInclude Include="leaderboard_widget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -212,10 +209,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="attackable_gameobject_widget.h">
-          <Filter>GUI</Filter>
+      <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="leaderboard_widget.h">
-          <Filter>GUI</Filter>
+      <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="tech_preview_widget.h">
       <Filter>GUI</Filter>
@@ -345,9 +342,6 @@
     <ClCompile Include="leaderboard_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="unit_window.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
     <ClCompile Include="leaderboard_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -382,10 +376,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="attackable_gameobject_widget.cpp">
-     <Filter>GUI</Filter>
+      <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="leaderboard_widget.cpp">
-     <Filter>GUI</Filter>
+      <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="unit_create_button.cpp">
       <Filter>GUI</Filter>
