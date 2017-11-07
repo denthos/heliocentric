@@ -1,0 +1,4 @@
+C:/Users/Brandon/code/heliocentric/Heliocentric/submodules/build/sunnet/CMakeFiles/SunNet.dir
+C:/Users/Brandon/code/heliocentric/Heliocentric/submodules/build/sunnet/CMakeFiles/ALL_BUILD.dir
+C:/Users/Brandon/code/heliocentric/Heliocentric/submodules/build/sunnet/CMakeFiles/ZERO_CHECK.dir
+C:/Users/Brandon/code/heliocentric/Heliocentric/submodules/build/sunnet/examples/CMakeFiles/infinite_comms.dir

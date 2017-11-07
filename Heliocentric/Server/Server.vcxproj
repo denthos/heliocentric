@@ -76,7 +76,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/submodules/modules/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>SunNet.lib;Core.lib;OpenGL32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -88,7 +88,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/submodules/modules/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>COMPILE_TIME_LOG_LEVEL=0;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -122,7 +122,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/submodules/modules/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -138,7 +138,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SourceDir)..\packages\GLMathematics.0.9.5.4\build\native\include;$(SolutionDir)/Core;$(SolutionDir)/submodules/modules/sunnet/include;$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>COMPILE_TIME_LOG_LEVEL=1;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
