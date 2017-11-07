@@ -36,6 +36,8 @@ public:
 
 	void setPlayer(std::shared_ptr<Player>);
 	void setFPS(double);
+	void setResearchPoints(int researchPoints);
+	void setTimer(int);
 
 	void unselectSelection(Client*, std::vector<GameObject*>& old_selection);
 	void selectSelection(Client*, std::vector<GameObject*>& old_selection);
@@ -44,7 +46,7 @@ public:
 	void hideSlotUI();
 
 
-	void displayCityUI(City* city, std::function<void(UnitType*)> createUnitCallback);
+	void displayCityUI(City* city, std::function<void(Buildable*)> createUnitCallback);
 	void hideCityUI();
 
 	void createTradeDisplay();
@@ -89,6 +91,9 @@ private:
 	void createUnitDisplay();
 	void createTechTreePreviewWindow();
 	void createTechTreeWindow(std::function<void(const Technology*)> techResearchCallback);
+	void createHelpWindow();
+	void showHelpDetailWindow();
+	void hideHelpDetailWindow();
 
 	std::pair<int, std::string> placeholderImage;
 
@@ -108,10 +113,13 @@ private:
 
 	City* selectedCity = NULL;
 	ref<Window> cityWindow;
+	Eigen::Vector2i cityWindowSize;
+	bool cityWindowSizeSet = false;
 	AttackableGameObjectWidget* cityInfoWidget;
 	UnitSpawnWidget* unitSpawnWidget;
 	SlotInfoPanel* citySlotInfoPanel;
 	void updateCityWindow();
+	void updateSlotWindow();
 
 	ref<Window> gameOverWindow;
 	Label* gameOverLabel;
@@ -121,6 +129,9 @@ private:
 	std::shared_ptr<Player> trade_partner;
 	std::pair<Resources::Type, Label *> resourceLabels[Resources::NUM_RESOURCES];
 	Label * fpsSpacer;
+	Label * researchPointsDisplay;
+	ImageView* researchImage;
+	Label * timerDisplay;
 	Label * fpsDisplay;
 
 	Window* leaderboardWindow;
@@ -153,4 +164,9 @@ private:
 	ComboBox* offerResourceType;
 	IntBox<int>* askForAmount;
 	ComboBox* askForResourceType;
+	int time;
+
+	// help window
+	ref<Window> helpWindow;
+	ref<Window> helpDetailWindow;
 };

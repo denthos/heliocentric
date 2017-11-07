@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "client.h"
 
 #include <glad\glad.h>
@@ -35,7 +36,8 @@
 #include "trade_deal.h"
 #include "instant_laser_attack.h"
 #include "selectable.h"
-#include "unit_spawner_update.h"
+#include "spawner_update.h"
+#include "player_icon.h"
 
 #define MAX_ACTIONS_WINDOW 50
 
@@ -68,7 +70,7 @@ std::unordered_map<GLFWwindow *, Client *> Client::glfwEntry;
 Quad * quad; //texture sampler
 ParticleSystem* particles;
 ParticleSystem* laser_particles;
-
+ParticleSystem* explosion_particles;
 
 SkyboxMesh* skybox;
 Shader* shader; //TODO reimplement so it doesn't need to be a pointer on heap?
@@ -80,6 +82,10 @@ Shader * blurShader;
 Shader* diffuseShader;
 Shader* colorShader;
 Shader* particleShader;
+Shader* iconShader;
+Shader* unitShader;
+
+PlayerIcon* player_icon;
 
 GLuint RBO;
 GLuint FBO; //frame buffer for offscreen rendering
@@ -97,8 +103,8 @@ std::vector<int> num_actions;
 
 Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INIParser::getInstance().get<int>("PollTimeout")) {
 	Lib::INIParser & config = Lib::INIParser::getInstance();
-	int width = config.get<int>("ScreenWidth");
-	int height = config.get<int>("ScreenHeight");
+	width = config.get<int>("ScreenWidth");
+	height = config.get<int>("ScreenHeight");
 
 	windowTitle = config.get<std::string>("WindowTitle");
 	createWindow(width, height);
@@ -209,17 +215,21 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	textureShader = new Shader(TEXTURE_VERT_SHADER, TEXTURE_FRAG_SHADER);
 	cubemapShader = new Shader(CUBEMAP_VERT_SHADER, CUBEMAP_FRAG_SHADER);
 	diffuseShader = new Shader("Shaders/shader.vert", DIFFUSE_FRAG_SHADER);
-	colorShader = new Shader("Shaders/shader.vert", "Shaders/color_shader.frag");
-	//diffuseShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
+	colorShader = new Shader("Shaders/geoshader.vert", "Shaders/color_shader.frag", "Shaders/explode.geom");
+	unitShader = new Shader("Shaders/geoshader.vert", DIFFUSE_FRAG_SHADER, "Shaders/explode.geom");
 	particleShader = new Shader("Shaders/particle.vert", "Shaders/particle.frag", "Shaders/particle.geom");
+	iconShader = new Shader("Shaders/icon.vert", "Shaders/particle.frag", "Shaders/icon.geom");
 	quadShader = new Shader("Shaders/quad.vert", "Shaders/hdr_bloom.frag");
 	blurShader = new Shader("Shaders/quad.vert", "Shaders/blur.frag");
 	bloomShader = new Shader(TEXTURE_VERT_SHADER, "Shaders/bloom_first_pass.frag");
 
 	particles = new ParticleSystem(0.0f, 20, new ParticleEmitter(), particleShader);
 	laser_particles = new ParticleSystem(0.0f, 20, new LaserEmitter(), particleShader);
+	explosion_particles = new ParticleSystem(0.3f, 20, new ParticleEmitter(), particleShader);
 
 	skybox = new SkyboxMesh(SKYBOX_RIGHT, SKYBOX_LEFT, SKYBOX_TOP, SKYBOX_BOTTOM, SKYBOX_BACK, SKYBOX_FRONT, new SkyboxMeshGeometry());
+
+	player_icon = new PlayerIcon(iconShader);
 
 	// LOAD MODELS, IMPORTANT
 	ModelPreloader::preload();
@@ -247,26 +257,33 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	this->subscribe<CityCreationUpdate>(std::bind(&Client::cityCreationUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<SlotUpdate>(std::bind(&Client::slotUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->subscribe<GameOverUpdate>(std::bind(&Client::gameOverUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
-	this->subscribe<UnitSpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<SpawnerUpdate>(std::bind(&Client::unitSpawnerUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
+	this->subscribe<TimeUpdate>(std::bind(&Client::timeUpdateHandler, this, std::placeholders::_1, std::placeholders::_2));
 
 	int cameraSwitchKey = config.get<std::string>(CAMERA_SWITCH_KEY)[0];
 	if (cameraSwitchKey >= 97 && cameraSwitchKey <= 122) cameraSwitchKey -= 32;
 
 	this->keyboard_handler.registerKeyPressHandler(cameraSwitchKey, std::bind(&Client::handleCameraSwitch, this, std::placeholders::_1));
-	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F1, std::bind(&Client::handleF1Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F2, std::bind(&Client::handleF2Key, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F3, std::bind(&Client::handleF3Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F4, std::bind(&Client::handleF4Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F6, std::bind(&Client::handleF6Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_F10, std::bind(&Client::handleF10Key, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_LEFT_BRACKET, std::bind(&Client::handleLeftBracketKey, this, std::placeholders::_1));
 	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_RIGHT_BRACKET, std::bind(&Client::handleRightBracketKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_T, std::bind(&Client::handleTKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_UP, std::bind(&Client::handleUpKey, this, std::placeholders::_1));
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_DOWN, std::bind(&Client::handleDownKey, this, std::placeholders::_1));
+
+#ifdef _DEBUG
+	this->keyboard_handler.registerKeyPressHandler(GLFW_KEY_ESCAPE, std::bind(&Client::handleEscapeKey, this, std::placeholders::_1));
+#endif
 
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_LEFT, GLFW_MOD_NONE), 
 		std::bind(&Client::mouseClickHandler, this, std::placeholders::_1, std::placeholders::_2));
 	this->mouse_handler.registerMouseClickHandler(MouseButton(GLFW_MOUSE_BUTTON_RIGHT, GLFW_MOD_NONE),
 		std::bind(&Client::mouseRightClickHandler, this, std::placeholders::_1, std::placeholders::_2));
-
 
 	std::string address = Lib::INIParser::getInstance().get<std::string>("ServerHost");
 	std::string port = Lib::INIParser::getInstance().get<std::string>("ServerPort");
@@ -289,6 +306,8 @@ Client::Client() : SunNet::ChanneledClient<SunNet::TCPSocketConnection>(Lib::INI
 	musicPlayer->load_sound("Audio/Holst_The_Planets_Uranus.ogg");
 	musicPlayer->load_sound("Audio/Holst_The_Planets_Mercury.ogg");
 	sound_thread = std::thread([&](MusicPlayer* player) { player->play(); }, musicPlayer);
+
+	exposure = 2.0f;
 }
 
 Client::~Client() {
@@ -426,15 +445,32 @@ void Client::display() {
 		newOctree->update();
 
 
-		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3(4000.0f)));
+		skybox->draw(*cubemapShader, *cameras[selectedCamera], glm::scale(glm::mat4(1.0f), glm::vec3
+		(4000.0f)));
 
 		Octree * delOctree = octree;
 		octree = newOctree;
 		octree->draw(*cameras[selectedCamera]);
 		delete delOctree;
 
-		//rocket.draw(*diffuseShader, *camera, glm::mat4(1.0f));
-		//particles->draw(*particleShader, *camera, glm::mat4(1.0f));
+		// Deal with dead objects.
+		auto& dead_it = dead_units.begin();
+		while (dead_it != dead_units.end()) {
+			dead_it->second->performUpdate(true);
+			if (!dead_it->second->do_animation(*cameras[selectedCamera])) {
+				UID id = dead_it->first;
+				if (selection.size() > 0 && selection[0]->getID() == id) {
+					selection.erase(selection.begin());
+					dead_units[id]->unselect(gui, this);
+				}
+				player->add_to_destroy<Unit>(dead_it->second.get());
+				dead_it = dead_units.erase(dead_it);
+			}
+			else {
+				dead_it++;
+			}
+		}
+
 
 		// blur the things that glow
 		int blurs = 5; //TODO init to number of blur iterations
@@ -482,13 +518,15 @@ void Client::display() {
 		glUniform1i(glGetUniformLocation(quadShader->getPid(), "sceneTexture"), 0);
 		glUniform1i(glGetUniformLocation(quadShader->getPid(), "blurTexture"), 1);
 		glUniform1f(glGetUniformLocation(quadShader->getPid(), "gammaFactor"), 1.72f);
-		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), 2.0f);
+		glUniform1f(glGetUniformLocation(quadShader->getPid(), "exposure"), exposure);
 		quad->draw();
-
+		
 		quadShader->unbind();
 
 		// draw the UI
 		gui->drawWidgets();
+
+		
 
 		glfwSwapBuffers(window);
 
@@ -503,8 +541,6 @@ void Client::display() {
 		//frameTimer = currentTime;
 		frameTimer += 1.0;
 	}
-
-
 
 	glfwPollEvents();
 }
@@ -546,13 +582,19 @@ void Client::update() {
 	if (num_actions.size() > MAX_ACTIONS_WINDOW) {
 		num_actions.erase(num_actions.begin());
 	}
+
+	for (auto it = planets.begin(); it != planets.end(); ++it) {
+		it->second->performUpdate();
+	}
+
+	for (auto it = units.begin(); it != units.end(); ++it) {
+		it->second->performUpdate();
+	}
 	
 
 	cameras[selectedCamera]->update();
 	
 	gui->update();
-
-	//particles->Update(*camera);
 	
 	this->keyboard_handler.callKeyboardHandlers();
 
@@ -740,21 +782,49 @@ void Client::handleF2Key(int key) {
 }
 
 
-void Client::createUnitFromCity(DrawableCity* city, UnitType* unit_type) {
+void Client::createUnitFromCity(DrawableCity* city, Buildable* unit_type) {
 	/* First, let's check to see if the client-side player has enough resources */
-	if (!unit_type->hasBuildRequirements(this->player->getResources())) {
-		/* Cannot create the unit due to lack of sufficient resources */
-		return;
+	if (unit_type->getBuildType() == Buildable::UNIT) {
+		UnitType* unitt = dynamic_cast<UnitType*>(unit_type);
+		if (!unitt) {
+			return;
+		}
+
+		if (!player->can_create_unit(unitt)) {
+			return;
+		}
+
+		glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
+		PlayerCommand command(pos.x, pos.y, pos.z, unitt->getIdentifier(), city->getID());
+		this->channeled_send(&command);
+	}
+	else {
+		BuildingType* buildingt = dynamic_cast<BuildingType*>(unit_type);
+		if (!buildingt) {
+			return;
+		}
+
+		PlayerCommand command(buildingt->getIdentifier(), city->getID());
+		this->channeled_send(&command);
 	}
 
-	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
-	PlayerCommand command(pos.x, pos.y, pos.z, unit_type->getIdentifier(), city->getID());
 
-	this->channeled_send(&command);
 }
 
 void Client::sendTradeDeal(std::shared_ptr<TradeData> deal) {
 	this->channeled_send(deal.get());
+}
+
+void Client::handleF3Key(int key) {
+	if (cities.begin() == cities.end()) {
+		LOG_DEBUG("No city established yet...");
+		return;
+	}
+
+	UID cityID = cities.begin()->first;
+	LOG_DEBUG("Add Fission Plant to production queue of city with ID ", cityID);
+	PlayerCommand command(BuildingType::TypeIdentifier::HADRON_COLLIDER, cityID);
+	this->channeled_send(&command);
 }
 
 void Client::handleF4Key(int key) {
@@ -850,6 +920,21 @@ void Client::handleRightBracketKey(int key) {
 	musicPlayer->volume_increase();
 }
 
+void Client::handleTKey(int key)
+{
+	PlayerIcon::drawIcons = !PlayerIcon::drawIcons;
+}
+
+void Client::handleUpKey(int)
+{
+	exposure = glm::clamp(exposure + 0.1f, 1.0f, 5.0f);
+}
+
+void Client::handleDownKey(int)
+{
+	exposure = glm::clamp(exposure - 0.1f, 1.0f, 5.0f);
+}
+
 
 void Client::newPlayerInfoUpdateHandler(SunNet::ChanneledSocketConnection_p conn, std::shared_ptr<NewPlayerInfoUpdate> update) {
 	auto& player_it = players.find(update->player_id);
@@ -909,15 +994,15 @@ void Client::unitCreationUpdateHandler(SunNet::ChanneledSocketConnection_p socke
 	UnitType* unitType = UnitType::getByIdentifier(update->type);
 	std::unique_ptr<DrawableUnit> newUnit = std::make_unique<DrawableUnit>(
 		*unitType->createUnit(update->id, glm::vec3(update->x, update->y, update->z), player_it->second.get(), nullptr).get(),
-		colorShader, laser_particles, soundSystem
+		colorShader, laser_particles, explosion_particles, soundSystem, player_icon
 	);
 
-	player_it->second->acquire_object(newUnit.get());
+	player_it->second->acquire_object<Unit>(newUnit.get());
 	units.insert(std::make_pair(update->id, std::move(newUnit)));
 }
 
 
-void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<UnitSpawnerUpdate> update) {
+void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<SpawnerUpdate> update) {
 	auto& spawner_it = this->spawners.find(update->id);
 	if (spawner_it == this->spawners.end()) {
 		LOG_ERR("Invalid spawner id ", update->id);
@@ -928,6 +1013,10 @@ void Client::unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p sender
 	update->apply(spawner_it->second);
 }
 
+void Client::timeUpdateHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TimeUpdate> update) {
+	LOG_DEBUG("Setting timer to", update->time);
+	gui->setTimer(update->time);
+}
 
 void Client::beginResearchOnTechnology(const Technology* tech) {
 	if (!tech) {
@@ -948,15 +1037,19 @@ void Client::cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p sende
 
 	Player* owner = player_iter->second.get();
 	City city(update->city_id, owner, new InstantLaserAttack(), nullptr, update->defense, update->health, update->production, update->population, slot_iter->second, update->name);
-	DrawableCity* newCity = new DrawableCity(city, colorShader);
+	DrawableCity* newCity = new DrawableCity(city, colorShader, player_icon);
 	slot_iter->second->attachCity(newCity);
-	owner->acquire_object(newCity);
+	LOG_DEBUG("Player's before settlement count: ", player->getOwnedObjects<DrawableCity>().size());
+	owner->acquire_object<City>(newCity);
+	LOG_DEBUG("After settlement count: ", player->getOwnedObjects<DrawableCity>().size());
 	cities.insert(std::make_pair(newCity->getID(), newCity));
 	spawners.insert(std::make_pair(newCity->getID(), newCity));
 
 	if (newCity->get_player()->getID() == player->getID()) {
 		setSelection({ newCity });
 	}
+
+	gui->setResearchPoints(player->get_research_points());
 }
 
 void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<PlayerIDConfirmation> update) {
@@ -975,7 +1068,7 @@ void Client::playerIdConfirmationHandler(SunNet::ChanneledSocketConnection_p sen
 void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<UnitUpdate> update) {
 	//LOG_DEBUG("Unit update received");
 	update->apply(units[update->id].get());
-	units[update->id]->update();
+	units[update->id]->mark_for_update();
 
 	/*
 	Handle unit death. We don't want to edit the units map in another thread,
@@ -983,10 +1076,9 @@ void Client::unitUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 	*/
 	LOG_DEBUG("Unit with ID " + std::to_string(update->id) + " health is " + std::to_string(units[update->id]->get_health()));
 	if (units[update->id]->is_dead()) {
-		if (selection.size() > 0 && selection[0]->getID() == update->id) {
-			selection.erase(selection.begin());
-			units[update->id]->unselect(gui, this);
-		}
+		units[update->id]->is_exploding = true;
+		units[update->id]->explosion_start_time = glfwGetTime();
+		dead_units.insert(std::make_pair(update->id, std::move(units[update->id])));
 		units.erase(update->id);
 	}
 }
@@ -1001,19 +1093,22 @@ void Client::cityUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnect
 		Slot* slot = cities[update->id]->get_slot();
 
 		slot->detachCity();
-		owner->add_to_destroy(cities[update->id].get());
+		owner->add_to_destroy<City>(cities[update->id].get());
 		if (selection.size() > 0 && selection[0]->getID() == update->id) {
 			selection.erase(selection.begin());
 			cities[update->id]->unselect(gui, this);
 		}
 		cities.erase(update->id);
 	}
+
+	/* Update research points display after handling city death. */
+	gui->setResearchPoints(player->get_research_points());
 }
 
 void Client::planetUpdateHandler(SunNet::ChanneledSocketConnection_p socketConnection, std::shared_ptr<PlanetUpdate> update) {
 	DrawablePlanet* planet = planets[update->id].get();
 	update->apply(planet);
-	planet->update();
+	planet->mark_for_update();
 }
 
 void Client::tradeDataHandler(SunNet::ChanneledSocketConnection_p sender, std::shared_ptr<TradeData> deal) {

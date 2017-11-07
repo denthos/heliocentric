@@ -1,26 +1,43 @@
 #include "city_manager.h"
 #include "instant_laser_attack.h"
-#include "unit_spawner.h"
+#include "builder.h"
 #include "planet.h"
+
+CityManager::CityManager(UnitManager* unit_manager) : unit_manager(unit_manager) {}
 
 void CityManager::handleUnitSpawningComplete(UnitType* type, City* city) {
 	glm::vec3 pos = city->get_position() + glm::vec3(city->get_slot()->get_spherical_position().getRotationMatrix() * glm::vec4(0.0f, city->get_slot()->getPlanet()->get_radius() * 1.15f, 0.0f, 0.0f));
 	unit_creation_updates.insert(unit_manager->add_unit(pos, type, city->get_player()));
 }
 
-CityManager::CityManager(UnitManager* unit_manager) : unit_manager(unit_manager) {}
+void CityManager::handleBuildingSpawningComplete(BuildingType* type, City* city) {
+	LOG_DEBUG("Building spawning complete... Sending CityUpdate");
+	int new_health = city->get_health() + type->getArmor();
+	int new_production = city->get_production() + type->getProduction();
+	int new_research_points = city->get_research_points() + type->getResearchPoints();
+
+	/* Update city on server */
+	city->set_health(new_health);
+	city->set_production(new_production);
+	city->set_research_points(new_research_points);
+
+	/* Send update to client */
+	std::shared_ptr<CityUpdate> update = std::make_shared<CityUpdate>(city->getID(), new_health,
+		new_production, new_research_points);
+	city_updates.insert(update);
+}
 
 void CityManager::doLogic() {
 	this->city_updates.clear();
-	this->spawner_updates.clear();
+	this->unit_spawner_updates.clear();
 	this->unit_creation_updates.clear();
 
 	/* Now we are going to look at all cities and see if we can update their spawners */
 	for (auto& city_pair : get_cities()) {
 		City* city = city_pair.second.get();
 
-		if (city->progressSpawnAndCreateUpdate()) {
-			this->spawner_updates.insert(city->getSpawnUpdate());
+		if (city->progressSpawnAndCreateUpdate() != Builder::ProductionType::IDLE) {
+			this->unit_spawner_updates.insert(city->getSpawnUpdate());
 		}
 	}
 }
@@ -40,11 +57,11 @@ std::shared_ptr<CityCreationUpdate> CityManager::add_city(Player* player, Slot* 
 		throw Player::SettlementLimitReachedException();
 	}
 
-	std::shared_ptr<City> new_city = std::make_shared<City>(player, new InstantLaserAttack(), this, 100, 100, 0, 0, slot, name);
+	std::shared_ptr<City> new_city = std::make_shared<City>(player, new InstantLaserAttack(), this, 100, 800, 0, 0, slot, name);
 	slot->attachCity(new_city.get());
 	player->acquire_object(new_city.get());
 	auto city_creation_update = std::make_shared<CityCreationUpdate>(player->getID(), slot->getID(), new_city->getID(), new_city->getName(),
-		new_city->get_combat_defense(), new_city->get_health(), new_city->getProduction(), new_city->get_population());
+		new_city->get_combat_defense(), new_city->get_health(), new_city->get_production(), new_city->get_population());
 	LOG_DEBUG("Created city with UID <", new_city->getID(), ">");
 	cities.insert(std::make_pair(new_city->getID(), std::move(new_city)));
 	return city_creation_update;
@@ -65,8 +82,8 @@ void CityManager::register_update(std::shared_ptr<CityUpdate> update) {
 
 }
 
-const std::unordered_set<std::shared_ptr<UnitSpawnerUpdate>>& CityManager::getSpawnerUpdates() const {
-	return this->spawner_updates;
+const std::unordered_set<std::shared_ptr<SpawnerUpdate>>& CityManager::getSpawnerUpdates() const {
+	return this->unit_spawner_updates;
 }
 
 
@@ -74,11 +91,20 @@ const std::unordered_set<std::shared_ptr<UnitCreationUpdate>>& CityManager::getC
 	return this->unit_creation_updates;
 }
 
-std::shared_ptr<UnitSpawnerUpdate> CityManager::spawnUnit(std::shared_ptr<PlayerCommand> command) {
+std::shared_ptr<SpawnerUpdate> CityManager::spawnUnit(std::shared_ptr<PlayerCommand> command) {
 	auto& city_pair = this->cities.find(command->initiator);
 	if (city_pair == this->cities.end()) {
-		LOG_ERR("Invalid city Id sent to server");
+		throw City::BadUIDException();
 	}
 
 	return city_pair->second->spawnUnit(command->createUnitType);
+}
+
+std::shared_ptr<SpawnerUpdate> CityManager::spawnBuilding(std::shared_ptr<PlayerCommand> command) {
+	auto& city_pair = this->cities.find(command->initiator);
+	if (city_pair == this->cities.end()) {
+		throw City::BadUIDException();
+	}
+
+	return city_pair->second->spawnBuilding(command->createBuildingType);
 }

@@ -37,6 +37,8 @@ Unit::CommandType Unit::do_logic() {
 	case UNIT_ATTACK:
 		if (!do_attack(this->target)) {
 			this->target.reset();
+			this->attack.resetAttack();
+			this->send_update_to_manager(this->make_update());
 			currentCommand = UNIT_IDLE;
 		}
 		break;
@@ -123,6 +125,7 @@ void Unit::set_command(CommandType command) {
 
 	if (currentCommand != UNIT_DIE)
 	{
+		this->attack.resetAttack();
 		currentCommand = command;
 	}
 }
@@ -145,7 +148,7 @@ bool Unit::do_attack(std::shared_ptr<AttackableGameObject> target) {
 
 
 glm::vec3 Unit::do_move() {
-	this->attack.resetAttack();
+	// this->attack.resetAttack();
 	do_orient(destination);
 
 	// Move towards destination.
@@ -167,6 +170,7 @@ void Unit::handle_out_of_range(std::shared_ptr<AttackableGameObject> opponent)
 	if (currentCommand == UNIT_ATTACK) {
 		set_destination(opponent.get());
 		do_move();
+		currentCommand = UNIT_ATTACK;
 	}
 }
 

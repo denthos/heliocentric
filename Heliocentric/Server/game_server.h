@@ -48,9 +48,9 @@ class GameServer : public SunNet::ChanneledServer<SunNet::TCPSocketConnection> {
 
 
 private:
-	Lib::Lock<std::pair<
+	std::pair<
 		std::unordered_map<UID, SunNet::ChanneledSocketConnection_p>,
-		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>>> connections;
+		std::unordered_map<SunNet::ChanneledSocketConnection_p, UID>> connections;
 
 	Universe universe;
 
@@ -74,12 +74,15 @@ private:
 	};
 
 
-	Lib::Lock<std::queue<UpdateToSend>> updates_to_send;
-	Lib::Lock<std::queue<std::function<void()>>> update_process_queue;
-	void addFunctionToProcessQueue(std::function<void()> work);
+	std::queue<UpdateToSend> updates_to_send;
 
 	template <typename TUpdate>
 	void sendUpdateToConnection(std::shared_ptr<TUpdate> update, SunNet::ChanneledSocketConnection_p connection) {
+		if (!connection) {
+			LOG_WARN("A connection was broken before sending an update");
+			return;
+		}
+
 		try {
 			connection->channeled_send<TUpdate>(update.get());
 		}
@@ -112,15 +115,21 @@ private:
 
 	template <typename TUpdate>
 	void addUpdateToSendQueue(std::shared_ptr<TUpdate> update, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {
-		auto updateQueue = Lib::key_acquire(this->updates_to_send);
-		this->makeUpdateAndInsertIntoQueue(update, intended_recipients, updateQueue.get());
+		this->makeUpdateAndInsertIntoQueue(update, intended_recipients, updates_to_send);
 	}
 
 	template <typename Iter>
 	void addUpdateToSendQueue(Iter& begin, Iter& end, std::initializer_list<SunNet::ChanneledSocketConnection_p> intended_recipients = {}) {
-		auto updateQueue = Lib::key_acquire(this->updates_to_send);
 		for (auto& it = begin; it != end; ++it) {
-			this->makeUpdateAndInsertIntoQueue(*it, intended_recipients, updateQueue.get());
+			this->makeUpdateAndInsertIntoQueue(*it, intended_recipients, updates_to_send);
+		}
+	}
+
+	template <typename TUpdate>
+	void addUpdateToSendQueue(std::shared_ptr<TUpdate> update, std::initializer_list<UID> intended_players) {
+		for (UID player_id : intended_players) {
+			SunNet::ChanneledSocketConnection_p player_connection = connections.first[player_id];
+			addUpdateToSendQueue(update, { player_connection });
 		}
 	}
 

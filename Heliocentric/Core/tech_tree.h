@@ -25,6 +25,8 @@ private:
 	std::string description;
 	std::string name;
 	bool researched;
+	bool available;
+	bool prereq_met;
 	float research_points_required;
 	float research_points_accumulated;
 	float research_progress; // percentage of research points accumulated
@@ -37,6 +39,7 @@ public:
 	std::string getName() const;
 	std::string getDescription() const;
 	const std::vector<Technology*>& getChildren() const;
+	bool hasResearched() const;
 
 	Technology(int, float, std::string name, std::string desc);
 

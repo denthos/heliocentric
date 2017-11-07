@@ -1,16 +1,17 @@
 #pragma once
 
 #define CITY_NAME_SIZE 16
+#define CITY_INITIAL_RESEARCH_POINTS 1
 
 #include "attackable_game_object.h"
 #include "slot.h"
 #include "player.h"
-#include "unit_spawner.h"
+#include "builder.h"
 
 class CityUpdate;
 class CityManager;
 
-class City : public AttackableGameObject, public UnitSpawner {
+class City : public AttackableGameObject, public Builder {
 public:
 	friend CityUpdate;
 
@@ -19,7 +20,8 @@ public:
 
 	int get_population() const;
 	void set_population(int new_pop);
-	int get_production() const;
+	int get_research_points() const;
+	void set_research_points(int new_rp);
 	Slot* get_slot();
 	glm::vec3 get_position() const;
 
@@ -34,6 +36,7 @@ public:
 private:
 	std::string name;
 	int population;
+	int research_points;
 	Slot* slot;
 
 	void initialize();
@@ -46,8 +49,8 @@ protected:
 	virtual void handle_counter(std::shared_ptr<AttackableGameObject> opponent);
 	void send_update_to_manager(std::shared_ptr<CityUpdate> update);
 
-	/* Override for UnitSpawner */
-	void spawnCompleteHandler(UnitType* type);
+	/* Override for Builder */
+	void spawnCompleteHandler(Buildable* type, Builder::ProductionType buildType);
 	
 	std::shared_ptr<CityUpdate> update;
 	std::shared_ptr<AttackableGameObject> target;

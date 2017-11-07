@@ -6,17 +6,16 @@ UnitCreateButton::UnitCreateButton(Widget* parent, UnitType* type) :
 	this->setCaption(type->getTypeName());
 
 	std::ostringstream infoDisplay;
-	infoDisplay << type->getTypeName() << std::endl;
+	infoDisplay << type->getDescription() << std::endl;
 	for (auto& resource_pair : type->getBuildRequirements()) {
 		infoDisplay << Resources::toString(resource_pair.first) << ": " << resource_pair.second << std::endl;
 	}
 
-	// TODO: make this tooltip display instantaneous and pretteir
 	this->setTooltip(infoDisplay.str());
 }
 
-void UnitCreateButton::updateCreateButton(const ResourceCollection& resources) {
-	this->setEnabled(type->hasBuildRequirements(resources));
+void UnitCreateButton::updateCreateButton(Player* player) {
+	this->setEnabled(player->can_create_unit(type));
 }
 
 void UnitCreateButton::setCallback(std::function<void(UnitType*)> callback) {

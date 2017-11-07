@@ -48,8 +48,18 @@ void init() {
 }
 #endif
 
-Drawable::Drawable() : toWorld(glm::mat4(1.0f)) {
+Drawable::Drawable() : toWorld(glm::mat4(1.0f)), needs_update(false) {
+}
 
+void Drawable::mark_for_update() {
+	needs_update = true;
+}
+
+void Drawable::performUpdate(bool force) {
+	if (needs_update || force) {
+		this->update();
+		needs_update = false;
+	}
 }
 
 void Drawable::draw(const Camera & camera) const {
@@ -106,4 +116,9 @@ bool Drawable::intersect(const Ray & ray, Collision & collision) const {
 
 const glm::mat4& Drawable::getToWorld() const {
 	return this->toWorld;
+}
+
+bool Drawable::do_animation(const Camera & camera) const {
+	LOG_DEBUG("INCORRECT, using drawable function!!");
+	return false;
 }

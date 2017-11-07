@@ -3,31 +3,43 @@
 
 
 Technology::Technology(int tech, float research_points_required, std::string name, std::string desc) : 
-	id(tech), name(name), description(desc), researched(false), research_points_required(research_points_required) {
+	id(tech), name(name), description(desc), researched(false), research_points_required(research_points_required),
+	available(false), prereq_met(false) {
 }
 
 void Technology::research(float research_points) {
 	research_points_accumulated += research_points;
 	research_progress = 100 * (research_points_accumulated / research_points_required);
 	researched = research_points_accumulated >= research_points_required;
+
+	/* Set this tech to unavailable  */
+	if (researched) {
+		available = false;
+	}
 }
 
 bool Technology::is_available() {
-	/* Not available if this tech has already been researched. */
-	if (this->researched) {
-		return false;
-	}
-
-	/* Not available if any of its parents has not been researched yet. */
-	for (auto it : parents) {
-		if (!it->researched) {
-			return false;
+	/* Check prerequisites if not already met. */
+	if (!prereq_met) {
+		/* Not available if any of its parents has not been researched yet. */
+		for (auto it : parents) {
+			if (!it->researched) {
+				return false;
+			}
 		}
+
+		/* If all prereq checks passed, set this boolean to true and make this tech available. */
+		prereq_met = true;
+		available = true;
 	}
 
-	return true;
+	return available;
 }
 
+
+bool Technology::hasResearched() const {
+	return researched;
+}
 
 int Technology::getID() const {
 	return id;
@@ -79,12 +91,12 @@ void TechTree::build_tree() {
 	tech 2 leads to tech 5
 	tech 3, 4 and 5 leads to tech 6
 	*/
-	techs[TECH_1] = new Technology(TECH_1, 100.0f, "Tech 1", "Does a tech");
-	techs[TECH_2] = new Technology(TECH_2, 100.0f, "Tech 2", "Does a tech");
-	techs[TECH_3] = new Technology(TECH_3, 400.0f, "Tech 3", "Does a tech");
-	techs[TECH_4] = new Technology(TECH_4, 400.0f, "Tech 4", "Does a tech");
-	techs[TECH_5] = new Technology(TECH_5, 400.0f, "Tech 5", "Does a tech");
-	techs[TECH_6] = new Technology(TECH_6, 800.0f, "Tech 6", "Does a tech");
+	techs[TECH_1] = new Technology(TECH_1, 600.0f, "Steel Plating", "New Units are Spawned with More Defense");
+	techs[TECH_2] = new Technology(TECH_2, 600.0f, "Advanced Mining", "Provides 25% chance of extracting additional resources from each occupied slot.");
+	techs[TECH_3] = new Technology(TECH_3, 2400.0f, "Heavy Unit", "Allows Spawning of a Heavy Unit");
+	techs[TECH_4] = new Technology(TECH_4, 2400.0f, "Advanced Warfare", "Improves new unit's combat defense, health, and speed.");
+	techs[TECH_5] = new Technology(TECH_5, 2400.0f, "Exploration Program", "Increases the city settlement limit (+1).");
+	techs[TECH_6] = new Technology(TECH_6, 4800.0f, "Score Boost", "Increases your score by 1000");
 
 	techs[TECH_1]->add_children({ techs[TECH_3], techs[TECH_4] });
 	techs[TECH_2]->add_children({ techs[TECH_5] });
@@ -123,7 +135,7 @@ void TechTree::choose_tech(int tech) {
 	}
 
 	current_research = techs[tech];
-	LOG_INFO("Now researching ", current_research->name);
+	LOG_DEBUG("Now researching ", current_research->name);
 }
 
 bool TechTree::is_researching() {

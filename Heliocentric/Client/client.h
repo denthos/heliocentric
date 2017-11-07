@@ -43,6 +43,7 @@
 #include "player_research_update.h"
 #include "threed_sound_system.h"
 #include "tech_tree.h"
+#include "time_update.h"
 
 class Client : public SunNet::ChanneledClient<SunNet::TCPSocketConnection> {
 public:
@@ -74,13 +75,13 @@ public:
 	void cityCreationUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<CityCreationUpdate>);
 	void slotUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SlotUpdate>);
 	void gameOverUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<GameOverUpdate>);
-	void unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<UnitSpawnerUpdate>);
-
+	void unitSpawnerUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<SpawnerUpdate>);
+	void timeUpdateHandler(SunNet::ChanneledSocketConnection_p, std::shared_ptr<TimeUpdate>);
 
 	void createCityForSlot(DrawableSlot*, std::string);
 
 	void setSelection(std::vector<GameObject*>);
-	void createUnitFromCity(DrawableCity* city, UnitType* unit_type);
+	void createUnitFromCity(DrawableCity* city, Buildable* unit_type);
 	void beginResearchOnTechnology(const Technology* tech);
 	void sendTradeDeal(std::shared_ptr<TradeData> deal);
 	void sendTradeCommand(UID trade_id, bool is_accepted);
@@ -93,7 +94,9 @@ protected:
 
 private:
 	std::thread sound_thread;
+	int width, height;
 
+	float exposure;
 	GLFWwindow * window;
 	GUI * gui;
 	ThreeDSoundSystem* soundSystem;
@@ -119,7 +122,8 @@ private:
 	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> units;
 	std::unordered_map<UID, std::unique_ptr<DrawableCity>> cities;
 	std::unordered_map<UID, DrawableSlot*> slots;
-	std::unordered_map<UID, UnitSpawner*> spawners;
+	std::unordered_map<UID, Builder*> spawners;
+	std::unordered_map<UID, std::unique_ptr<DrawableUnit>> dead_units;
 
 	std::shared_ptr<Player> player;
 
@@ -138,10 +142,14 @@ private:
 	void handleEscapeKey(int);
 	void handleF1Key(int);
 	void handleF2Key(int);
+	void handleF3Key(int);
 	void handleF4Key(int);
 	void handleF6Key(int);
 	void handleF10Key(int);
 	void handleLeftBracketKey(int);
 	void handleRightBracketKey(int);
+	void handleTKey(int);
+	void handleUpKey(int);
+	void handleDownKey(int);
 };
 

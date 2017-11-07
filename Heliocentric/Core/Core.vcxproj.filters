@@ -27,6 +27,9 @@
     <Filter Include="Managers">
       <UniqueIdentifier>{29aad4f1-f1b3-492c-9719-331be87de5be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Buildings">
+      <UniqueIdentifier>{5a462d50-3b96-4e7a-a0a6-878bb2528b03}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="attackable_game_object.h">
@@ -176,12 +179,6 @@
     <ClInclude Include="heavy_unit.h">
       <Filter>Units</Filter>
     </ClInclude>
-    <ClInclude Include="unit_spawner_update.h">
-      <Filter>Updates</Filter>
-    </ClInclude>
-    <ClInclude Include="unit_spawner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="player_color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -206,11 +203,44 @@
     <ClInclude Include="city_manager.h">
       <Filter>Managers</Filter>
     </ClInclude>
+    <ClInclude Include="building_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="buildable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="building.h">
+      <Filter>Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="fission_plant.h">
+      <Filter>Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_plant.h">
+      <Filter>Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="research_facility.h">
+      <Filter>Buildings</Filter>
+    </ClInclude>
     <ClInclude Include="player_research_update.h">
       <Filter>Updates</Filter>
     </ClInclude>
     <ClInclude Include="research_command.h">
       <Filter>Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="builder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="time_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="spawner_update.h">
+      <Filter>Updates</Filter>
+    </ClInclude>
+    <ClInclude Include="fortress.h">
+      <Filter>Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="hadron_collider.h">
+      <Filter>Buildings</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -343,9 +373,6 @@
     <ClCompile Include="heavy_unit.cpp">
       <Filter>Units</Filter>
     </ClCompile>
-    <ClCompile Include="unit_spawner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="player_color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -364,11 +391,41 @@
     <ClCompile Include="city_manager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
+    <ClCompile Include="building_type.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="buildable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="building.cpp">
+      <Filter>Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="fission_plant.cpp">
+      <Filter>Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="fusion_plant.cpp">
+      <Filter>Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="research_facility.cpp">
+      <Filter>Buildings</Filter>
+    </ClCompile>
     <ClCompile Include="player_research_update.cpp">
       <Filter>Updates</Filter>
     </ClCompile>
     <ClCompile Include="research_command.cpp">
       <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="builder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="time_update.cpp">
+      <Filter>Updates</Filter>
+    </ClCompile>
+    <ClCompile Include="fortress.cpp">
+      <Filter>Buildings</Filter>
+    </ClCompile>
+    <ClCompile Include="hadron_collider.cpp">
+      <Filter>Buildings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

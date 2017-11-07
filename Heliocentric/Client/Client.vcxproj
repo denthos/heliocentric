@@ -216,12 +216,14 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClInclude Include="assimp_geometry.h" />
     <ClInclude Include="audio_3d_sound.h" />
     <ClInclude Include="bounding_box.h" />
+    <ClInclude Include="building_create_button.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="free_camera.h" />
     <ClInclude Include="gui_utilities.h" />
+    <ClInclude Include="player_icon.h" />
     <ClInclude Include="leaderboard_widget.h" />
     <ClInclude Include="model_preloader.h" />
     <ClInclude Include="mouse_button_status.h" />
@@ -273,6 +275,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClCompile Include="assimp_geometry.cpp" />
     <ClCompile Include="audio_3d_sound.cpp" />
     <ClCompile Include="bounding_box.cpp" />
+    <ClCompile Include="building_create_button.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="client.cpp" />
     <ClCompile Include="gui.cpp" />
@@ -282,6 +285,7 @@ xcopy /I /D /E /Y Audio\* $(OutDir)Audio\</Command>
     <ClCompile Include="mouse_handler.cpp" />
     <ClCompile Include="music_player.cpp" />
     <ClCompile Include="orbital_camera.cpp" />
+    <ClCompile Include="player_icon.cpp" />
     <ClCompile Include="quad.cpp" />
     <ClCompile Include="laser_emitter.cpp" />
     <ClCompile Include="particle_emitter.cpp" />

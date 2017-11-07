@@ -6,6 +6,7 @@
 #include "city.h"
 #include "lib.h"
 #include "logging.h"
+#include "unit_type.h"
 #include <iostream>
 #include <string>
 
@@ -19,7 +20,6 @@ Player::Player(std::string player_name, UID id, PlayerColor::Color color) : Iden
 
 void Player::initialize() {
 	player_score = 10;
-	research_points = 0.1f;
 	settlement_limit = INITIAL_SETTLEMENT_LIMIT;
 
 	owned_objects[std::type_index(typeid(Unit))] = std::unordered_map<unsigned int, GameObject*>();
@@ -35,7 +35,11 @@ void Player::initialize() {
 	owned_resources[Resources::URANIUM] = 100;
 
 	this->score_update = std::make_shared<PlayerScoreUpdate>(getID(), this->get_player_score());	
-	this->research_update = std::make_shared<PlayerResearchUpdate>(getID(), 0, this->research_points);
+	this->research_update = std::make_shared<PlayerResearchUpdate>(getID(), 0, this->get_research_points());
+}
+
+int Player::get_settlement_limit() {
+	return settlement_limit;
 }
 
 void Player::choose_research(int id) {
@@ -45,10 +49,18 @@ void Player::choose_research(int id) {
 void Player::research() {
 	try {
 		Technology* current_tech;
-		if (tech_tree.research(this->research_points, current_tech)) {
-			this->research_update->research_points = this->research_points;
+		if (tech_tree.research(this->get_research_points(), current_tech)) {
+			this->research_update->research_points = this->get_research_points();
 			this->research_update->tech_id = current_tech->getID();
 			send_update_to_manager(this->research_update);
+
+			if (current_tech->hasResearched() && current_tech->getID() == TECH_5) {
+				// Increase the settlement limit
+				settlement_limit += 1;
+			}
+			else if (current_tech->hasResearched() && current_tech->getID() == TECH_6) {
+				this->increase_player_score(1000);
+			}
 		}
 	}
 	catch (TechTree::ResearchIdleException) {
@@ -57,8 +69,16 @@ void Player::research() {
 }
 
 void Player::research(float research_points) {
-	Technology* dummy;
-	tech_tree.research(research_points, dummy);
+	Technology* current_tech;
+	if (tech_tree.research(research_points, current_tech) && current_tech->hasResearched()) {
+		if (current_tech->getID() == TECH_5) {
+			// Increase the settlement limit
+			settlement_limit += 1;
+		}
+		else if (current_tech->getID() == TECH_6) {
+			this->increase_player_score(1000);
+		}
+	}
 }
 
 std::string Player::get_name() const {
@@ -113,7 +133,13 @@ void Player::send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update
 	}
 }
 
-float Player::get_research_points() {
+int Player::get_research_points() {
+	int research_points = 0;
+	std::unordered_map<UID, GameObject*> cities = getOwnedObjects<City>();
+	for (auto it = cities.begin(); it != cities.end(); it++) {
+		research_points += ((City*) it->second)->get_research_points();
+	}
+	LOG_DEBUG("Player Research Points: ", research_points);
 	return research_points;
 }
 
@@ -121,14 +147,9 @@ bool Player::can_settle() {
 	return getOwnedObjects<City>().size() < settlement_limit;
 }
 
-void Player::acquire_object(GameObject* object) {
-	owned_objects[std::type_index(typeid(*object))].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
-	// update object members
-	object->set_player(this);
-}
 
-void Player::add_to_destroy(GameObject* object) {
-	owned_objects[std::type_index(typeid(*object))].erase(object->getID());
+bool Player::can_create_unit(UnitType* type) {
+	return (type->hasBuildRequirements(getResources()) && type->hasTechRequirements(getTechTree()));
 }
 
 std::unordered_map<unsigned int, GameObject*> Player::get_units() {

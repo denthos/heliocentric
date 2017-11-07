@@ -12,7 +12,7 @@
 #include <typeindex>
 
 #define PLAYER_NAME_MAX_SIZE 16
-#define INITIAL_SETTLEMENT_LIMIT 1
+#define INITIAL_SETTLEMENT_LIMIT 2
 
 /* Forward declaration is necessary so compiler knows about GameObject. We cannot
 #include "game_object.h" since it #includes "player.h" */
@@ -22,6 +22,7 @@ class NewPlayerInfoUpdate;
 class PlayerScoreUpdate;
 class PlayerResearchUpdate;
 class PlayerManager;
+class UnitType;
 
 class Player : public Identifiable {
 public:
@@ -34,9 +35,11 @@ public:
 	void choose_research(int id); // Set current research by tech id
 	void research(); // Called by server
 	void research(float research_points); // Called by client
+	int get_settlement_limit();
 
-	float get_research_points();
+	int get_research_points();
 	bool can_settle(); // tells if a player currently can settle another city
+	bool can_create_unit(UnitType* type);
 
 	std::string get_name() const;
 	void set_name(std::string new_name);
@@ -48,8 +51,17 @@ public:
 	void increase_player_score(int);
 	void decrease_player_score(int);
 
-	void acquire_object(GameObject* object);
-	void add_to_destroy(GameObject* object);         // Add a game object to destroy
+	template <typename T>
+	void acquire_object(T* object) {
+		owned_objects[typeid(T)].insert(std::pair<unsigned int, GameObject*>(object->getID(), object));
+		// update object members
+		object->set_player(this);
+	}
+
+	template <typename T>
+	void add_to_destroy(T* object) {
+		owned_objects[typeid(T)].erase(object->getID());
+	}
 
 	TechTree& getTechTree();
 
@@ -88,7 +100,6 @@ private:
 	PlayerManager* manager;
 	std::string name;
 	int player_score;
-	float research_points; // research points accumulated every tick
 	int settlement_limit; // maximum number of cities a player can settle
 
 	TechTree tech_tree;
@@ -99,7 +110,6 @@ private:
 	void send_update_to_manager(std::shared_ptr<PlayerScoreUpdate> update);
 	void send_update_to_manager(std::shared_ptr<PlayerResearchUpdate> update);
   
-	std::vector<GameObject*> objects_to_destroy;
 	std::unordered_map<Resources::Type, int> owned_resources; // Stores the amount of each type of resources the player owns
 	// std::queue<std::shared_ptr<TradeDeal>> active_trade_deals; // All active trade deals that involves this player, not implemented yet
 	std::unordered_map<UID, std::shared_ptr<TradeDeal>> pending_trade_deals; // All pending trade deals waiting to be accepted or declined

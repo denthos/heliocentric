@@ -36,7 +36,7 @@ void AttackableGameObject::set_health(int heal) {
 }
 
 int AttackableGameObject::take_damage(int damage) {
-	int total_damage = (int)((damage / this->combatDefense) * 50);
+	int total_damage = (int)((((float) damage) / this->combatDefense) * 50);
 	this->health = this->health - total_damage;
 	LOG_DEBUG("Unit " + std::to_string(this->getID()) + " took damage, health is now " + std::to_string(health));
 	return this->health;

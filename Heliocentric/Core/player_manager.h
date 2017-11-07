@@ -8,6 +8,7 @@
 #include "player.h"
 #include "player_score_update.h"
 #include "player_research_update.h"
+#include "time_update.h"
 
 class PlayerManager {
 private:

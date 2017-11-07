@@ -14,6 +14,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 target, glm::vec3 up, float fov, fl
 	calculateViewMatrix();
 	calculatePerspectiveMatrix();
 	calculateInfinitePerspectiveMatrix();
+	
 }
 
 void Camera::loadSettings(Lib::INIParser & config) {
@@ -41,7 +42,6 @@ glm::mat4 Camera::calculateInfinitePerspectiveMatrix()
 	}
 	return infinite_perspective;
 }
-
 
 ViewFrustum Camera::calculateViewFrustum() {
 	float tang = glm::tan(toRad * fov);

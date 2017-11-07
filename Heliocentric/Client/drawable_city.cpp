@@ -7,12 +7,13 @@
 
 #include <glm/gtx/transform.hpp>
 
-DrawableCity::DrawableCity(const City& city, Shader * shader) : City(city) {
+DrawableCity::DrawableCity(const City& city, Shader * shader, PlayerIcon * icon) : City(city) {
 	this->model = Model::getInstance("Models/city.obj");
 	this->drawable_slot = static_cast<DrawableSlot*>(this->get_slot());
 	this->shader = shader;
 
 	this->toWorld = this->drawable_slot->getToWorld();
+	this->icon = icon;
 }
 
 void DrawableCity::update() {
@@ -21,6 +22,11 @@ void DrawableCity::update() {
 
 void DrawableCity::draw(const Camera & camera) const {
 	PlayerColor::Color player_color = this->get_player()->getColor();
+	icon->setColor(glm::vec4(PlayerColor::colorToRGBVec(player_color), 1.0f));
+	icon->setSize(0.02);
+	icon->update(toWorld[3]);
+	icon->draw(camera);
+
 	shader->bind();
 	GLuint shaderID = shader->getPid();
 

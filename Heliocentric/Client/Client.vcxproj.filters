@@ -223,6 +223,12 @@
     <ClInclude Include="technology_button.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="player_icon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="building_create_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="client.cpp">
@@ -391,6 +397,12 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="technology_button.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="player_icon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="building_create_button.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>

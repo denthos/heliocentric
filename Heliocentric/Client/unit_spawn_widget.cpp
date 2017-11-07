@@ -17,6 +17,13 @@ void UnitSpawnWidget::createButtons() {
 
 		createUnitButtons.push_back(new UnitCreateButton(this, type));
 	}
+
+	for (int i = BuildingType::FIRST; i < BuildingType::NUM_TYPES; i++) {
+		BuildingType::TypeIdentifier ident = static_cast<BuildingType::TypeIdentifier>(i);
+		BuildingType* type = BuildingType::getByIdentifier(ident);
+
+		createBuildingButtons.push_back(new BuildingCreateButton(this, type));
+	}
 }
 
 void UnitSpawnWidget::createProgressbar() {
@@ -33,10 +40,14 @@ void UnitSpawnWidget::createProductionLabel() {
 	productionLabel = new Label(this, "Production: 999");
 }
 
-void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, const ResourceCollection& resources) {
+void UnitSpawnWidget::updateSelection(Builder* spawner, Player* player) {
 
 	for (auto& button : createUnitButtons) {
-		button->updateCreateButton(resources);
+		button->updateCreateButton(player);
+	}
+
+	for (auto& button : createBuildingButtons) {
+		button->updateCreateButton(player);
 	}
 
 	if (spawner->isProducing()) {
@@ -46,12 +57,16 @@ void UnitSpawnWidget::updateSelection(UnitSpawner* spawner, const ResourceCollec
 		createUnitProgress->setValue(0.0f);
 	}
 
-	productionLabel->setCaption("Production: " + std::to_string(spawner->getProduction()));
-	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getUnitSpawnQueue().size()));
+	productionLabel->setCaption("Production: " + std::to_string(spawner->get_production()));
+	queueLabel->setCaption("In Queue: " + std::to_string(spawner->getProductionQueue().size()));
 }
 
-void UnitSpawnWidget::setCreateButtonCallback(std::function<void(UnitType*)> callback) {
+void UnitSpawnWidget::setCreateButtonCallback(std::function<void(Buildable*)> callback) {
 	for (auto& button : createUnitButtons) {
+		button->setCallback(callback);
+	}
+
+	for (auto& button : createBuildingButtons) {
 		button->setCallback(callback);
 	}
 }
